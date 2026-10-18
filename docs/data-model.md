@@ -1,0 +1,36 @@
+# PostgreSQL 데이터 모델 (서비스별 분리)
+
+단일 개발용 PostgreSQL 서버에 별도 DB 6개를 둘 수 있으나, 각 서비스는 **자기 DB만 접근**하고 독립 마이그레이션(Flyway 권장)을 적용한다. 다른 DB의 식별자는 외부 ID이며 cross-DB FK 금지.
+
+## member_db — Member Service (P0)
+users(id CHAR(36) PK, email UNIQUE, password_hash, role, created_at)
+- password_hash: BCrypt/Argon2; JWT 비밀값 DB·Git 평문 저장 금지.
+
+## event_db — Event Service (P0)
+events(id PK, title, description, capacity, starts_at, ends_at, status, created_by)
+sessions(id PK, event_id FK, title, starts_at, ends_at, meeting_url)
+registrations(id PK, event_id FK, user_id 외부UUID, status, requested_at, decided_at)
+- UNIQUE(event_id,user_id), index(user_id,status), index(event_id,status)
+- 상태: PENDING → APPROVED/REJECTED; PENDING/APPROVED → CANCELLED (상태 전이 세부 정책 합의)
+- 승인과 정원 차감은 하나의 트랜잭션/잠금 혹은 원자 조건 갱신으로 처리.
+
+## interaction_db — Interaction Service (P0)
+polls(id PK, session_id 외부UUID, question, status, closes_at)
+poll_options(id PK, poll_id FK, label)
+votes(id PK, poll_id FK, option_id FK, user_id 외부UUID, created_at)
+- UNIQUE(poll_id,user_id) 단일 선택 기준. 투표 전 Event Service 참가 승인 확인.
+
+## notification_db — Notification Service (P1)
+notifications(id PK, user_id 외부UUID, type, payload_json, status, created_at, read_at)
+delivery_attempts(id PK, notification_id FK, channel, status, attempted_at)
+
+## analytics_db — Analytics Service (P1)
+metric_snapshots(id PK, event_id 외부UUID, metric_type, metric_value, collected_at)
+- Event/Interaction의 API 또는 향후 이벤트 스트림으로 집계. 직접 DB 조회하지 않음.
+
+## integration_db — Integration Service (P1)
+meetings(id PK, session_id 외부UUID, provider, provider_meeting_id, join_url, status, created_at)
+- 제공자 토큰/시크릿은 Secret 또는 별도 암호화 저장, 로그 마스킹.
+
+## Redis (P1)
+분산 WebSocket 메시징·임시 캐시 등 휘발성 데이터. 회원/행사/투표 영속 데이터의 단독 원본으로 사용하지 않음.
