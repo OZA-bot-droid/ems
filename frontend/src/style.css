@@ -1,2 +1,14 @@
-@import "tailwindcss";
-:root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{margin:0;color:#0f172a;background:#f8fafc}
+@import 'tailwindcss';
+:root {
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+}
+body {
+  margin: 0;
+  color: #0f172a;
+  background: #f8fafc;
+}
