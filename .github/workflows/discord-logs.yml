@@ -1,0 +1,62 @@
+name: GitHub Discord Logs Notification
+
+on:
+  push:
+  workflow_run:
+    workflows:
+      - "GitHub Discord Communication Notification"
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  notify-logs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send Push Log
+        if: github.event_name == 'push'
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK_LOGS }}
+
+          username: "Git Log Bot"
+          avatar_url: "https://github.githubassets.com/favicons/favicon.png"
+
+          title: "🪵 GitHub PUSH 로그"
+          description: |
+            **작업자:** ${{ github.actor }}
+            **저장소:** ${{ github.repository }}
+            **브랜치:** ${{ github.ref_name }}
+            **커밋:** ${{ github.sha }}
+
+            🔗 [커밋 확인하기](${{ github.event.head_commit.url }})
+
+          url: ${{ github.event.head_commit.url || format('https://github.com/{0}/commit/{1}', github.repository, github.sha) }}
+          status: "Success"
+          color: "0x4f545c"
+          nodetail: true
+
+      - name: Send Workflow Result Log
+        if: github.event_name == 'workflow_run'
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK_LOGS }}
+
+          username: "Git Log Bot"
+          avatar_url: "https://github.githubassets.com/favicons/favicon.png"
+
+          title: "⚙️ GitHub Workflow 실행 결과"
+          description: |
+            **워크플로우:** ${{ github.event.workflow_run.name }}
+            **실행자:** ${{ github.event.workflow_run.actor.login }}
+            **결과:** ${{ github.event.workflow_run.conclusion }}
+            **브랜치:** ${{ github.event.workflow_run.head_branch }}
+
+            🔗 [실행 결과 확인하기](${{ github.event.workflow_run.html_url }})
+
+          url: ${{ github.event.workflow_run.html_url }}
+          status: ${{ github.event.workflow_run.conclusion == 'success' && 'Success' || github.event.workflow_run.conclusion == 'cancelled' && 'Cancelled' || 'Failure' }}
+          color: "0x4f545c"
+          nodetail: true
