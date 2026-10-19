@@ -27,15 +27,18 @@ jobs:
           webhook: ${{ secrets.DISCORD_WEBHOOK_LOGS }}
           username: "Git Log Bot"
           title: "📦 EMS 코드 PUSH"
+
           description: |
-            **작업자:** ${{ github.actor }}
+            **Push 작업자:** ${{ github.actor }}
+            **커밋 작성자:** ${{ github.event.head_commit.author.name || '알 수 없음' }}
             **브랜치:** ${{ github.ref_name }}
             **커밋:** `${{ github.sha }}`
 
             📝 **커밋 메시지**
-            ${{ github.event.head_commit.message }}
+            ${{ github.event.head_commit.message || '(메시지 없음)' }}
 
             🔗 [변경 내용 확인](${{ github.event.compare || format('{0}/{1}/commit/{2}', github.server_url, github.repository, github.sha) }})
+
           url: ${{ github.event.compare || format('{0}/{1}/commit/{2}', github.server_url, github.repository, github.sha) }}
           color: "0x4f545c"
           status: "Success"
@@ -53,6 +56,7 @@ jobs:
           webhook: ${{ secrets.DISCORD_WEBHOOK_LOGS }}
           username: "EMS CI Bot"
           title: "⚙️ EMS CI 검증 결과"
+
           description: |
             **워크플로우:** ${{ github.event.workflow_run.name }}
             **실행자:** ${{ github.event.workflow_run.actor.login }}
@@ -60,7 +64,9 @@ jobs:
             **결과:** `${{ github.event.workflow_run.conclusion }}`
 
             🔗 [빌드 및 테스트 로그 확인](${{ github.event.workflow_run.html_url }})
+
           url: ${{ github.event.workflow_run.html_url }}
           status: ${{ github.event.workflow_run.conclusion == 'success' && 'Success' || github.event.workflow_run.conclusion == 'cancelled' && 'Cancelled' || 'Failure' }}
+          color: "0x4f545c"
           nodetail: true
           nofail: false
