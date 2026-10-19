@@ -1,0 +1,54 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set_POSTGRES_PASSWORD_in_.env}
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+      - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL","pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  member:
+    build: ./member-service
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/member_db
+      DB_USER: member_app
+      DB_PASSWORD: localdev
+    depends_on:
+      postgres: {condition: service_healthy}
+  event:
+    build: ./event-service
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/event_db
+      DB_USER: event_app
+      DB_PASSWORD: localdev
+    depends_on:
+      postgres: {condition: service_healthy}
+  interaction:
+    build: ./interaction-service
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/interaction_db
+      DB_USER: interaction_app
+      DB_PASSWORD: localdev
+    depends_on:
+      postgres: {condition: service_healthy}
+  gateway:
+    build: ./gateway
+    environment:
+      MEMBER_SERVICE_URL: http://member:8081
+      EVENT_SERVICE_URL: http://event:8082
+      INTERACTION_SERVICE_URL: http://interaction:8083
+    depends_on: [member,event,interaction]
+  frontend:
+    build: ./frontend
+  nginx:
+    image: nginx:1.27-alpine
+    ports: ["${APP_PORT:-8088}:80"]
+    volumes: ["./infra/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro"]
+    depends_on: [frontend,gateway]
+volumes:
+  dbdata:

@@ -1,0 +1,15 @@
+server:
+  port: 8082
+spring:
+  application:
+    name: event-service
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/event_db}
+    username: ${DB_USER:event_app}
+    password: ${DB_PASSWORD:localdev}
+    driver-class-name: org.postgresql.Driver
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
