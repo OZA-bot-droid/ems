@@ -20,20 +20,67 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Prepare Notification
+        id: info
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const e = JSON.parse(
+            fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8')
+          );
+
+          const item = e.pull_request || e.issue || {};
+          const comment = e.comment || e.review || {};
+          const isComment = [
+            'issue_comment',
+            'pull_request_review_comment',
+            'pull_request_review'
+          ].includes(process.env.EVENT_NAME);
+
+          const safe = (v, n = 2500) =>
+            String(v || '').replace(/@/g, '@\u200b').slice(0, n);
+
+          const lines = [
+            `**작성자:** ${process.env.ACTOR}`,
+            `**이벤트:** ${process.env.EVENT_NAME}`,
+            `**상태:** ${e.action}`,
+            `**제목:** ${safe(item.title, 200)}`
+          ];
+
+          if (e.pull_request && e.action === 'closed') {
+            lines.push(
+              `**종료 유형:** ${e.pull_request.merged ? 'Merged' : 'Closed'}`
+            );
+          }
+
+          if (isComment) {
+            lines.push(
+              '',
+              '**💬 댓글 내용:**',
+              safe(comment.body || '(본문 없음)')
+            );
+          }
+
+          const url = comment.html_url || item.html_url ||
+            `https://github.com/${process.env.GITHUB_REPOSITORY}`;
+
+          const body = lines.join('\n');
+
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,
+            `body<<EOF\n${body}\nEOF\nurl=${url}\n`);
+          NODE
+
       - name: Notify Discord
         uses: sarisia/actions-status-discord@v1
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK_COMMUNICATION }}
           username: "Pull & Request"
           title: "💬 EMS GitHub 소통 알림"
-          description: |
-            **작성자:** ${{ github.actor }}
-            **이벤트:** ${{ github.event_name }}
-            **상태:** ${{ github.event.action }}
-            **저장소:** ${{ github.repository }}
-
-            🔗 [GitHub에서 확인하기](${{ github.event.review.html_url || github.event.comment.html_url || github.event.pull_request.html_url || github.event.issue.html_url || github.server_url }})
-          url: ${{ github.event.review.html_url || github.event.comment.html_url || github.event.pull_request.html_url || github.event.issue.html_url || github.server_url }}
+          description: ${{ steps.info.outputs.body }}
+          url: ${{ steps.info.outputs.url }}
           status: "Success"
           color: "0x5865F2"
           nodetail: true
