@@ -1,62 +1,66 @@
-name: GitHub Discord Logs Notification
+name: EMS Discord Logs
 
 on:
   push:
+    branches:
+      - main
+      - develop
+      - "feature/**"
+
   workflow_run:
     workflows:
-      - "GitHub Discord Communication Notification"
+      - "EMS CI"
     types: [completed]
 
 permissions:
   contents: read
 
 jobs:
-  notify-logs:
+  push-log:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
 
     steps:
       - name: Send Push Log
-        if: github.event_name == 'push'
         uses: sarisia/actions-status-discord@v1
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK_LOGS }}
-
           username: "Git Log Bot"
-          avatar_url: "https://github.githubassets.com/favicons/favicon.png"
-
-          title: "🪵 GitHub PUSH 로그"
+          title: "📦 EMS 코드 PUSH"
           description: |
             **작업자:** ${{ github.actor }}
-            **저장소:** ${{ github.repository }}
             **브랜치:** ${{ github.ref_name }}
-            **커밋:** ${{ github.sha }}
+            **커밋:** `${{ github.sha }}`
 
-            🔗 [커밋 확인하기](${{ github.event.head_commit.url }})
+            📝 **커밋 메시지**
+            ${{ github.event.head_commit.message }}
 
-          url: ${{ github.event.head_commit.url || format('https://github.com/{0}/commit/{1}', github.repository, github.sha) }}
-          status: "Success"
+            🔗 [변경 내용 확인](${{ github.event.compare || format('{0}/{1}/commit/{2}', github.server_url, github.repository, github.sha) }})
+          url: ${{ github.event.compare || format('{0}/{1}/commit/{2}', github.server_url, github.repository, github.sha) }}
           color: "0x4f545c"
+          status: "Success"
           nodetail: true
+          nofail: false
 
-      - name: Send Workflow Result Log
-        if: github.event_name == 'workflow_run'
+  ci-log:
+    if: github.event_name == 'workflow_run'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send CI Result
         uses: sarisia/actions-status-discord@v1
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK_LOGS }}
-
-          username: "Git Log Bot"
-          avatar_url: "https://github.githubassets.com/favicons/favicon.png"
-
-          title: "⚙️ GitHub Workflow 실행 결과"
+          username: "EMS CI Bot"
+          title: "⚙️ EMS CI 검증 결과"
           description: |
             **워크플로우:** ${{ github.event.workflow_run.name }}
             **실행자:** ${{ github.event.workflow_run.actor.login }}
-            **결과:** ${{ github.event.workflow_run.conclusion }}
             **브랜치:** ${{ github.event.workflow_run.head_branch }}
+            **결과:** `${{ github.event.workflow_run.conclusion }}`
 
-            🔗 [실행 결과 확인하기](${{ github.event.workflow_run.html_url }})
-
+            🔗 [빌드 및 테스트 로그 확인](${{ github.event.workflow_run.html_url }})
           url: ${{ github.event.workflow_run.html_url }}
           status: ${{ github.event.workflow_run.conclusion == 'success' && 'Success' || github.event.workflow_run.conclusion == 'cancelled' && 'Cancelled' || 'Failure' }}
-          color: "0x4f545c"
           nodetail: true
+          nofail: false

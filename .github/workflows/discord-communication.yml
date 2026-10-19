@@ -30,7 +30,9 @@ jobs:
             **작성자:** ${{ github.actor }}
             **이벤트:** ${{ github.event_name }}
             **상태:** ${{ github.event.action }}
-            **저장소:** ${{ github.repository }}
+
+            📝 **커밋 메시지**
+            ${{ github.event.head_commit.message }}
 
             🔗 [GitHub에서 확인하기](${{ github.event.review.html_url || github.event.comment.html_url || github.event.pull_request.html_url || github.event.issue.html_url || github.server_url }})
           url: ${{ github.event.review.html_url || github.event.comment.html_url || github.event.pull_request.html_url || github.event.issue.html_url || github.server_url }}
