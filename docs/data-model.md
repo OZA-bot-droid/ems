@@ -9,6 +9,7 @@ users(id CHAR(36) PK, email UNIQUE, password_hash, role, created_at)
 ## event_db — Event Service (P0)
 events(id PK, title, description, capacity, starts_at, ends_at, status, created_by)
 sessions(id PK, event_id FK, title, starts_at, ends_at, meeting_url)
+- events.status: DRAFT(작성 중, 비공개) → OPEN(공개, 신청 가능) → CLOSED(신청 마감). 참가 신청은 OPEN일 때만 허용.
 registrations(id PK, event_id FK, user_id 외부UUID, status, requested_at, decided_at)
 - UNIQUE(event_id,user_id), index(user_id,status), index(event_id,status)
 - 상태: PENDING → APPROVED/REJECTED; PENDING/APPROVED → CANCELLED (상태 전이 세부 정책 합의)
