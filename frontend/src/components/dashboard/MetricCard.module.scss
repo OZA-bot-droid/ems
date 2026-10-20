@@ -1,0 +1,21 @@
+@use '../../styles/tokens' as t;
+
+.card {
+  min-width: 0;
+  background: t.$surface;
+  border: 1px solid t.$border;
+  border-radius: t.$radius-lg;
+  box-shadow: t.$shadow-card;
+}
+
+.title {
+  color: t.$muted;
+  font-size: var(--ems-font-size-sm);
+  font-weight: var(--ems-font-weight-semibold);
+}
+
+.value {
+  color: t.$text;
+  font-size: var(--ems-font-size-xl);
+  font-weight: var(--ems-font-weight-bold);
+}

@@ -1,0 +1,54 @@
+/* EMS semantic design tokens. Source of truth for CSS Modules and Tailwind. */
+:root {
+  --ems-color-primary: #169b62;
+  --ems-color-primary-hover: #117a4d;
+  --ems-color-primary-soft: #eaf6f0;
+  --ems-color-danger: #d94450;
+  --ems-color-warning: #e89a35;
+  --ems-color-info: #3779c8;
+  --ems-color-sidebar: #17253c;
+  --ems-color-sidebar-active: #29423f;
+  --ems-color-background: #f7f9fc;
+  --ems-color-surface: #ffffff;
+  --ems-color-surface-muted: #f5f7fa;
+  --ems-color-text: #142238;
+  --ems-color-text-muted: #7a879a;
+  --ems-color-border: #e7ecf2;
+  --ems-font-family: Pretendard, 'Noto Sans KR', system-ui, sans-serif;
+  --ems-font-size-xs: 0.75rem;
+  --ems-font-size-sm: 0.875rem;
+  --ems-font-size-md: 1rem;
+  --ems-font-size-lg: 1.25rem;
+  --ems-font-size-xl: 1.8125rem;
+  --ems-font-weight-regular: 400;
+  --ems-font-weight-semibold: 600;
+  --ems-font-weight-bold: 700;
+  --ems-space-1: 0.25rem;
+  --ems-space-2: 0.5rem;
+  --ems-space-3: 0.75rem;
+  --ems-space-4: 1rem;
+  --ems-space-5: 1.25rem;
+  --ems-space-6: 1.5rem;
+  --ems-space-8: 2rem;
+  --ems-space-10: 2.5rem;
+  --ems-radius-sm: 0.5rem;
+  --ems-radius-md: 0.75rem;
+  --ems-radius-lg: 1rem;
+  --ems-radius-pill: 9999px;
+  --ems-shadow-card: 0 3px 14px rgb(20 34 56 / 5%);
+  --ems-layout-sidebar-width: 15.375rem;
+}
+@theme inline {
+  --color-ems-primary: var(--ems-color-primary);
+  --color-ems-primary-soft: var(--ems-color-primary-soft);
+  --color-ems-danger: var(--ems-color-danger);
+  --color-ems-warning: var(--ems-color-warning);
+  --color-ems-info: var(--ems-color-info);
+  --color-ems-sidebar: var(--ems-color-sidebar);
+  --color-ems-bg: var(--ems-color-background);
+  --color-ems-surface: var(--ems-color-surface);
+  --color-ems-text: var(--ems-color-text);
+  --color-ems-muted: var(--ems-color-text-muted);
+  --color-ems-border: var(--ems-color-border);
+  --font-ems: var(--ems-font-family);
+}

@@ -1,0 +1,26 @@
+// Use @use '../styles/tokens' as t; in component styles.
+// Values remain CSS custom properties to support runtime themes and Tailwind.
+$primary: var(--ems-color-primary);
+$primary-hover: var(--ems-color-primary-hover);
+$primary-soft: var(--ems-color-primary-soft);
+$danger: var(--ems-color-danger);
+$warning: var(--ems-color-warning);
+$info: var(--ems-color-info);
+$sidebar: var(--ems-color-sidebar);
+$background: var(--ems-color-background);
+$surface: var(--ems-color-surface);
+$text: var(--ems-color-text);
+$muted: var(--ems-color-text-muted);
+$border: var(--ems-color-border);
+$font-family: var(--ems-font-family);
+$radius-sm: var(--ems-radius-sm);
+$radius-md: var(--ems-radius-md);
+$radius-lg: var(--ems-radius-lg);
+$shadow-card: var(--ems-shadow-card);
+$space-1: var(--ems-space-1);
+$space-2: var(--ems-space-2);
+$space-3: var(--ems-space-3);
+$space-4: var(--ems-space-4);
+$space-5: var(--ems-space-5);
+$space-6: var(--ems-space-6);
+$space-8: var(--ems-space-8);

@@ -1,0 +1,162 @@
+@use '../../styles/tokens' as t;
+.shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: var(--ems-layout-sidebar-width) minmax(0, 1fr);
+}
+.sidebar {
+  background: t.$sidebar;
+  color: white;
+  padding: 28px 17px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.brand {
+  font-weight: 700;
+  font-size: 27px;
+  color: #fff;
+  text-decoration: none;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+.brandMark {
+  background: t.$primary;
+  width: 12px;
+  height: 30px;
+  border-radius: 4px;
+  display: inline-block;
+}
+.subBrand {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: #9facbf;
+  margin: 0 12px 48px;
+}
+.sidebar nav {
+  display: grid;
+  gap: 8px;
+}
+.navLink,
+.active {
+  color: #b7c3d0;
+  text-decoration: none;
+  padding: 13px 15px;
+  border-radius: 10px;
+  display: block;
+  font-size: 14px;
+}
+.active {
+  background: #29423f;
+  color: white;
+  font-weight: 700;
+}
+.identity {
+  margin-top: auto;
+  display: grid;
+  gap: 12px;
+  background: #243651;
+  padding: 16px;
+  border-radius: 12px;
+  font-size: 13px;
+}
+.identity a,
+.identity button {
+  color: white;
+  background: none;
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+  text-decoration: none;
+}
+.content {
+  min-width: 0;
+}
+.topbar {
+  background: white;
+  border-bottom: 1px solid t.$border;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 17px 30px;
+  color: t.$muted;
+  font-size: 13px;
+}
+.topbar a {
+  color: t.$text;
+  text-decoration: none;
+  font-weight: 600;
+}
+.main {
+  max-width: 1450px;
+  margin: auto;
+  padding: 32px;
+}
+.heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: center;
+  margin-bottom: 25px;
+}
+.heading h1 {
+  font-size: 28px;
+  margin: 0 0 8px;
+}
+.heading p {
+  margin: 0;
+  color: t.$muted;
+  font-size: 14px;
+}
+.panel {
+  background: t.$surface;
+  border: 1px solid t.$border;
+  border-radius: t.$radius-lg;
+  padding: 24px;
+  margin-bottom: 22px;
+  box-shadow: t.$shadow-card;
+}
+.panel h2 {
+  margin: 0 0 20px;
+  font-size: 18px;
+}
+.error {
+  color: #b42331;
+  padding: 13px;
+  background: #fff1f1;
+  border-radius: 8px;
+}
+.success {
+  color: #13774c;
+  padding: 13px;
+  background: #eaf6f0;
+  border-radius: 8px;
+}
+@media (max-width: 800px) {
+  .shell {
+    display: block;
+  }
+  .sidebar {
+    padding: 14px;
+  }
+  .subBrand {
+    margin-bottom: 6px;
+  }
+  .sidebar nav {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .identity {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .main {
+    padding: 18px;
+  }
+  .heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

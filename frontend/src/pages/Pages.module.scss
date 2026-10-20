@@ -1,0 +1,96 @@
+@use '../styles/tokens' as t;
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+}
+.card {
+  background: t.$surface;
+  border: 1px solid t.$border;
+  border-radius: t.$radius-lg;
+  padding: 22px;
+  box-shadow: t.$shadow-card;
+}
+.card h3 {
+  font-size: 17px;
+  margin: 0 0 12px;
+}
+.muted {
+  color: t.$muted;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.form {
+  display: grid;
+  gap: 17px;
+  max-width: 600px;
+}
+.form label {
+  display: grid;
+  gap: 8px;
+  color: t.$text;
+  font-weight: 600;
+  font-size: 14px;
+}
+.form input,
+.form select,
+.form textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 13px;
+  border: 1px solid t.$border;
+  border-radius: t.$radius-sm;
+  font: inherit;
+  background: white;
+}
+.btn {
+  border: 0;
+  border-radius: 10px;
+  padding: 13px 19px;
+  background: t.$primary;
+  color: white;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-block;
+}
+.secondary {
+  background: #eaf6f0;
+  color: #117a4d;
+}
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin: 14px 0;
+  padding-bottom: 14px;
+  border-bottom: 1px solid t.$border;
+}
+.stack {
+  display: grid;
+  gap: 12px;
+}
+.hero {
+  background: t.$primary-soft;
+  padding: 26px;
+  border-radius: t.$radius-lg;
+  margin-bottom: 22px;
+}
+.hero h2 {
+  margin: 0 0 9px;
+}
+.note {
+  background: #fff4e8;
+  color: #755022;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  margin: 18px 0;
+}
