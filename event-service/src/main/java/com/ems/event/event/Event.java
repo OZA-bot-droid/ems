@@ -18,30 +18,37 @@ import java.util.UUID;
 @Table(name = "events")
 public class Event {
 
+//    게시물 번호
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+//    제목
     @Column(nullable = false, length = 200)
     private String title;
 
+//    소개
     @Column(length = 2000)
     private String description;
 
+//    최대 정원
     @Column(nullable = false)
     private int capacity;
 
+//    시작하는 날짜
     @Column(name = "starts_at", nullable = false)
     private Instant startsAt;
 
+//    끝나는 날짜
     @Column(name = "ends_at", nullable = false)
     private Instant endsAt;
 
+//    상태(DRAFT,OPEN,CLOSE)
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private EventStatus status;
 
-    /** 만든 관리자의 member-service 사용자 ID (외부 ID, 로그인 연동 전에는 null) */
+//    만든사람
     @Column(name = "created_by")
     private UUID createdBy;
 

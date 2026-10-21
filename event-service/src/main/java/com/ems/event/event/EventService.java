@@ -5,6 +5,7 @@ import com.ems.event.common.PageResponse;
 import com.ems.event.event.dto.EventCreateRequest;
 import com.ems.event.event.dto.EventResponse;
 import com.ems.event.event.dto.EventUpdateRequest;
+import com.ems.event.session.SessionRepository;
 import java.time.Instant;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -18,9 +19,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class EventService {
 
     private final EventRepository eventRepository;
+    private final SessionRepository sessionRepository;
 
-    public EventService(EventRepository eventRepository) {
+    public EventService(EventRepository eventRepository, SessionRepository sessionRepository) {
         this.eventRepository = eventRepository;
+        this.sessionRepository = sessionRepository;
     }
 
     /** 목록 조회. status가 없으면 전체 */
@@ -55,6 +58,12 @@ public class EventService {
         Instant startsAt = request.startsAt() != null ? request.startsAt() : event.getStartsAt();
         Instant endsAt = request.endsAt() != null ? request.endsAt() : event.getEndsAt();
         validatePeriod(startsAt, endsAt);
+        // 행사 일정을 줄였을 때 이미 등록된 세션이 행사 밖으로 벗어나면 막는다
+        if (sessionRepository.existsOutsidePeriod(eventId, startsAt, endsAt)) {
+            throw new BusinessException(
+                    HttpStatus.CONFLICT, "SESSION_OUT_OF_EVENT",
+                    "행사 시간 밖에 있는 세션이 있습니다. 세션을 먼저 수정하거나 삭제하세요.");
+        }
 
         event.update(
                 request.title(),

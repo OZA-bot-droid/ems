@@ -1,5 +1,6 @@
 package com.ems.event.event;
 
+import com.ems.event.common.AdminChecker;
 import com.ems.event.common.PageResponse;
 import com.ems.event.event.dto.EventCreateRequest;
 import com.ems.event.event.dto.EventResponse;
@@ -24,16 +25,19 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
-@RequestMapping("http://localhost:5173/events")
+@RequestMapping("/events")
 public class EventController {
 
     private final EventService eventService;
+    private final AdminChecker adminChecker;
 
-    public EventController(EventService eventService) {
+    public EventController(EventService eventService, AdminChecker adminChecker) {
         this.eventService = eventService;
+        this.adminChecker = adminChecker;
     }
 
 
+//    전체목록
     @GetMapping
     public PageResponse<EventResponse> getEvents(
             @RequestParam(required = false) EventStatus status,
@@ -41,32 +45,41 @@ public class EventController {
         return eventService.getEvents(status, pageable);
     }
 
-
+//  상세목록
     @GetMapping("/{eventId}")
     public EventResponse getEvent(@PathVariable UUID eventId) {
         return eventService.getEvent(eventId);
     }
 
 //   생성
-    @PostMapping("http://localhost:5173/admin/create/{eventId}")
+    @PostMapping
     public ResponseEntity<EventResponse> createEvent(
             @Valid @RequestBody EventCreateRequest request,
-            @RequestHeader(value = "X-User-Id", required = false) UUID userId) {
+            @RequestHeader(value = "X-User-Id", required = false) UUID userId,
+            @RequestHeader(value = "X-User-Role", required = false) String role) {
+        adminChecker.requireAdmin(userId, role); // ADMIN만 생성
         EventResponse created = eventService.createEvent(request, userId);
         return ResponseEntity.created(URI.create("/api/events/" + created.id())).body(created);
     }
 
 //  수정
-    @PatchMapping("http://localhost:5173/admin/event/{eventId}")
+    @PatchMapping("/{eventId}")
     public EventResponse updateEvent(
             @PathVariable UUID eventId,
-            @Valid @RequestBody EventUpdateRequest request) {
+            @Valid @RequestBody EventUpdateRequest request,
+            @RequestHeader(value = "X-User-Id", required = false) UUID userId,
+            @RequestHeader(value = "X-User-Role", required = false) String role) {
+        adminChecker.requireAdmin(userId, role); // ADMIN만 수정
         return eventService.updateEvent(eventId, request);
     }
 
 //  삭제
-    @DeleteMapping("http://localhost:5173/admin/{eventId}")
-    public ResponseEntity<Void> deleteEvent(@PathVariable UUID eventId) {
+    @DeleteMapping("/{eventId}")
+    public ResponseEntity<Void> deleteEvent(
+            @PathVariable UUID eventId,
+            @RequestHeader(value = "X-User-Id", required = false) UUID userId,
+            @RequestHeader(value = "X-User-Role", required = false) String role) {
+        adminChecker.requireAdmin(userId, role); // ADMIN만 삭제
         eventService.deleteEvent(eventId);
         return ResponseEntity.noContent().build();
     }

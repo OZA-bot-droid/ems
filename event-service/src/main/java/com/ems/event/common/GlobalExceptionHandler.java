@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-/** 모든 예외를 {code, message, timestamp} 형식으로 응답한다 */
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
