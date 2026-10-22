@@ -6,10 +6,6 @@ import org.springframework.stereotype.Component;
 
 /**
  * 관리자(ADMIN)만 할 수 있는 요청인지 검사한다.
- *
- * 흐름: 로그인 → Member Service가 JWT 발급(role 포함)
- *       → Gateway가 JWT를 검증하고 X-User-Id, X-User-Role 헤더를 붙여서 전달
- *       → Controller가 헤더를 받아 이 클래스로 검사
  */
 @Component
 public class AdminChecker {
