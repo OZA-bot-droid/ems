@@ -28,14 +28,14 @@ public class JwtTokenService {
         this.accessTokenException = accessTokenException;
     }
 
-    public String createAccessToken(Long id, Role role) {
+    public String createAccessToken(long id, Role role) {
 
         Instant now = Instant.now();
 
         JwtClaimsSet claimsSet = JwtClaimsSet.builder()
                 .issuer(issuer)         // 발급자 설정
                 .issuedAt(now)          // 발급 시간 설정
-                .subject(id.toString()) // 식별자 설정
+                .subject(String.valueOf(id)) // 식별자 설정
                 .expiresAt(             // 만료 시간 설정
                         now.plus(
                                 accessTokenException,
@@ -54,5 +54,9 @@ public class JwtTokenService {
         return jwtEncoder.encode(
                 JwtEncoderParameters.from(header, claimsSet)
         ).getTokenValue();  // 완성된 JWT Token을 문자열로 변환
+    }
+
+    public String createRefreshToken(String email, Role role) {
+        return "1";
     }
 }

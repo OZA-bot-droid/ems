@@ -14,11 +14,9 @@ import org.springframework.web.bind.annotation.*;
 public class MemberController {
 
     private final MemberService memberService;
-    private final JwtTokenService jwtTokenService;
 
-    public MemberController(MemberService memberService, JwtTokenService jwtTokenService) {
+    public MemberController(MemberService memberService) {
         this.memberService = memberService;
-        this.jwtTokenService = jwtTokenService;
     }
 
     // 회원가입

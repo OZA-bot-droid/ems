@@ -5,6 +5,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -14,6 +16,16 @@ import java.util.List;
 
 @Configuration
 public class SecurityConfig {
+
+//    @Bean
+//    public PasswordEncoder passwordEncoder() {
+//        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+//    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
     public CorsConfigurationSource corsConfigurationSource() {
 
@@ -33,7 +45,7 @@ public class SecurityConfig {
         return http.csrf(AbstractHttpConfigurer::disable)
                 .cors(c -> c.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(author ->
-                        author.requestMatchers("/members/test/jwt", "/members/ping")
+                        author.requestMatchers("/members/register", "/members/ping", "/members/login")
                                 .permitAll()
                                 .anyRequest()
                                 .authenticated()
