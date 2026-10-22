@@ -27,6 +27,7 @@ public class MemberService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    // 회원가입
     public void registerMember(MemberRegisterDTO dto) {
 
         if(memberRepository.existsByEmail(dto.getEmail())) {
@@ -38,6 +39,7 @@ public class MemberService {
         );
     }
 
+    // 로그인
     public Map<String, String> login(MemberLoginDTO dto) {
 
         Member member = memberRepository.findByEmail(dto.getEmail())
