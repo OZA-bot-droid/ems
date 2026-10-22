@@ -23,9 +23,14 @@ public class MemberService {
 
     public void registerMember(MemberRegisterDTO dto) {
 
-        Long id = memberRepository.save(dto.toEntity()).getId();
+        if(memberRepository.existsByEmail(dto.getEmail())) {
+            throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
+        }
 
-        System.out.println(jwtTokenService.createAccessToken(id, Role.USER));
+//        memberRepository.save(
+//                dto.toEntityByBCryptPassword()
+//        );
+
     }
 
     public Map<String, String> login(MemberLoginDTO dto) {

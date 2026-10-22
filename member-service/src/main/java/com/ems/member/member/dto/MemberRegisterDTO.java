@@ -21,7 +21,16 @@ public class MemberRegisterDTO {
         return Member.builder()
                 .email(this.email)
                 .name(this.name)
-                .password(this.password)
+                .passwordHash(this.password)
+                .build();
+    }
+
+    public Member toEntityByBCryptPassword(String bCryptPassword) {
+
+        return Member.builder()
+                .email(this.email)
+                .name(this.name)
+                .passwordHash(bCryptPassword)
                 .build();
     }
 }

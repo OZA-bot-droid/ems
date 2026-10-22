@@ -21,11 +21,6 @@ public class MemberController {
         this.jwtTokenService = jwtTokenService;
     }
 
-    @GetMapping("/test/jwt")
-    public void testJwt() {
-        System.out.println(jwtTokenService.createAccessToken(Math.round(Math.random() * 10), Role.USER));
-    }
-
     // 회원가입
     @PostMapping("/register")
     public ResponseEntity<?> registerMember(@RequestBody MemberRegisterDTO dto) {
