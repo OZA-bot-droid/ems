@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 
+// 임시
 const initialRegistrations = [
   {
     id: 1,
