@@ -28,3 +28,4 @@ jwt:
   public-key: C:/Dev/keys/public_key.pem
   issuer: ems-auth
   access-token-expiration: 1800
+  refresh-token-expiration: 604800

@@ -38,8 +38,8 @@ public class MemberController {
         return null;
     }
 
-    //
-    @GetMapping("/")
+    // 새로운 access token 생성
+    @GetMapping("/refresh")
     public ResponseEntity<?> admin() {
         return null;
 

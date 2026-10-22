@@ -1,16 +1,18 @@
 package com.ems.member.member.service;
 
 import com.ems.member.member.domain.Member;
-import com.ems.member.member.domain.Role;
+import com.ems.member.member.domain.RefreshTokenEntity;
+import com.ems.member.member.dto.TokenResponseDTO;
 import com.ems.member.member.dto.MemberLoginDTO;
 import com.ems.member.member.dto.MemberRegisterDTO;
 import com.ems.member.member.repository.MemberRepository;
+import com.ems.member.member.repository.RefreshTokenRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.time.Instant;
 
 @Service
 public class MemberService {
@@ -18,13 +20,19 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final JwtTokenService jwtTokenService;
     private final PasswordEncoder passwordEncoder;
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final long refreshTokenExpiration;
 
     public MemberService(MemberRepository memberRepository,
                          JwtTokenService jwtTokenService,
-                         PasswordEncoder passwordEncoder) {
+                         PasswordEncoder passwordEncoder,
+                         RefreshTokenRepository refreshTokenRepository,
+                         @Value("${jwt.refresh-token-expiration}") long refreshTokenExpiration) {
         this.memberRepository = memberRepository;
         this.jwtTokenService = jwtTokenService;
         this.passwordEncoder = passwordEncoder;
+        this.refreshTokenRepository = refreshTokenRepository;
+        this.refreshTokenExpiration = refreshTokenExpiration;
     }
 
     // 회원가입
@@ -40,19 +48,25 @@ public class MemberService {
     }
 
     // 로그인
-    public Map<String, String> login(MemberLoginDTO dto) {
+    public TokenResponseDTO login(MemberLoginDTO dto) {
 
         Member member = memberRepository.findByEmail(dto.getEmail())
                 .orElseThrow(() -> new EntityNotFoundException("해당 회원은 존재하지 않습니다."));
 
         if(passwordEncoder.matches(dto.getPassword(), member.getPasswordHash())) {
 
-            Map<String, String> loginData = new HashMap<>();
+            String accessToken = jwtTokenService.createAccessToken(member.getId());
+            String refreshToken = jwtTokenService.createRefreshToken(member.getId());
 
-            loginData.put("accessToken", jwtTokenService.createAccessToken(member.getId(), Role.USER));
-            loginData.put("refreshToken", jwtTokenService.createRefreshToken(member.getEmail(), Role.USER));
+            refreshTokenRepository.save(
+                    RefreshTokenEntity.builder()
+                            .memberId(member.getId())
+                            .expiresAt(Instant.now().plusSeconds(refreshTokenExpiration))
+                            .token(refreshToken)
+                            .build()
+            );
 
-            return loginData;
+            return new TokenResponseDTO(accessToken, refreshToken);
 
         } else {
 
