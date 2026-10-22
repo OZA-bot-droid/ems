@@ -7,8 +7,9 @@ users(id CHAR(36) PK, email UNIQUE, password_hash, role, created_at)
 - password_hash: BCrypt/Argon2; JWT 비밀값 DB·Git 평문 저장 금지.
 
 ## event_db — Event Service (P0)
-events(id PK, title, description, capacity, starts_at, ends_at, status, created_by)
-sessions(id PK, event_id FK ON DELETE CASCADE, title, starts_at, ends_at, meeting_url)
+events(id PK, title, description, capacity, starts_at, ends_at, status, created_by, meeting_url)
+sessions(id PK, event_id FK ON DELETE CASCADE, title, starts_at, ends_at)
+- 화상 회의 링크(meeting_url)는 행사 단위로 관리한다 (V3). 링크는 관리자와 승인된 참가자에게만 공개하는 것을 원칙으로 한다.
 - 세션은 행사 starts_at~ends_at 안에서만 생성, 같은 행사의 세션끼리 시간 겹침 금지(끝=시작은 허용). 행사 일정 수정 시 밖으로 벗어나는 세션이 있으면 409.
 - events.status: DRAFT(작성 중, 비공개) → OPEN(공개, 신청 가능) → CLOSED(신청 마감). 참가 신청은 OPEN일 때만 허용.
 registrations(id PK, event_id FK, user_id 외부UUID, status, requested_at, decided_at)

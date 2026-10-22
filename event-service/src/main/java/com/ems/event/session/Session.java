@@ -43,30 +43,25 @@ public class Session {
     @Column(name = "ends_at", nullable = false)
     private Instant endsAt;
 
-//    화상회의 링크
-    @Column(name = "meeting_url", length = 500)
-    private String meetingUrl;
 
     protected Session() {
         // JPA용
     }
 
     public Session(Event event, String title,
-                   Instant startsAt, Instant endsAt, String meetingUrl) {
+                   Instant startsAt, Instant endsAt) {
         this.event = event;
         this.title = title;
         this.startsAt = startsAt;
         this.endsAt = endsAt;
-        this.meetingUrl = meetingUrl;
     }
 
     /** PATCH: null이 아닌 값만 바꾼다 */
     public void update(String title,
-                       Instant startsAt, Instant endsAt, String meetingUrl) {
+                       Instant startsAt, Instant endsAt) {
         if (title != null) this.title = title;
         if (startsAt != null) this.startsAt = startsAt;
         if (endsAt != null) this.endsAt = endsAt;
-        if (meetingUrl != null) this.meetingUrl = meetingUrl;
     }
 
     public UUID getId() { return id; }
@@ -74,5 +69,4 @@ public class Session {
     public String getTitle() { return title; }
     public Instant getStartsAt() { return startsAt; }
     public Instant getEndsAt() { return endsAt; }
-    public String getMeetingUrl() { return meetingUrl; }
 }

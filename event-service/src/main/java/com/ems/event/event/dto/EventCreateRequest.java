@@ -12,6 +12,7 @@ public record EventCreateRequest(
         @Size(max = 2000) String description,
         @NotNull @Min(1) Integer capacity,
         @NotNull Instant startsAt,
-        @NotNull Instant endsAt
+        @NotNull Instant endsAt,
+        @Size(max = 500) String meetingUrl
 ) {
 }

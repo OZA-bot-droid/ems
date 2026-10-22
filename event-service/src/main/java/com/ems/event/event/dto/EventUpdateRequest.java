@@ -12,6 +12,7 @@ public record EventUpdateRequest(
         @Min(1) Integer capacity,
         Instant startsAt,
         Instant endsAt,
+        @Size(max = 500) String meetingUrl,
         EventStatus status
 ) {
 }

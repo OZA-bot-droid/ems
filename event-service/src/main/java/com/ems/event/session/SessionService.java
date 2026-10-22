@@ -25,9 +25,13 @@ public class SessionService {
         this.eventRepository = eventRepository;
     }
 
-    /** 행사의 세션 목록 (시작 시각 순) */
-    public List<SessionResponse> getSessions(UUID eventId) {
-        findEvent(eventId); // 없는 행사면 404
+    /** 행사의 세션 목록 (시작 시각 순). 일반 회원에게 DRAFT 행사의 세션은 보이지 않음 */
+    public List<SessionResponse> getSessions(UUID eventId, boolean admin) {
+        Event event = findEvent(eventId); // 없는 행사면 404
+        if (!admin && !event.getStatus().isVisibleToPublic()) {
+            throw new BusinessException(
+                    HttpStatus.NOT_FOUND, "EVENT_NOT_FOUND", "행사를 찾을 수 없습니다: " + eventId);
+        }
         return sessionRepository.findByEventIdOrderByStartsAtAsc(eventId).stream()
                 .map(SessionResponse::from)
                 .toList();
@@ -47,8 +51,7 @@ public class SessionService {
                 event,
                 request.title(),
                 request.startsAt(),
-                request.endsAt(),
-                request.meetingUrl());
+                request.endsAt());
         return SessionResponse.from(sessionRepository.save(session));
     }
 
@@ -70,8 +73,7 @@ public class SessionService {
         session.update(
                 request.title(),
                 request.startsAt(),
-                request.endsAt(),
-                request.meetingUrl());
+                request.endsAt());
         return SessionResponse.from(session); // 변경 감지로 자동 저장
     }
 

@@ -9,8 +9,7 @@ public record SessionResponse(
         UUID eventId,
         String title,
         Instant startsAt,
-        Instant endsAt,
-        String meetingUrl
+        Instant endsAt
 ) {
     public static SessionResponse from(Session session) {
         return new SessionResponse(
@@ -18,7 +17,6 @@ public record SessionResponse(
                 session.getEvent().getId(),
                 session.getTitle(),
                 session.getStartsAt(),
-                session.getEndsAt(),
-                session.getMeetingUrl());
+                session.getEndsAt());
     }
 }

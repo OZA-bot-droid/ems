@@ -7,7 +7,6 @@ import java.time.Instant;
 public record SessionUpdateRequest(
         @Size(min = 1, max = 200) String title,
         Instant startsAt,
-        Instant endsAt,
-        @Size(max = 500) String meetingUrl
+        Instant endsAt
 ) {
 }

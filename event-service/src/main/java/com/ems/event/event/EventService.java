@@ -7,6 +7,7 @@ import com.ems.event.event.dto.EventResponse;
 import com.ems.event.event.dto.EventUpdateRequest;
 import com.ems.event.session.SessionRepository;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class EventService {
 
+    /** 일반 회원에게 보이는 상태 */
+    private static final List<EventStatus> PUBLIC_STATUSES = List.of(EventStatus.OPEN, EventStatus.CLOSED);
+
     private final EventRepository eventRepository;
     private final SessionRepository sessionRepository;
 
@@ -26,16 +30,34 @@ public class EventService {
         this.sessionRepository = sessionRepository;
     }
 
-    /** 목록 조회. status가 없으면 전체 */
-    public PageResponse<EventResponse> getEvents(EventStatus status, Pageable pageable) {
-        Page<Event> page = (status == null)
-                ? eventRepository.findAll(pageable)
-                : eventRepository.findByStatus(status, pageable);
-        return PageResponse.of(page, EventResponse::from);
+    /**
+     * 목록 조회. status가 없으면 전체
+     * - 관리자: 모든 상태
+     * - 일반 회원: OPEN, CLOSED만 (DRAFT는 작성 중이라 숨김), 화상 회의 링크도 숨김
+     */
+    public PageResponse<EventResponse> getEvents(EventStatus status, Pageable pageable, boolean admin) {
+        Page<Event> page;
+        if (admin) {
+            page = (status == null)
+                    ? eventRepository.findAll(pageable)
+                    : eventRepository.findByStatus(status, pageable);
+        } else {
+            List<EventStatus> visible = (status == null) ? PUBLIC_STATUSES
+                    : (status.isVisibleToPublic() ? List.of(status) : List.of());
+            page = visible.isEmpty()
+                    ? Page.empty(pageable)
+                    : eventRepository.findByStatusIn(visible, pageable);
+        }
+        return PageResponse.of(page, event -> EventResponse.from(event, admin));
     }
 
-    public EventResponse getEvent(UUID eventId) {
-        return EventResponse.from(findEvent(eventId));
+    /** 상세 조회. 일반 회원이 DRAFT 행사를 조회하면 없는 행사처럼 404 */
+    public EventResponse getEvent(UUID eventId, boolean admin) {
+        Event event = findEvent(eventId);
+        if (!admin && !event.getStatus().isVisibleToPublic()) {
+            throw notFound(eventId);
+        }
+        return EventResponse.from(event, admin);
     }
 
     @Transactional
@@ -47,6 +69,7 @@ public class EventService {
                 request.capacity(),
                 request.startsAt(),
                 request.endsAt(),
+                request.meetingUrl(),
                 createdBy);
         return EventResponse.from(eventRepository.save(event));
     }
@@ -58,6 +81,13 @@ public class EventService {
         Instant startsAt = request.startsAt() != null ? request.startsAt() : event.getStartsAt();
         Instant endsAt = request.endsAt() != null ? request.endsAt() : event.getEndsAt();
         validatePeriod(startsAt, endsAt);
+        // 상태는 DRAFT → OPEN → CLOSED 순서로만 바꿀 수 있다
+        if (!event.getStatus().canChangeTo(request.status())) {
+            throw new BusinessException(
+                    HttpStatus.CONFLICT, "INVALID_STATUS_CHANGE",
+                    "행사 상태는 DRAFT → OPEN → CLOSED 순서로만 바꿀 수 있습니다. (현재: "
+                            + event.getStatus() + ", 요청: " + request.status() + ")");
+        }
         // 행사 일정을 줄였을 때 이미 등록된 세션이 행사 밖으로 벗어나면 막는다
         if (sessionRepository.existsOutsidePeriod(eventId, startsAt, endsAt)) {
             throw new BusinessException(
@@ -71,6 +101,7 @@ public class EventService {
                 request.capacity(),
                 request.startsAt(),
                 request.endsAt(),
+                request.meetingUrl(),
                 request.status());
         return EventResponse.from(event); // 트랜잭션이 끝나면 변경 내용이 자동 저장됨
     }
@@ -82,8 +113,12 @@ public class EventService {
 
     private Event findEvent(UUID eventId) {
         return eventRepository.findById(eventId)
-                .orElseThrow(() -> new BusinessException(
-                        HttpStatus.NOT_FOUND, "EVENT_NOT_FOUND", "행사를 찾을 수 없습니다: " + eventId));
+                .orElseThrow(() -> notFound(eventId));
+    }
+
+    private BusinessException notFound(UUID eventId) {
+        return new BusinessException(
+                HttpStatus.NOT_FOUND, "EVENT_NOT_FOUND", "행사를 찾을 수 없습니다: " + eventId);
     }
 
     private void validatePeriod(Instant startsAt, Instant endsAt) {

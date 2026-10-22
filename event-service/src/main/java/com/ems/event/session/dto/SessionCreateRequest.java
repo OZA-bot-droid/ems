@@ -9,7 +9,6 @@ import java.time.Instant;
 public record SessionCreateRequest(
         @NotBlank @Size(max = 200) String title,
         @NotNull Instant startsAt,
-        @NotNull Instant endsAt,
-        @Size(max = 500) String meetingUrl
+        @NotNull Instant endsAt
 ) {
 }

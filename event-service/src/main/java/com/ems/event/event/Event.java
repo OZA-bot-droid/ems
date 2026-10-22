@@ -52,29 +52,35 @@ public class Event {
     @Column(name = "created_by")
     private UUID createdBy;
 
+//    화상 회의 링크 (Zoom, Jitsi 등 · 선택)
+    @Column(name = "meeting_url", length = 500)
+    private String meetingUrl;
+
     protected Event() {
         // JPA용
     }
 
     public Event(String title, String description, int capacity,
-                 Instant startsAt, Instant endsAt, UUID createdBy) {
+                 Instant startsAt, Instant endsAt, String meetingUrl, UUID createdBy) {
         this.title = title;
         this.description = description;
         this.capacity = capacity;
         this.startsAt = startsAt;
         this.endsAt = endsAt;
         this.status = EventStatus.DRAFT; // 새 행사는 항상 작성 중으로 시작
+        this.meetingUrl = meetingUrl;
         this.createdBy = createdBy;
     }
 
-    /** PATCH: null이 아닌 값만 바꾼다 */
+//  변경하지 않은 값은 그대로 유지
     public void update(String title, String description, Integer capacity,
-                       Instant startsAt, Instant endsAt, EventStatus status) {
+                       Instant startsAt, Instant endsAt, String meetingUrl, EventStatus status) {
         if (title != null) this.title = title;
         if (description != null) this.description = description;
         if (capacity != null) this.capacity = capacity;
         if (startsAt != null) this.startsAt = startsAt;
         if (endsAt != null) this.endsAt = endsAt;
+        if (meetingUrl != null) this.meetingUrl = meetingUrl;
         if (status != null) this.status = status;
     }
 
@@ -86,4 +92,5 @@ public class Event {
     public Instant getEndsAt() { return endsAt; }
     public EventStatus getStatus() { return status; }
     public UUID getCreatedBy() { return createdBy; }
+    public String getMeetingUrl() { return meetingUrl; }
 }

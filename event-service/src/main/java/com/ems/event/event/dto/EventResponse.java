@@ -13,9 +13,18 @@ public record EventResponse(
         Instant startsAt,
         Instant endsAt,
         EventStatus status,
+        String meetingUrl,
         UUID createdBy
 ) {
     public static EventResponse from(Event event) {
+        return from(event, true);
+    }
+
+    /**
+     * @param showMeetingUrl false면 화상 회의 링크를 숨긴다 (null)
+     *                       TODO: 승인된 참가자에게도 공개 (이도형 참가 신청 연동 후)
+     */
+    public static EventResponse from(Event event, boolean showMeetingUrl) {
         return new EventResponse(
                 event.getId(),
                 event.getTitle(),
@@ -24,6 +33,7 @@ public record EventResponse(
                 event.getStartsAt(),
                 event.getEndsAt(),
                 event.getStatus(),
+                showMeetingUrl ? event.getMeetingUrl() : null,
                 event.getCreatedBy());
     }
 }

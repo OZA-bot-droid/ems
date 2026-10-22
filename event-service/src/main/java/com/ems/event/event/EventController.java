@@ -41,14 +41,17 @@ public class EventController {
     @GetMapping
     public PageResponse<EventResponse> getEvents(
             @RequestParam(required = false) EventStatus status,
-            @PageableDefault(sort = "startsAt", direction = Sort.Direction.ASC) Pageable pageable) {
-        return eventService.getEvents(status, pageable);
+            @PageableDefault(sort = "startsAt", direction = Sort.Direction.ASC) Pageable pageable,
+            @RequestHeader(value = "X-User-Role", required = false) String role) {
+        return eventService.getEvents(status, pageable, adminChecker.isAdmin(role)); // 관리자가 아니면 DRAFT 제외
     }
 
 //  상세목록
     @GetMapping("/{eventId}")
-    public EventResponse getEvent(@PathVariable UUID eventId) {
-        return eventService.getEvent(eventId);
+    public EventResponse getEvent(
+            @PathVariable UUID eventId,
+            @RequestHeader(value = "X-User-Role", required = false) String role) {
+        return eventService.getEvent(eventId, adminChecker.isAdmin(role));
     }
 
 //   생성

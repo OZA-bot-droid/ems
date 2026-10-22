@@ -12,6 +12,11 @@ public class AdminChecker {
 
     public static final String ADMIN = "ADMIN";
 
+    /** 관리자인가? (조회 API에서 보여줄 범위를 정할 때 사용, 막지는 않음) */
+    public boolean isAdmin(String role) {
+        return ADMIN.equals(role);
+    }
+
     /**
      * @param userId 로그인한 사용자 ID (X-User-Id 헤더)
      * @param role   로그인한 사용자 역할 (X-User-Role 헤더)

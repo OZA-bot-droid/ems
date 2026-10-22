@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/** 행사 아래의 세션: /events/{eventId}/sessions */
 @RestController
 @RequestMapping("/events/{eventId}/sessions")
 public class SessionController {
@@ -34,8 +33,10 @@ public class SessionController {
 
 //    세션 목록 (누구나)
     @GetMapping
-    public List<SessionResponse> getSessions(@PathVariable UUID eventId) {
-        return sessionService.getSessions(eventId);
+    public List<SessionResponse> getSessions(
+            @PathVariable UUID eventId,
+            @RequestHeader(value = "X-User-Role", required = false) String role) {
+        return sessionService.getSessions(eventId, adminChecker.isAdmin(role));
     }
 
 //    세션 생성 (ADMIN)
