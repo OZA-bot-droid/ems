@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+/** 참가 신청의 중복 검사, 상태 변경, 본인 권한 검사를 처리합니다. */
 @Service
 public class RegistrationService {
 
@@ -20,6 +21,7 @@ public class RegistrationService {
         this.registrationRepository = registrationRepository;
     }
 
+    /** 중복 신청을 확인한 뒤 새 신청을 PENDING 상태로 저장합니다. */
     @Transactional
     public Registration apply(String userId, Long eventId) {
         registrationRepository.findByUserIdAndEventId(userId, eventId)
@@ -30,16 +32,19 @@ public class RegistrationService {
         try {
             return registrationRepository.saveAndFlush(new Registration(userId, eventId));
         } catch (DataIntegrityViolationException exception) {
+            // 동시에 들어온 중복 요청은 DB 제약 위반으로도 차단합니다.
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "이미 이 행사에 신청한 이력이 있습니다.", exception);
         }
     }
 
+    /** 로그인한 사용자의 신청 내역만 최근 신청 순으로 조회합니다. */
     @Transactional(readOnly = true)
     public Page<Registration> findMine(String userId, Pageable pageable) {
-        return registrationRepository.findAllByUserIdOrderByCreatedAtDesc(userId, pageable);
+        return registrationRepository.findAllByUserIdOrderByRequestedAtDesc(userId, pageable);
     }
 
+    /** 신청을 찾아 승인 대기 상태인지 확인한 뒤 승인합니다. */
     @Transactional
     public Registration approve(Long registrationId) {
         Registration registration = findRegistration(registrationId);
@@ -47,6 +52,7 @@ public class RegistrationService {
         return registration;
     }
 
+    /** 신청을 찾아 승인 대기 상태인지 확인한 뒤 거절합니다. */
     @Transactional
     public Registration reject(Long registrationId) {
         Registration registration = findRegistration(registrationId);
@@ -54,6 +60,7 @@ public class RegistrationService {
         return registration;
     }
 
+    /** 관리자는 취소할 수 있고, 일반 사용자는 본인 신청만 취소할 수 있습니다. */
     @Transactional
     public Registration cancel(Long registrationId, String requesterId, boolean admin) {
         Registration registration = findRegistration(registrationId);
@@ -64,6 +71,7 @@ public class RegistrationService {
         return registration;
     }
 
+    /** 관리자가 행사별 신청 상태 건수를 확인할 때 사용합니다. */
     @Transactional(readOnly = true)
     public EventRegistrationSummary summarize(Long eventId) {
         return new EventRegistrationSummary(
@@ -75,12 +83,14 @@ public class RegistrationService {
         );
     }
 
+    /** ID에 해당하는 신청이 없으면 404 오류를 반환합니다. */
     private Registration findRegistration(Long registrationId) {
         return registrationRepository.findById(registrationId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "신청 정보를 찾을 수 없습니다."));
     }
 
+    /** 엔티티의 잘못된 상태 전이를 HTTP 409 오류로 바꿉니다. */
     private void transition(Runnable action) {
         try {
             action.run();
@@ -89,6 +99,7 @@ public class RegistrationService {
         }
     }
 
+    /** 행사별 신청 상태 건수 응답입니다. */
     public record EventRegistrationSummary(
             Long eventId, long pending, long approved, long rejected, long cancelled) { }
 }
