@@ -11,11 +11,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.Instant;
-import java.util.UUID;
 
 /**
  * 세션: 행사 안의 한 시간대와 그 시간에 할 일.
- * 테이블은 Flyway(V2__create_sessions.sql)가 만든다.
+ * 테이블은 Flyway(V5__create_sessions.sql)가 만든다.
  */
 @Entity
 @Table(name = "sessions")
@@ -23,8 +22,8 @@ public class Session {
 
 //    세션 번호
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
 //    어느 행사의 세션인지 (세션 여러 개 → 행사 하나, N:1)
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -64,7 +63,7 @@ public class Session {
         if (endsAt != null) this.endsAt = endsAt;
     }
 
-    public UUID getId() { return id; }
+    public Long getId() { return id; }
     public Event getEvent() { return event; }
     public String getTitle() { return title; }
     public Instant getStartsAt() { return startsAt; }

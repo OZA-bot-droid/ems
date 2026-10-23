@@ -3,18 +3,17 @@ package com.ems.event.session;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface SessionRepository extends JpaRepository<Session, UUID> {
+public interface SessionRepository extends JpaRepository<Session, Long> {
 
     /** 행사의 세션을 시작 시각 순서로 (화면의 시간표 순서) */
-    List<Session> findByEventIdOrderByStartsAtAsc(UUID eventId);
+    List<Session> findByEventIdOrderByStartsAtAsc(Long eventId);
 
     /** 이 행사에 속한 세션인지까지 확인하며 찾기 */
-    Optional<Session> findByIdAndEventId(UUID id, UUID eventId);
+    Optional<Session> findByIdAndEventId(Long id, Long eventId);
 
     /**
      * 새 시간대 [startsAt, endsAt)와 겹치는 세션이 있는가? (생성할 때)
@@ -27,7 +26,7 @@ public interface SessionRepository extends JpaRepository<Session, UUID> {
               and s.startsAt < :endsAt
               and s.endsAt > :startsAt
             """)
-    boolean existsOverlap(@Param("eventId") UUID eventId,
+    boolean existsOverlap(@Param("eventId") Long eventId,
                           @Param("startsAt") Instant startsAt,
                           @Param("endsAt") Instant endsAt);
 
@@ -39,8 +38,8 @@ public interface SessionRepository extends JpaRepository<Session, UUID> {
               and s.startsAt < :endsAt
               and s.endsAt > :startsAt
             """)
-    boolean existsOverlapExcluding(@Param("eventId") UUID eventId,
-                                   @Param("sessionId") UUID sessionId,
+    boolean existsOverlapExcluding(@Param("eventId") Long eventId,
+                                   @Param("sessionId") Long sessionId,
                                    @Param("startsAt") Instant startsAt,
                                    @Param("endsAt") Instant endsAt);
 
@@ -50,7 +49,7 @@ public interface SessionRepository extends JpaRepository<Session, UUID> {
             where s.event.id = :eventId
               and (s.startsAt < :eventStartsAt or s.endsAt > :eventEndsAt)
             """)
-    boolean existsOutsidePeriod(@Param("eventId") UUID eventId,
+    boolean existsOutsidePeriod(@Param("eventId") Long eventId,
                                 @Param("eventStartsAt") Instant eventStartsAt,
                                 @Param("eventEndsAt") Instant eventEndsAt);
 }

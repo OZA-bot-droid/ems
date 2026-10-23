@@ -35,7 +35,7 @@ public class GlobalExceptionHandler {
                 .body(ErrorResponse.of("INVALID_INPUT", "요청 본문을 읽을 수 없습니다. JSON 형식과 값을 확인하세요."));
     }
 
-    /** 경로/쿼리 값 형식 오류 (예: eventId가 UUID가 아님) */
+    /** 경로/쿼리 값 형식 오류 (예: eventId가 숫자가 아님) */
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException e) {
         return ResponseEntity.badRequest()

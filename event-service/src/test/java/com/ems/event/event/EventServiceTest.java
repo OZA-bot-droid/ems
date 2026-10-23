@@ -16,7 +16,6 @@ import com.ems.event.event.dto.EventUpdateRequest;
 import com.ems.event.session.SessionRepository;
 import java.time.Instant;
 import java.util.Optional;
-import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,7 +37,7 @@ class EventServiceTest {
     @InjectMocks
     EventService eventService;
 
-    private final UUID eventId = UUID.randomUUID();
+    private final Long eventId = 1L;
 
     /** 한국 시간 14:00 = UTC 05:00 */
     private static Instant at(String hhmm) {

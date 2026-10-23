@@ -8,7 +8,6 @@ import com.ems.event.session.dto.SessionResponse;
 import com.ems.event.session.dto.SessionUpdateRequest;
 import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +25,7 @@ public class SessionService {
     }
 
     /** 행사의 세션 목록 (시작 시각 순). 일반 회원에게 DRAFT 행사의 세션은 보이지 않음 */
-    public List<SessionResponse> getSessions(UUID eventId, boolean admin) {
+    public List<SessionResponse> getSessions(Long eventId, boolean admin) {
         Event event = findEvent(eventId); // 없는 행사면 404
         if (!admin && !event.getStatus().isVisibleToPublic()) {
             throw new BusinessException(
@@ -39,7 +38,7 @@ public class SessionService {
 
     /** 세션 생성: 행사 시간 안에서, 다른 세션과 겹치지 않게 */
     @Transactional
-    public SessionResponse createSession(UUID eventId, SessionCreateRequest request) {
+    public SessionResponse createSession(Long eventId, SessionCreateRequest request) {
         Event event = findEvent(eventId);
         validateTimeSlot(event, request.startsAt(), request.endsAt());
 
@@ -57,7 +56,7 @@ public class SessionService {
 
     /** 세션 수정: 바뀐 뒤의 시간대가 행사 안이고, 다른 세션과 겹치지 않는지 확인 */
     @Transactional
-    public SessionResponse updateSession(UUID eventId, UUID sessionId, SessionUpdateRequest request) {
+    public SessionResponse updateSession(Long eventId, Long sessionId, SessionUpdateRequest request) {
         Session session = findSession(eventId, sessionId);
         Event event = session.getEvent();
 
@@ -78,19 +77,19 @@ public class SessionService {
     }
 
     @Transactional
-    public void deleteSession(UUID eventId, UUID sessionId) {
+    public void deleteSession(Long eventId, Long sessionId) {
         sessionRepository.delete(findSession(eventId, sessionId));
     }
 
     // ===== 도우미 메서드 =====
 
-    private Event findEvent(UUID eventId) {
+    private Event findEvent(Long eventId) {
         return eventRepository.findById(eventId)
                 .orElseThrow(() -> new BusinessException(
                         HttpStatus.NOT_FOUND, "EVENT_NOT_FOUND", "행사를 찾을 수 없습니다: " + eventId));
     }
 
-    private Session findSession(UUID eventId, UUID sessionId) {
+    private Session findSession(Long eventId, Long sessionId) {
         return sessionRepository.findByIdAndEventId(sessionId, eventId)
                 .orElseThrow(() -> new BusinessException(
                         HttpStatus.NOT_FOUND, "SESSION_NOT_FOUND", "세션을 찾을 수 없습니다: " + sessionId));

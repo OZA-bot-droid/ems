@@ -3,10 +3,9 @@ package com.ems.event.event.dto;
 import com.ems.event.event.Event;
 import com.ems.event.event.EventStatus;
 import java.time.Instant;
-import java.util.UUID;
 
 public record EventResponse(
-        UUID id,
+        Long id,
         String title,
         String description,
         int capacity,
@@ -14,7 +13,7 @@ public record EventResponse(
         Instant endsAt,
         EventStatus status,
         String meetingUrl,
-        UUID createdBy
+        Long createdBy
 ) {
     public static EventResponse from(Event event) {
         return from(event, true);

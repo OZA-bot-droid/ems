@@ -9,10 +9,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.Instant;
-import java.util.UUID;
 
 /**
- * 행사. 테이블은 Flyway(V1__create_events.sql)가 만든다.
+ * 행사. 테이블은 Flyway(V4__create_events.sql)가 만든다.
  */
 @Entity
 @Table(name = "events")
@@ -20,8 +19,8 @@ public class Event {
 
 //    게시물 번호
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
 //    제목
     @Column(nullable = false, length = 200)
@@ -50,7 +49,7 @@ public class Event {
 
 //    만든사람
     @Column(name = "created_by")
-    private UUID createdBy;
+    private Long createdBy;
 
 //    화상 회의 링크 (Zoom, Jitsi 등 · 선택)
     @Column(name = "meeting_url", length = 500)
@@ -61,7 +60,7 @@ public class Event {
     }
 
     public Event(String title, String description, int capacity,
-                 Instant startsAt, Instant endsAt, String meetingUrl, UUID createdBy) {
+                 Instant startsAt, Instant endsAt, String meetingUrl, Long createdBy) {
         this.title = title;
         this.description = description;
         this.capacity = capacity;
@@ -84,13 +83,13 @@ public class Event {
         if (status != null) this.status = status;
     }
 
-    public UUID getId() { return id; }
+    public Long getId() { return id; }
     public String getTitle() { return title; }
     public String getDescription() { return description; }
     public int getCapacity() { return capacity; }
     public Instant getStartsAt() { return startsAt; }
     public Instant getEndsAt() { return endsAt; }
     public EventStatus getStatus() { return status; }
-    public UUID getCreatedBy() { return createdBy; }
+    public Long getCreatedBy() { return createdBy; }
     public String getMeetingUrl() { return meetingUrl; }
 }

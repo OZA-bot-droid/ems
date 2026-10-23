@@ -15,7 +15,6 @@ import com.ems.event.session.dto.SessionResponse;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,7 +35,7 @@ class SessionServiceTest {
     @InjectMocks
     SessionService sessionService;
 
-    private final UUID eventId = UUID.randomUUID();
+    private final Long eventId = 1L;
 
     /** 한국 시간 14:00 = UTC 05:00 */
     private static Instant at(String hhmm) {

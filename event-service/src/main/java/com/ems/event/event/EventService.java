@@ -8,7 +8,6 @@ import com.ems.event.event.dto.EventUpdateRequest;
 import com.ems.event.session.SessionRepository;
 import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -52,7 +51,7 @@ public class EventService {
     }
 
     /** 상세 조회. 일반 회원이 DRAFT 행사를 조회하면 없는 행사처럼 404 */
-    public EventResponse getEvent(UUID eventId, boolean admin) {
+    public EventResponse getEvent(Long eventId, boolean admin) {
         Event event = findEvent(eventId);
         if (!admin && !event.getStatus().isVisibleToPublic()) {
             throw notFound(eventId);
@@ -61,7 +60,7 @@ public class EventService {
     }
 
     @Transactional
-    public EventResponse createEvent(EventCreateRequest request, UUID createdBy) {
+    public EventResponse createEvent(EventCreateRequest request, Long createdBy) {
         validatePeriod(request.startsAt(), request.endsAt());
         Event event = new Event(
                 request.title(),
@@ -75,7 +74,7 @@ public class EventService {
     }
 
     @Transactional
-    public EventResponse updateEvent(UUID eventId, EventUpdateRequest request) {
+    public EventResponse updateEvent(Long eventId, EventUpdateRequest request) {
         Event event = findEvent(eventId);
         // 시작/종료 중 하나만 바꿔도 바뀐 뒤의 기간이 올바른지 확인
         Instant startsAt = request.startsAt() != null ? request.startsAt() : event.getStartsAt();
@@ -107,16 +106,16 @@ public class EventService {
     }
 
     @Transactional
-    public void deleteEvent(UUID eventId) {
+    public void deleteEvent(Long eventId) {
         eventRepository.delete(findEvent(eventId));
     }
 
-    private Event findEvent(UUID eventId) {
+    private Event findEvent(Long eventId) {
         return eventRepository.findById(eventId)
                 .orElseThrow(() -> notFound(eventId));
     }
 
-    private BusinessException notFound(UUID eventId) {
+    private BusinessException notFound(Long eventId) {
         return new BusinessException(
                 HttpStatus.NOT_FOUND, "EVENT_NOT_FOUND", "행사를 찾을 수 없습니다: " + eventId);
     }

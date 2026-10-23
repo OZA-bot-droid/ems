@@ -7,7 +7,6 @@ import com.ems.event.event.dto.EventResponse;
 import com.ems.event.event.dto.EventUpdateRequest;
 import jakarta.validation.Valid;
 import java.net.URI;
-import java.util.UUID;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -49,7 +48,7 @@ public class EventController {
 //  상세목록
     @GetMapping("/{eventId}")
     public EventResponse getEvent(
-            @PathVariable UUID eventId,
+            @PathVariable Long eventId,
             @RequestHeader(value = "X-User-Role", required = false) String role) {
         return eventService.getEvent(eventId, adminChecker.isAdmin(role));
     }
@@ -58,7 +57,7 @@ public class EventController {
     @PostMapping
     public ResponseEntity<EventResponse> createEvent(
             @Valid @RequestBody EventCreateRequest request,
-            @RequestHeader(value = "X-User-Id", required = false) UUID userId,
+            @RequestHeader(value = "X-User-Id", required = false) Long userId,
             @RequestHeader(value = "X-User-Role", required = false) String role) {
         adminChecker.requireAdmin(userId, role); // ADMIN만 생성
         EventResponse created = eventService.createEvent(request, userId);
@@ -68,9 +67,9 @@ public class EventController {
 //  수정
     @PatchMapping("/{eventId}")
     public EventResponse updateEvent(
-            @PathVariable UUID eventId,
+            @PathVariable Long eventId,
             @Valid @RequestBody EventUpdateRequest request,
-            @RequestHeader(value = "X-User-Id", required = false) UUID userId,
+            @RequestHeader(value = "X-User-Id", required = false) Long userId,
             @RequestHeader(value = "X-User-Role", required = false) String role) {
         adminChecker.requireAdmin(userId, role); // ADMIN만 수정
         return eventService.updateEvent(eventId, request);
@@ -79,8 +78,8 @@ public class EventController {
 //  삭제
     @DeleteMapping("/{eventId}")
     public ResponseEntity<Void> deleteEvent(
-            @PathVariable UUID eventId,
-            @RequestHeader(value = "X-User-Id", required = false) UUID userId,
+            @PathVariable Long eventId,
+            @RequestHeader(value = "X-User-Id", required = false) Long userId,
             @RequestHeader(value = "X-User-Role", required = false) String role) {
         adminChecker.requireAdmin(userId, role); // ADMIN만 삭제
         eventService.deleteEvent(eventId);

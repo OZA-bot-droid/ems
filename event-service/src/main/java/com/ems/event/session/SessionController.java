@@ -7,7 +7,6 @@ import com.ems.event.session.dto.SessionUpdateRequest;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
-import java.util.UUID;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,7 +33,7 @@ public class SessionController {
 //    세션 목록 (누구나)
     @GetMapping
     public List<SessionResponse> getSessions(
-            @PathVariable UUID eventId,
+            @PathVariable Long eventId,
             @RequestHeader(value = "X-User-Role", required = false) String role) {
         return sessionService.getSessions(eventId, adminChecker.isAdmin(role));
     }
@@ -42,9 +41,9 @@ public class SessionController {
 //    세션 생성 (ADMIN)
     @PostMapping
     public ResponseEntity<SessionResponse> createSession(
-            @PathVariable UUID eventId,
+            @PathVariable Long eventId,
             @Valid @RequestBody SessionCreateRequest request,
-            @RequestHeader(value = "X-User-Id", required = false) UUID userId,
+            @RequestHeader(value = "X-User-Id", required = false) Long userId,
             @RequestHeader(value = "X-User-Role", required = false) String role) {
         adminChecker.requireAdmin(userId, role);
         SessionResponse created = sessionService.createSession(eventId, request);
@@ -56,10 +55,10 @@ public class SessionController {
 //    세션 수정 (ADMIN)
     @PatchMapping("/{sessionId}")
     public SessionResponse updateSession(
-            @PathVariable UUID eventId,
-            @PathVariable UUID sessionId,
+            @PathVariable Long eventId,
+            @PathVariable Long sessionId,
             @Valid @RequestBody SessionUpdateRequest request,
-            @RequestHeader(value = "X-User-Id", required = false) UUID userId,
+            @RequestHeader(value = "X-User-Id", required = false) Long userId,
             @RequestHeader(value = "X-User-Role", required = false) String role) {
         adminChecker.requireAdmin(userId, role);
         return sessionService.updateSession(eventId, sessionId, request);
@@ -68,9 +67,9 @@ public class SessionController {
 //    세션 삭제 (ADMIN)
     @DeleteMapping("/{sessionId}")
     public ResponseEntity<Void> deleteSession(
-            @PathVariable UUID eventId,
-            @PathVariable UUID sessionId,
-            @RequestHeader(value = "X-User-Id", required = false) UUID userId,
+            @PathVariable Long eventId,
+            @PathVariable Long sessionId,
+            @RequestHeader(value = "X-User-Id", required = false) Long userId,
             @RequestHeader(value = "X-User-Role", required = false) String role) {
         adminChecker.requireAdmin(userId, role);
         sessionService.deleteSession(eventId, sessionId);

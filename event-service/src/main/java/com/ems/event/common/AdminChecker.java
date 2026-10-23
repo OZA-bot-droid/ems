@@ -1,6 +1,5 @@
 package com.ems.event.common;
 
-import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +20,7 @@ public class AdminChecker {
      * @param userId 로그인한 사용자 ID (X-User-Id 헤더)
      * @param role   로그인한 사용자 역할 (X-User-Role 헤더)
      */
-    public void requireAdmin(UUID userId, String role) {
+    public void requireAdmin(Long userId, String role) {
         // 1) 누구인지 모름 → 401
         if (userId == null || role == null || role.isBlank()) {
             throw new BusinessException(
