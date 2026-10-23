@@ -71,7 +71,9 @@ public class AuthService {
 
     public void logout(RefreshTokenRequestDTO dto) {
 
-        RefreshToken refreshToken = refreshTokenRepository.findByClientId(dto.clientId())
+        RefreshToken refreshToken = refreshTokenRepository.findByClientIdAndToken(dto.clientId(), dto.refreshToken())
                 .orElseThrow(() -> new EntityNotFoundException("클라이언트의 정보가 일치하지 않습니다."));
+
+        refreshTokenRepository.delete(refreshToken);
     }
 }

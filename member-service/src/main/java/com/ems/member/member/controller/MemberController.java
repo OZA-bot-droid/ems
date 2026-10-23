@@ -55,6 +55,6 @@ public class MemberController {
     // 회원 정보
     @GetMapping("/me")
     public ResponseEntity<?> mypage() {
-        return null;
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

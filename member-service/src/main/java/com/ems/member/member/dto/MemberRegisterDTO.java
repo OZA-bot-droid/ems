@@ -16,15 +16,6 @@ public class MemberRegisterDTO {
     private String password;
     private String name;
 
-    public Member toEntity() {
-
-        return Member.builder()
-                .email(this.email)
-                .name(this.name)
-                .passwordHash(this.password)
-                .build();
-    }
-
     public Member toEntityByBCryptPassword(String bCryptPassword) {
 
         return Member.builder()
