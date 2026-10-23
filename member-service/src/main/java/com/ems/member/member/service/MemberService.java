@@ -8,8 +8,10 @@ import com.ems.member.member.repository.MemberRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class MemberService {
 
     private final MemberRepository memberRepository;
@@ -56,7 +58,7 @@ public class MemberService {
             String refreshToken = jwtTokenService.createRefreshToken(member.getId());
 
             // refresh token entity 생성 및 DB 저장
-            authService.saveRefreshToken(member.getId(), refreshToken);
+            authService.saveRefreshToken(member.getId(), refreshToken, dto.getClientId());
 
             return new LoginResponseDTO(accessToken, refreshToken);
 

@@ -39,9 +39,17 @@ public class MemberController {
 
     // 새로운 access token 생성
     @PostMapping("/refresh")
-    public ResponseEntity<?> accessTokenRefresh(@RequestBody RefreshTokenRequestDTO dto) {
+    public ResponseEntity<?> reissue(@RequestBody RefreshTokenRequestDTO dto) {
 
         return new ResponseEntity<>(authService.reissue(dto), HttpStatus.OK);
+    }
+
+    // 로그아웃
+    @DeleteMapping("/logout")
+    public ResponseEntity<?> logout(@RequestBody RefreshTokenRequestDTO dto) {
+
+        authService.logout(dto);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     // 회원 정보

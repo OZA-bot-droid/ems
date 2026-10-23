@@ -13,4 +13,5 @@ public class MemberLoginDTO {
 
     private String email;
     private String password;
+    private String clientId;
 }

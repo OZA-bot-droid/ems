@@ -1,4 +1,4 @@
 package com.ems.member.member.dto;
 
-public record RefreshTokenRequestDTO(String refreshToken) {
+public record RefreshTokenRequestDTO(String refreshToken, String clientId) {
 }
