@@ -1,5 +1,7 @@
 server:
   port: 8082
+  error:
+    include-message: always
 spring:
   application:
     name: event-service
@@ -8,15 +10,37 @@ spring:
     username: ${DB_USER:event_app}
     password: ${DB_PASSWORD:localdev}
     driver-class-name: org.postgresql.Driver
-  # Bootstrap: no business tables or entities on main yet.
-  # Set ddl-auto: validate in each service's Entity + V1 migration PR.
+  # JPA: 테이블은 Flyway가 만들고, JPA는 엔티티와 테이블이 맞는지만 검사한다
   jpa:
-    hibernate:
-      ddl-auto: none
     open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          time_zone: UTC
+    show-sql: ${SHOW_SQL:false}
   flyway:
     enabled: true
     locations: classpath:db/migration
+    baseline-on-migrate: true
+  jackson:
+    time-zone: UTC
+    serialization:
+      write-dates-as-timestamps: false
+  # GET /events 페이징 기본값
+  data:
+    web:
+      pageable:
+        default-page-size: 10
+        max-page-size: 100
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+  api-docs:
+    path: /v3/api-docs
 management:
   endpoints:
     web:
