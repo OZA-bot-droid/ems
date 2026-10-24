@@ -54,7 +54,8 @@ public class MemberController {
 
     // 회원 정보
     @GetMapping("/me")
-    public ResponseEntity<?> mypage() {
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<?> mypage(@RequestHeader(value = "Authorization", required = false) String authorization) {
+        System.out.println(authorization);
+        return new ResponseEntity<>(authorization, HttpStatus.OK);
     }
 }
