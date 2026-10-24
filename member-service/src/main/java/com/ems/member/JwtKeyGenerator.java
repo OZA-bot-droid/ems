@@ -20,6 +20,7 @@ public class JwtKeyGenerator {
 
         // 지정한 경로로 Path 객체 생성
         Path keyDirectory = Path.of("C:/Dev/keys");
+        Files.createDirectories(keyDirectory);
 
         // 문자열을 파일로 저장
         Files.writeString(
