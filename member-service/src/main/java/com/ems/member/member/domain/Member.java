@@ -26,6 +26,12 @@ public class Member extends BaseEntity {
     @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false)
+    private String provider;
+
+    @Column(name = "provider_id")
+    private String providerId;
+
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;

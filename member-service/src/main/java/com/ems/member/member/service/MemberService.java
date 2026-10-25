@@ -44,7 +44,6 @@ public class MemberService {
     }
 
     // 로그인
-    @Transactional(readOnly = true)
     public LoginResponseDTO login(MemberLoginDTO dto) {
 
         // 회원 존재 여부 => 없으면 401 에러

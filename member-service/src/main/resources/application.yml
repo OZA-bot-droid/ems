@@ -18,6 +18,18 @@ spring:
     enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: false
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            # 해단 비밀키는 .env나 환경변수에 넣고 실행
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope:
+              - openid
+              - profile
+              - email
 management:
   endpoints:
     web:
