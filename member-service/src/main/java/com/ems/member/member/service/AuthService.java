@@ -31,8 +31,12 @@ public class AuthService {
     }
 
     // refresh token entity 생성 및 DB 저장
-    public void saveRefreshToken(Long memberId, String refreshToken, String clientId) {
+    public void changeRefreshToken(Long memberId, String refreshToken, String clientId) {
 
+        // 기본 세션 종료
+        refreshTokenRepository.deleteByMemberIdAndClientId(memberId, clientId);
+
+        // 새 세션 생성
         refreshTokenRepository.save(
                 RefreshToken.builder()
                         .memberId(memberId)
@@ -63,9 +67,10 @@ public class AuthService {
         String newAccessToken = jwtTokenService.createAccessToken(memberId);
         String newRefreshToken = jwtTokenService.createRefreshToken(memberId);
 
-        refreshTokenRepository.delete(entity);
+        // @Transactional으로 트랜젝션 안에서 실행되어 JPA의 Dirty Checking 때문에 별도로 save()를 다시 호출하지 않아도 수정 가능
+        entity.rotate(newRefreshToken, Instant.now().plusSeconds(refreshTokenExpiration));
+        // refreshTokenRepository.save(entity);
 
-        saveRefreshToken(memberId, newRefreshToken, dto.clientId());
         return new LoginResponseDTO(newAccessToken, newRefreshToken);
     }
 

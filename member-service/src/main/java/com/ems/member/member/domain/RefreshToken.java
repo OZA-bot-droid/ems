@@ -28,4 +28,10 @@ public class RefreshToken extends BaseEntity {
 
     @Column(name = "expires_at", nullable = false)
     private Instant expiresAt;
+
+    public void rotate(String newToken, Instant newExpiresAt) {
+
+        this.token = newToken;
+        this.expiresAt = newExpiresAt;
+    }
 }

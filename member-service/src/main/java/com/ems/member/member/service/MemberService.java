@@ -44,6 +44,7 @@ public class MemberService {
     }
 
     // 로그인
+    @Transactional(readOnly = true)
     public LoginResponseDTO login(MemberLoginDTO dto) {
 
         // 회원 존재 여부 => 없으면 401 에러
@@ -58,7 +59,7 @@ public class MemberService {
             String refreshToken = jwtTokenService.createRefreshToken(member.getId());
 
             // refresh token entity 생성 및 DB 저장
-            authService.saveRefreshToken(member.getId(), refreshToken, dto.getClientId());
+            authService.changeRefreshToken(member.getId(), refreshToken, dto.getClientId());
 
             return new LoginResponseDTO(accessToken, refreshToken);
 
