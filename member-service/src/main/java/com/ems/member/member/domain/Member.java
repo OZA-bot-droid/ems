@@ -26,9 +26,11 @@ public class Member extends BaseEntity {
     @Column(nullable = false)
     private String name;
 
+    // 제공자
     @Column(nullable = false)
     private String provider;
 
+    // 제공 id
     @Column(name = "provider_id")
     private String providerId;
 

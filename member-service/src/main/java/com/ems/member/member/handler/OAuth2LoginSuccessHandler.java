@@ -51,7 +51,14 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         String accessToken = jwtTokenService.createAccessToken(member.getId());
         String refreshToken = jwtTokenService.createRefreshToken(member.getId());
 
-        authService.changeRefreshToken(member.getId(), refreshToken, clientId);
-    }
+        String loginCode = socialLoginService.save(accessToken, refreshToken);
+        authService.changeRefreshToken(
+                member.getId(),
+                refreshToken,
+                clientId,
+                loginCode
+        );
 
+        response.sendRedirect("http://127.0.0.1:5173/oauth-success?code=" + loginCode);
+    }
 }

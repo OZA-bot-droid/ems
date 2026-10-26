@@ -26,6 +26,7 @@ public class SecurityConfig {
                 add-to-simple-url-handler-mapping: true
                 cors-configurations:
                   '[/**]':
+                    allowCredentials: true
                     allowedOrigins:
                       - "http://127.0.0.1:5173"
                       - "http://localhost:5173"
@@ -44,6 +45,7 @@ public class SecurityConfig {
         corsConfiguration.setAllowedOrigins(List.of("http://localhost:5173/", "http://127.0.0.1:5173/"));
         corsConfiguration.setAllowedHeaders(List.of("*"));
         corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH"));
+        corsConfiguration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", corsConfiguration);

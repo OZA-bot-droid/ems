@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.Objects;
-import java.util.UUID;
 
 // 인증 관련 Service
 @Service
@@ -38,24 +37,29 @@ public class AuthService {
 
         // 새 세션 생성
         refreshTokenRepository.save(
-                RefreshToken.builder()
-                        .memberId(memberId)
-                        .token(refreshToken)
-                        .clientId(clientId)
-                        .sessionId(UUID.randomUUID().toString())
-                        .expiresAt(Instant.now().plusSeconds(refreshTokenExpiration))
-                        .build()
+                RefreshToken.toBuilder(memberId, refreshToken, clientId, refreshTokenExpiration)
+        );
+    }
+
+    public void changeRefreshToken(Long memberId, String refreshToken, String clientId, String sessionId) {
+
+        // 기본 세션 종료
+        refreshTokenRepository.deleteByMemberIdAndClientId(memberId, clientId);
+
+        // 새 세션 생성
+        refreshTokenRepository.save(
+                RefreshToken.toBuilder(memberId, refreshToken, clientId, refreshTokenExpiration, sessionId)
         );
     }
 
     // 새로운 accessToken과 refreshToken 발급
-    public LoginResponseDTO reissue(RefreshTokenRequestDTO dto) {
+    public LoginResponseDTO reissue(RefreshTokenRequestDTO dto, String refreshToken) {
 
         // jwt 토큰 검증 및 token 정보 중 member id 가져오기
-        Long memberId = jwtTokenService.validateRefreshToken(dto.refreshToken());
+        Long memberId = jwtTokenService.validateRefreshToken(refreshToken);
 
         // 회원 존재 여부 확인
-        RefreshToken entity = refreshTokenRepository.findByToken(dto.refreshToken())
+        RefreshToken entity = refreshTokenRepository.findByToken(refreshToken)
                 .orElseThrow(() -> new EntityNotFoundException("refresh token이 존재하지 않습니다."));
 
         // 전달 받은 dto가 null일 수 있기에 Objects.equals가 안전하게 비교
@@ -74,11 +78,11 @@ public class AuthService {
         return new LoginResponseDTO(newAccessToken, newRefreshToken);
     }
 
-    public void logout(RefreshTokenRequestDTO dto) {
+    public void logout(RefreshTokenRequestDTO dto, String refreshToken) {
 
-        RefreshToken refreshToken = refreshTokenRepository.findByClientIdAndToken(dto.clientId(), dto.refreshToken())
+        RefreshToken refreshTokenEntity = refreshTokenRepository.findByClientIdAndToken(dto.clientId(), refreshToken)
                 .orElseThrow(() -> new EntityNotFoundException("클라이언트의 정보가 일치하지 않습니다."));
 
-        refreshTokenRepository.delete(refreshToken);
+        refreshTokenRepository.delete(refreshTokenEntity);
     }
 }

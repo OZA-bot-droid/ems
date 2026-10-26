@@ -22,7 +22,10 @@ public class JwtAuthenticationFilter implements GlobalFilter {
             "/members/register",
             "/members/login",
             "/members/logout",
-            "/members/refresh"
+            "/members/refresh",
+
+            "/members/google",
+            "/members/oauth2/exchange"
     );
 
     public JwtAuthenticationFilter(JwtDecoder jwtDecoder) {
@@ -36,7 +39,8 @@ public class JwtAuthenticationFilter implements GlobalFilter {
         String path = exchange.getRequest()
                 .getURI()
                 .getPath();
-        if(PASS_PATHS.contains(path)) {
+        System.out.println(path);
+        if(PASS_PATHS.contains(path) || path.startsWith("/login/oauth2/") || path.startsWith("/oauth2/")) {
             return chain.filter(exchange);
         }
 

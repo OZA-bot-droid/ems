@@ -6,7 +6,9 @@ ORDER BY table_name;
 select * from member;
 select * from refresh_token;
 drop table member;
+drop table refresh_token;
 delete from refresh_token;
+delete from member;
 
 
 

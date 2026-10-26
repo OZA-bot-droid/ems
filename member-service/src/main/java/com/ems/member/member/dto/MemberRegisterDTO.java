@@ -16,7 +16,7 @@ public class MemberRegisterDTO {
     private String password;
     private String name;
 
-    public Member toEntityByBCryptPassword(String bCryptPassword) {
+    public Member toEntity(String bCryptPassword) {
 
         return Member.builder()
                 .email(this.email)

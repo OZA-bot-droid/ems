@@ -23,9 +23,11 @@ spring:
       client:
         registration:
           google:
-            # 해단 비밀키는 .env나 환경변수에 넣고 실행
+            # 개발시 해당 비밀키는 오른쪽 위 down button 클릭 후 Edit configurations... => 해당 플젝 지정 => modify options => Environment variables 클릭 => 생성 및 입력
+            # 배포시 해당 비밀키는 .env나 서버/클라우드 Secret 설정에 넣고 실행
             client-id: ${GOOGLE_CLIENT_ID}
             client-secret: ${GOOGLE_CLIENT_SECRET}
+            redirect-uri: "http://127.0.0.1:8080/api/login/oauth2/code/google"
             scope:
               - openid
               - profile

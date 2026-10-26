@@ -8,7 +8,7 @@ spring:
       routes:
         - id: member
           uri: ${MEMBER_SERVICE_URL:http://localhost:8081}
-          predicates: [Path=/api/members/**]
+          predicates: ["Path=/api/members/**,/api/oauth2/**,/api/login/oauth2/**"]
           filters: [StripPrefix=1]
         - id: event
           uri: ${EVENT_SERVICE_URL:http://localhost:8082}

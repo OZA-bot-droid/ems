@@ -31,16 +31,28 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
+        // Spring Security의 CSRF(Cross-Site Request Forgery) 보호 기능을 끄는 설정
+        // 사용자가 원하지 않는 요청을 다른 사이트가 대신 보내는 공격을 막는 기능
+        // JWT를 헤더에 직접 넣어 인증하므로 전통적인 CSRF 위험이 상대적으로 낮음
+        // 현재 플젝은 REST API + JWT 구조를 가지고 있음
         return http.csrf(AbstractHttpConfigurer::disable)
+
+                // 어떤 HTTP 요청을 누구에게 허용할지 정하는 설정
                 .authorizeHttpRequests(author ->
                         author.requestMatchers(
                                     "/members/ping",
+
                                     "/members/register",
                                     "/members/login",
                                     "/members/refresh",
                                     "/members/logout",
-                                    "/members/oauth2/**",
-                                    "/members/login/oauth2/**"
+
+                                    // google 로그인 실행 순서 1, 3, 4, 2
+                                    "/members/google",
+                                    "/members/oauth2/exchange",
+                                    // Spring Security OAuth2 Login이 내부적으로 사용하는 기본 endpoint 패턴
+                                    "/oauth2/**",           // /oauth2/authorization/google
+                                    "/login/oauth2/**"      // /login/oauth2/code/google
                                 )
                                 .permitAll()
                                 .anyRequest()
