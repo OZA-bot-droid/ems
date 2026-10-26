@@ -15,11 +15,7 @@ public interface SessionRepository extends JpaRepository<Session, Long> {
     /** 이 행사에 속한 세션인지까지 확인하며 찾기 */
     Optional<Session> findByIdAndEventId(Long id, Long eventId);
 
-    /**
-     * 새 시간대 [startsAt, endsAt)와 겹치는 세션이 있는가? (생성할 때)
-     * 겹침 조건: 기존 시작 < 새 종료 AND 기존 종료 > 새 시작
-     * 14:00~14:45 다음에 14:45~15:30은 겹치지 않음 (끝과 시작이 같으면 허용)
-     */
+// 겹치지않은지, 끝나는 시간이 시작하는 시간보다 더 빠르지않은지
     @Query("""
             select case when count(s) > 0 then true else false end from Session s
             where s.event.id = :eventId

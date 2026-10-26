@@ -45,6 +45,7 @@ public class EventController {
         return eventService.getEvents(status, pageable, adminChecker.isAdmin(role)); // 관리자가 아니면 DRAFT 제외
     }
 
+
 //  상세목록
     @GetMapping("/{eventId}")
     public EventResponse getEvent(

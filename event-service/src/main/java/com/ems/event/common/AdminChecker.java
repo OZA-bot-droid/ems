@@ -3,23 +3,18 @@ package com.ems.event.common;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-/**
- * 관리자(ADMIN)만 할 수 있는 요청인지 검사한다.
- */
+
 @Component
 public class AdminChecker {
 
     public static final String ADMIN = "ADMIN";
 
-    /** 관리자인가? (조회 API에서 보여줄 범위를 정할 때 사용, 막지는 않음) */
+//  관리자인지만 체크
     public boolean isAdmin(String role) {
         return ADMIN.equals(role);
     }
 
-    /**
-     * @param userId 로그인한 사용자 ID (X-User-Id 헤더)
-     * @param role   로그인한 사용자 역할 (X-User-Role 헤더)
-     */
+//  role별 권한 판정
     public void requireAdmin(Long userId, String role) {
         // 1) 누구인지 모름 → 401
         if (userId == null || role == null || role.isBlank()) {

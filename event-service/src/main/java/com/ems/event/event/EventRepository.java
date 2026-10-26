@@ -12,3 +12,4 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     /** 여러 상태 중 하나인 행사 (일반 회원용 목록: OPEN, CLOSED) */
     Page<Event> findByStatusIn(Collection<EventStatus> statuses, Pageable pageable);
 }
+

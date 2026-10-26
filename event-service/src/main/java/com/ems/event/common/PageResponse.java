@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.function.Function;
 import org.springframework.data.domain.Page;
 
-/** 목록 응답 형식. Spring의 Page를 그대로 JSON으로 내보내지 않고 필요한 값만 담는다 */
+// 페이지에 대한 상세 설명
 public record PageResponse<T>(
         List<T> content,
         int page,

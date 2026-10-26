@@ -13,15 +13,12 @@ public enum EventStatus {
         return this == OPEN;
     }
 
-    /** 일반 회원에게 보이는 상태인가? (DRAFT는 관리자에게만 보임) */
+//  draft를 제외하고는 user에게 다 보여줌
     public boolean isVisibleToPublic() {
         return this != DRAFT;
     }
 
-    /**
-     * 이 상태에서 next로 바꿀 수 있는가?
-     * 허용: 그대로 유지, DRAFT → OPEN, OPEN → CLOSED (되돌리기와 건너뛰기는 금지)
-     */
+// status창이 순서대로 바뀌는거는 괜찮으나, 역순은 불가
     public boolean canChangeTo(EventStatus next) {
         if (next == null || next == this) {
             return true;

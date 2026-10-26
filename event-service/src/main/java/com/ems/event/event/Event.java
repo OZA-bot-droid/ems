@@ -10,9 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.Instant;
 
-/**
- * 행사. 테이블은 Flyway(V4__create_events.sql)가 만든다.
- */
+
 @Entity
 @Table(name = "events")
 public class Event {
@@ -35,6 +33,7 @@ public class Event {
     private int capacity;
 
 //    시작하는 날짜
+//    Instant를 하여서 나라별로 시간대를 설정하게 만듬 => frontend에서 format.js로 설정
     @Column(name = "starts_at", nullable = false)
     private Instant startsAt;
 
