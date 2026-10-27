@@ -1,5 +1,7 @@
 package com.ems.event.registration.service;
 
+import com.ems.event.event.Event;
+import com.ems.event.event.EventRepository;
 import com.ems.event.registration.entity.Registration;
 import com.ems.event.registration.entity.RegistrationStatus;
 import com.ems.event.registration.repository.RegistrationRepository;
@@ -16,9 +18,11 @@ import org.springframework.web.server.ResponseStatusException;
 public class RegistrationService {
 
     private final RegistrationRepository registrationRepository;
+    private final EventRepository eventRepository;
 
-    public RegistrationService(RegistrationRepository registrationRepository) {
+    public RegistrationService(RegistrationRepository registrationRepository, EventRepository eventRepository) {
         this.registrationRepository = registrationRepository;
+        this.eventRepository = eventRepository;
     }
 
     /** 중복 신청을 확인한 뒤 새 신청을 PENDING 상태로 저장합니다. */
@@ -44,10 +48,23 @@ public class RegistrationService {
         return registrationRepository.findAllByUserIdOrderByRequestedAtDesc(userId, pageable);
     }
 
-    /** 신청을 찾아 승인 대기 상태인지 확인한 뒤 승인합니다. */
+    /** 행사별 잠금으로 승인 요청을 직렬화하고 정원 안에서만 승인합니다. */
     @Transactional
     public Registration approve(Long registrationId) {
-        Registration registration = findRegistration(registrationId);
+        Long eventId = registrationRepository.findEventIdById(registrationId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "신청 정보를 찾을 수 없습니다."));
+        Event event = eventRepository.findByIdForUpdate(eventId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "행사 정보를 찾을 수 없습니다."));
+        Registration registration = registrationRepository.findByIdForUpdate(registrationId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "신청 정보를 찾을 수 없습니다."));
+        if (registration.getStatus() == RegistrationStatus.PENDING
+                && registrationRepository.countByEventIdAndStatus(eventId, RegistrationStatus.APPROVED)
+                        >= event.getCapacity()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "행사 정원이 가득 차 승인할 수 없습니다.");
+        }
         transition(registration::approve);
         return registration;
     }
