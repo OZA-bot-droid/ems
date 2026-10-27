@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 
 @RestController
@@ -24,7 +25,11 @@ public class PollController {
 
     // 투표 생성
     @PostMapping("/polls")
-    public ResponseEntity<?> createPoll(@Valid @RequestBody PollSaveDTO dto, @RequestHeader("X-Member-Id") Long userId) {
+    public ResponseEntity<?> createPoll(@Valid @RequestBody PollSaveDTO dto,
+                                        @RequestHeader("X-Member-Id") Long userId,
+                                        @RequestHeader("X-User-Role") String role) {
+        checkAdmin(role);
+
         PollResponseDTO response = pollService.createPoll(dto, userId);
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
@@ -36,4 +41,15 @@ public class PollController {
 
         return new ResponseEntity<>(pollService.getPoll(pollId), HttpStatus.OK);
     }
+
+    private void checkAdmin(String role) {
+
+        if (!"ADMIN".equals(role)) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "투표 생성 권한이 없습니다."
+            );
+        }
+    }
+
 }

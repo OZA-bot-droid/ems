@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 public class PollVoteController {
     private final PollVoteService pollVoteService;
 
-    // 투표 생성
+    // 투표하기 기능
     @PostMapping("/polls/{pollId}/votes")
     public ResponseEntity<?> createPollVote(@Valid @RequestBody PollVoteSaveDTO dto, @PathVariable Long pollId,@RequestHeader("X-Member-Id") Long userId) {
 
