@@ -1,6 +1,7 @@
 package com.ems.member.member.dto;
 
 import com.ems.member.member.domain.Member;
+import com.ems.member.member.domain.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,6 +16,7 @@ public class MemberRegisterDTO {
     private String email;
     private String password;
     private String name;
+    private Role role;
 
     public Member toEntity(String bCryptPassword) {
 
@@ -22,6 +24,7 @@ public class MemberRegisterDTO {
                 .email(this.email)
                 .name(this.name)
                 .passwordHash(bCryptPassword)
+                .role(this.role)
                 .build();
     }
 }

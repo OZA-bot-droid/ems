@@ -1,6 +1,7 @@
 package com.ems.member.member.handler;
 
 import com.ems.member.member.domain.Member;
+import com.ems.member.member.domain.Role;
 import com.ems.member.member.dto.SocialLoginDTO;
 import com.ems.member.member.service.AuthService;
 import com.ems.member.member.service.JwtTokenService;
@@ -8,6 +9,7 @@ import com.ems.member.member.service.SocialLoginService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
@@ -30,7 +32,9 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     }
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+    public void onAuthenticationSuccess(HttpServletRequest request,
+                                        HttpServletResponse response,
+                                        Authentication authentication) throws IOException {
 
         OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
         OidcUser oidcUser = (OidcUser) oauthToken.getPrincipal();
@@ -41,24 +45,36 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         String name = oidcUser.getFullName();       // 이름
 
         SocialLoginDTO socialUser = new SocialLoginDTO(provider, providerId, email, name);
+        HttpSession session = request.getSession();
+        Role role = (Role) session.getAttribute("role");
 
-        Member member = socialLoginService.login(socialUser);
 
-        String clientId = request.getSession()
-                .getAttribute("clientId")
-                .toString();
 
-        String accessToken = jwtTokenService.createAccessToken(member.getId());
-        String refreshToken = jwtTokenService.createRefreshToken(member.getId());
+        if(role != null) {
+            socialLoginService.register(socialUser, role);
+            session.removeAttribute("role");
 
-        String loginCode = socialLoginService.save(accessToken, refreshToken);
-        authService.changeRefreshToken(
-                member.getId(),
-                refreshToken,
-                clientId,
-                loginCode
-        );
+            response.sendRedirect("http://127.0.0.1:5173/login");
+        } else {
 
-        response.sendRedirect("http://127.0.0.1:5173/oauth-success?code=" + loginCode);
+            Member member = socialLoginService.login(socialUser);
+
+            String clientId = request.getSession()
+                    .getAttribute("clientId")
+                    .toString();
+
+            String accessToken = jwtTokenService.createAccessToken(member.getId());
+            String refreshToken = jwtTokenService.createRefreshToken(member.getId());
+
+            String loginCode = socialLoginService.save(accessToken, refreshToken);
+            authService.changeRefreshToken(
+                    member.getId(),
+                    refreshToken,
+                    clientId,
+                    loginCode
+            );
+
+            response.sendRedirect("http://127.0.0.1:5173/oauth-success?code=" + loginCode);
+        }
     }
 }

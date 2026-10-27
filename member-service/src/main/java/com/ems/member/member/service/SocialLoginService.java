@@ -1,9 +1,11 @@
 package com.ems.member.member.service;
 
 import com.ems.member.member.domain.Member;
+import com.ems.member.member.domain.Role;
 import com.ems.member.member.dto.LoginResponseDTO;
 import com.ems.member.member.dto.SocialLoginDTO;
 import com.ems.member.member.repository.MemberRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,21 +24,28 @@ public class SocialLoginService {
         this.memberRepository = memberRepository;
     }
 
-    public Member login(SocialLoginDTO dto) {
-        return memberRepository.findByProviderAndProviderId(dto.provider(), dto.providerId())
-                .orElseGet(() -> createSocialMemberEntity(dto));
+    // 소셜 회원가입
+    public void register(SocialLoginDTO dto, Role role) {
+
+        if(memberRepository.existsByProviderAndProviderId(dto.provider(), dto.providerId())) {
+            throw new IllegalArgumentException("이미 가입된 회원입니다.");
+        } else {
+
+            memberRepository.save(
+                    Member.builder()
+                            .provider(dto.provider())
+                            .providerId(dto.providerId())
+                            .email(dto.email())
+                            .name(dto.name())
+                            .role(role)
+                            .build()
+            );
+        }
     }
 
-    private Member createSocialMemberEntity(SocialLoginDTO dto) {
-
-        return memberRepository.save(
-                Member.builder()
-                        .email(dto.email())
-                        .name(dto.name())
-                        .provider(dto.provider())
-                        .providerId(dto.providerId())
-                        .build()
-        );
+    public Member login(SocialLoginDTO dto) {
+        return memberRepository.findByProviderAndProviderId(dto.provider(), dto.providerId())
+                .orElseThrow(() -> new EntityNotFoundException("가입되지 않는 회원입니다."));
     }
 
     public String save(String accessToken, String refreshToken) {

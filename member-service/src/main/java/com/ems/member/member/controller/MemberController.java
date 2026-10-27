@@ -1,5 +1,6 @@
 package com.ems.member.member.controller;
 
+import com.ems.member.member.domain.Role;
 import com.ems.member.member.dto.LoginResponseDTO;
 import com.ems.member.member.dto.MemberLoginDTO;
 import com.ems.member.member.dto.MemberRegisterDTO;
@@ -9,6 +10,7 @@ import com.ems.member.member.service.MemberService;
 import com.ems.member.member.service.SocialLoginService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -90,11 +92,19 @@ public class MemberController {
     // -----------------------------------------------------
     @GetMapping("/google")
     public void googleLogin(@RequestParam String clientId,
+                            @RequestParam(required = false) Role role,
                             HttpServletRequest request,
                             HttpServletResponse response) throws IOException {
 
-        request.getSession()
-                .setAttribute("clientId", clientId);
+        HttpSession session = request.getSession();
+
+        session.setAttribute("clientId", clientId);
+
+        if(role != null) {
+            session.setAttribute("role", role);
+        } else {
+            session.removeAttribute("role");
+        }
 
         // Spring Security의 기본 Google 로그인 시작 URL
         response.sendRedirect("http://127.0.0.1:8080/api/oauth2/authorization/google");
