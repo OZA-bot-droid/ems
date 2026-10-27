@@ -1,0 +1,16 @@
+/* 행사 화면(EventPage) 전용 디자인 값
+   Figma "EMS Event Management — Dashboard UI" 기준.
+   팀 공용 style.css는 건드리지 않고, 여기 변수만 추가합니다.
+   Tailwind에서 쓰는 법: bg-(--ems-green), text-(--ems-ink) … */
+:root {
+  --ems-bg: #f7f9fc; /* 화면 바탕 */
+  --ems-surface: #ffffff; /* 카드·입력칸 */
+  --ems-row: #f6f8fb; /* 표 줄무늬 */
+  --ems-ink: #142238; /* 제목·본문 */
+  --ems-muted: #7a879a; /* 보조 글자 */
+  --ems-green: #169b62; /* 강조(버튼·배지 글자) */
+  --ems-green-dark: #11804f; /* 버튼 hover */
+  --ems-green-soft: #eaf6f0; /* 배지·카드 그림 영역 */
+  --ems-blue-soft: #eaf2fe; /* 카드 그림 영역(번갈아) */
+  --ems-font: 'Inter', 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+}

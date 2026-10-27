@@ -35,7 +35,7 @@ export default function EventDetail({ eventId, onBack }) {
   const backButton = (
     <button
       onClick={onBack}
-      className="w-fit rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50"
+      className="w-fit rounded-[10px] bg-(--ems-surface) px-4 py-2 text-[13px] font-semibold text-(--ems-ink) hover:text-(--ems-green)"
     >
       ← 목록으로
     </button>
@@ -45,7 +45,7 @@ export default function EventDetail({ eventId, onBack }) {
     return (
       <section className="flex flex-col gap-4">
         {backButton}
-        <p className="text-sm text-slate-500">행사 정보를 불러오는 중입니다…</p>
+        <p className="text-sm text-(--ems-muted)">행사 정보를 불러오는 중입니다…</p>
       </section>
     );
   }
@@ -56,7 +56,7 @@ export default function EventDetail({ eventId, onBack }) {
     return (
       <section className="flex flex-col gap-4">
         {backButton}
-        <div className="rounded-lg border border-rose-200 bg-rose-50 p-6 text-sm text-rose-700">
+        <div className="rounded-[14px] bg-rose-50 p-6 text-sm text-rose-700">
           <p className="font-semibold">
             {notFound ? '행사를 찾을 수 없습니다.' : '행사 정보를 불러오지 못했습니다.'}
           </p>
@@ -74,91 +74,117 @@ export default function EventDetail({ eventId, onBack }) {
 
   return (
     <section className="flex flex-col gap-6">
-      {backButton}
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex flex-col gap-1.5">
+          <h1 className="text-[27px] font-bold text-(--ems-ink)">04 · 행사 상세</h1>
+          <p className="text-[13px] text-(--ems-muted)">일정 · 세션 · 참가 상태</p>
+        </div>
+        {backButton}
+      </div>
 
-      {/* 머리: 상태 배지 + 제목 */}
-      <header className="flex flex-col gap-3 rounded-xl bg-gradient-to-br from-indigo-500 to-sky-400 p-6 text-white">
-        <p className="text-xs font-semibold tracking-widest text-white/80">EMS 2026 · EVENT</p>
-        <h1 className="text-2xl font-bold">{event.title}</h1>
-        <span className={`w-fit rounded-full px-2.5 py-0.5 text-xs font-semibold ${badge.className}`}>
-          {badge.label}
-        </span>
-      </header>
+      {/* Figma 04 · Event details: 흰 카드 하나 */}
+      <article className="flex flex-col gap-8 rounded-[14px] bg-(--ems-surface) p-5">
+        {/* 머리: Event hero */}
+        <header className="flex flex-col gap-3 rounded-[12px] bg-(--ems-green-soft) px-6 py-6">
+          <p className="text-sm font-bold text-(--ems-green)">EMS 2026 · EVENT</p>
+          <h2 className="text-[26px] font-bold text-(--ems-ink)">{event.title}</h2>
+          <span className={`w-fit rounded-full px-3 py-1 text-xs font-semibold ${badge.className}`}>
+            {badge.label}
+          </span>
+        </header>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* 왼쪽: 소개 + 세션 */}
-        <div className="flex min-w-0 flex-col gap-6 lg:col-span-2">
-          <article className="flex flex-col gap-2">
-            <h2 className="text-lg font-semibold">행사 소개</h2>
-            <p className="whitespace-pre-line text-slate-700">
+        <div className="flex flex-col gap-8 px-1.5">
+          {/* 행사 소개 */}
+          <section className="flex flex-col gap-2">
+            <h3 className="text-lg font-bold text-(--ems-ink)">행사 소개</h3>
+            <p className="whitespace-pre-line text-sm text-(--ems-muted)">
               {event.description || '등록된 소개가 없습니다.'}
             </p>
-          </article>
+          </section>
 
-          <article className="flex flex-col gap-3">
-            <h2 className="text-lg font-semibold">세션 일정</h2>
-            {sessions.length === 0 ? (
-              <p className="rounded-lg border border-dashed border-slate-300 p-4 text-sm text-slate-500">
-                아직 등록된 세션이 없습니다.
-              </p>
-            ) : (
-              <ol className="flex flex-col gap-2">
-                {sessions.map((s) => (
-                  <li
-                    key={s.id}
-                    className="flex items-center gap-4 rounded-lg border border-slate-200 bg-white px-4 py-3"
+          {/* 행사 일정: 줄무늬 행 3개 */}
+          <section className="flex flex-col gap-2">
+            <h3 className="text-lg font-bold text-(--ems-ink)">행사 일정</h3>
+            <div className="flex flex-col gap-[7px]">
+              <InfoRow striped>
+                <span className="tabular-nums">{formatRange(event.startsAt, event.endsAt)}</span>
+              </InfoRow>
+              <InfoRow>
+                {event.meetingUrl ? (
+                  <a
+                    href={event.meetingUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="break-all text-(--ems-green) underline"
                   >
-                    <span className="shrink-0 text-sm font-semibold text-indigo-600 tabular-nums">
-                      {formatTimeRange(s.startsAt, s.endsAt)}
-                    </span>
-                    <span className="min-w-0">{s.title}</span>
+                    온라인 · {event.meetingUrl}
+                  </a>
+                ) : isAdmin ? (
+                  '등록된 참여 링크가 없습니다.'
+                ) : (
+                  '온라인 세미나 · 참여 URL은 승인 후 제공'
+                )}
+              </InfoRow>
+              <InfoRow striped>
+                {/* 현재 참가자 수는 이도형 님의 신청 API가 생기면 연결 */}
+                정원 {event.capacity}명
+              </InfoRow>
+            </div>
+          </section>
+
+          {/* 세션 일정 (Figma에는 없지만 상세 화면의 세션 표시) */}
+          <section className="flex flex-col gap-2">
+            <h3 className="text-lg font-bold text-(--ems-ink)">세션 일정</h3>
+            {sessions.length === 0 ? (
+              <InfoRow striped>
+                <span className="text-(--ems-muted)">아직 등록된 세션이 없습니다.</span>
+              </InfoRow>
+            ) : (
+              <ol className="flex flex-col gap-[7px]">
+                {sessions.map((s, i) => (
+                  <li key={s.id}>
+                    <InfoRow striped={i % 2 === 0}>
+                      <span className="w-28 shrink-0 font-semibold text-(--ems-green) tabular-nums">
+                        {formatTimeRange(s.startsAt, s.endsAt)}
+                      </span>
+                      <span className="min-w-0">{s.title}</span>
+                    </InfoRow>
                   </li>
                 ))}
               </ol>
             )}
-          </article>
-        </div>
-
-        {/* 오른쪽: 일정·정원·링크·신청 버튼 */}
-        <aside className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-5">
-          <div>
-            <p className="text-xs font-semibold text-slate-500">행사 일정</p>
-            <p className="mt-1 font-medium tabular-nums">{formatRange(event.startsAt, event.endsAt)}</p>
-          </div>
-          <div>
-            <p className="text-xs font-semibold text-slate-500">정원</p>
-            {/* 현재 참가자 수는 이도형 님의 신청 API가 생기면 연결 */}
-            <p className="mt-1 font-medium">{event.capacity}명</p>
-          </div>
-          <div>
-            <p className="text-xs font-semibold text-slate-500">참여 링크</p>
-            {event.meetingUrl ? (
-              <a
-                href={event.meetingUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-1 block break-all text-sm text-indigo-600 underline"
-              >
-                {event.meetingUrl}
-              </a>
-            ) : (
-              <p className="mt-1 text-sm text-slate-500">
-                {isAdmin ? '등록된 링크가 없습니다.' : '참가 승인 후 제공됩니다.'}
-              </p>
-            )}
-          </div>
+          </section>
 
           {/* 참가 신청: 이도형 님의 신청 모달과 연결할 자리 */}
-          <button
-            disabled={!canApply}
-            onClick={() => alertApply(event)}
-            className="mt-2 rounded-lg bg-indigo-600 px-4 py-2.5 font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-slate-300"
-          >
-            {canApply ? '참가 신청하기' : event.status === 'CLOSED' ? '신청이 마감되었습니다' : '아직 모집 전입니다'}
-          </button>
-        </aside>
-      </div>
+          <div className="flex justify-end">
+            <button
+              disabled={!canApply}
+              onClick={() => alertApply(event)}
+              className="h-[42px] min-w-[197px] rounded-[10px] bg-(--ems-green) px-4 text-[13px] font-semibold text-white hover:bg-(--ems-green-dark) disabled:cursor-not-allowed disabled:bg-slate-300"
+            >
+              {canApply
+                ? '참가 신청하기'
+                : event.status === 'CLOSED'
+                  ? '신청이 마감되었습니다'
+                  : '아직 모집 전입니다'}
+            </button>
+          </div>
+        </div>
+      </article>
     </section>
+  );
+}
+
+// 행사 일정의 한 줄 (Figma Row 1·2·3: 줄무늬)
+function InfoRow({ striped = false, children }) {
+  return (
+    <div
+      className={`flex min-h-[52px] items-center gap-3 rounded-[9px] px-4 py-3 text-[13px] text-(--ems-ink) ${
+        striped ? 'bg-(--ems-row)' : 'bg-(--ems-surface)'
+      }`}
+    >
+      {children}
+    </div>
   );
 }
 

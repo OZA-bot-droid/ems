@@ -31,11 +31,11 @@ export function formatRange(startIso, endIso) {
   return `${start} – ${end}`;
 }
 
-// 백엔드 상태값 → 화면 배지 (이름은 팀 합의 후 바꿀 수 있음)
+// 백엔드 상태값 → 화면 배지 (이름은 팀 합의 후 바꿀 수 있음, 색은 Figma 기준)
 export const STATUS_BADGE = {
-  DRAFT: { label: '작성 중', className: 'bg-slate-100 text-slate-600' },
-  OPEN: { label: '모집 중', className: 'bg-emerald-100 text-emerald-700' },
-  CLOSED: { label: '마감', className: 'bg-rose-100 text-rose-700' },
+  DRAFT: { label: '작성 중', className: 'bg-slate-100 text-(--ems-muted)' },
+  OPEN: { label: '모집 중', className: 'bg-(--ems-green-soft) text-(--ems-green)' },
+  CLOSED: { label: '마감', className: 'bg-rose-50 text-rose-600' },
 };
 
 // "14:00 – 14:45" (세션처럼 같은 날 안의 시간만 보여줄 때)

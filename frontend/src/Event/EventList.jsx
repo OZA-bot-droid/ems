@@ -38,24 +38,29 @@ export default function EventList({ onSelect }) {
   );
 
   return (
-    <section className="flex flex-col gap-6">
-      <header className="flex flex-col gap-1">
-        <p className="text-xs font-semibold tracking-wide text-indigo-600">03 · 행사 목록</p>
-        <h1 className="text-2xl font-bold">이벤트 탐색</h1>
+    <section className="flex flex-col gap-8">
+      <header className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex flex-col gap-1.5">
+          <h1 className="text-[27px] font-bold text-(--ems-ink)">03 · 행사 목록</h1>
+          <p className="text-[13px] text-(--ems-muted)">이벤트 탐색 · 검색 및 필터</p>
+        </div>
+        <span className="rounded-full bg-(--ems-green-soft) px-3 py-1 text-xs font-semibold text-(--ems-green)">
+          COMMON
+        </span>
       </header>
 
       {/* 검색 + 상태 필터 */}
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-4">
         <input
           id="event-search"
-          className="min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm"
-          placeholder="⌕ 행사명으로 검색"
+          className="h-[45px] min-w-0 flex-1 rounded-[10px] border border-transparent bg-(--ems-surface) px-4 text-sm text-(--ems-ink) placeholder:text-(--ems-muted) focus:border-(--ems-green) focus:outline-none sm:max-w-[525px]"
+          placeholder="⌕ 행사명, 키워드로 검색"
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
         />
         <select
           id="event-status"
-          className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"
+          className="h-[45px] rounded-[10px] border border-transparent bg-(--ems-surface) px-4 text-[13px] font-semibold text-(--ems-ink) focus:border-(--ems-green) focus:outline-none"
           value={status}
           onChange={(e) => {
             setStatus(e.target.value);
@@ -70,10 +75,10 @@ export default function EventList({ onSelect }) {
       </div>
 
       {/* 상황별 화면: 불러오는 중 / 에러 / 비어 있음 / 목록 */}
-      {loading && <p className="text-sm text-slate-500">행사를 불러오는 중입니다…</p>}
+      {loading && <p className="text-sm text-(--ems-muted)">행사를 불러오는 중입니다…</p>}
 
       {!loading && error && (
-        <div className="rounded-lg border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+        <div className="rounded-[14px] bg-rose-50 p-5 text-sm text-rose-700">
           <p className="font-semibold">행사 목록을 불러오지 못했습니다.</p>
           <p className="mt-1">
             {error.message} <span className="text-rose-400">({error.code})</span>
@@ -82,16 +87,16 @@ export default function EventList({ onSelect }) {
       )}
 
       {!loading && !error && events.length === 0 && (
-        <div className="rounded-lg border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">
+        <div className="rounded-[14px] bg-(--ems-surface) p-10 text-center text-sm text-(--ems-muted)">
           {keyword ? '검색어와 맞는 행사가 없습니다.' : '아직 등록된 행사가 없습니다.'}
         </div>
       )}
 
       {!loading && !error && events.length > 0 && (
-        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {events.map((event) => (
+        <ul className="grid gap-[18px] md:grid-cols-2">
+          {events.map((event, index) => (
             <li key={event.id}>
-              <EventCard event={event} onClick={() => onSelect?.(event.id)} />
+              <EventCard event={event} index={index} onClick={() => onSelect?.(event.id)} />
             </li>
           ))}
         </ul>
@@ -99,19 +104,19 @@ export default function EventList({ onSelect }) {
 
       {/* 페이지 이동 */}
       {result && result.totalPages > 1 && (
-        <nav className="flex items-center justify-center gap-3 text-sm">
+        <nav className="flex items-center justify-center gap-3 text-sm text-(--ems-ink)">
           <button
-            className="rounded border px-3 py-1 disabled:opacity-40"
+            className="rounded-[10px] bg-(--ems-surface) px-4 py-2 font-semibold disabled:opacity-40"
             disabled={page === 0}
             onClick={() => setPage(page - 1)}
           >
             이전
           </button>
-          <span className="tabular-nums">
+          <span className="tabular-nums text-(--ems-muted)">
             {page + 1} / {result.totalPages}
           </span>
           <button
-            className="rounded border px-3 py-1 disabled:opacity-40"
+            className="rounded-[10px] bg-(--ems-surface) px-4 py-2 font-semibold disabled:opacity-40"
             disabled={page + 1 >= result.totalPages}
             onClick={() => setPage(page + 1)}
           >
@@ -123,25 +128,29 @@ export default function EventList({ onSelect }) {
   );
 }
 
-// 카드 한 장 (부품)
-function EventCard({ event, onClick }) {
+// 카드 한 장 (부품) — Figma 03 · Event card
+function EventCard({ event, index, onClick }) {
   const badge = STATUS_BADGE[event.status] ?? { label: event.status, className: 'bg-slate-100' };
+  // Figma처럼 카드 그림 영역 색을 초록/파랑 번갈아
+  const visual = index % 2 === 0 ? 'bg-(--ems-green-soft)' : 'bg-(--ems-blue-soft)';
   return (
     <button
       onClick={onClick}
-      className="flex h-full w-full flex-col overflow-hidden rounded-xl border border-slate-200 bg-white text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-indigo-500"
+      className="flex h-full w-full flex-col gap-4 rounded-[14px] bg-(--ems-surface) p-3 text-left transition hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(20,34,56,0.08)] focus-visible:outline-2 focus-visible:outline-(--ems-green)"
     >
-      <div className="flex h-24 items-end bg-gradient-to-br from-indigo-500 to-sky-400 p-3">
-        <span className="text-[11px] font-semibold tracking-widest text-white/80">EMS EVENT</span>
+      <div className={`flex h-[72px] items-center rounded-[9px] px-4 ${visual}`}>
+        <span className="text-sm font-bold text-(--ems-green)">EMS EVENT</span>
       </div>
-      <div className="flex flex-1 flex-col gap-2 p-4">
-        <span className={`w-fit rounded-full px-2 py-0.5 text-xs font-semibold ${badge.className}`}>
-          {badge.label}
-        </span>
-        <h2 className="font-semibold leading-snug">{event.title}</h2>
-        <p className="mt-auto text-sm text-slate-500 tabular-nums">
+      <div className="flex flex-1 flex-col gap-2 px-2 pb-2">
+        <h2 className="text-[17px] font-bold leading-snug text-(--ems-ink)">{event.title}</h2>
+        <p className="text-[13px] text-(--ems-muted) tabular-nums">
           {formatShort(event.startsAt)} · 정원 {event.capacity}명
         </p>
+        <span
+          className={`mt-2 w-fit rounded-full px-3 py-1 text-xs font-semibold ${badge.className}`}
+        >
+          {badge.label}
+        </span>
       </div>
     </button>
   );

@@ -1,52 +1,45 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { createRoot } from 'react-dom/client';
 import './style.css';
-import EventList from './Event/EventList.jsx';
-import EventDetail from './Event/EventDetail.jsx';
-import { getDevUser, setDevUser } from './api.js';
-
+import EventPage from './Event/EventPage.jsx'; // 행사 화면 (이도관)
 function App() {
-  const [role, setRole] = useState(getDevUser().role);
-  const [selectedId, setSelectedId] = useState(null);
-
-  // 개발용: 관리자/일반 사용자를 바꿔 가며 화면 확인 (로그인 완성 후 삭제)
-  const changeRole = (next) => {
-    setDevUser(next);
-    setRole(next);
-  };
-
+  const [data, setData] = React.useState({});
+  React.useEffect(() => {
+    Promise.all(
+      ['members', 'events', 'interactions'].map(async (service) => {
+        try {
+          const r = await fetch('/api/' + service + '/ping');
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return [service, await r.json()];
+        } catch (e) {
+          return [service, { status: 'ERROR', error: e.message }];
+        }
+      }),
+    ).then((result) => setData(Object.fromEntries(result)));
+  }, []);
   return (
-    <main className="mx-auto flex max-w-6xl flex-col gap-6 px-6 py-10">
-      <div className="flex flex-wrap items-center gap-2 rounded-lg bg-amber-50 px-4 py-2 text-xs text-amber-800">
-        <span className="font-semibold">개발용 사용자</span>
-        {['ADMIN', 'USER'].map((r) => (
-          <button
-            key={r}
-            onClick={() => changeRole(r)}
-            className={`rounded px-2 py-1 ${role === r ? 'bg-amber-600 text-white' : 'bg-white'}`}
-          >
-            {r === 'ADMIN' ? '관리자' : '일반 사용자'}
-          </button>
+    <main className="mx-auto max-w-4xl px-6 py-16">
+      <p className="text-sm font-semibold text-emerald-700">EMS · Bootstrap</p>
+      <h1 className="mt-3 text-4xl font-bold">통합 이벤트 관리 플랫폼</h1>
+      <p className="mt-3 text-slate-600">
+        React + Vite + Tailwind CSS / Cloud Native MSA 초기 연결 확인
+      </p>
+      <section className="mt-10 grid gap-4 md:grid-cols-3">
+        {['members', 'events', 'interactions'].map((n) => (
+          <article key={n} className="rounded-xl border border-slate-200 p-5 shadow-sm">
+            <h2 className="font-semibold">{n}</h2>
+            <p className="mt-2 text-sm text-slate-500">{data[n]?.status || 'Checking...'}</p>
+          </article>
         ))}
-      </div>
-
-      {/* 화면 전환: 선택한 행사가 있으면 상세, 없으면 목록 */}
-      {/* key: 사용자나 행사가 바뀌면 처음부터 다시 불러옴 */}
-      {selectedId ? (
-        <EventDetail
-          key={`${role}-${selectedId}`}
-          eventId={selectedId}
-          onBack={() => setSelectedId(null)}
-        />
-      ) : (
-        <EventList key={role} onSelect={setSelectedId} />
-      )}
+      </section>
+      <p className="mt-8 text-sm text-slate-500">
+        현재는 헬스체크 데모입니다. 로그인·행사 CRUD·WebSocket 등은 후속 PR에서 구현합니다.
+      </p>
     </main>
   );
 }
-
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <App />
+    <EventPage />
   </React.StrictMode>,
 );
