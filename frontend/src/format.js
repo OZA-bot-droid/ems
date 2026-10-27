@@ -37,3 +37,10 @@ export const STATUS_BADGE = {
   OPEN: { label: '모집 중', className: 'bg-emerald-100 text-emerald-700' },
   CLOSED: { label: '마감', className: 'bg-rose-100 text-rose-700' },
 };
+
+// "14:00 – 14:45" (세션처럼 같은 날 안의 시간만 보여줄 때)
+export function formatTimeRange(startIso, endIso) {
+  const s = parts(startIso);
+  const e = parts(endIso);
+  return `${s.hour}:${s.minute} – ${e.hour}:${e.minute}`;
+}

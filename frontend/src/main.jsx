@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import './style.css';
 import EventList from './Event/EventList.jsx';
+import EventDetail from './Event/EventDetail.jsx';
 import { getDevUser, setDevUser } from './api.js';
 
 function App() {
@@ -27,11 +28,19 @@ function App() {
             {r === 'ADMIN' ? '관리자' : '일반 사용자'}
           </button>
         ))}
-        {selectedId && <span className="ml-auto">선택한 행사 id: {selectedId} (상세 화면은 다음 단계)</span>}
       </div>
 
-      {/* key={role}: 사용자가 바뀌면 목록을 처음부터 다시 불러옴 */}
-      <EventList key={role} onSelect={setSelectedId} />
+      {/* 화면 전환: 선택한 행사가 있으면 상세, 없으면 목록 */}
+      {/* key: 사용자나 행사가 바뀌면 처음부터 다시 불러옴 */}
+      {selectedId ? (
+        <EventDetail
+          key={`${role}-${selectedId}`}
+          eventId={selectedId}
+          onBack={() => setSelectedId(null)}
+        />
+      ) : (
+        <EventList key={role} onSelect={setSelectedId} />
+      )}
     </main>
   );
 }
