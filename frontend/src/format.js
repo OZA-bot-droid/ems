@@ -44,3 +44,17 @@ export function formatTimeRange(startIso, endIso) {
   const e = parts(endIso);
   return `${s.hour}:${s.minute} – ${e.hour}:${e.minute}`;
 }
+
+// ---- 입력칸(datetime-local) ↔ 서버(UTC) 변환 ----
+// 입력칸 값 "2026-10-28T14:00"(한국 시간) → 서버용 "2026-10-28T05:00:00.000Z"
+export function kstToInstant(localValue) {
+  if (!localValue) return null;
+  return new Date(`${localValue}:00+09:00`).toISOString();
+}
+
+// 서버 값 "2026-10-28T05:00:00Z" → 입력칸용 "2026-10-28T14:00"(한국 시간)
+export function instantToKstInput(iso) {
+  if (!iso) return '';
+  const t = parts(iso);
+  return `${t.year}-${t.month}-${t.day}T${t.hour}:${t.minute}`;
+}

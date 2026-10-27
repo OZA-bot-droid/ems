@@ -76,7 +76,7 @@ export default function EventDetail({ eventId, onBack }) {
     <section className="flex flex-col gap-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex flex-col gap-1.5">
-          <h1 className="text-[27px] font-bold text-(--ems-ink)">04 · 행사 상세</h1>
+          <h1 className="text-[27px] font-bold text-(--ems-ink)">행사 상세</h1>
           <p className="text-[13px] text-(--ems-muted)">일정 · 세션 · 참가 상태</p>
         </div>
         {backButton}

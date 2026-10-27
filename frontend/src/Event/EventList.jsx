@@ -41,12 +41,9 @@ export default function EventList({ onSelect }) {
     <section className="flex flex-col gap-8">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex flex-col gap-1.5">
-          <h1 className="text-[27px] font-bold text-(--ems-ink)">03 · 행사 목록</h1>
+          <h1 className="text-[27px] font-bold text-(--ems-ink)">행사 목록</h1>
           <p className="text-[13px] text-(--ems-muted)">이벤트 탐색 · 검색 및 필터</p>
         </div>
-        <span className="rounded-full bg-(--ems-green-soft) px-3 py-1 text-xs font-semibold text-(--ems-green)">
-          COMMON
-        </span>
       </header>
 
       {/* 검색 + 상태 필터 */}
