@@ -6,6 +6,7 @@ import com.ems.member.member.dto.RefreshTokenRequestDTO;
 import com.ems.member.member.repository.RefreshTokenRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,7 +61,7 @@ public class AuthService {
 
         // 회원 존재 여부 확인
         RefreshToken entity = refreshTokenRepository.findByToken(refreshToken)
-                .orElseThrow(() -> new EntityNotFoundException("refresh token이 존재하지 않습니다."));
+                .orElseThrow(() -> new BadCredentialsException("refresh token이 존재하지 않습니다."));
 
         // 전달 받은 dto가 null일 수 있기에 Objects.equals가 안전하게 비교
         if(!Objects.equals(entity.getClientId(), dto.clientId())) {

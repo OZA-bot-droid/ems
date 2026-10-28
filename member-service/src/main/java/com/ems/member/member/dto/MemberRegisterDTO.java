@@ -29,6 +29,7 @@ public record MemberRegisterDTO(@Email
                 .name(this.name)
                 .passwordHash(bCryptPassword)
                 .role(this.role)
+                .provider("local")
                 .build();
     }
 }

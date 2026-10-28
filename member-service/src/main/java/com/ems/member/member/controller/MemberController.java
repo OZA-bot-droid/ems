@@ -56,8 +56,6 @@ public class MemberController {
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue(@RequestBody RefreshTokenRequestDTO requestDTO, @CookieValue("refreshToken") String refreshToken) {
 
-        System.out.println(requestDTO);
-        System.out.println(refreshToken);
         LoginResponseDTO responseDTO = authService.reissue(requestDTO, refreshToken);
 
         return new ResponseEntity<>(responseDTO.accessToken(), memberService.headersInCookie(responseDTO.refreshToken()), HttpStatus.OK);
