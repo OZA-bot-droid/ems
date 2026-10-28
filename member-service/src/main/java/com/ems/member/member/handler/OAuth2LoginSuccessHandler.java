@@ -106,17 +106,14 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 // Access Token/Refresh Token 자체를 URL에 직접 넣지 않고, 짧게 유효한 일회성 코드만 프론트에 넘긴 다음 그 코드로 서버에서 토큰을 교환하는 구조를 만들기 위함
                 response.sendRedirect("http://127.0.0.1:5173/oauth-success?code=" + loginCode);
             }
+        } catch (IllegalStateException e) {
+
+            String message = URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
+            response.sendRedirect("http://127.0.0.1:5173/?error=" + message);
         } catch (IllegalArgumentException e) {
 
             String message = URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
-
-            if(role != null) {
-                session.removeAttribute("role");
-
-                response.sendRedirect("http://127.0.0.1:5173/signup?error=" + message);
-            } else {
-                response.sendRedirect("http://127.0.0.1:5173/login?error=" + message);
-            }
+            response.sendRedirect("http://127.0.0.1:5173/signup?error=" + message);
         }
     }
 }

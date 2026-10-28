@@ -45,7 +45,7 @@ public class SocialLoginService {
 
     public Member login(SocialLoginDTO dto) {
         return memberRepository.findByProviderAndProviderId(dto.provider(), dto.providerId())
-                .orElseThrow(() -> new EntityNotFoundException("가입되지 않는 회원입니다."));
+                .orElseThrow(() -> new IllegalStateException("가입되지 않는 회원입니다."));
     }
 
     public String save(String accessToken, String refreshToken) {

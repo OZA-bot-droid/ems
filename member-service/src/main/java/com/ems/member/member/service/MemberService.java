@@ -53,7 +53,7 @@ public class MemberService {
 
         // 회원 존재 여부 => 없으면 401 에러
         Member member = memberRepository.findByEmail(dto.email())
-                .orElseThrow(() -> new EntityNotFoundException("해당 회원은 존재하지 않습니다."));
+                .orElseThrow(() -> new IllegalStateException("해당 회원은 존재하지 않습니다."));
 
         // 비밀번호 확인
         if(passwordEncoder.matches(dto.password(), member.getPasswordHash())) {
