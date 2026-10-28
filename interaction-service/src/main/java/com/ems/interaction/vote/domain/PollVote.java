@@ -4,8 +4,6 @@ import com.ems.interaction.common.domain.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.UUID;
-
 @Entity
 @Table(name = "poll_vote")
 @Getter
@@ -31,7 +29,4 @@ public class PollVote extends BaseEntity {
     @Column(name = "poll_option_id", nullable = false)
     private Long pollOptionId;
 
-    // 세션 ID
-    @Column(name = "session_id", nullable = false)
-    private UUID sessionId;
 }

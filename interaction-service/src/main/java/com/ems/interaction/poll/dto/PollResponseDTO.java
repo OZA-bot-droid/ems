@@ -8,7 +8,6 @@ import lombok.*;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 
 @Getter
 @Builder
@@ -20,7 +19,7 @@ public class PollResponseDTO {
     private String title;
     private Long userId;
     private Long eventId;
-    private UUID sessionId;
+    private Long sessionId;
     private Status status;
     private Boolean showLiveResults;
     private Instant startsAt;

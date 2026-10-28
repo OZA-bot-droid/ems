@@ -7,8 +7,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
-
 
 @Getter
 @Builder
@@ -25,7 +23,6 @@ public class PollVoteSaveDTO {
                 .userId(userId)
                 .pollId(poll.getId())
                 .pollOptionId(this.pollOptionId)
-                .sessionId(poll.getSessionId())
                 .build();
     }
 }

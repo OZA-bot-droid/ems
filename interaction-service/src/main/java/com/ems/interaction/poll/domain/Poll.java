@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
-import java.util.UUID;
 
 @Entity
 @Table(name = "poll")
@@ -32,9 +31,9 @@ public class Poll extends BaseEntity {
     @Column(name = "event_id", nullable = false)
     private Long eventId;
 
-    // 세션 UUID
+    // 세션 ID
     @Column(name = "session_id", nullable = false)
-    private UUID sessionId;
+    private Long sessionId;
 
     // 투표 상태 (기본값: SCHEDULED)
     @Builder.Default
@@ -71,5 +70,17 @@ public class Poll extends BaseEntity {
         return status == Status.ACTIVE
                 && !now.isBefore(startsAt)
                 && now.isBefore(endsAt);
+    }
+
+    // 투표 활성화 가능 여부
+    public boolean canActivate(Instant now) {
+        return status == Status.SCHEDULED
+                && !now.isBefore(startsAt)
+                && now.isBefore(endsAt);
+    }
+
+    // 투표 비활성화(종료) 가능 여부
+    public boolean canClose() {
+        return status == Status.ACTIVE;
     }
 }

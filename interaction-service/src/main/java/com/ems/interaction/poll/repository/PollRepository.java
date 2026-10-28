@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 
 public interface PollRepository extends JpaRepository<Poll, Long> {
 
@@ -17,7 +16,7 @@ public interface PollRepository extends JpaRepository<Poll, Long> {
     List<Poll> findByEventId(Long eventId);
 
     // 세션별 투표 목록
-    List<Poll> findBySessionId(UUID sessionId);
+    List<Poll> findBySessionId(Long sessionId);
 
     // 시작 시각이 지난 예정 투표 조회
     List<Poll> findByStatusAndStartsAtLessThanEqual(
@@ -30,4 +29,7 @@ public interface PollRepository extends JpaRepository<Poll, Long> {
             Status status,
             Instant now
     );
+
+    // 관리자가 생성한 투표 목록 조회(최신순)
+    List<Poll> findByUserIdOrderByIdDesc(Long userId);
 }

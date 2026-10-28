@@ -7,7 +7,7 @@ import lombok.*;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
+
 
 @Getter
 @Builder
@@ -23,7 +23,7 @@ public class PollSaveDTO {
     private Long eventId;
 
     @NotNull
-    private UUID sessionId;
+    private Long sessionId;
 
     @NotNull
     private Boolean showLiveResults;
