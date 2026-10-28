@@ -16,6 +16,8 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 @Component
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
@@ -67,41 +69,54 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
 
 
-        if(role != null) {
-            socialLoginService.register(socialUser, role);
+        try {
+            if (role != null) {
+                socialLoginService.register(socialUser, role);
 
-            // 현재 세션에 저장해 둔 특정 속성 하나를 삭제하는 메서드
-            session.removeAttribute("role");
+                // 현재 세션에 저장해 둔 특정 속성 하나를 삭제하는 메서드
+                session.removeAttribute("role");
 
-            // 클라이언트에게 다른 URL로 다시 이동하라고 응답하는 메서드
-            response.sendRedirect("http://127.0.0.1:5173/");
-        } else {
+                // 클라이언트에게 다른 URL로 다시 이동하라고 응답하는 메서드
+                response.sendRedirect("http://127.0.0.1:5173/");
+            } else {
 
-            Member member = socialLoginService.login(socialUser);
+                Member member = socialLoginService.login(socialUser);
 
-            // NullPointerException 주의
-            // 현재 요청과 관련된 HttpSession을 가져옴
-            Object clientId = request.getSession()
-                    // clientId라는 이름으로 저장해둔 값을 가져옴
-                    .getAttribute("clientId");
+                // NullPointerException 주의
+                // 현재 요청과 관련된 HttpSession을 가져옴
+                Object clientId = request.getSession()
+                        // clientId라는 이름으로 저장해둔 값을 가져옴
+                        .getAttribute("clientId");
 
-            if(clientId == null) {
-                throw new IllegalStateException("null 발생");
+                if (clientId == null) {
+                    throw new IllegalStateException("null 발생");
+                }
+
+                String accessToken = jwtTokenService.createAccessToken(member.getId(), role);
+                String refreshToken = jwtTokenService.createRefreshToken(member.getId(), role);
+
+                String loginCode = socialLoginService.save(accessToken, refreshToken);
+                authService.changeRefreshToken(
+                        member.getId(),
+                        refreshToken,
+                        clientId.toString(),
+                        loginCode
+                );
+
+                // Access Token/Refresh Token 자체를 URL에 직접 넣지 않고, 짧게 유효한 일회성 코드만 프론트에 넘긴 다음 그 코드로 서버에서 토큰을 교환하는 구조를 만들기 위함
+                response.sendRedirect("http://127.0.0.1:5173/oauth-success?code=" + loginCode);
             }
+        } catch (IllegalArgumentException e) {
 
-            String accessToken = jwtTokenService.createAccessToken(member.getId(), role);
-            String refreshToken = jwtTokenService.createRefreshToken(member.getId(), role);
+            String message = URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
 
-            String loginCode = socialLoginService.save(accessToken, refreshToken);
-            authService.changeRefreshToken(
-                    member.getId(),
-                    refreshToken,
-                    clientId.toString(),
-                    loginCode
-            );
+            if(role != null) {
+                session.removeAttribute("role");
 
-            // Access Token/Refresh Token 자체를 URL에 직접 넣지 않고, 짧게 유효한 일회성 코드만 프론트에 넘긴 다음 그 코드로 서버에서 토큰을 교환하는 구조를 만들기 위함
-            response.sendRedirect("http://127.0.0.1:5173/oauth-success?code=" + loginCode);
+                response.sendRedirect("http://127.0.0.1:5173/signup?error=" + message);
+            } else {
+                response.sendRedirect("http://127.0.0.1:5173/login?error=" + message);
+            }
         }
     }
 }
