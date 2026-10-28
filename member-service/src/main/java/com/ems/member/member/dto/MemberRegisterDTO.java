@@ -2,21 +2,25 @@ package com.ems.member.member.dto;
 
 import com.ems.member.member.domain.Member;
 import com.ems.member.member.domain.Role;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-@Getter
-public class MemberRegisterDTO {
+public record MemberRegisterDTO(@Email
+                                @NotBlank
+                                @Size(max = 254)
+                                String email,
 
-    private String email;
-    private String password;
-    private String name;
-    private Role role;
+                                @NotBlank
+                                @Size(min = 8, max = 20)
+                                @Pattern(
+                                        regexp = "^(?=.*[A-Za-z])(?=.*\\\\d)(?=.*[!@#$%^&*])[A-Za-z\\\\d!@#$%^&*]+$",
+                                        message = "비밀번호는 8~20자이며 영문, 숫자, 특수문자(!@#$%^&*)를 포함해야 합니다."
+                                ) String password,
+
+                                String name,
+                                Role role) {
 
     public Member toEntity(String bCryptPassword) {
 
