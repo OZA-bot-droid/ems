@@ -89,8 +89,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 throw new IllegalStateException("null 발생");
             }
 
-            String accessToken = jwtTokenService.createAccessToken(member.getId());
-            String refreshToken = jwtTokenService.createRefreshToken(member.getId());
+            String accessToken = jwtTokenService.createAccessToken(member.getId(), role);
+            String refreshToken = jwtTokenService.createRefreshToken(member.getId(), role);
 
             String loginCode = socialLoginService.save(accessToken, refreshToken);
             authService.changeRefreshToken(

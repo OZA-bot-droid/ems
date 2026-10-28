@@ -59,8 +59,8 @@ public class MemberService {
         if(passwordEncoder.matches(dto.password(), member.getPasswordHash())) {
 
             // token 생성
-            String accessToken = jwtTokenService.createAccessToken(member.getId());
-            String refreshToken = jwtTokenService.createRefreshToken(member.getId());
+            String accessToken = jwtTokenService.createAccessToken(member.getId(), member.getRole());
+            String refreshToken = jwtTokenService.createRefreshToken(member.getId(), member.getRole());
 
             // refresh token entity 생성 및 DB 저장
             authService.changeRefreshToken(member.getId(), refreshToken, dto.clientId());

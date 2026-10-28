@@ -1,5 +1,6 @@
 package com.ems.member.member.service;
 
+import com.ems.member.member.domain.Role;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
@@ -34,19 +35,19 @@ public class JwtTokenService {
     }
 
     // accessToken 생성
-    public String createAccessToken(long id) {
+    public String createAccessToken(long id, Role role) {
 
-        return createToken(id, accessTokenExpiration, "access");
+        return createToken(id, accessTokenExpiration, "access", role);
     }
 
     // refreshToken 생성
-    public String createRefreshToken(long id) {
+    public String createRefreshToken(long id, Role role) {
 
-        return createToken(id, refreshTokenExpiration, "refresh");
+        return createToken(id, refreshTokenExpiration, "refresh", role);
     }
 
     // token 생성
-    private String createToken(long id, long expiration, String type) {
+    private String createToken(long id, long expiration, String type, Role role) {
 
         // Instant : 특정 시점을 나타내는 클래스
         Instant now = Instant.now();
@@ -59,6 +60,7 @@ public class JwtTokenService {
                 .subject(String.valueOf(id))        // 식별자 설정
                 .expiresAt(now.plusSeconds(expiration)) // 만료 시간 설정
                 .claim("token_type", type)
+                .claim("role", role.name())
                 .build();
 
         // JWT 헤더에 RS256 알고리즘 지정

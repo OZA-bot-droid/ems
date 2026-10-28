@@ -1,8 +1,10 @@
 package com.ems.member.member.service;
 
 import com.ems.member.member.domain.RefreshToken;
+import com.ems.member.member.domain.Role;
 import com.ems.member.member.dto.LoginResponseDTO;
 import com.ems.member.member.dto.RefreshTokenRequestDTO;
+import com.ems.member.member.repository.MemberRepository;
 import com.ems.member.member.repository.RefreshTokenRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,13 +23,15 @@ public class AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtTokenService jwtTokenService;
     private final long refreshTokenExpiration;
+    private final MemberRepository memberRepository;
 
     public AuthService(RefreshTokenRepository refreshTokenRepository,
                        JwtTokenService jwtTokenService,
-                       @Value("${jwt.refresh-token-expiration}") long refreshTokenExpiration) {
+                       @Value("${jwt.refresh-token-expiration}") long refreshTokenExpiration, MemberRepository memberRepository) {
         this.refreshTokenRepository = refreshTokenRepository;
         this.jwtTokenService = jwtTokenService;
         this.refreshTokenExpiration = refreshTokenExpiration;
+        this.memberRepository = memberRepository;
     }
 
     // refresh token entity 생성 및 DB 저장
@@ -62,6 +66,9 @@ public class AuthService {
         // 회원 존재 여부 확인
         RefreshToken entity = refreshTokenRepository.findByToken(refreshToken)
                 .orElseThrow(() -> new BadCredentialsException("refresh token이 존재하지 않습니다."));
+        Role role = memberRepository.findById(entity.getMemberId())
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 회원 입니다."))
+                .getRole();
 
         // 전달 받은 dto가 null일 수 있기에 Objects.equals가 안전하게 비교
         if(!Objects.equals(entity.getClientId(), dto.clientId())) {
@@ -69,8 +76,8 @@ public class AuthService {
         }
 
         // 새로운 accessToken과 refreshToken 발급
-        String newAccessToken = jwtTokenService.createAccessToken(memberId);
-        String newRefreshToken = jwtTokenService.createRefreshToken(memberId);
+        String newAccessToken = jwtTokenService.createAccessToken(memberId, role);
+        String newRefreshToken = jwtTokenService.createRefreshToken(memberId, role);
 
         // @Transactional으로 트랜젝션 안에서 실행되어 JPA의 Dirty Checking 때문에 별도로 save()를 다시 호출하지 않아도 수정 가능
         entity.rotate(newRefreshToken, Instant.now().plusSeconds(refreshTokenExpiration));
