@@ -43,10 +43,10 @@ public class SessionController {
     public ResponseEntity<SessionResponse> createSession(
             @PathVariable Long eventId,
             @Valid @RequestBody SessionCreateRequest request,
-            @RequestHeader(value = "X-User-Id", required = false) Long userId,
+            @RequestHeader(value = "X-Member-Id", required = false) Long userId,
             @RequestHeader(value = "X-User-Role", required = false) String role) {
         adminChecker.requireAdmin(userId, role);
-        SessionResponse created = sessionService.createSession(eventId, request);
+        SessionResponse created = sessionService.createSession(eventId, userId, request);
         return ResponseEntity
                 .created(URI.create("/api/events/" + eventId + "/sessions/" + created.id()))
                 .body(created);
@@ -58,10 +58,10 @@ public class SessionController {
             @PathVariable Long eventId,
             @PathVariable Long sessionId,
             @Valid @RequestBody SessionUpdateRequest request,
-            @RequestHeader(value = "X-User-Id", required = false) Long userId,
+            @RequestHeader(value = "X-Member-Id", required = false) Long userId,
             @RequestHeader(value = "X-User-Role", required = false) String role) {
         adminChecker.requireAdmin(userId, role);
-        return sessionService.updateSession(eventId, sessionId, request);
+        return sessionService.updateSession(eventId, sessionId, userId, request);
     }
 
 //    세션 삭제 (ADMIN)
@@ -69,10 +69,10 @@ public class SessionController {
     public ResponseEntity<Void> deleteSession(
             @PathVariable Long eventId,
             @PathVariable Long sessionId,
-            @RequestHeader(value = "X-User-Id", required = false) Long userId,
+            @RequestHeader(value = "X-Member-Id", required = false) Long userId,
             @RequestHeader(value = "X-User-Role", required = false) String role) {
         adminChecker.requireAdmin(userId, role);
-        sessionService.deleteSession(eventId, sessionId);
+        sessionService.deleteSession(eventId, sessionId, userId);
         return ResponseEntity.noContent().build();
     }
 }

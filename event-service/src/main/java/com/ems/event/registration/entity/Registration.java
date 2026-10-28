@@ -24,9 +24,9 @@ public class Registration {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /** 회원 서비스에서 발급한 외부 사용자 UUID 문자열입니다. */
-    @Column(name = "user_id", nullable = false, length = 36)
-    private String userId;
+    /** Member Service에서 발급한 회원 ID입니다. */
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
     /** 신청 대상 행사 ID입니다. 행사 테이블과의 FK는 통합 시 연결합니다. */
     @Column(name = "event_id", nullable = false)
@@ -51,7 +51,7 @@ public class Registration {
 
     protected Registration() { }
 
-    public Registration(String userId, Long eventId) {
+    public Registration(Long userId, Long eventId) {
         this.userId = userId;
         this.eventId = eventId;
         this.status = RegistrationStatus.PENDING;
@@ -72,7 +72,7 @@ public class Registration {
     }
 
     public Long getId() { return id; }
-    public String getUserId() { return userId; }
+    public Long getUserId() { return userId; }
     public Long getEventId() { return eventId; }
     public RegistrationStatus getStatus() { return status; }
     public Instant getRequestedAt() { return requestedAt; }

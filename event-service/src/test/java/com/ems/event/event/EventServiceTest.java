@@ -54,7 +54,7 @@ class EventServiceTest {
     }
 
     private static Event seminar(String meetingUrl) {
-        return new Event("Cloud Native 세미나", "설명", 100, at("05:00"), at("08:00"), meetingUrl, null);
+        return new Event("Cloud Native 세미나", "설명", 100, at("05:00"), at("08:00"), meetingUrl, 99L);
     }
 
     private static Event openSeminar(String meetingUrl) {
@@ -69,7 +69,7 @@ class EventServiceTest {
         when(eventRepository.save(any(Event.class))).thenAnswer(call -> call.getArgument(0));
 
         EventResponse created = eventService.createEvent(new EventCreateRequest(
-                "Cloud Native 세미나", null, 100, at("05:00"), at("08:00"), "https://zoom.us/j/1"), null);
+                "Cloud Native 세미나", null, 100, at("05:00"), at("08:00"), "https://zoom.us/j/1"), 99L);
 
         assertThat(created.status()).isEqualTo(EventStatus.DRAFT);
         assertThat(created.meetingUrl()).isEqualTo("https://zoom.us/j/1");
@@ -156,7 +156,7 @@ class EventServiceTest {
     void canEditTitleOfStartedEvent() {
         // 지금(10/01)보다 앞선 9/30에 시작한 행사
         Event started = new Event("지난 행사", null, 100,
-                Instant.parse("2026-09-30T05:00:00Z"), Instant.parse("2026-09-30T08:00:00Z"), null, null);
+                Instant.parse("2026-09-30T05:00:00Z"), Instant.parse("2026-09-30T08:00:00Z"), null, 99L);
         when(eventRepository.findById(eventId)).thenReturn(Optional.of(started));
         EventUpdateRequest request = new EventUpdateRequest(
                 "새 제목", null, null, started.getStartsAt(), null, null, null); // 같은 시작 시각을 그대로 보냄

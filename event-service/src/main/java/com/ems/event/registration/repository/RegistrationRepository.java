@@ -25,10 +25,10 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
     Optional<Registration> findByIdForUpdate(@Param("registrationId") Long registrationId);
 
     /** 특정 사용자가 특정 행사에 이미 신청했는지 확인합니다. */
-    Optional<Registration> findByUserIdAndEventId(String userId, Long eventId);
+    Optional<Registration> findByUserIdAndEventId(Long userId, Long eventId);
 
     /** 사용자의 신청 내역을 최근 신청 순으로 페이지 단위 조회합니다. */
-    Page<Registration> findAllByUserIdOrderByRequestedAtDesc(String userId, Pageable pageable);
+    Page<Registration> findAllByUserIdOrderByRequestedAtDesc(Long userId, Pageable pageable);
 
     /** 행사와 상태가 일치하는 신청 건수를 셉니다. */
     long countByEventIdAndStatus(Long eventId, RegistrationStatus status);

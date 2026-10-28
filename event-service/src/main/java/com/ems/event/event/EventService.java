@@ -67,6 +67,10 @@ public class EventService {
     public EventResponse createEvent(EventCreateRequest request, Long createdBy) {
         validatePeriod(request.startsAt(), request.endsAt());
         validateNotPast(request.startsAt());
+        if (createdBy == null) {
+            throw new BusinessException(
+                    HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "로그인이 필요합니다.");
+        }
         Event event = new Event(
                 request.title(),
                 request.description(),

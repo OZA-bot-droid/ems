@@ -58,7 +58,7 @@ public class EventController {
     @PostMapping
     public ResponseEntity<EventResponse> createEvent(
             @Valid @RequestBody EventCreateRequest request,
-            @RequestHeader(value = "X-User-Id", required = false) Long userId,
+            @RequestHeader(value = "X-Member-Id", required = false) Long userId,
             @RequestHeader(value = "X-User-Role", required = false) String role) {
         adminChecker.requireAdmin(userId, role); // ADMIN만 생성
         EventResponse created = eventService.createEvent(request, userId);
@@ -70,7 +70,7 @@ public class EventController {
     public EventResponse updateEvent(
             @PathVariable Long eventId,
             @Valid @RequestBody EventUpdateRequest request,
-            @RequestHeader(value = "X-User-Id", required = false) Long userId,
+            @RequestHeader(value = "X-Member-Id", required = false) Long userId,
             @RequestHeader(value = "X-User-Role", required = false) String role) {
         adminChecker.requireAdmin(userId, role); // ADMIN만 수정
         return eventService.updateEvent(eventId, request);
@@ -80,7 +80,7 @@ public class EventController {
     @DeleteMapping("/{eventId}")
     public ResponseEntity<Void> deleteEvent(
             @PathVariable Long eventId,
-            @RequestHeader(value = "X-User-Id", required = false) Long userId,
+            @RequestHeader(value = "X-Member-Id", required = false) Long userId,
             @RequestHeader(value = "X-User-Role", required = false) String role) {
         adminChecker.requireAdmin(userId, role); // ADMIN만 삭제
         eventService.deleteEvent(eventId);

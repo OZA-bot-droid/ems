@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.Instant;
+import java.util.Objects;
 
 
 @Entity
@@ -47,7 +48,7 @@ public class Event {
     private EventStatus status;
 
 //    만든사람
-    @Column(name = "created_by")
+    @Column(name = "created_by", nullable = false)
     private Long createdBy;
 
 //    화상 회의 링크 (Zoom, Jitsi 등 · 선택)
@@ -67,7 +68,7 @@ public class Event {
         this.endsAt = endsAt;
         this.status = EventStatus.DRAFT; // 새 행사는 항상 작성 중으로 시작
         this.meetingUrl = meetingUrl;
-        this.createdBy = createdBy;
+        this.createdBy = Objects.requireNonNull(createdBy, "createdBy must not be null");
     }
 
 //  변경하지 않은 값은 그대로 유지

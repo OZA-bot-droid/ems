@@ -36,6 +36,7 @@ class SessionServiceTest {
     SessionService sessionService;
 
     private final Long eventId = 1L;
+    private static final Long EVENT_OWNER_ID = 99L;
 
     /** 한국 시간 14:00 = UTC 05:00 */
     private static Instant at(String hhmm) {
@@ -44,7 +45,7 @@ class SessionServiceTest {
 
     /** 한국 시간 14:00 ~ 17:00 행사 (작성 중 DRAFT) */
     private static Event seminar() {
-        return new Event("Cloud Native 세미나", null, 100, at("05:00"), at("08:00"), null, null);
+        return new Event("Cloud Native 세미나", null, 100, at("05:00"), at("08:00"), null, EVENT_OWNER_ID);
     }
 
     @Test
@@ -54,7 +55,7 @@ class SessionServiceTest {
         when(sessionRepository.existsOverlap(eventId, at("05:00"), at("05:45"))).thenReturn(false);
         when(sessionRepository.save(any(Session.class))).thenAnswer(call -> call.getArgument(0));
 
-        SessionResponse created = sessionService.createSession(eventId,
+        SessionResponse created = sessionService.createSession(eventId, EVENT_OWNER_ID,
                 new SessionCreateRequest("클라우드 아키텍처의 현재", at("05:00"), at("05:45")));
 
         assertThat(created.title()).isEqualTo("클라우드 아키텍처의 현재");
@@ -66,7 +67,7 @@ class SessionServiceTest {
     void sessionOutsideEvent() {
         when(eventRepository.findById(eventId)).thenReturn(Optional.of(seminar()));
 
-        assertThatThrownBy(() -> sessionService.createSession(eventId,
+        assertThatThrownBy(() -> sessionService.createSession(eventId, EVENT_OWNER_ID,
                 new SessionCreateRequest("행사 밖", at("08:00"), at("08:30"))))
                 .isInstanceOf(BusinessException.class)
                 .extracting("code").isEqualTo("SESSION_OUT_OF_EVENT");
@@ -79,7 +80,7 @@ class SessionServiceTest {
         when(eventRepository.findById(eventId)).thenReturn(Optional.of(seminar()));
         when(sessionRepository.existsOverlap(eventId, at("05:30"), at("06:15"))).thenReturn(true);
 
-        assertThatThrownBy(() -> sessionService.createSession(eventId,
+        assertThatThrownBy(() -> sessionService.createSession(eventId, EVENT_OWNER_ID,
                 new SessionCreateRequest("겹치는 세션", at("05:30"), at("06:15"))))
                 .isInstanceOf(BusinessException.class)
                 .extracting("code").isEqualTo("SESSION_TIME_CONFLICT");
@@ -91,7 +92,7 @@ class SessionServiceTest {
     void invalidPeriod() {
         when(eventRepository.findById(eventId)).thenReturn(Optional.of(seminar()));
 
-        assertThatThrownBy(() -> sessionService.createSession(eventId,
+        assertThatThrownBy(() -> sessionService.createSession(eventId, EVENT_OWNER_ID,
                 new SessionCreateRequest("거꾸로", at("06:00"), at("05:00"))))
                 .isInstanceOf(BusinessException.class)
                 .extracting("code").isEqualTo("INVALID_PERIOD");

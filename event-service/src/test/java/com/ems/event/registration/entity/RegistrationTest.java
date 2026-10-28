@@ -4,18 +4,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 class RegistrationTest {
 
     @Test
-    void newRegistrationStartsPendingAndKeepsEventUuid() {
+    void newRegistrationStartsPendingAndKeepsMemberId() {
         Long eventId = 101L;
-        Registration registration = new Registration(
-                "22222222-2222-2222-2222-222222222222", eventId);
+        Long memberId = 222L;
+        Registration registration = new Registration(memberId, eventId);
 
         assertEquals(eventId, registration.getEventId());
+        assertEquals(memberId, registration.getUserId());
         assertEquals(RegistrationStatus.PENDING, registration.getStatus());
     }
 
@@ -59,9 +59,7 @@ class RegistrationTest {
     }
 
     private Registration newRegistration() {
-        return new Registration(
-                "22222222-2222-2222-2222-222222222222",
-                101L);
+        return new Registration(222L, 101L);
     }
 }
 

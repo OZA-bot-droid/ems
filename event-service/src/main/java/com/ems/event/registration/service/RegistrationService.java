@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import java.util.Objects;
 
 /** 참가 신청의 중복 검사, 상태 변경, 본인 권한 검사를 처리합니다. */
 @Service
@@ -27,7 +28,7 @@ public class RegistrationService {
 
     /** 중복 신청을 확인한 뒤 새 신청을 PENDING 상태로 저장합니다. */
     @Transactional
-    public Registration apply(String userId, Long eventId) {
+    public Registration apply(Long userId, Long eventId) {
         registrationRepository.findByUserIdAndEventId(userId, eventId)
                 .ifPresent(existing -> {
                     throw new ResponseStatusException(HttpStatus.CONFLICT,
@@ -44,19 +45,20 @@ public class RegistrationService {
 
     /** 로그인한 사용자의 신청 내역만 최근 신청 순으로 조회합니다. */
     @Transactional(readOnly = true)
-    public Page<Registration> findMine(String userId, Pageable pageable) {
+    public Page<Registration> findMine(Long userId, Pageable pageable) {
         return registrationRepository.findAllByUserIdOrderByRequestedAtDesc(userId, pageable);
     }
 
     /** 행사별 잠금으로 승인 요청을 직렬화하고 정원 안에서만 승인합니다. */
     @Transactional
-    public Registration approve(Long registrationId) {
+    public Registration approve(Long registrationId, Long approverId) {
         Long eventId = registrationRepository.findEventIdById(registrationId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "신청 정보를 찾을 수 없습니다."));
         Event event = eventRepository.findByIdForUpdate(eventId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "행사 정보를 찾을 수 없습니다."));
+        requireEventOwner(event, approverId);
         Registration registration = registrationRepository.findByIdForUpdate(registrationId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "신청 정보를 찾을 수 없습니다."));
@@ -71,15 +73,19 @@ public class RegistrationService {
 
     /** 신청을 찾아 승인 대기 상태인지 확인한 뒤 거절합니다. */
     @Transactional
-    public Registration reject(Long registrationId) {
+    public Registration reject(Long registrationId, Long reviewerId) {
         Registration registration = findRegistration(registrationId);
+        Event event = eventRepository.findById(registration.getEventId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "행사 정보를 찾을 수 없습니다."));
+        requireEventOwner(event, reviewerId);
         transition(registration::reject);
         return registration;
     }
 
     /** 관리자는 취소할 수 있고, 일반 사용자는 본인 신청만 취소할 수 있습니다. */
     @Transactional
-    public Registration cancel(Long registrationId, String requesterId, boolean admin) {
+    public Registration cancel(Long registrationId, Long requesterId, boolean admin) {
         Registration registration = findRegistration(registrationId);
         if (!admin && !registration.getUserId().equals(requesterId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "본인의 신청만 취소할 수 있습니다.");
@@ -105,6 +111,14 @@ public class RegistrationService {
         return registrationRepository.findById(registrationId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "신청 정보를 찾을 수 없습니다."));
+    }
+
+    /** 승인·거절은 해당 행사의 주최자만 할 수 있습니다. */
+    private void requireEventOwner(Event event, Long requesterId) {
+        if (!Objects.equals(event.getCreatedBy(), requesterId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "행사 소유자만 신청을 승인하거나 거절할 수 있습니다.");
+        }
     }
 
     /** 엔티티의 잘못된 상태 전이를 HTTP 409 오류로 바꿉니다. */

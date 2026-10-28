@@ -8,6 +8,7 @@ import com.ems.event.session.dto.SessionResponse;
 import com.ems.event.session.dto.SessionUpdateRequest;
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,8 +39,9 @@ public class SessionService {
 
     /** 세션 생성: 행사 시간 안에서, 다른 세션과 겹치지 않게 */
     @Transactional
-    public SessionResponse createSession(Long eventId, SessionCreateRequest request) {
+    public SessionResponse createSession(Long eventId, Long requesterId, SessionCreateRequest request) {
         Event event = findEvent(eventId);
+        requireOwner(event, requesterId);
         validateTimeSlot(event, request.startsAt(), request.endsAt());
 
         if (sessionRepository.existsOverlap(eventId, request.startsAt(), request.endsAt())) {
@@ -56,9 +58,11 @@ public class SessionService {
 
     /** 세션 수정: 바뀐 뒤의 시간대가 행사 안이고, 다른 세션과 겹치지 않는지 확인 */
     @Transactional
-    public SessionResponse updateSession(Long eventId, Long sessionId, SessionUpdateRequest request) {
+    public SessionResponse updateSession(
+            Long eventId, Long sessionId, Long requesterId, SessionUpdateRequest request) {
         Session session = findSession(eventId, sessionId);
         Event event = session.getEvent();
+        requireOwner(event, requesterId);
 
         // 시작/종료 중 하나만 보내도 "바뀐 뒤의 시간대"로 검사
         Instant startsAt = request.startsAt() != null ? request.startsAt() : session.getStartsAt();
@@ -77,8 +81,10 @@ public class SessionService {
     }
 
     @Transactional
-    public void deleteSession(Long eventId, Long sessionId) {
-        sessionRepository.delete(findSession(eventId, sessionId));
+    public void deleteSession(Long eventId, Long sessionId, Long requesterId) {
+        Session session = findSession(eventId, sessionId);
+        requireOwner(session.getEvent(), requesterId);
+        sessionRepository.delete(session);
     }
 
     // ===== 도우미 메서드 =====
@@ -93,6 +99,14 @@ public class SessionService {
         return sessionRepository.findByIdAndEventId(sessionId, eventId)
                 .orElseThrow(() -> new BusinessException(
                         HttpStatus.NOT_FOUND, "SESSION_NOT_FOUND", "세션을 찾을 수 없습니다: " + sessionId));
+    }
+
+    /** 세션 변경은 행사 생성자만 할 수 있습니다. */
+    private void requireOwner(Event event, Long requesterId) {
+        if (!Objects.equals(event.getCreatedBy(), requesterId)) {
+            throw new BusinessException(
+                    HttpStatus.FORBIDDEN, "EVENT_OWNER_REQUIRED", "행사 소유자만 세션을 관리할 수 있습니다.");
+        }
     }
 
     /**
