@@ -25,4 +25,5 @@ management:
         include: health,info
 
 jwt:
-  public-key: C:/Dev/keys/public_key.pem
+  public-key: ${JWT_PUBLIC_KEY_PATH}
+  issuer: ems-auth

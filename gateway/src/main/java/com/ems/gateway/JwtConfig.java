@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 
 import java.io.IOException;
@@ -40,11 +41,22 @@ public class JwtConfig {
                 .generatePublic(keySpec);
     }
 
-    @Bean
-    public JwtDecoder jwtDecoder(RSAPublicKey publicKey) {
 
-        return NimbusJwtDecoder.withPublicKey(publicKey)
-                .signatureAlgorithm(SignatureAlgorithm.RS256)
-                .build();
+    @Bean
+    public JwtDecoder jwtDecoder(
+            RSAPublicKey publicKey,
+            @Value("${jwt.issuer}") String issuer) {
+
+        NimbusJwtDecoder decoder =
+                NimbusJwtDecoder.withPublicKey(publicKey)
+                        .signatureAlgorithm(SignatureAlgorithm.RS256)
+                        .build();
+
+        decoder.setJwtValidator(
+                JwtValidators.createDefaultWithIssuer(issuer)
+        );
+
+        return decoder;
     }
+
 }
