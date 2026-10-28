@@ -57,8 +57,9 @@ public class JwtAuthenticationFilter implements GlobalFilter {
             return exchange.getResponse().setComplete();
         }
 
+        Jwt jwt = null;
         try {
-            Jwt jwt = jwtDecoder.decode(authorization.substring(7));
+            jwt = jwtDecoder.decode(authorization.substring(7));
             if(!"access".equals(jwt.getClaimAsString("token_type"))) {
 
                 exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
