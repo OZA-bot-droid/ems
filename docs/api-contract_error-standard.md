@@ -103,9 +103,11 @@ Gateway `JwtAuthenticationFilter.unauthorized()`는 현재 상태 코드만 반�
 | 다른 주최자 행사 수정·삭제·승인 | 403 | `EVENT_OWNER_REQUIRED` |
 | 행사·세션 기간 형식 불일치 | 400 | `INVALID_PERIOD` |
 | 세션이 행사 시간 밖 | 400 | `SESSION_OUT_OF_EVENT` |
+| 행사 시작 일시가 현재보다 과거 | 400 | ` PAST_START_TIME` |
 | 세션 시간 겹침 | 409 | `SESSION_TIME_CONFLICT` |
 | 허용되지 않은 상태 변경 | 409 | `INVALID_STATUS_CHANGE` |
 | 신청 불가 상태의 행사 | 409 | `EVENT_NOT_OPEN` |
+| 참가 신청이 있는 행사 삭제불가 | 409 | `EVENT_HAS_REGISTRATIONS` |
 | 중복 참가 신청 | 409 | `ALREADY_REGISTERED` |
 | 참가 신청 정보 없음 | 404 | `REGISTRATION_NOT_FOUND` |
 | 정원 초과 | 409 | `CAPACITY_EXCEEDED` |
