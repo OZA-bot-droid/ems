@@ -11,7 +11,13 @@ delete from refresh_token;
 delete from member;
 
 
-
+SELECT
+    version,
+    description,
+    script,
+    success
+FROM flyway_schema_history
+ORDER BY installed_rank;
 
 
 SELECT current_database(), current_schema();

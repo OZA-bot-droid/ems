@@ -56,6 +56,8 @@ public class MemberController {
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue(@RequestBody RefreshTokenRequestDTO requestDTO, @CookieValue("refreshToken") String refreshToken) {
 
+        System.out.println(requestDTO);
+        System.out.println(refreshToken);
         LoginResponseDTO responseDTO = authService.reissue(requestDTO, refreshToken);
 
         return new ResponseEntity<>(responseDTO.accessToken(), memberService.headersInCookie(responseDTO.refreshToken()), HttpStatus.OK);
@@ -65,13 +67,15 @@ public class MemberController {
     @DeleteMapping("/logout")
     public ResponseEntity<?> logout(@RequestBody RefreshTokenRequestDTO dto, @CookieValue("refreshToken") String refreshToken) {
 
-        authService.logout(dto, refreshToken);
+        if(refreshToken != null) {
+            authService.logout(dto, refreshToken);
+        }
 
         ResponseCookie deleteCookie = ResponseCookie.from("refreshToken", "")
                 .httpOnly(true)
                 .secure(false)
                 .sameSite("Lax")
-                .path("/members")   // cookie에서 path가 다를 경우 다른 cookie로 보고 원래 있던 cookie 삭제x
+                .path("/api/members")   // cookie에서 path가 다를 경우 다른 cookie로 보고 원래 있던 cookie 삭제x
                 .maxAge(0)  // cookie 삭제를 의미
                 .build();
 

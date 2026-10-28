@@ -44,7 +44,7 @@ public class SecurityConfig {
 
                                     "/members/register",
                                     "/members/login",
-                                    "/members/refresh",
+                                    "/members/reissue",
                                     "/members/logout",
 
                                     // google 로그인 실행 순서 1, 3, 4, 2

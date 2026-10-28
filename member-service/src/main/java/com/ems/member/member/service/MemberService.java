@@ -37,13 +37,13 @@ public class MemberService {
     // 회원가입
     public void registerMember(MemberRegisterDTO dto) {
 
-        if(memberRepository.existsByEmail(dto.getEmail())) {
+        if(memberRepository.existsByEmail(dto.email())) {
             throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
         }
 
         memberRepository.save(
                 dto.toEntity(
-                        passwordEncoder.encode(dto.getPassword())
+                        passwordEncoder.encode(dto.password())
                 )
         );
     }
@@ -80,7 +80,7 @@ public class MemberService {
                 // JavaScript에서 접근할 수 없도록 설정
                 .httpOnly(true)
                 // 모든 API 요청에서 쿠키를 사용할 수 있도록
-                .path("/members")
+                .path("/api/members")
                 // 로컬 개발은 HTTP라서 false
                 // 실제 HTTPS 배포에서는 반드시 true로 변경
                 .secure(false)
