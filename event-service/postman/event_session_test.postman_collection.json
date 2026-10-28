@@ -1135,7 +1135,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('400 응답', () => pm.response.to.have.status(400));",
-                  "pm.test('code = INVALID_INPUT', () => pm.expect(pm.response.json().code).to.eql('INVALID_INPUT'));"
+                  "pm.test('code = VALIDATION_ERROR', () => pm.expect(pm.response.json().code).to.eql('VALIDATION_ERROR'));"
                 ]
               }
             }
@@ -1186,7 +1186,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('400 응답', () => pm.response.to.have.status(400));",
-                  "pm.test('code = INVALID_INPUT', () => pm.expect(pm.response.json().code).to.eql('INVALID_INPUT'));"
+                  "pm.test('code = VALIDATION_ERROR', () => pm.expect(pm.response.json().code).to.eql('VALIDATION_ERROR'));"
                 ]
               }
             }
@@ -2648,6 +2648,32 @@
     {
       "key": "regEventId",
       "value": ""
+    }
+  ],
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// [공통 오류 규격 검사] 모든 요청에 자동 적용: 4xx/5xx 응답이면 7칸이 다 있는지 확인",
+          "if (pm.response.code >= 400 && pm.response.text()) {",
+          "  const err = pm.response.json();",
+          "  pm.test('[공통] 오류 응답 7칸 (success, code, message, status, timestamp, path, traceId)', () => {",
+          "    pm.expect(err).to.have.all.keys('success', 'code', 'message', 'status', 'timestamp', 'path', 'traceId');",
+          "  });",
+          "  pm.test('[공통] success=false, status = 실제 HTTP 상태', () => {",
+          "    pm.expect(err.success).to.eql(false);",
+          "    pm.expect(err.status).to.eql(pm.response.code);",
+          "  });",
+          "  pm.test('[공통] code는 대문자_스네이크, path는 /api로 시작, timestamp는 UTC(Z)', () => {",
+          "    pm.expect(err.code).to.match(/^[A-Z][A-Z0-9_]*$/);",
+          "    pm.expect(err.path).to.match(/^\\/api\\//);",
+          "    pm.expect(err.timestamp).to.match(/Z$/);",
+          "  });",
+          "}"
+        ]
+      }
     }
   ]
 }
