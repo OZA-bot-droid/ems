@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { eventApi } from '../api.js';
 import { instantToKstInput, kstToInstant, nowKstInput } from '../format.js';
+import DateTimeField from './DateTimeField.jsx';
 
 export default function EventFormModal({ event, onClose, onSaved }) {
   const isEdit = Boolean(event);
@@ -106,14 +107,23 @@ export default function EventFormModal({ event, onClose, onSaved }) {
             <textarea id="ev-desc" rows={3} className={`${inputClass} h-20 resize-none py-3`} placeholder="행사의 목적과 주요 내용을 입력하세요." value={form.description} onChange={change('description')} />
           </Field>
 
-          <div className="grid gap-5 sm:grid-cols-2">
-            <Field label="시작 일시 *" error={fieldErrors.startsAt}>
-              <input id="ev-start" type="datetime-local" min={startChanged ? nowKstInput() : undefined} className={inputClass} value={form.startsAt} onChange={change('startsAt')} />
-            </Field>
-            <Field label="종료 일시 *" error={fieldErrors.endsAt}>
-              <input id="ev-end" type="datetime-local" min={form.startsAt || undefined} className={inputClass} value={form.endsAt} onChange={change('endsAt')} />
-            </Field>
-          </div>
+          {/* 날짜 + 시 + 분(5분 단위). 지난 날짜·시작보다 앞선 날짜는 달력에서 고를 수 없음 */}
+          <Field label="시작 일시 *" error={fieldErrors.startsAt}>
+            <DateTimeField
+              id="ev-start"
+              value={form.startsAt}
+              minDate={startChanged ? nowKstInput().slice(0, 10) : undefined}
+              onChange={(v) => setForm((f) => ({ ...f, startsAt: v }))}
+            />
+          </Field>
+          <Field label="종료 일시 *" error={fieldErrors.endsAt}>
+            <DateTimeField
+              id="ev-end"
+              value={form.endsAt}
+              minDate={form.startsAt ? form.startsAt.slice(0, 10) : undefined}
+              onChange={(v) => setForm((f) => ({ ...f, endsAt: v }))}
+            />
+          </Field>
 
           <div className="grid gap-5 sm:grid-cols-2">
             <Field label="참가 정원 *" error={fieldErrors.capacity}>

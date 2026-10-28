@@ -12,6 +12,7 @@ import com.ems.event.event.Event;
 import com.ems.event.event.EventRepository;
 import com.ems.event.session.dto.SessionCreateRequest;
 import com.ems.event.session.dto.SessionResponse;
+import com.ems.event.session.dto.SessionUpdateRequest;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -37,6 +38,9 @@ class SessionServiceTest {
 
     private final Long eventId = 1L;
     private static final Long EVENT_OWNER_ID = 99L;
+    /** 같은 관리자지만 이 행사를 만들지 않은 사람 */
+    private static final Long OTHER_ADMIN_ID = 3L;
+    private final Long sessionId = 10L;
 
     /** 한국 시간 14:00 = UTC 05:00 */
     private static Instant at(String hhmm) {
@@ -108,5 +112,55 @@ class SessionServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .extracting("code").isEqualTo("EVENT_NOT_FOUND");
         assertThat(sessionService.getSessions(eventId, true)).isEmpty();
+    }
+
+    // ===== 소유권: 행사를 만든 관리자만 세션을 관리할 수 있다 =====
+
+    @Test
+    @DisplayName("다른 관리자가 세션을 만들면 403 EVENT_OWNER_REQUIRED, 저장하지 않는다")
+    void otherAdminCannotCreateSession() {
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(seminar()));
+
+        assertThatThrownBy(() -> sessionService.createSession(eventId, OTHER_ADMIN_ID,
+                new SessionCreateRequest("남의 행사 세션", at("05:00"), at("05:45"))))
+                .isInstanceOf(BusinessException.class)
+                .extracting("code").isEqualTo("EVENT_OWNER_REQUIRED");
+        verify(sessionRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("다른 관리자가 세션을 수정하면 403 EVENT_OWNER_REQUIRED, 내용이 바뀌지 않는다")
+    void otherAdminCannotUpdateSession() {
+        Session session = new Session(seminar(), "원래 제목", at("05:00"), at("05:45"));
+        when(sessionRepository.findByIdAndEventId(sessionId, eventId)).thenReturn(Optional.of(session));
+
+        assertThatThrownBy(() -> sessionService.updateSession(eventId, sessionId, OTHER_ADMIN_ID,
+                new SessionUpdateRequest("바꾼 제목", null, null)))
+                .isInstanceOf(BusinessException.class)
+                .extracting("code").isEqualTo("EVENT_OWNER_REQUIRED");
+        assertThat(session.getTitle()).isEqualTo("원래 제목");
+    }
+
+    @Test
+    @DisplayName("다른 관리자가 세션을 삭제하면 403 EVENT_OWNER_REQUIRED, 삭제하지 않는다")
+    void otherAdminCannotDeleteSession() {
+        Session session = new Session(seminar(), "원래 제목", at("05:00"), at("05:45"));
+        when(sessionRepository.findByIdAndEventId(sessionId, eventId)).thenReturn(Optional.of(session));
+
+        assertThatThrownBy(() -> sessionService.deleteSession(eventId, sessionId, OTHER_ADMIN_ID))
+                .isInstanceOf(BusinessException.class)
+                .extracting("code").isEqualTo("EVENT_OWNER_REQUIRED");
+        verify(sessionRepository, never()).delete(any());
+    }
+
+    @Test
+    @DisplayName("회원 번호가 없으면(null) 소유자가 아니므로 403")
+    void anonymousCannotCreateSession() {
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(seminar()));
+
+        assertThatThrownBy(() -> sessionService.createSession(eventId, null,
+                new SessionCreateRequest("세션", at("05:00"), at("05:45"))))
+                .isInstanceOf(BusinessException.class)
+                .extracting("code").isEqualTo("EVENT_OWNER_REQUIRED");
     }
 }

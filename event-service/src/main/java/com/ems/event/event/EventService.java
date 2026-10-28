@@ -5,10 +5,12 @@ import com.ems.event.common.PageResponse;
 import com.ems.event.event.dto.EventCreateRequest;
 import com.ems.event.event.dto.EventResponse;
 import com.ems.event.event.dto.EventUpdateRequest;
+import com.ems.event.registration.repository.RegistrationRepository;
 import com.ems.event.session.SessionRepository;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -24,12 +26,15 @@ public class EventService {
 
     private final EventRepository eventRepository;
     private final SessionRepository sessionRepository;
+    private final RegistrationRepository registrationRepository;
     /** 지금 시각을 알려주는 시계 (테스트에서는 고정된 시계를 넣어 날짜가 지나도 결과가 같게 함) */
     private final Clock clock;
 
-    public EventService(EventRepository eventRepository, SessionRepository sessionRepository, Clock clock) {
+    public EventService(EventRepository eventRepository, SessionRepository sessionRepository,
+                        RegistrationRepository registrationRepository, Clock clock) {
         this.eventRepository = eventRepository;
         this.sessionRepository = sessionRepository;
+        this.registrationRepository = registrationRepository;
         this.clock = clock;
     }
 
@@ -83,8 +88,9 @@ public class EventService {
     }
 
     @Transactional
-    public EventResponse updateEvent(Long eventId, EventUpdateRequest request) {
+    public EventResponse updateEvent(Long eventId, Long requesterId, EventUpdateRequest request) {
         Event event = findEvent(eventId);
+        requireOwner(event, requesterId); // 행사를 만든 관리자만 수정·공개·마감
         // 시작/종료 중 하나만 바꿔도 바뀐 뒤의 기간이 올바른지 확인
         Instant startsAt = request.startsAt() != null ? request.startsAt() : event.getStartsAt();
         Instant endsAt = request.endsAt() != null ? request.endsAt() : event.getEndsAt();
@@ -119,13 +125,30 @@ public class EventService {
     }
 
     @Transactional
-    public void deleteEvent(Long eventId) {
-        eventRepository.delete(findEvent(eventId));
+    public void deleteEvent(Long eventId, Long requesterId) {
+        Event event = findEvent(eventId);
+        requireOwner(event, requesterId); // 행사를 만든 관리자만 삭제
+        // 신청 내역이 있으면 삭제 금지 (registrations → events FK 때문에 DB도 거부함: 500 대신 409로 안내)
+        // 신청 기록은 취소·거절된 것도 남겨야 하므로, 행사를 지우지 말고 "마감"으로 바꾸도록 안내
+        if (registrationRepository.existsByEventId(eventId)) {
+            throw new BusinessException(
+                    HttpStatus.CONFLICT, "EVENT_HAS_REGISTRATIONS",
+                    "참가 신청 내역이 있는 행사는 삭제할 수 없습니다. 행사를 마감 처리하세요.");
+        }
+        eventRepository.delete(event); // 세션은 DB의 ON DELETE CASCADE로 함께 삭제
     }
 
     private Event findEvent(Long eventId) {
         return eventRepository.findById(eventId)
                 .orElseThrow(() -> notFound(eventId));
+    }
+
+    /** 행사를 만든 관리자(createdBy)만 바꿀 수 있다. 세션·신청 승인과 같은 규칙 */
+    private void requireOwner(Event event, Long requesterId) {
+        if (!Objects.equals(event.getCreatedBy(), requesterId)) {
+            throw new BusinessException(
+                    HttpStatus.FORBIDDEN, "EVENT_OWNER_REQUIRED", "행사를 만든 관리자만 수정하거나 삭제할 수 있습니다.");
+        }
     }
 
     private BusinessException notFound(Long eventId) {

@@ -30,6 +30,9 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
     /** 사용자의 신청 내역을 최근 신청 순으로 페이지 단위 조회합니다. */
     Page<Registration> findAllByUserIdOrderByRequestedAtDesc(Long userId, Pageable pageable);
 
+    /** 행사에 신청 내역이 하나라도 있는지 확인합니다. (행사 삭제 전 확인용, 이도관 추가) */
+    boolean existsByEventId(Long eventId);
+
     /** 행사와 상태가 일치하는 신청 건수를 셉니다. */
     long countByEventIdAndStatus(Long eventId, RegistrationStatus status);
 }

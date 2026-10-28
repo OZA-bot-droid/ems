@@ -73,7 +73,7 @@ public class EventController {
             @RequestHeader(value = "X-Member-Id", required = false) Long userId,
             @RequestHeader(value = "X-User-Role", required = false) String role) {
         adminChecker.requireAdmin(userId, role); // ADMIN만 수정
-        return eventService.updateEvent(eventId, request);
+        return eventService.updateEvent(eventId, userId, request);
     }
 
 //  삭제
@@ -83,7 +83,7 @@ public class EventController {
             @RequestHeader(value = "X-Member-Id", required = false) Long userId,
             @RequestHeader(value = "X-User-Role", required = false) String role) {
         adminChecker.requireAdmin(userId, role); // ADMIN만 삭제
-        eventService.deleteEvent(eventId);
+        eventService.deleteEvent(eventId, userId);
         return ResponseEntity.noContent().build();
     }
 }

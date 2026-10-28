@@ -1,7 +1,7 @@
 // 09 · 행사 관리 (관리자 전용, Figma "09 행사 관리")
 // 흐름: 목록 불러오기 → [+ 행사 등록]/[수정]은 모달 열기 → 저장되면 목록 다시 불러오기
 import { useEffect, useState } from 'react';
-import { eventApi } from '../api.js';
+import { eventApi, getDevUser } from '../api.js';
 import { formatShort, STATUS_BADGE } from '../format.js';
 import EventFormModal from './EventFormModal.jsx';
 
@@ -59,6 +59,9 @@ export default function EventManage() {
   }
 
   const events = result?.content ?? [];
+  // 내가 만든 행사인지 (서버도 같은 규칙으로 403을 주지만, 화면에서 미리 버튼을 숨김)
+  const myId = String(getDevUser().id);
+  const isMine = (event) => String(event.createdBy) === myId;
 
   return (
     <section>
@@ -125,6 +128,9 @@ export default function EventManage() {
                     <button onClick={() => remove(event)} className="rounded-[6px] bg-rose-600 px-2.5 py-1 font-semibold text-white">삭제</button>
                     <button onClick={() => setConfirm(null)} className="rounded-[6px] bg-(--ems-surface) px-2.5 py-1 font-semibold">취소</button>
                   </div>
+                ) : !isMine(event) ? (
+                  // 다른 관리자가 만든 행사: 보기만 가능
+                  <span className="rounded-[6px] bg-(--ems-surface) px-2.5 py-1 text-xs text-(--ems-muted)">다른 관리자의 행사</span>
                 ) : (
                   <div className="flex items-center gap-2 text-xs font-semibold">
                     <button onClick={() => setModal({ event })} className="rounded-[6px] bg-(--ems-surface) px-2.5 py-1">수정</button>

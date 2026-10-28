@@ -13,6 +13,7 @@ import com.ems.event.common.PageResponse;
 import com.ems.event.event.dto.EventCreateRequest;
 import com.ems.event.event.dto.EventResponse;
 import com.ems.event.event.dto.EventUpdateRequest;
+import com.ems.event.registration.repository.RegistrationRepository;
 import com.ems.event.session.SessionRepository;
 import java.time.Clock;
 import java.time.Instant;
@@ -36,6 +37,9 @@ class EventServiceTest {
     @Mock
     SessionRepository sessionRepository;
 
+    @Mock
+    RegistrationRepository registrationRepository;
+
     EventService eventService;
 
     /** 테스트 속 "지금"은 항상 2026-10-01 (실제 날짜가 지나도 테스트 결과가 바뀌지 않음) */
@@ -43,10 +47,13 @@ class EventServiceTest {
 
     @BeforeEach
     void setUp() {
-        eventService = new EventService(eventRepository, sessionRepository, FIXED_CLOCK);
+        eventService = new EventService(eventRepository, sessionRepository, registrationRepository, FIXED_CLOCK);
     }
 
     private final Long eventId = 1L;
+    /** 테스트 행사를 만든 관리자 / 다른 관리자 */
+    private static final Long OWNER_ID = 99L;
+    private static final Long OTHER_ADMIN_ID = 3L;
 
     /** 한국 시간 14:00 = UTC 05:00 */
     private static Instant at(String hhmm) {
@@ -122,7 +129,7 @@ class EventServiceTest {
         when(eventRepository.findById(eventId)).thenReturn(Optional.of(openSeminar(null)));
         EventUpdateRequest request = new EventUpdateRequest(null, null, null, null, null, null, EventStatus.DRAFT);
 
-        assertThatThrownBy(() -> eventService.updateEvent(eventId, request))
+        assertThatThrownBy(() -> eventService.updateEvent(eventId, OWNER_ID, request))
                 .isInstanceOf(BusinessException.class)
                 .extracting("code").isEqualTo("INVALID_STATUS_CHANGE");
     }
@@ -134,7 +141,7 @@ class EventServiceTest {
         when(sessionRepository.existsOutsidePeriod(eventId, at("05:00"), at("07:00"))).thenReturn(true);
         EventUpdateRequest request = new EventUpdateRequest(null, null, null, null, at("07:00"), null, null);
 
-        assertThatThrownBy(() -> eventService.updateEvent(eventId, request))
+        assertThatThrownBy(() -> eventService.updateEvent(eventId, OWNER_ID, request))
                 .isInstanceOf(BusinessException.class)
                 .extracting("code").isEqualTo("SESSION_OUT_OF_EVENT");
     }
@@ -161,7 +168,7 @@ class EventServiceTest {
         EventUpdateRequest request = new EventUpdateRequest(
                 "새 제목", null, null, started.getStartsAt(), null, null, null); // 같은 시작 시각을 그대로 보냄
 
-        assertThat(eventService.updateEvent(eventId, request).title()).isEqualTo("새 제목");
+        assertThat(eventService.updateEvent(eventId, OWNER_ID, request).title()).isEqualTo("새 제목");
     }
 
     @Test
@@ -171,8 +178,83 @@ class EventServiceTest {
         EventUpdateRequest request = new EventUpdateRequest(
                 null, null, null, Instant.parse("2026-09-30T05:00:00Z"), null, null, null);
 
-        assertThatThrownBy(() -> eventService.updateEvent(eventId, request))
+        assertThatThrownBy(() -> eventService.updateEvent(eventId, OWNER_ID, request))
                 .isInstanceOf(BusinessException.class)
                 .extracting("code").isEqualTo("PAST_START_TIME");
+    }
+
+    @Test
+    @DisplayName("만든 사람(회원 번호)이 없으면 401 UNAUTHORIZED, 저장하지 않는다")
+    void createEventRequiresMember() {
+        EventCreateRequest request = new EventCreateRequest(
+                "Cloud Native 세미나", null, 100, at("05:00"), at("08:00"), null);
+
+        assertThatThrownBy(() -> eventService.createEvent(request, null))
+                .isInstanceOf(BusinessException.class)
+                .extracting("code").isEqualTo("UNAUTHORIZED");
+        verify(eventRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("참가 신청이 있는 행사를 삭제하면 409 EVENT_HAS_REGISTRATIONS, 삭제하지 않는다")
+    void cannotDeleteEventWithRegistrations() {
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(seminar(null)));
+        when(registrationRepository.existsByEventId(eventId)).thenReturn(true);
+
+        assertThatThrownBy(() -> eventService.deleteEvent(eventId, OWNER_ID))
+                .isInstanceOf(BusinessException.class)
+                .extracting("code").isEqualTo("EVENT_HAS_REGISTRATIONS");
+        verify(eventRepository, never()).delete(any());
+    }
+
+    @Test
+    @DisplayName("참가 신청이 없는 행사는 삭제된다")
+    void deleteEventWithoutRegistrations() {
+        Event event = seminar(null);
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+        when(registrationRepository.existsByEventId(eventId)).thenReturn(false);
+
+        eventService.deleteEvent(eventId, OWNER_ID);
+
+        verify(eventRepository).delete(event);
+    }
+
+    @Test
+    @DisplayName("없는 행사를 삭제하면 404 EVENT_NOT_FOUND")
+    void deleteMissingEvent() {
+        when(eventRepository.findById(eventId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> eventService.deleteEvent(eventId, OWNER_ID))
+                .isInstanceOf(BusinessException.class)
+                .extracting("code").isEqualTo("EVENT_NOT_FOUND");
+        verifyNoInteractions(registrationRepository);
+    }
+
+    // ===== 소유권: 행사를 만든 관리자만 수정·삭제 =====
+
+    @Test
+    @DisplayName("다른 관리자가 행사를 수정(공개 포함)하면 403 EVENT_OWNER_REQUIRED, 바뀌지 않는다")
+    void otherAdminCannotUpdateEvent() {
+        Event event = seminar(null);
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+        EventUpdateRequest request = new EventUpdateRequest("남이 바꾼 제목", null, null, null, null, null, EventStatus.OPEN);
+
+        assertThatThrownBy(() -> eventService.updateEvent(eventId, OTHER_ADMIN_ID, request))
+                .isInstanceOf(BusinessException.class)
+                .extracting("code").isEqualTo("EVENT_OWNER_REQUIRED");
+        assertThat(event.getTitle()).isEqualTo("Cloud Native 세미나");
+        assertThat(event.getStatus()).isEqualTo(EventStatus.DRAFT);
+    }
+
+    @Test
+    @DisplayName("다른 관리자가 행사를 삭제하면 403 EVENT_OWNER_REQUIRED, 삭제하지 않는다")
+    void otherAdminCannotDeleteEvent() {
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(seminar(null)));
+
+        assertThatThrownBy(() -> eventService.deleteEvent(eventId, OTHER_ADMIN_ID))
+                .isInstanceOf(BusinessException.class)
+                .extracting("code").isEqualTo("EVENT_OWNER_REQUIRED");
+        verify(eventRepository, never()).delete(any());
+        verifyNoInteractions(registrationRepository);
     }
 }

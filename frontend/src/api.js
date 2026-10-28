@@ -3,7 +3,8 @@
 // Gateway가 /api 를 떼서 각 서비스로 보냅니다.
 
 // ⚠️ 임시 사용자: 로그인(JWT)이 완성되기 전까지만 씁니다.
-// 로그인이 붙으면 Gateway가 X-User-Id / X-User-Role 을 대신 넣어 주므로 이 부분은 지웁니다.
+// 로그인이 붙으면 Gateway가 X-Member-Id / X-User-Role 을 대신 넣어 주므로 이 부분은 지웁니다.
+// (헤더 이름은 팀 표준: 회원 번호 = X-Member-Id, 권한 = X-User-Role)
 export const DEV_USERS = {
   ADMIN: { id: '1', role: 'ADMIN' },
   USER: { id: '2', role: 'USER' },
@@ -28,7 +29,7 @@ export class ApiError extends Error {
 // 모든 요청이 지나가는 함수
 async function request(path, { method = 'GET', body } = {}) {
   const headers = {
-    'X-User-Id': currentUser.id,
+    'X-Member-Id': currentUser.id,
     'X-User-Role': currentUser.role,
   };
   if (body !== undefined) headers['Content-Type'] = 'application/json';

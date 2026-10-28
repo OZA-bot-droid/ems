@@ -28,7 +28,7 @@
             "method": "GET",
             "header": [
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{adminId}}"
               },
               {
@@ -75,7 +75,7 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{adminId}}"
               },
               {
@@ -125,7 +125,7 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{adminId}}"
               },
               {
@@ -177,7 +177,7 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{adminId}}"
               },
               {
@@ -229,7 +229,7 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{adminId}}"
               },
               {
@@ -281,7 +281,7 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{adminId}}"
               },
               {
@@ -338,7 +338,7 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{adminId}}"
               },
               {
@@ -388,7 +388,7 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{adminId}}"
               },
               {
@@ -445,7 +445,7 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{adminId}}"
               },
               {
@@ -501,7 +501,7 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{adminId}}"
               },
               {
@@ -551,7 +551,7 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{adminId}}"
               },
               {
@@ -602,7 +602,7 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{adminId}}"
               },
               {
@@ -654,7 +654,7 @@
             "method": "GET",
             "header": [
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{userId}}"
               },
               {
@@ -701,7 +701,7 @@
             "method": "GET",
             "header": [
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{adminId}}"
               },
               {
@@ -749,7 +749,7 @@
             "method": "GET",
             "header": [
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{userId}}"
               },
               {
@@ -792,7 +792,7 @@
             "method": "GET",
             "header": [
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{userId}}"
               },
               {
@@ -831,7 +831,7 @@
             "method": "GET",
             "header": [
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{userId}}"
               },
               {
@@ -868,7 +868,7 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "5"
               },
               {
@@ -895,7 +895,7 @@
             "method": "DELETE",
             "header": [
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "1"
               },
               {
@@ -933,7 +933,7 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "1"
               },
               {
@@ -972,7 +972,7 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "2"
               },
               {
@@ -1011,7 +1011,7 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "1"
               },
               {
@@ -1052,7 +1052,7 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "1"
               },
               {
@@ -1148,7 +1148,7 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{adminId}}"
               },
               {
@@ -1199,7 +1199,7 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{adminId}}"
               },
               {
@@ -1246,7 +1246,7 @@
             "method": "GET",
             "header": [
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{adminId}}"
               },
               {
@@ -1290,7 +1290,7 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{adminId}}"
               },
               {
@@ -1341,7 +1341,7 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{adminId}}"
               },
               {
@@ -1394,7 +1394,7 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{adminId}}"
               },
               {
@@ -1443,7 +1443,7 @@
             "method": "GET",
             "header": [
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{userId}}"
               },
               {
@@ -1481,7 +1481,7 @@
             "method": "GET",
             "header": [
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{userId}}"
               },
               {
@@ -1521,7 +1521,7 @@
             "method": "GET",
             "header": [
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{userId}}"
               },
               {
@@ -1563,7 +1563,7 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{userId}}"
               },
               {
@@ -1615,7 +1615,7 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{adminId}}"
               },
               {
@@ -1667,7 +1667,7 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{adminId}}"
               },
               {
@@ -1721,7 +1721,7 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{adminId}}"
               },
               {
@@ -1775,7 +1775,7 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{adminId}}"
               },
               {
@@ -1829,7 +1829,7 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{adminId}}"
               },
               {
@@ -1881,7 +1881,7 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{adminId}}"
               },
               {
@@ -1933,7 +1933,7 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{adminId}}"
               },
               {
@@ -1985,7 +1985,7 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{adminId}}"
               },
               {
@@ -2037,7 +2037,7 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{adminId}}"
               },
               {
@@ -2085,7 +2085,7 @@
             "method": "GET",
             "header": [
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{userId}}"
               },
               {
@@ -2124,12 +2124,157 @@
             "method": "DELETE",
             "header": [
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{userId}}"
               },
               {
                 "key": "X-User-Role",
                 "value": "USER"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/events/{{exEventId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "events",
+                "{{exEventId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "26-1. 다른 관리자(3번)가 세션 수정 → 403 EVENT_OWNER_REQUIRED",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403 응답', () => pm.response.to.have.status(403));",
+                  "pm.test('code = EVENT_OWNER_REQUIRED', () => pm.expect(pm.response.json().code).to.eql('EVENT_OWNER_REQUIRED'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Member-Id",
+                "value": "3"
+              },
+              {
+                "key": "X-User-Role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/events/{{exEventId}}/sessions/{{exSessionB}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "events",
+                "{{exEventId}}",
+                "sessions",
+                "{{exSessionB}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"예외 세션 B (제목 수정)\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "26-2. 다른 관리자(3번)가 행사 수정 → 403 EVENT_OWNER_REQUIRED",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403 응답', () => pm.response.to.have.status(403));",
+                  "pm.test('code = EVENT_OWNER_REQUIRED', () => pm.expect(pm.response.json().code).to.eql('EVENT_OWNER_REQUIRED'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Member-Id",
+                "value": "3"
+              },
+              {
+                "key": "X-User-Role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/events/{{exEventId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "events",
+                "{{exEventId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"남이 바꾼 제목\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "26-3. 다른 관리자(3번)가 행사 삭제 → 403 EVENT_OWNER_REQUIRED",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403 응답', () => pm.response.to.have.status(403));",
+                  "pm.test('code = EVENT_OWNER_REQUIRED', () => pm.expect(pm.response.json().code).to.eql('EVENT_OWNER_REQUIRED'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "X-Member-Id",
+                "value": "3"
+              },
+              {
+                "key": "X-User-Role",
+                "value": "ADMIN"
               }
             ],
             "url": {
@@ -2162,7 +2307,7 @@
             "method": "DELETE",
             "header": [
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{adminId}}"
               },
               {
@@ -2201,7 +2346,7 @@
             "method": "GET",
             "header": [
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{adminId}}"
               },
               {
@@ -2244,7 +2389,7 @@
                 "value": "application/json"
               },
               {
-                "key": "X-User-Id",
+                "key": "X-Member-Id",
                 "value": "{{adminId}}"
               },
               {
@@ -2269,6 +2414,189 @@
                   "language": "json"
                 }
               }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "30. [준비] 삭제 테스트용 행사 만들기 → 201",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201 응답', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('regEventId', pm.response.json().id);",
+                  "pm.test('새 행사는 DRAFT', () => pm.expect(pm.response.json().status).to.eql('DRAFT'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Member-Id",
+                "value": "{{adminId}}"
+              },
+              {
+                "key": "X-User-Role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "events"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"신청자 있는 행사 (삭제 불가 테스트)\",\n  \"description\": \"참가 신청이 있으면 삭제가 막히는지 확인\",\n  \"capacity\": 10,\n  \"startsAt\": \"2027-12-02T05:00:00Z\",\n  \"endsAt\": \"2027-12-02T08:00:00Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "31. [준비] 행사 공개 (DRAFT → OPEN) → 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 응답', () => pm.response.to.have.status(200));",
+                  "pm.test('OPEN이 됨', () => pm.expect(pm.response.json().status).to.eql('OPEN'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Member-Id",
+                "value": "{{adminId}}"
+              },
+              {
+                "key": "X-User-Role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/events/{{regEventId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "events",
+                "{{regEventId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"OPEN\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "32. [준비] 일반 사용자가 참가 신청 → 201",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201 응답', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Member-Id",
+                "value": "{{userId}}"
+              },
+              {
+                "key": "X-User-Role",
+                "value": "USER"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/events/{{regEventId}}/registrations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "events",
+                "{{regEventId}}",
+                "registrations"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "33. 신청자 있는 행사 삭제 → 409 EVENT_HAS_REGISTRATIONS",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('409 응답', () => pm.response.to.have.status(409));",
+                  "pm.test('code = EVENT_HAS_REGISTRATIONS', () => pm.expect(pm.response.json().code).to.eql('EVENT_HAS_REGISTRATIONS'));",
+                  "// 참고: 이 행사는 신청 기록 때문에 지워지지 않고 DB에 남습니다 (의도된 동작)"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "X-Member-Id",
+                "value": "{{adminId}}"
+              },
+              {
+                "key": "X-User-Role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/events/{{regEventId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "events",
+                "{{regEventId}}"
+              ]
             }
           },
           "response": []
@@ -2315,6 +2643,10 @@
     },
     {
       "key": "exSessionB",
+      "value": ""
+    },
+    {
+      "key": "regEventId",
       "value": ""
     }
   ]
