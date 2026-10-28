@@ -14,12 +14,14 @@ import com.ems.event.event.dto.EventCreateRequest;
 import com.ems.event.event.dto.EventResponse;
 import com.ems.event.event.dto.EventUpdateRequest;
 import com.ems.event.session.SessionRepository;
+import java.time.Clock;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
@@ -34,8 +36,15 @@ class EventServiceTest {
     @Mock
     SessionRepository sessionRepository;
 
-    @InjectMocks
     EventService eventService;
+
+    /** 테스트 속 "지금"은 항상 2026-10-01 (실제 날짜가 지나도 테스트 결과가 바뀌지 않음) */
+    private static final Clock FIXED_CLOCK = Clock.fixed(Instant.parse("2026-10-01T00:00:00Z"), ZoneOffset.UTC);
+
+    @BeforeEach
+    void setUp() {
+        eventService = new EventService(eventRepository, sessionRepository, FIXED_CLOCK);
+    }
 
     private final Long eventId = 1L;
 
@@ -128,5 +137,42 @@ class EventServiceTest {
         assertThatThrownBy(() -> eventService.updateEvent(eventId, request))
                 .isInstanceOf(BusinessException.class)
                 .extracting("code").isEqualTo("SESSION_OUT_OF_EVENT");
+    }
+
+    @Test
+    @DisplayName("시작 시각이 지금보다 과거면 400 PAST_START_TIME")
+    void cannotCreateEventInPast() {
+        EventCreateRequest request = new EventCreateRequest(
+                "지난 행사", null, 100, Instant.parse("2026-09-30T05:00:00Z"), Instant.parse("2026-09-30T08:00:00Z"), null);
+
+        assertThatThrownBy(() -> eventService.createEvent(request, null))
+                .isInstanceOf(BusinessException.class)
+                .extracting("code").isEqualTo("PAST_START_TIME");
+        verify(eventRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("이미 시작한 행사라도 시작 시각을 안 바꾸면 제목 수정은 가능")
+    void canEditTitleOfStartedEvent() {
+        // 지금(10/01)보다 앞선 9/30에 시작한 행사
+        Event started = new Event("지난 행사", null, 100,
+                Instant.parse("2026-09-30T05:00:00Z"), Instant.parse("2026-09-30T08:00:00Z"), null, null);
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(started));
+        EventUpdateRequest request = new EventUpdateRequest(
+                "새 제목", null, null, started.getStartsAt(), null, null, null); // 같은 시작 시각을 그대로 보냄
+
+        assertThat(eventService.updateEvent(eventId, request).title()).isEqualTo("새 제목");
+    }
+
+    @Test
+    @DisplayName("수정에서 시작 시각을 과거로 바꾸면 400 PAST_START_TIME")
+    void cannotMoveStartToPast() {
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(seminar(null)));
+        EventUpdateRequest request = new EventUpdateRequest(
+                null, null, null, Instant.parse("2026-09-30T05:00:00Z"), null, null, null);
+
+        assertThatThrownBy(() -> eventService.updateEvent(eventId, request))
+                .isInstanceOf(BusinessException.class)
+                .extracting("code").isEqualTo("PAST_START_TIME");
     }
 }

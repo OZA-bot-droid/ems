@@ -2,7 +2,7 @@
 // event가 없으면 "새 행사 등록", 있으면 "행사 수정"으로 동작합니다.
 import { useState } from 'react';
 import { eventApi } from '../api.js';
-import { instantToKstInput, kstToInstant } from '../format.js';
+import { instantToKstInput, kstToInstant, nowKstInput } from '../format.js';
 
 export default function EventFormModal({ event, onClose, onSaved }) {
   const isEdit = Boolean(event);
@@ -20,6 +20,10 @@ export default function EventFormModal({ event, onClose, onSaved }) {
   const [serverError, setServerError] = useState(null); // 서버가 거절했을 때
   const [saving, setSaving] = useState(false);
 
+  // 시작 일시를 검사할지: 새 등록이면 항상, 수정이면 시작 일시를 바꿨을 때만
+  // (이미 지난 행사의 설명만 고칠 때 막히지 않도록)
+  const startChanged = !isEdit || form.startsAt !== instantToKstInput(event.startsAt);
+
   const change = (name) => (e) => setForm({ ...form, [name]: e.target.value });
 
   // 1차 검사: 서버에 보내기 전에 화면에서 먼저 (백엔드 규칙과 같은 내용)
@@ -28,6 +32,8 @@ export default function EventFormModal({ event, onClose, onSaved }) {
     if (!form.title.trim()) errors.title = '행사명을 입력하세요.';
     else if (form.title.length > 200) errors.title = '행사명은 200자까지 입력할 수 있습니다.';
     if (!form.startsAt) errors.startsAt = '시작 일시를 입력하세요.';
+    else if (startChanged && form.startsAt <= nowKstInput())
+      errors.startsAt = '시작 일시는 현재 시간 이후로 설정하세요.';
     if (!form.endsAt) errors.endsAt = '종료 일시를 입력하세요.';
     if (form.startsAt && form.endsAt && form.endsAt <= form.startsAt)
       errors.endsAt = '종료 일시는 시작 일시보다 뒤여야 합니다.';
@@ -59,6 +65,7 @@ export default function EventFormModal({ event, onClose, onSaved }) {
     } catch (err) {
       // 2차 검사: 서버가 거절한 이유를 알맞은 자리에 보여주기
       if (err.code === 'INVALID_PERIOD') setFieldErrors({ endsAt: err.message });
+      else if (err.code === 'PAST_START_TIME') setFieldErrors({ startsAt: err.message });
       else setServerError(err);
     } finally {
       setSaving(false);
@@ -73,6 +80,7 @@ export default function EventFormModal({ event, onClose, onSaved }) {
     >
       <form
         onSubmit={submit}
+        noValidate // 브라우저 기본 경고(영어 말풍선) 대신 우리 한국어 안내를 쓰기
         onClick={(e) => e.stopPropagation()} // 안쪽 클릭은 닫히지 않게
         className="w-full max-w-[670px] rounded-[18px] bg-(--ems-surface) px-[30px] pt-6 pb-5"
       >
@@ -100,10 +108,10 @@ export default function EventFormModal({ event, onClose, onSaved }) {
 
           <div className="grid gap-5 sm:grid-cols-2">
             <Field label="시작 일시 *" error={fieldErrors.startsAt}>
-              <input id="ev-start" type="datetime-local" className={inputClass} value={form.startsAt} onChange={change('startsAt')} />
+              <input id="ev-start" type="datetime-local" min={startChanged ? nowKstInput() : undefined} className={inputClass} value={form.startsAt} onChange={change('startsAt')} />
             </Field>
             <Field label="종료 일시 *" error={fieldErrors.endsAt}>
-              <input id="ev-end" type="datetime-local" className={inputClass} value={form.endsAt} onChange={change('endsAt')} />
+              <input id="ev-end" type="datetime-local" min={form.startsAt || undefined} className={inputClass} value={form.endsAt} onChange={change('endsAt')} />
             </Field>
           </div>
 

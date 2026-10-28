@@ -6,6 +6,7 @@ import com.ems.event.event.dto.EventCreateRequest;
 import com.ems.event.event.dto.EventResponse;
 import com.ems.event.event.dto.EventUpdateRequest;
 import com.ems.event.session.SessionRepository;
+import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -23,10 +24,13 @@ public class EventService {
 
     private final EventRepository eventRepository;
     private final SessionRepository sessionRepository;
+    /** 지금 시각을 알려주는 시계 (테스트에서는 고정된 시계를 넣어 날짜가 지나도 결과가 같게 함) */
+    private final Clock clock;
 
-    public EventService(EventRepository eventRepository, SessionRepository sessionRepository) {
+    public EventService(EventRepository eventRepository, SessionRepository sessionRepository, Clock clock) {
         this.eventRepository = eventRepository;
         this.sessionRepository = sessionRepository;
+        this.clock = clock;
     }
 
     /**
@@ -62,6 +66,7 @@ public class EventService {
     @Transactional
     public EventResponse createEvent(EventCreateRequest request, Long createdBy) {
         validatePeriod(request.startsAt(), request.endsAt());
+        validateNotPast(request.startsAt());
         Event event = new Event(
                 request.title(),
                 request.description(),
@@ -80,6 +85,10 @@ public class EventService {
         Instant startsAt = request.startsAt() != null ? request.startsAt() : event.getStartsAt();
         Instant endsAt = request.endsAt() != null ? request.endsAt() : event.getEndsAt();
         validatePeriod(startsAt, endsAt);
+        // 시작 시각을 "바꿀 때만" 과거인지 검사 (이미 시작한 행사의 제목·설명 수정은 허용)
+        if (request.startsAt() != null && !request.startsAt().equals(event.getStartsAt())) {
+            validateNotPast(request.startsAt());
+        }
         // 상태는 DRAFT → OPEN → CLOSED 순서로만 바꿀 수 있다
         if (!event.getStatus().canChangeTo(request.status())) {
             throw new BusinessException(
@@ -124,6 +133,14 @@ public class EventService {
         if (!endsAt.isAfter(startsAt)) {
             throw new BusinessException(
                     HttpStatus.BAD_REQUEST, "INVALID_PERIOD", "종료 시각은 시작 시각보다 뒤여야 합니다.");
+        }
+    }
+
+    /** 시작 시각은 지금보다 뒤여야 한다 (지난 시간으로 행사를 만들 수 없음) */
+    private void validateNotPast(Instant startsAt) {
+        if (!startsAt.isAfter(Instant.now(clock))) {
+            throw new BusinessException(
+                    HttpStatus.BAD_REQUEST, "PAST_START_TIME", "시작 시각은 현재 시각 이후여야 합니다.");
         }
     }
 }

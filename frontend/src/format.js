@@ -52,6 +52,11 @@ export function kstToInstant(localValue) {
   return new Date(`${localValue}:00+09:00`).toISOString();
 }
 
+// 지금 시각을 입력칸 형식(한국 시간)으로: "2026-10-28T10:48"
+export function nowKstInput() {
+  return instantToKstInput(new Date().toISOString());
+}
+
 // 서버 값 "2026-10-28T05:00:00Z" → 입력칸용 "2026-10-28T14:00"(한국 시간)
 export function instantToKstInput(iso) {
   if (!iso) return '';

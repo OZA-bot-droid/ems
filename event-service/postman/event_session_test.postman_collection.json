@@ -1116,7 +1116,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"예외 테스트용 행사\",\n  \"description\": \"예외 확인 전용\",\n  \"capacity\": 30,\n  \"startsAt\": \"2026-12-01T05:00:00Z\",\n  \"endsAt\": \"2026-12-01T08:00:00Z\"\n}",
+              "raw": "{\n  \"title\": \"예외 테스트용 행사\",\n  \"description\": \"예외 확인 전용\",\n  \"capacity\": 30,\n  \"startsAt\": \"2027-12-01T05:00:00Z\",\n  \"endsAt\": \"2027-12-01T08:00:00Z\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1167,7 +1167,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"\",\n  \"description\": \"예외 확인 전용\",\n  \"capacity\": 30,\n  \"startsAt\": \"2026-12-01T05:00:00Z\",\n  \"endsAt\": \"2026-12-01T08:00:00Z\"\n}",
+              "raw": "{\n  \"title\": \"\",\n  \"description\": \"예외 확인 전용\",\n  \"capacity\": 30,\n  \"startsAt\": \"2027-12-01T05:00:00Z\",\n  \"endsAt\": \"2027-12-01T08:00:00Z\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1218,7 +1218,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"예외 테스트용 행사\",\n  \"description\": \"예외 확인 전용\",\n  \"capacity\": 0,\n  \"startsAt\": \"2026-12-01T05:00:00Z\",\n  \"endsAt\": \"2026-12-01T08:00:00Z\"\n}",
+              "raw": "{\n  \"title\": \"예외 테스트용 행사\",\n  \"description\": \"예외 확인 전용\",\n  \"capacity\": 0,\n  \"startsAt\": \"2027-12-01T05:00:00Z\",\n  \"endsAt\": \"2027-12-01T08:00:00Z\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1309,7 +1309,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"예외 테스트용 행사\",\n  \"description\": \"예외 확인 전용\",\n  \"capacity\": 30,\n  \"startsAt\": \"2026-12-01T05:00:00Z\",\n  \"endsAt\": \"2026-12-01T08:00:00Z\"\n}",
+              "raw": "{\n  \"title\": \"예외 테스트용 행사\",\n  \"description\": \"예외 확인 전용\",\n  \"capacity\": 30,\n  \"startsAt\": \"2027-12-01T05:00:00Z\",\n  \"endsAt\": \"2027-12-01T08:00:00Z\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1362,7 +1362,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"예외 세션 A\",\n  \"startsAt\": \"2026-12-01T05:00:00Z\",\n  \"endsAt\": \"2026-12-01T05:45:00Z\"\n}",
+              "raw": "{\n  \"title\": \"예외 세션 A\",\n  \"startsAt\": \"2027-12-01T05:00:00Z\",\n  \"endsAt\": \"2027-12-01T05:45:00Z\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1415,7 +1415,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"예외 세션 B\",\n  \"startsAt\": \"2026-12-01T06:00:00Z\",\n  \"endsAt\": \"2026-12-01T06:45:00Z\"\n}",
+              "raw": "{\n  \"title\": \"예외 세션 B\",\n  \"startsAt\": \"2027-12-01T06:00:00Z\",\n  \"endsAt\": \"2027-12-01T06:45:00Z\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1584,7 +1584,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"권한 없음\",\n  \"startsAt\": \"2026-12-01T07:00:00Z\",\n  \"endsAt\": \"2026-12-01T07:30:00Z\"\n}",
+              "raw": "{\n  \"title\": \"권한 없음\",\n  \"startsAt\": \"2027-12-01T07:00:00Z\",\n  \"endsAt\": \"2027-12-01T07:30:00Z\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1636,7 +1636,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"쉬는 시간\",\n  \"startsAt\": \"2026-12-01T05:45:00Z\",\n  \"endsAt\": \"2026-12-01T06:00:00Z\"\n}",
+              "raw": "{\n  \"title\": \"쉬는 시간\",\n  \"startsAt\": \"2027-12-01T05:45:00Z\",\n  \"endsAt\": \"2027-12-01T06:00:00Z\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1743,7 +1743,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"startsAt\": \"2026-12-01T05:30:00Z\",\n  \"endsAt\": \"2026-12-01T06:15:00Z\"\n}",
+              "raw": "{\n  \"startsAt\": \"2027-12-01T05:30:00Z\",\n  \"endsAt\": \"2027-12-01T06:15:00Z\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1849,7 +1849,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"endsAt\": \"2026-12-01T06:30:00Z\"\n}",
+              "raw": "{\n  \"endsAt\": \"2027-12-01T06:30:00Z\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1901,7 +1901,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"endsAt\": \"2026-12-01T04:00:00Z\"\n}",
+              "raw": "{\n  \"endsAt\": \"2027-12-01T04:00:00Z\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2218,6 +2218,57 @@
                 "events",
                 "{{exEventId}}"
               ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "29. 시작 일시가 과거 → 400 PAST_START_TIME",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400 응답', () => pm.response.to.have.status(400));",
+                  "pm.test('code = PAST_START_TIME', () => pm.expect(pm.response.json().code).to.eql('PAST_START_TIME'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-User-Id",
+                "value": "{{adminId}}"
+              },
+              {
+                "key": "X-User-Role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "events"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"지난 날짜 행사\",\n  \"description\": \"시작이 과거라서 막혀야 함\",\n  \"capacity\": 10,\n  \"startsAt\": \"2026-01-01T05:00:00Z\",\n  \"endsAt\": \"2026-01-01T08:00:00Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           },
           "response": []
