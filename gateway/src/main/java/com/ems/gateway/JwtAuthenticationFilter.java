@@ -25,6 +25,7 @@ public class JwtAuthenticationFilter implements GlobalFilter {
             "/members/reissue",
 
             "/members/google",
+            "/members/naver",
             "/members/oauth2/exchange"
     );
 
