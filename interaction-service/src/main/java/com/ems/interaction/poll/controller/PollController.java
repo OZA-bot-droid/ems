@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -57,6 +58,17 @@ public class PollController {
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    // 유저가 참여 중인 세션의 활성화 상태인 투표 목록 전달
+    @GetMapping("/polls/getpolls")
+    public ResponseEntity<?> getActivePolls(@RequestHeader("X-Member-Id") Long userId,
+                                            @RequestHeader("X-User-Role") String role) {
+
+        List<PollResponseDTO> response = pollService.getActivePolls(userId);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
 
     // 투표 활성화
     @PatchMapping("/polls/active/{pollId}")

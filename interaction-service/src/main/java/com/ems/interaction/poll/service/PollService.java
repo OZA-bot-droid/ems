@@ -17,8 +17,16 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
 import org.springframework.http.HttpStatus;
 import com.ems.interaction.poll.domain.Status;
+
+
+//    데모용 유저, 이벤트, 세션, 허가 데이터
+import com.ems.interaction.mock.DemoData;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 
 @Service
 @Transactional
@@ -27,6 +35,9 @@ public class PollService {
 
     private final PollRepository pollRepository;
     private final PollOptionRepository pollOptionRepository;
+
+//    데모용 유저, 이벤트, 세션, 허가 데이터
+    private final DemoData demoData;
 
     // 투표 생성
     @Transactional
@@ -95,6 +106,70 @@ public class PollService {
                 .map(poll -> PollManagementDTO.from(poll, now))
                 .toList();
     }
+
+    // 유저가 참여 중인 세션의 활성화 상태인 투표 목록 전달
+    public List<PollResponseDTO> getActivePolls(Long userId){
+
+        // 1. 데모 회원 존재 여부 확인
+        if (userId == null || !demoData.members.containsKey(userId)) {
+            throw new ApiException(
+                    HttpStatus.NOT_FOUND,
+                    "USER_NOT_FOUND",
+                    "존재하지 않는 사용자입니다."
+            );
+        }
+
+        // 2. 사용자가 참가 승인받은 세션 조회
+        List<Long> sessionIds = demoData.registrations.stream()
+                .filter(reg -> reg.userId().equals(userId))
+                .filter(reg -> "APPROVED".equals(reg.status()))
+                .map(DemoData.DemoRegistration::sessionId)
+                .distinct()
+                .toList();
+
+        // 3. 승인된 세션이 없으면 빈 목록 반환
+        if (sessionIds.isEmpty()) {
+            return List.of();
+        }
+
+        // 4. 해당 세션에 속한 ACTIVE 투표 조회
+        List<Poll> polls = pollRepository.findBySessionIdInAndStatus(
+                sessionIds,
+                Status.ACTIVE
+        );
+
+        if (polls.isEmpty()) {
+            return List.of();
+        }
+
+        // 5. 조회한 투표의 ID 목록
+        List<Long> pollIds = polls.stream()
+                .map(Poll::getId)
+                .toList();
+
+        // 6. 투표 선택지 일괄 조회
+        List<PollOption> options = pollOptionRepository
+                .findByPollIdInOrderByPollIdAscDisplayOrderAsc(pollIds);
+
+        // 7. 투표 ID를 기준으로 선택지 그룹화
+        Map<Long, List<PollOption>> optionsByPollId =
+                options.stream()
+                        .collect(Collectors.groupingBy(
+                                PollOption::getPollId
+                        ));
+
+        // 8. Poll + PollOption -> PollResponseDTO 변환
+        return polls.stream()
+                .map(poll -> PollResponseDTO.from(
+                        poll,
+                        optionsByPollId.getOrDefault(
+                                poll.getId(),
+                                List.of()
+                        )
+                ))
+                .toList();
+    }
+
 
     // 투표 활성화: 예정 상태에서만, 실제 투표 가능 시간에만 전환
     public Long setPollActive(Long userId, Long pollId) {

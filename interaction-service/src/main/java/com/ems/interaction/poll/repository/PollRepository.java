@@ -8,6 +8,7 @@ import com.ems.interaction.poll.domain.Status;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 
 public interface PollRepository extends JpaRepository<Poll, Long> {
@@ -32,4 +33,7 @@ public interface PollRepository extends JpaRepository<Poll, Long> {
 
     // 관리자가 생성한 투표 목록 조회(최신순)
     List<Poll> findByUserIdOrderByIdDesc(Long userId);
+
+    // 여러 세션에 속한 ACTIVE 투표 조회
+    List<Poll> findBySessionIdInAndStatus(Collection<Long> sessionIds, Status status);
 }
