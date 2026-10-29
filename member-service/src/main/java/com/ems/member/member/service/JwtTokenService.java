@@ -1,6 +1,8 @@
 package com.ems.member.member.service;
 
 import com.ems.member.member.domain.Role;
+import com.ems.member.member.repository.MemberRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
@@ -21,17 +23,19 @@ public class JwtTokenService {
     private final String issuer;
     private final long accessTokenExpiration;
     private final long refreshTokenExpiration;
+    private final MemberRepository memberRepository;
 
     public JwtTokenService(JwtEncoder jwtEncoder,
                            JwtDecoder jwtDecoder,
                            @Value("${jwt.issuer}") String issuer,
                            @Value("${jwt.access-token-expiration}") long accessTokenExpiration,
-                           @Value("${jwt.refresh-token-expiration}") long refreshTokenExpiration) {
+                           @Value("${jwt.refresh-token-expiration}") long refreshTokenExpiration, MemberRepository memberRepository) {
         this.jwtEncoder = jwtEncoder;
         this.jwtDecoder = jwtDecoder;
         this.issuer = issuer;
         this.accessTokenExpiration = accessTokenExpiration;
         this.refreshTokenExpiration = refreshTokenExpiration;
+        this.memberRepository = memberRepository;
     }
 
     // accessToken 생성
@@ -39,10 +43,24 @@ public class JwtTokenService {
 
         return createToken(id, accessTokenExpiration, "access", role);
     }
+    public String createAccessToken(long id) {
+
+        Role role = memberRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(""))
+                .getRole();
+        return createToken(id, accessTokenExpiration, "access", role);
+    }
 
     // refreshToken 생성
     public String createRefreshToken(long id, Role role) {
 
+        return createToken(id, refreshTokenExpiration, "refresh", role);
+    }
+    public String createRefreshToken(long id) {
+
+        Role role = memberRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(""))
+                .getRole();
         return createToken(id, refreshTokenExpiration, "refresh", role);
     }
 

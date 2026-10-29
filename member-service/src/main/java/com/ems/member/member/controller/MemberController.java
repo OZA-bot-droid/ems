@@ -91,15 +91,14 @@ public class MemberController {
     }
 
 
-    // -----------------------------------------------------
+    // google -----------------------------------------------------
     @GetMapping("/google")
-    public void googleLogin(@RequestParam String clientId,
+    public void googleSignup(@RequestParam String clientId,
                             @RequestParam(required = false) Role role,
                             HttpServletRequest request,
                             HttpServletResponse response) throws IOException {
 
         HttpSession session = request.getSession();
-
         session.setAttribute("clientId", clientId);
 
         if(role != null) {
@@ -109,9 +108,30 @@ public class MemberController {
         }
 
         // Spring Security의 기본 Google 로그인 시작 URL
-        response.sendRedirect("http://127.0.0.1:8080/api/oauth2/authorization/google");
+        response.sendRedirect("http://localhost:8080/api/oauth2/authorization/google");
     }
 
+    // naver ---------------------------------------------------
+    @GetMapping("/naver")
+    public void naverSignup(@RequestParam String clientId,
+                            @RequestParam(required = false) Role role,
+                            HttpServletRequest request,
+                            HttpServletResponse response) throws IOException {
+
+        HttpSession session = request.getSession();
+        session.setAttribute("clientId", clientId);
+
+        if(role != null) {
+            session.setAttribute("role", role);
+        } else {
+            session.removeAttribute("role");
+        }
+
+        // Spring Security의 기본 Google 로그인 시작 URL
+        response.sendRedirect("http://localhost:8080/api/oauth2/authorization/naver");
+    }
+
+    // 소셜 로그인 ---------------------------------------------------
     @PostMapping("/oauth2/exchange")
     public ResponseEntity<?> exchange(@RequestParam String code) {
 

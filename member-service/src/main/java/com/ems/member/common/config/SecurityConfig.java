@@ -41,7 +41,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(author ->
                         author.requestMatchers(
                                     "/members/ping",
-
                                     "/members/register",
                                     "/members/login",
                                     "/members/reissue",
@@ -49,6 +48,7 @@ public class SecurityConfig {
 
                                     // google 로그인 실행 순서 1, 3, 4, 2
                                     "/members/google",
+                                    "/members/naver",
                                     "/members/oauth2/exchange",
                                     // Spring Security OAuth2 Login이 내부적으로 사용하는 기본 endpoint 패턴
                                     "/oauth2/**",           // /oauth2/authorization/google

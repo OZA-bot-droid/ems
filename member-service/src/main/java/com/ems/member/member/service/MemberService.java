@@ -1,5 +1,8 @@
 package com.ems.member.member.service;
 
+import com.ems.member.common.exception.MemberLoginException;
+import com.ems.member.common.exception.MemberNotFoundException;
+import com.ems.member.common.exception.MemberSignupException;
 import com.ems.member.member.domain.Member;
 import com.ems.member.member.dto.LoginResponseDTO;
 import com.ems.member.member.dto.MemberInformationDTO;
@@ -38,7 +41,7 @@ public class MemberService {
     public void registerMember(MemberRegisterDTO dto) {
 
         if(memberRepository.existsByEmail(dto.email())) {
-            throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
+            throw new MemberSignupException("이미 가입된 이메일입니다.");
         }
 
         memberRepository.save(
@@ -53,7 +56,7 @@ public class MemberService {
 
         // 회원 존재 여부 => 없으면 401 에러
         Member member = memberRepository.findByEmail(dto.email())
-                .orElseThrow(() -> new IllegalStateException("해당 회원은 존재하지 않습니다."));
+                .orElseThrow(() -> new MemberLoginException("이메일 또는 비밀번호가 일치하지 않습니다."));
 
         // 비밀번호 확인
         if(passwordEncoder.matches(dto.password(), member.getPasswordHash())) {
@@ -63,12 +66,12 @@ public class MemberService {
             String refreshToken = jwtTokenService.createRefreshToken(member.getId(), member.getRole());
 
             // refresh token entity 생성 및 DB 저장
-            authService.changeRefreshToken(member.getId(), refreshToken, dto.clientId());
+            authService.changeRefreshToken(member, refreshToken, dto.clientId());
 
             return new LoginResponseDTO(accessToken, refreshToken);
 
         } else {
-            throw new IllegalArgumentException("로그인 실패");
+            throw new MemberLoginException("이메일 또는 비밀번호가 일치하지 않습니다.");
         }
     }
 
@@ -101,7 +104,7 @@ public class MemberService {
     public MemberInformationDTO myPage(String memberId) {
 
         Member member = memberRepository.findById(Long.parseLong(memberId))
-                .orElseThrow(() -> new EntityNotFoundException("회원 정보가 없습니다."));
+                .orElseThrow(() -> new MemberNotFoundException("회원을 찾을 수 없습니다."));
 
         return new MemberInformationDTO(member.getEmail(), member.getName());
     }

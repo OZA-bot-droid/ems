@@ -8,3 +8,5 @@ CREATE TABLE member
     created_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+-- CURRENT_TIMESTAMP : INSERT할 때 revoked_at을 직접 안 넣으면 DB가 현재 시각을 자동으로 넣음
