@@ -35,4 +35,7 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
 
     /** 행사와 상태가 일치하는 신청 건수를 셉니다. */
     long countByEventIdAndStatus(Long eventId, RegistrationStatus status);
+
+    /** 특정 회원이 행사 참가 승인을 받았는지 확인합니다. */
+    boolean existsByEventIdAndUserIdAndStatus(Long eventId, Long userId, RegistrationStatus status);
 }
