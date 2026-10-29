@@ -3,8 +3,13 @@ package com.ems.member.common.handler;
 import com.ems.member.common.domain.BaseException;
 import com.ems.member.common.domain.ErrorCode;
 import com.ems.member.common.dto.APIErrorResponse;
+import com.ems.member.member.domain.Role;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -45,19 +50,26 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, errorCode.getStatus());
     }
 
-    // 아직 dto에 @Valid 추가 안함
-    /*
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<APIErrorResponse> handleValidationException(MethodArgumentNotValidException e, HttpServletRequest request) {
+    // 잘못된 role
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<APIErrorResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException e, HttpServletRequest request) {
 
-        String message = e.getBindingResult()
-                .getFieldErrors()
-                .stream()
-                .findFirst()
-                .map(FieldError::getDefaultMessage)
-                .orElse("요청 값이 올바르지 않습니다.");
+        // Role enum 변환 실패 => HttpMessageNotReadableException
+        ErrorCode errorCode = ErrorCode.INVALID_REQUEST;
+        String message = "요청 형식이 올바르지 않습니다.";
 
-        ErrorCode errorCode = ErrorCode.VALIDATION_ERROR;
+        Throwable cause = e.getCause();
+
+        // 내부 cause가 InvalidFormatException
+        if(cause instanceof InvalidFormatException invalidFormatException) {
+
+            Class<?> targetType = invalidFormatException.getTargetType();
+
+            if(targetType == Role.class) {
+                errorCode = ErrorCode.INVALID_ROLE;
+                message = "유효하지 않는 role입니다.";
+            }
+        }
 
         APIErrorResponse response = new APIErrorResponse(
                 false,
@@ -71,8 +83,33 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(response, errorCode.getStatus());
     }
-    */
 
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<APIErrorResponse> handleValidationException(MethodArgumentNotValidException e, HttpServletRequest request) {
+
+        ErrorCode errorCode = ErrorCode.VALIDATION_ERROR;
+
+        String message = e.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .findFirst()
+                .map(FieldError::getDefaultMessage)
+                .orElse("요청 값이 올바르지 않습니다.");
+
+        APIErrorResponse response = new APIErrorResponse(
+                false,
+                errorCode,
+                message,
+                errorCode.getStatus().value(),
+                Instant.now(),
+                request.getRequestURI(),
+                null
+        );
+
+        return new ResponseEntity<>(response, errorCode.getStatus());
+    }
+
+    // 그외 예외
     @ExceptionHandler(Exception.class)
     public ResponseEntity<APIErrorResponse> handleException(Exception e, HttpServletRequest request) {
 

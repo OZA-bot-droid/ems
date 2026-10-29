@@ -1,7 +1,6 @@
 package com.ems.member.member.handler;
 
-import com.ems.member.common.exception.MemberLoginException;
-import com.ems.member.common.exception.MemberSignupException;
+import com.ems.member.common.exception.*;
 import com.ems.member.member.domain.Member;
 import com.ems.member.member.domain.Role;
 import com.ems.member.member.dto.SocialLoginDTO;
@@ -57,6 +56,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         // 어떤 OAuth Provider인지 확인하는 메서드
         String provider = oauthToken.getAuthorizedClientRegistrationId();
+
+        // 현재 요청과 관련된 HttpSession을 가져옴
         HttpSession session = request.getSession();
         Role role = (Role) session.getAttribute("role");
         SocialLoginDTO socialUser;
@@ -80,7 +81,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             Map<String, Object> naverResponse = oAuth2User.getAttribute("response");
 
             if(naverResponse == null) {
-                throw new IllegalArgumentException("");
+                throw new SocialProviderResponseException("소셜 로그인 사용자 정보를 가져올 수 없습니다.");
             }
 
             socialUser = new SocialLoginDTO(
@@ -91,11 +92,12 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             );
 
         } else {
-            throw new IllegalArgumentException("지원하지 않는 소셜 로그인입니다.");
+            throw new UnsupportedSocialProviderException("지원하지 않는 소셜 로그인입니다.");
         }
 
         try {
             if (role != null) {
+                // 회원 가입
                 socialLoginService.register(socialUser, role);
 
                 // 현재 세션에 저장해 둔 특정 속성 하나를 삭제하는 메서드
@@ -105,16 +107,15 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 response.sendRedirect("http://localhost:5173/");
             } else {
 
+                // 로그인
                 Member member = socialLoginService.login(socialUser);
 
                 // NullPointerException 주의
-                // 현재 요청과 관련된 HttpSession을 가져옴
-                Object clientId = request.getSession()
-                        // clientId라는 이름으로 저장해둔 값을 가져옴
-                        .getAttribute("clientId");
+                // clientId라는 이름으로 저장해둔 값을 가져옴
+                Object clientId = session.getAttribute("clientId");
 
                 if (clientId == null) {
-                    throw new IllegalStateException("null 발생");
+                    throw new InvalidRequestException("OAuth 로그인에 필요한 clientId가 존재하지 않습니다.");
                 }
 
                 String accessToken = jwtTokenService.createAccessToken(member.getId());

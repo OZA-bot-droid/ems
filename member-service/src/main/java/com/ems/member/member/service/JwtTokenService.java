@@ -1,8 +1,9 @@
 package com.ems.member.member.service;
 
+import com.ems.member.common.exception.InvalidRefreshTokenException;
+import com.ems.member.common.exception.MemberNotFoundException;
 import com.ems.member.member.domain.Role;
 import com.ems.member.member.repository.MemberRepository;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
@@ -46,7 +47,7 @@ public class JwtTokenService {
     public String createAccessToken(long id) {
 
         Role role = memberRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(""))
+                .orElseThrow(() -> new MemberNotFoundException("회원을 찾을 수 없습니다."))
                 .getRole();
         return createToken(id, accessTokenExpiration, "access", role);
     }
@@ -59,7 +60,7 @@ public class JwtTokenService {
     public String createRefreshToken(long id) {
 
         Role role = memberRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(""))
+                .orElseThrow(() -> new MemberNotFoundException("회원을 찾을 수 없습니다."))
                 .getRole();
         return createToken(id, refreshTokenExpiration, "refresh", role);
     }
@@ -100,7 +101,7 @@ public class JwtTokenService {
 
         // refresh token 여부
         if(!"refresh".equals(jwt.getClaimAsString("token_type"))){
-            throw new IllegalArgumentException("refresh token이 아님");
+            throw new InvalidRefreshTokenException("refresh token이 아님");
         }
 
         // refresh token이면 sub => member id 가져오기

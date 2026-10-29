@@ -12,7 +12,6 @@ import com.ems.member.member.dto.RefreshTokenRequestDTO;
 import com.ems.member.member.repository.MemberRepository;
 import com.ems.member.member.repository.RefreshTokenHistoryRepository;
 import com.ems.member.member.repository.RefreshTokenRepository;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -145,7 +144,7 @@ public class AuthService {
     public void logout(RefreshTokenRequestDTO dto, String refreshToken) {
 
         RefreshToken refreshTokenEntity = refreshTokenRepository.findByClientIdAndToken(dto.clientId(), refreshToken)
-                .orElseThrow(() -> new EntityNotFoundException("클라이언트의 정보가 일치하지 않습니다."));
+                .orElseThrow(() -> new InvalidRefreshTokenException("클라이언트의 정보가 일치하지 않습니다."));
 
         refreshTokenRepository.delete(refreshTokenEntity);
     }

@@ -2,17 +2,14 @@ package com.ems.member.member.dto;
 
 import com.ems.member.member.domain.Member;
 import com.ems.member.member.domain.Role;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
-public record MemberRegisterDTO(@Email
-                                @NotBlank
-                                @Size(max = 254)
+public record MemberRegisterDTO(@Email(message = "올바른 이메일 형식이 아닙니다.")
+                                @NotBlank(message = "이메일을 입력해주세요.")
+                                @Size(max = 254, message = "이메일은 254자를 초과할 수 없습니다.")
                                 String email,
 
-                                @NotBlank
+                                @NotBlank(message = "비밀번호를 입력해주세요.")
                                 @Size(min = 8, max = 20)
                                 @Pattern(
                                         regexp = "^(?=.*[A-Za-z])(?=.*\\\\d)(?=.*[!@#$%^&*])[A-Za-z\\\\d!@#$%^&*]+$",
@@ -20,6 +17,7 @@ public record MemberRegisterDTO(@Email
                                 ) String password,
 
                                 String name,
+                                @NotNull(message = "회원 유형을 선택해주세요.")
                                 Role role) {
 
     public Member toEntity(String bCryptPassword) {

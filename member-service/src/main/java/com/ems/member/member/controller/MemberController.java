@@ -11,6 +11,7 @@ import com.ems.member.member.service.SocialLoginService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -38,7 +39,7 @@ public class MemberController {
 
     // 회원가입
     @PostMapping("/register")
-    public ResponseEntity<?> registerMember(@RequestBody MemberRegisterDTO dto) {
+    public ResponseEntity<?> registerMember(@Valid @RequestBody MemberRegisterDTO dto) {
 
         memberService.registerMember(dto);
         return new ResponseEntity<>(HttpStatus.CREATED);
@@ -46,7 +47,7 @@ public class MemberController {
 
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody MemberLoginDTO dto) {
+    public ResponseEntity<?> login(@Valid @RequestBody MemberLoginDTO dto) {
         LoginResponseDTO responseDTO = memberService.login(dto);
 
         return new ResponseEntity<>(responseDTO.accessToken(), memberService.headersInCookie(responseDTO.refreshToken()), HttpStatus.OK);
@@ -54,16 +55,16 @@ public class MemberController {
 
     // 새로운 access token 생성
     @PostMapping("/reissue")
-    public ResponseEntity<?> reissue(@RequestBody RefreshTokenRequestDTO requestDTO, @CookieValue("refreshToken") String refreshToken) {
+    public ResponseEntity<?> reissue(@Valid @RequestBody RefreshTokenRequestDTO dto, @CookieValue("refreshToken") String refreshToken) {
 
-        LoginResponseDTO responseDTO = authService.reissue(requestDTO, refreshToken);
+        LoginResponseDTO responseDTO = authService.reissue(dto, refreshToken);
 
         return new ResponseEntity<>(responseDTO.accessToken(), memberService.headersInCookie(responseDTO.refreshToken()), HttpStatus.OK);
     }
 
     // 로그아웃
     @DeleteMapping("/logout")
-    public ResponseEntity<?> logout(@RequestBody RefreshTokenRequestDTO dto, @CookieValue("refreshToken") String refreshToken) {
+    public ResponseEntity<?> logout(@Valid @RequestBody RefreshTokenRequestDTO dto, @CookieValue("refreshToken") String refreshToken) {
 
         if(refreshToken != null) {
             authService.logout(dto, refreshToken);

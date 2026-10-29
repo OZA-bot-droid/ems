@@ -9,7 +9,6 @@ import com.ems.member.member.dto.MemberInformationDTO;
 import com.ems.member.member.dto.MemberLoginDTO;
 import com.ems.member.member.dto.MemberRegisterDTO;
 import com.ems.member.member.repository.MemberRepository;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;

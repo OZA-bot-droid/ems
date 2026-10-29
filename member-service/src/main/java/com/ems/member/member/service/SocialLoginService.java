@@ -1,7 +1,6 @@
 package com.ems.member.member.service;
 
-import com.ems.member.common.exception.MemberLoginException;
-import com.ems.member.common.exception.MemberSignupException;
+import com.ems.member.common.exception.InvalidRequestException;
 import com.ems.member.common.exception.SocialMemberDuplicatedException;
 import com.ems.member.common.exception.SocialMemberNotFoundException;
 import com.ems.member.member.domain.Member;
@@ -9,7 +8,6 @@ import com.ems.member.member.domain.Role;
 import com.ems.member.member.dto.LoginResponseDTO;
 import com.ems.member.member.dto.SocialLoginDTO;
 import com.ems.member.member.repository.MemberRepository;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,7 +67,7 @@ public class SocialLoginService {
         LoginResponseDTO result = loginCodes.remove(code);
 
         if(result == null) {
-            throw new IllegalArgumentException("유효하지 않은 로그인 코드입니다.");
+            throw new InvalidRequestException("유효하지 않은 로그인 코드입니다.");
         }
 
         return result;

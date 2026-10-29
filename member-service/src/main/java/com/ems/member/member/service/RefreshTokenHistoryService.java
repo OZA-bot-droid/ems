@@ -17,6 +17,7 @@ public class RefreshTokenHistoryService {
 
             return HexFormat.of().formatHex(tokenHash);
         } catch (NoSuchAlgorithmException e) {
+            // INTERNAL_SERVER_ERROR 500
             throw new IllegalStateException("SHA-256 알고리즘을 사용할 수 없습니다.", e);
         }
     }
