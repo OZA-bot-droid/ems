@@ -30,10 +30,33 @@ import java.util.Base64;
 public class JwtTokenConfig {
 
     @Value("${jwt.private-key}")
-    private String privateKeyPath;
+    private String privateKey;
 
     @Value("${jwt.public-key}")
-    private String publicKeyPath;
+    private String publicKey;
+
+    @Bean
+    public RSAPrivateKey rsaPrivateKey() throws Exception {
+
+        byte[] keyBytes = Base64.getDecoder().decode(privateKey);
+
+        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
+
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+
+        return (RSAPrivateKey) keyFactory.generatePrivate(keySpec);
+    }
+
+    @Bean RSAPublicKey rsaPublicKey() throws Exception {
+
+        byte[] keyBytes = Base64.getDecoder().decode(publicKey);
+
+        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
+
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+
+        return (RSAPublicKey) keyFactory.generatePublic(keySpec);
+    }
 
     // jwt encoder
     // JwtEncoder : JWT를 만들어내는 Spring Security의 인터페이스
@@ -43,7 +66,7 @@ public class JwtTokenConfig {
         // 개인키 파일 읽기
         // 해당 경로에 있는 파일의 문자열을 읽기
         String privateKeyFile = Files.readString(
-                Path.of(privateKeyPath)
+                Path.of(privateKey)
         );
 
         // \\s : 정규식에서 공백이나 줄바꿈 같은 공백 문자를 의미
@@ -112,7 +135,7 @@ public class JwtTokenConfig {
 
         // 공개키 파일 읽기
         String publicKeyFile = Files.readString(
-                Path.of(publicKeyPath)
+                Path.of(publicKey)
         );
         byte[] publicByte = Base64.getDecoder().decode(
 

@@ -104,7 +104,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 session.removeAttribute("role");
 
                 // 클라이언트에게 다른 URL로 다시 이동하라고 응답하는 메서드
-                response.sendRedirect("http://localhost:5173/");
+                response.sendRedirect("http://localhost:5173");
             } else {
 
                 // 로그인

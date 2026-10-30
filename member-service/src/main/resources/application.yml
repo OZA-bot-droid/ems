@@ -67,8 +67,8 @@ management:
       exposure:
         include: health,info
 jwt:
-  private-key: C:/Dev/keys/private_key.pem
-  public-key: C:/Dev/keys/public_key.pem
+  private-key: ${JWT_RRIVATE_KEY}
+  public-key: ${JWT_PUBLIC_KEY}
   issuer: ems-auth
   access-token-expiration: 1800
   refresh-token-expiration: 604800

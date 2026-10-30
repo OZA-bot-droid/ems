@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 
+// 로직을 DB가 아니라 Java 서비스 계층에서 명확하게 관리하려고 했기 때문에 java에서 db 저장
 @Entity
 @Builder
 @NoArgsConstructor
