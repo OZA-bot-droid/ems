@@ -106,6 +106,13 @@ public class RegistrationService {
         );
     }
 
+    /** 특정 회원의 해당 행사 참가 승인 여부를 반환합니다. */
+    @Transactional(readOnly = true)
+    public boolean isApproved(Long eventId, Long memberId) {
+        return registrationRepository.existsByEventIdAndUserIdAndStatus(
+                eventId, memberId, RegistrationStatus.APPROVED);
+    }
+
     /** ID에 해당하는 신청이 없으면 404 오류를 반환합니다. */
     private Registration findRegistration(Long registrationId) {
         return registrationRepository.findById(registrationId)
