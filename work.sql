@@ -5,6 +5,7 @@ ORDER BY table_name;
 
 select * from member;
 select * from refresh_token;
+select * from refresh_token_history;
 drop table member;
 drop table refresh_token;
 drop table refresh_token_history;

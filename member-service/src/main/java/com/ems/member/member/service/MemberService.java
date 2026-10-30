@@ -76,6 +76,7 @@ public class MemberService {
 
     public MultiValueMap<String, String> headersInCookie(String refreshToken) {
 
+        // 응답에 cookie를 넣어서 client에 저장하기 위함
         ResponseCookie refreshCookie = ResponseCookie
                 // 이름, value
                 .from("refreshToken", refreshToken)

@@ -24,18 +24,19 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         this.objectMapper = objectMapper;
     }
 
-    // gateway 적용 예정
-    // Authorization 헤더 없음
+    // 인증 실패 handler -> 401
     // 인증되지 않은 사용자가 인증 필요한 API 호출
     @Override
     public void commence(HttpServletRequest request,
                          HttpServletResponse response,
                          AuthenticationException authException) throws IOException {
+        // AuthenticationException : 인증 실패 예외들의 부모 타입
 
         String message;
         ErrorCode errorCode;
 
         // 만료 혹은 변조된 accessToken
+        // OAuth2AuthenticationException : OAuth2 인증 실패를 나타내는 구체적인 하위 예외
         if(authException instanceof OAuth2AuthenticationException oauthException
                 && "invalid_token".equals(oauthException.getError().getErrorCode())) {
 

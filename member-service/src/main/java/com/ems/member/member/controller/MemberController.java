@@ -38,6 +38,7 @@ public class MemberController {
     }
 
     // 회원가입
+    // @Valid : DTO 같은 객체 안에 선언된 검증 조건을 실제로 실행하라고 Spring에 알려주는 어노테이션
     @PostMapping("/register")
     public ResponseEntity<?> registerMember(@Valid @RequestBody MemberRegisterDTO dto) {
 
@@ -54,8 +55,9 @@ public class MemberController {
     }
 
     // 새로운 access token 생성
+    // @CookieValue : 해당 api에 온 정보 중에 특정 cookie의 값을 가져오는 어노테이션
     @PostMapping("/reissue")
-    public ResponseEntity<?> reissue(@Valid @RequestBody RefreshTokenRequestDTO dto, @CookieValue("refreshToken") String refreshToken) {
+    public ResponseEntity<?> reissue(@RequestBody RefreshTokenRequestDTO dto, @CookieValue("refreshToken") String refreshToken) {
 
         LoginResponseDTO responseDTO = authService.reissue(dto, refreshToken);
 
@@ -64,7 +66,7 @@ public class MemberController {
 
     // 로그아웃
     @DeleteMapping("/logout")
-    public ResponseEntity<?> logout(@Valid @RequestBody RefreshTokenRequestDTO dto, @CookieValue("refreshToken") String refreshToken) {
+    public ResponseEntity<?> logout(@RequestBody RefreshTokenRequestDTO dto, @CookieValue("refreshToken") String refreshToken) {
 
         if(refreshToken != null) {
             authService.logout(dto, refreshToken);
@@ -78,6 +80,7 @@ public class MemberController {
                 .maxAge(0)  // cookie 삭제를 의미
                 .build();
 
+        // MultiValueMap : 하나의 key에 여러 개의 value를 저장할 수 있는 Map 인터페이스
         MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
         headers.add(HttpHeaders.SET_COOKIE, deleteCookie.toString());
 

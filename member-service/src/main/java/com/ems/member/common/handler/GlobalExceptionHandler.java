@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.Instant;
 
+// 여러 Controller에서 발생하는 예외를 한 곳에서 공통 처리할 수 있게 해주는 어노테이션
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -30,6 +31,7 @@ public class GlobalExceptionHandler {
     }
     */
 
+    // @ExceptionHandler : 특정 예외가 발생했을 때 어떤 메서드가 그 예외를 처리할지 지정하는 어노테이션
     // Spring은 더 구체적으로 일치하는 Exception Handler를 먼저 선택
     // 사용자 정의 예외가 발생할 경우
     @ExceptionHandler(BaseException.class)
@@ -58,11 +60,15 @@ public class GlobalExceptionHandler {
         ErrorCode errorCode = ErrorCode.INVALID_REQUEST;
         String message = "요청 형식이 올바르지 않습니다.";
 
+        // 예외 종류 받기
         Throwable cause = e.getCause();
 
-        // 내부 cause가 InvalidFormatException
+        // 내부 cause가 InvalidFormatException인지 확인
+        // InvalidFormatException : Jackson이 JSON 값을 자바 타입으로 변환하지 못했을 때 발생시키는 예외
         if(cause instanceof InvalidFormatException invalidFormatException) {
 
+            // Class : 클래스 자체에 대한 정보를 담는 객체
+            // getTargetType : 원래 어떤 Java 타입으로 변환하려고 했는지를 알려줌
             Class<?> targetType = invalidFormatException.getTargetType();
 
             if(targetType == Role.class) {
@@ -85,11 +91,13 @@ public class GlobalExceptionHandler {
     }
 
     // DTO validation 실패 -> 필드가 조건에 맞지 않음
+    // controller에서 @Valid로 dto의 validation 조건을 통과하지 못할 경우 발생하는 예외
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<APIErrorResponse> handleValidationException(MethodArgumentNotValidException e, HttpServletRequest request) {
 
         ErrorCode errorCode = ErrorCode.VALIDATION_ERROR;
 
+        // @Valid로 검증시 실패할 경우 여기서 message를 가져옴
         String message = e.getBindingResult()
                 .getFieldErrors()
                 .stream()

@@ -8,6 +8,7 @@ import java.util.Base64;
 
 public class JwtKeyGenerator {
 
+    // 나중에 파일을 생성 및 관리하지 않고 AWS KMS(private key)/JWKS(public key) 기반으로 전환 예정
     public static void main(String[] args) throws Exception {
 
         // RSA 알고리즘(비대칭키 암호화 알고리즘)을 사용하는 키 생성기, 키 크기를 3072비트로 설정

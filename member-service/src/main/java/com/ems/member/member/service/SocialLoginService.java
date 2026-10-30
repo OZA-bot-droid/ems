@@ -19,6 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Transactional
 public class SocialLoginService {
 
+    // ConcurrentHashMap : 여러 스레드가 동시에 접근해도 안전하게 사용할 수 있도록 만든 Map 구현 클래스
     private final Map<String, LoginResponseDTO> loginCodes = new ConcurrentHashMap<>();
     private final MemberRepository memberRepository;
 

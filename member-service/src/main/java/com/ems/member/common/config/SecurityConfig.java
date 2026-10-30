@@ -26,16 +26,12 @@ public class SecurityConfig {
         this.customAccessDeniedHandler = customAccessDeniedHandler;
     }
 
-//    @Bean
-//    public PasswordEncoder passwordEncoder() {
-//        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-//    }
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    // Spring Security에서 어떤 요청에 어떤 보안 규칙을 적용할지 정의하는 필터 체인 객체
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
@@ -75,12 +71,16 @@ public class SecurityConfig {
                         // Bean으로 Spring에 등록한 JwtDecoder를 찾아서 사용
                         oauth2.jwt(jwt -> {})
                 )
-                // google 계정으로 로그인
+                // 소셜 계정으로 로그인시 handler 실행
                 .oauth2Login(oauth2 ->
                         oauth2.successHandler(oAuth2LoginSuccessHandler)
                 )
+                // Spring Security에서 인증/인가 실패가 발생했을 때 어떻게 응답할지 정하는 설정
+                // controller에 도달하기 전에 발생하는 Security 예외이기 때문에 별도 Handler가 필요
                 .exceptionHandling(exception -> exception
+                        // 인증 실패
                         .authenticationEntryPoint(customAuthenticationEntryPoint)
+                        // 인가 실패
                         .accessDeniedHandler(customAccessDeniedHandler)
                 )
                 .build();

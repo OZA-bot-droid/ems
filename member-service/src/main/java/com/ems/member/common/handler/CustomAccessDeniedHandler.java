@@ -3,7 +3,6 @@ package com.ems.member.common.handler;
 import com.ems.member.common.domain.ErrorCode;
 import com.ems.member.common.dto.APIErrorResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;
@@ -24,6 +23,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
         this.objectMapper = objectMapper;
     }
 
+    // 인가 실패 handler -> 403
     // 인증은 됐지만 해당 API 접근 권한이 없으면 실행
     @Override
     public void handle(HttpServletRequest request,
@@ -46,6 +46,8 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
+        // writeValue : Java 객체를 JSON으로 변환해서 특정 출력 대상에 바로 써주는 메서드
+        // getWriter : HTTP 응답 본문에 문자열을 작성할 통로
         objectMapper.writeValue(response.getWriter(), errorResponse);
     }
 }

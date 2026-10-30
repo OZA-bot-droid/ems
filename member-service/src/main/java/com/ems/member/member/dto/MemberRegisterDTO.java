@@ -16,9 +16,16 @@ public record MemberRegisterDTO(@Email(message = "올바른 이메일 형식이 
                                         message = "비밀번호는 8~20자이며 영문, 숫자, 특수문자(!@#$%^&*)를 포함해야 합니다."
                                 ) String password,
 
+                                @NotBlank(message = "이름을 1글자 이상 입력해주세요.")
                                 String name,
-                                @NotNull(message = "회원 유형을 선택해주세요.")
+
+                                @NotBlank(message = "회원 유형을 선택해주세요.")
                                 Role role) {
+
+    // @NotBlank : null, 빈 문자열, 공백만 있는 문자열 금지
+    // @NotNull : null인지만 검사
+
+    // regexp : 문자열 허용 정규식
 
     public Member toEntity(String bCryptPassword) {
 

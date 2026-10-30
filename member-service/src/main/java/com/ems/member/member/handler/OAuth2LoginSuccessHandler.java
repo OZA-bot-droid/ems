@@ -91,6 +91,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                     naverResponse.get("name").toString()    // 이름
             );
 
+        } else {
+            throw new IllegalArgumentException("제공하지 않는 소셜 로그인입니다.");
         }
 
         try {

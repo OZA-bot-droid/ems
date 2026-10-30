@@ -67,7 +67,7 @@ public class AuthService {
     }
 
     // 새로운 accessToken과 refreshToken 발급
-    // noRollbackFor : RefreshTokenReusedException이 발생해도 이 트랜잭션은 rollback하지 않음
+    // noRollbackFor : 해당 예외가 발생해도 이 트랜잭션은 rollback하지 않음
     @Transactional(noRollbackFor = RefreshTokenReusedException.class)
     public LoginResponseDTO reissue(RefreshTokenRequestDTO dto, String refreshToken) {
 
