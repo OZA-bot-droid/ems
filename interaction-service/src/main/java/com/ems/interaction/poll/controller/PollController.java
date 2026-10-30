@@ -1,23 +1,17 @@
 package com.ems.interaction.poll.controller;
 
 import com.ems.interaction.common.exception.ApiException;
+import com.ems.interaction.common.exception.ErrorCode;
 import com.ems.interaction.poll.dto.PollManagementDTO;
-import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.ems.interaction.poll.dto.PollSaveDTO;
 import com.ems.interaction.poll.dto.PollResponseDTO;
+import com.ems.interaction.poll.dto.PollSaveDTO;
 import com.ems.interaction.poll.service.PollService;
-
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -91,10 +85,12 @@ public class PollController {
     }
 
 
+    //관리자 권한 체크
     private void checkAdmin(String role) {
         if (!"ADMIN".equals(role)) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "FORBIDDEN", "관리자 권한이 필요합니다.");
+            throw new ApiException(ErrorCode.FORBIDDEN);
         }
     }
+
 
 }

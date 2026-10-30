@@ -3,7 +3,10 @@ package com.ems.interaction.poll.domain;
 
 import com.ems.interaction.common.domain.BaseEntity;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 

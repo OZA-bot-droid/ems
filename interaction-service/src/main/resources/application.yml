@@ -12,11 +12,12 @@ spring:
   # Set ddl-auto: validate in each service's Entity + V1 migration PR.
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: validate
     open-in-view: false
   flyway:
     enabled: true
     locations: classpath:db/migration
+    baseline-on-migrate: false
 management:
   endpoints:
     web:

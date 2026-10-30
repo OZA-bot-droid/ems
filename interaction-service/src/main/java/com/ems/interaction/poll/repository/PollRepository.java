@@ -1,9 +1,6 @@
 package com.ems.interaction.poll.repository;
 
 import com.ems.interaction.poll.domain.Poll;
-import org.springframework.data.jpa.repository.JpaRepository;
-
-import com.ems.interaction.poll.domain.Poll;
 import com.ems.interaction.poll.domain.Status;
 import org.springframework.data.jpa.repository.JpaRepository;
 

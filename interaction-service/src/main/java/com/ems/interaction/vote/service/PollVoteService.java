@@ -2,6 +2,7 @@ package com.ems.interaction.vote.service;
 
 
 import com.ems.interaction.common.exception.ApiException;
+import com.ems.interaction.mock.DemoData;
 import com.ems.interaction.poll.domain.Poll;
 import com.ems.interaction.poll.domain.PollOption;
 import com.ems.interaction.poll.domain.Status;
@@ -19,12 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 
 // 임시 권한 데이터
-import com.ems.interaction.mock.DemoData;
 
 @Service
 @Transactional

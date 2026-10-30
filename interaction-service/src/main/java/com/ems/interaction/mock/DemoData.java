@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-@Profile("local") // 개발 환경 전용. 운영 환경에서는 등록하지 않음
 public class DemoData {
 
     public record DemoMember(
