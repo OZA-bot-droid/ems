@@ -60,7 +60,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         // 현재 요청과 관련된 HttpSession을 가져옴
         HttpSession session = request.getSession();
         Role role = (Role) session.getAttribute("role");
-        SocialLoginDTO socialUser;
+        SocialLoginDTO socialUser = null;
 
         if("google".equals(provider)) {
             // Google 같은 OpenID Connect 로그인에서 인증된 사용자의 email, name, sub, ID Token, Claim 등을 담고 있는 Spring Security의 사용자 정보 객체
@@ -91,8 +91,6 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                     naverResponse.get("name").toString()    // 이름
             );
 
-        } else {
-            throw new UnsupportedSocialProviderException("지원하지 않는 소셜 로그인입니다.");
         }
 
         try {

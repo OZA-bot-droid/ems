@@ -24,6 +24,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
         this.objectMapper = objectMapper;
     }
 
+    // 인증은 됐지만 해당 API 접근 권한이 없으면 실행
     @Override
     public void handle(HttpServletRequest request,
                        HttpServletResponse response,

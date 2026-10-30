@@ -30,8 +30,8 @@ public class GlobalExceptionHandler {
     }
     */
 
-    // 회원가입 실패, 이메일 중복 예외
-    // Spring은 더 구체적으로 일치하는 BaseException Handler를 먼저 선택
+    // Spring은 더 구체적으로 일치하는 Exception Handler를 먼저 선택
+    // 사용자 정의 예외가 발생할 경우
     @ExceptionHandler(BaseException.class)
     public ResponseEntity<APIErrorResponse> handleMemberSignupException(BaseException e, HttpServletRequest request) {
 
@@ -50,7 +50,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, errorCode.getStatus());
     }
 
-    // 잘못된 role
+    // JSON or enum 변환 실패 -> role문제 포함
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<APIErrorResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException e, HttpServletRequest request) {
 
@@ -84,6 +84,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, errorCode.getStatus());
     }
 
+    // DTO validation 실패 -> 필드가 조건에 맞지 않음
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<APIErrorResponse> handleValidationException(MethodArgumentNotValidException e, HttpServletRequest request) {
 
@@ -109,7 +110,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, errorCode.getStatus());
     }
 
-    // 그외 예외
+    // 그외 예외 -> 500
     @ExceptionHandler(Exception.class)
     public ResponseEntity<APIErrorResponse> handleException(Exception e, HttpServletRequest request) {
 
