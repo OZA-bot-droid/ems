@@ -2,7 +2,7 @@ package com.ems.interaction.vote.service;
 
 
 import com.ems.interaction.common.exception.ApiException;
-import com.ems.interaction.mock.DemoData;
+import com.ems.interaction.common.exception.ErrorCode;
 import com.ems.interaction.poll.domain.Poll;
 import com.ems.interaction.poll.domain.PollOption;
 import com.ems.interaction.poll.domain.Status;
@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 // 임시 권한 데이터
+import com.ems.interaction.mock.DemoData;
+
 
 @Service
 @Transactional
@@ -38,23 +40,41 @@ public class PollVoteService {
 
         // 1. 투표 조회
         Poll poll = pollRepository.findById(pollId).orElseThrow(()
-                -> new IllegalArgumentException("존재하지 않는 투표입니다."));
+                -> new ApiException(ErrorCode.POLL_NOT_FOUND));
+
+        // 해당 세션 참가 승인 여부 확인
+        boolean isApproved = false;
+
+        for (DemoData.DemoRegistration reg : demoData.registrations) {
+            if (reg.userId().equals(userId)
+                    && reg.eventId().equals(poll.getEventId())
+                    && reg.sessionId().equals(poll.getSessionId())
+                    && "APPROVED".equals(reg.status())) {
+
+                isApproved = true;
+                break;
+            }
+        }
+
+        if(!isApproved){
+            throw new ApiException(ErrorCode.REGISTRATION_NOT_APPROVED);
+        }
 
         // 2. 진행 중인 투표인지 확인
         if (!poll.canVote()) {
-            throw new IllegalArgumentException("현재 참여할 수 없는 투표입니다.");
+            throw new ApiException(ErrorCode.POLL_NOT_ACTIVE);
         }
 
         // 3. 선택지가 해당 투표에 속하는지 확인
         boolean optionExists = pollOptionRepository.existsByPollIdAndId(poll.getId(), dto.getPollOptionId());
 
         if (!optionExists) {
-            throw new IllegalArgumentException("해당 투표에 속하지 않는 선택지입니다.");
+            throw new ApiException(ErrorCode.INVALID_POLL_OPTION);
         }
 
         // 4. 중복 투표 확인
         if (pollVoteRepository.existsByPollIdAndUserId(poll.getId(), userId)) {
-            throw new IllegalArgumentException("이미 참여한 투표입니다.");
+            throw new ApiException(ErrorCode.ALREADY_VOTED);
         }
 
         // 5. DTO → Entity 변환
@@ -93,19 +113,11 @@ public class PollVoteService {
 
         // 1. 투표 조회
         Poll poll = pollRepository.findById(pollId)
-                .orElseThrow(() -> new ApiException(
-                        HttpStatus.NOT_FOUND,
-                        "POLL_NOT_FOUND",
-                        "투표를 찾을 수 없습니다."
-                ));
+                .orElseThrow(() -> new ApiException(ErrorCode.POLL_NOT_FOUND));
 
         // 2. 사용자 확인
         if (userId == null || !demoData.members.containsKey(userId)) {
-            throw new ApiException(
-                    HttpStatus.UNAUTHORIZED,
-                    "UNAUTHORIZED",
-                    "유효하지 않은 사용자입니다."
-            );
+            throw new ApiException(ErrorCode.UNAUTHORIZED);
         }
 
         // 3. 투표 생성자 여부 확인
@@ -127,25 +139,17 @@ public class PollVoteService {
 
         // 5. 투표 생성자도 아니고 참가 승인 사용자도 아니라면 거부
         if (!isOwner && !isApproved) {
-            throw new ApiException(
-                    HttpStatus.FORBIDDEN,
-                    "FORBIDDEN",
-                    "투표 결과를 조회할 권한이 없습니다."
-            );
+            throw new ApiException(ErrorCode.REGISTRATION_NOT_APPROVED);
         }
 
-        // 6. 참가자의 결과 공개 조건 확인
+        // 6. 결과 공개 조건 확인
         // 생성자는 조회 허용
         // 참가자는 실시간 공개이거나 종료된 투표일 때만 허용
         if (!isOwner
                 && !poll.isShowLiveResults()
                 && poll.getStatus() != Status.CLOSED) {
 
-            throw new ApiException(
-                    HttpStatus.FORBIDDEN,
-                    "RESULT_NOT_AVAILABLE",
-                    "투표 종료 후 결과를 확인할 수 있습니다."
-            );
+            throw new ApiException(HttpStatus.FORBIDDEN, "RESULT_NOT_AVAILABLE", "투표 종료 후 결과를 확인할 수 있습니다.");
         }
 
         // 7. 해당 투표의 선택지 조회

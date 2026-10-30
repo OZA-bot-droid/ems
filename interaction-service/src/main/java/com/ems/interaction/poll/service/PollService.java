@@ -1,7 +1,7 @@
 package com.ems.interaction.poll.service;
 
 import com.ems.interaction.common.exception.ApiException;
-import com.ems.interaction.mock.DemoData;
+import com.ems.interaction.common.exception.ErrorCode;
 import com.ems.interaction.poll.domain.Poll;
 import com.ems.interaction.poll.domain.PollOption;
 import com.ems.interaction.poll.domain.Status;
@@ -22,7 +22,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+
 //    데모용 유저, 이벤트, 세션, 허가 데이터
+import com.ems.interaction.mock.DemoData;
 
 
 @Service
@@ -33,7 +35,7 @@ public class PollService {
     private final PollRepository pollRepository;
     private final PollOptionRepository pollOptionRepository;
 
-//    데모용 유저, 이벤트, 세션, 허가 데이터
+    //    데모용 유저, 이벤트, 세션, 허가 데이터
     private final DemoData demoData;
 
     // 투표 생성
@@ -42,21 +44,35 @@ public class PollService {
 
         // 인증된 관리자 ID 검증
         if (userId == null) {
-            throw new ApiException(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "인증이 필요합니다.");
+            throw new ApiException(ErrorCode.UNAUTHORIZED);
+        }
+
+        // 행사 조회
+        DemoData.DemoEvent event = demoData.events.get(dto.getEventId());
+
+        // 행사 존재 여부 확인
+        if (event == null) {
+            throw new ApiException(ErrorCode.RESOURCE_NOT_FOUND);
+        }
+
+        // 행사 생성자와 현재 투표 생성자 아이디 비교
+        if (!event.createdBy().equals(userId)) {
+            throw new ApiException(ErrorCode.EVENT_OWNER_REQUIRED);
         }
 
         // 투표 시작·종료 시간 검증
         if (!dto.getEndsAt().isAfter(dto.getStartsAt())) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "INVALID_PERIOD", "종료 시각은 시작 시각보다 늦어야 합니다.");
+            throw new ApiException(ErrorCode.INVALID_PERIOD);
         }
 
+        // 투표 시작·종료 시간 검증
         if (!dto.getStartsAt().isAfter(Instant.now())) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "INVALID_PERIOD", "시작 시각은 현재보다 미래여야 합니다.");
+            throw new ApiException(ErrorCode.INVALID_PERIOD);
         }
 
         // 선택지 최소 2개 검증
         if (dto.getOptions() == null || dto.getOptions().size() < 2) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", "선택지는 최소 2개 필요합니다.");
+            throw new ApiException(ErrorCode.VALIDATION_ERROR);
         }
 
         // 투표 Entity 생성
@@ -156,31 +172,25 @@ public class PollService {
                         ));
 
         // 8. Poll + PollOption -> PollResponseDTO 변환
-        return polls.stream()
-                .map(poll -> PollResponseDTO.from(
-                        poll,
-                        optionsByPollId.getOrDefault(
-                                poll.getId(),
-                                List.of()
-                        )
-                ))
-                .toList();
+        return polls.stream().map(poll -> PollResponseDTO.from(poll, optionsByPollId.getOrDefault(poll.getId(), List.of()))).toList();
     }
 
 
     // 투표 활성화: 예정 상태에서만, 실제 투표 가능 시간에만 전환
     public Long setPollActive(Long userId, Long pollId) {
         Poll poll = pollRepository.findById(pollId)
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "POLL_NOT_FOUND", "투표를 찾을 수 없습니다."));
+                .orElseThrow(() -> new ApiException(ErrorCode.POLL_NOT_FOUND));
 
         if (!Objects.equals(poll.getUserId(), userId)) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "FORBIDDEN", "투표를 변경할 권한이 없습니다.");
+            throw new ApiException(ErrorCode.EVENT_OWNER_REQUIRED);
         }
 
+        // 투표 상태 전이 충돌 에러
         if (poll.getStatus() != Status.SCHEDULED) {
             throw new ApiException(HttpStatus.CONFLICT, "INVALID_STATUS_CHANGE", "예정 상태의 투표만 활성화할 수 있습니다.");
         }
 
+        // 투표 상태 전이 충돌
         // 기존의 투표 조회 및 생성자 검증 이후
         if (!poll.canActivate(Instant.now())) {
             throw new ApiException(HttpStatus.CONFLICT, "INVALID_STATUS_CHANGE", "현재 활성화할 수 없는 투표입니다.");
@@ -193,12 +203,13 @@ public class PollService {
     // 투표 비활성화(종료): 종료 후 재활성화는 허용하지 않음
     public Long setPollClose(Long userId, Long pollId) {
         Poll poll = pollRepository.findById(pollId)
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "POLL_NOT_FOUND", "투표를 찾을 수 없습니다."));
+                .orElseThrow(() -> new ApiException(ErrorCode.POLL_NOT_FOUND));
 
         if (!Objects.equals(poll.getUserId(), userId)) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "FORBIDDEN", "투표를 변경할 권한이 없습니다.");
+            throw new ApiException(ErrorCode.EVENT_OWNER_REQUIRED);
         }
 
+        // 투표 상태 전이 충돌
         if (!poll.canClose()) {
             throw new ApiException(HttpStatus.CONFLICT, "INVALID_STATUS_CHANGE", "진행 중인 투표만 종료할 수 있습니다.");
         }
