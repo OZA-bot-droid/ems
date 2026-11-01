@@ -1,4 +1,4 @@
-package com.ems.member.member.handler;
+package com.ems.member.common.handler;
 
 import com.ems.member.common.exception.*;
 import com.ems.member.member.domain.Member;
@@ -10,12 +10,14 @@ import com.ems.member.member.service.SocialLoginService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -35,11 +37,18 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private final SocialLoginService socialLoginService;
     private final JwtTokenService jwtTokenService;
     private final AuthService authService;
+    private final HandlerExceptionResolver handlerExceptionResolver;
 
-    public OAuth2LoginSuccessHandler(SocialLoginService socialLoginService, JwtTokenService jwtTokenService, AuthService authService) {
+    public OAuth2LoginSuccessHandler(SocialLoginService socialLoginService,
+                                     JwtTokenService jwtTokenService,
+                                     AuthService authService,
+                                     // HandlerExceptionResolver 관련 Resolver들이 여러 개가 있으니 Spring은 이것들을 묶어서 사용하는 대표 Resolver를 handlerExceptionResolver로 등록됨
+                                     // handlerExceptionResolver : Spring MVC가 정상적으로 사용하는 전체 예외 처리 체인
+                                     @Qualifier("handlerExceptionResolver") HandlerExceptionResolver handlerExceptionResolver) {
         this.socialLoginService = socialLoginService;
         this.jwtTokenService = jwtTokenService;
         this.authService = authService;
+        this.handlerExceptionResolver = handlerExceptionResolver;
     }
 
     // 인증이 성공했을 때 Spring Security가 자동으로 호출
@@ -51,54 +60,54 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                                         HttpServletResponse response,
                                         Authentication authentication) throws IOException {
 
-        // OAuth2 로그인 성공 후, 로그인한 사용자 정보와 권한, 어떤 소셜 로그인인지에 대한 정보를 담고 있는 Spring Security의 인증 객체
-        OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
+        try {
+            // OAuth2 로그인 성공 후, 로그인한 사용자 정보와 권한, 어떤 소셜 로그인인지에 대한 정보를 담고 있는 Spring Security의 인증 객체
+            OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
 
-        // 어떤 OAuth Provider인지 확인하는 메서드
-        String provider = oauthToken.getAuthorizedClientRegistrationId();
+            // 어떤 OAuth Provider인지 확인하는 메서드
+            String provider = oauthToken.getAuthorizedClientRegistrationId();
 
-        // 현재 요청과 관련된 HttpSession을 가져옴
-        HttpSession session = request.getSession();
-        Role role = (Role) session.getAttribute("role");
-        SocialLoginDTO socialUser = null;
+            // 현재 요청과 관련된 HttpSession을 가져옴
+            HttpSession session = request.getSession();
+            Role role = (Role) session.getAttribute("role");
+            SocialLoginDTO socialUser = null;
 
-        if("google".equals(provider)) {
-            // Google 같은 OpenID Connect 로그인에서 인증된 사용자의 email, name, sub, ID Token, Claim 등을 담고 있는 Spring Security의 사용자 정보 객체
-            OidcUser oidcUser = (OidcUser) oauthToken.getPrincipal();
+            if("google".equals(provider)) {
+                // Google 같은 OpenID Connect 로그인에서 인증된 사용자의 email, name, sub, ID Token, Claim 등을 담고 있는 Spring Security의 사용자 정보 객체
+                OidcUser oidcUser = (OidcUser) oauthToken.getPrincipal();
 
-            // 서버가 사용자별 상태 데이터를 저장하는 객체
-            // OAuth2 인증 절차에서 임시 상태 저장 용도로 사용
-            // JSESSIONID(session 식별자)를 서버가 보고 해당 HttpSession을 찾음
-            socialUser = new SocialLoginDTO(
-                    provider,
-                    oidcUser.getSubject(),  // google 사용자 고유 id
-                    oidcUser.getEmail(),    // gmail
-                    oidcUser.getFullName()  // 이름
-            );
-        } else if("naver".equals(provider)) {
+                // 서버가 사용자별 상태 데이터를 저장하는 객체
+                // OAuth2 인증 절차에서 임시 상태 저장 용도로 사용
+                // JSESSIONID(session 식별자)를 서버가 보고 해당 HttpSession을 찾음
+                socialUser = new SocialLoginDTO(
+                        provider,
+                        oidcUser.getSubject(),  // google 사용자 고유 id
+                        oidcUser.getEmail(),    // gmail
+                        oidcUser.getFullName()  // 이름
+                );
+            } else if("naver".equals(provider)) {
 
-            OAuth2User oAuth2User = oauthToken.getPrincipal();
-            Map<String, Object> naverResponse = oAuth2User.getAttribute("response");
+                OAuth2User oAuth2User = oauthToken.getPrincipal();
+                Map<String, Object> naverResponse = oAuth2User.getAttribute("response");
 
-            if(naverResponse == null) {
-                throw new SocialProviderResponseException("소셜 로그인 사용자 정보를 가져올 수 없습니다.");
+                if(naverResponse == null) {
+                    throw new SocialProviderResponseException("소셜 로그인 사용자 정보를 가져올 수 없습니다.");
+                }
+
+                socialUser = new SocialLoginDTO(
+                        provider,
+                        naverResponse.get("id").toString(),     // google 사용자 고유 id
+                        naverResponse.get("email").toString(),  // gmail
+                        naverResponse.get("name").toString()    // 이름
+                );
+
+            } else {
+                throw new IllegalArgumentException("제공하지 않는 소셜 로그인입니다.");
             }
 
-            socialUser = new SocialLoginDTO(
-                    provider,
-                    naverResponse.get("id").toString(),     // google 사용자 고유 id
-                    naverResponse.get("email").toString(),  // gmail
-                    naverResponse.get("name").toString()    // 이름
-            );
-
-        } else {
-            throw new IllegalArgumentException("제공하지 않는 소셜 로그인입니다.");
-        }
-
-        try {
             if (role != null) {
                 // 회원 가입
-                socialLoginService.register(socialUser, role);
+                socialLoginService.socialRegister(socialUser, role);
 
                 // 현재 세션에 저장해 둔 특정 속성 하나를 삭제하는 메서드
                 session.removeAttribute("role");
@@ -108,7 +117,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             } else {
 
                 // 로그인
-                Member member = socialLoginService.login(socialUser);
+                Member member = socialLoginService.socialLogin(socialUser);
 
                 // NullPointerException 주의
                 // clientId라는 이름으로 저장해둔 값을 가져옴
@@ -121,8 +130,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 String accessToken = jwtTokenService.createAccessToken(member.getId());
                 String refreshToken = jwtTokenService.createRefreshToken(member.getId());
 
-                String loginCode = socialLoginService.save(accessToken, refreshToken);
-                authService.changeRefreshToken(
+                String loginCode = socialLoginService.saveLoginCode(accessToken, refreshToken);
+                authService.replaceRefreshToken(
                         member,
                         refreshToken,
                         clientId.toString(),
@@ -132,14 +141,21 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 // Access Token/Refresh Token 자체를 URL에 직접 넣지 않고, 짧게 유효한 일회성 코드만 프론트에 넘긴 다음 그 코드로 서버에서 토큰을 교환하는 구조를 만들기 위함
                 response.sendRedirect("http://localhost:5173/oauth-success?code=" + loginCode);
             }
-        } catch (MemberLoginException e) {
+        } catch (InvalidCredentialsException e) {
 
             String message = URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
             response.sendRedirect("http://localhost:5173/?error=" + message);
-        } catch (MemberSignupException e) {
+        } catch (MemberEmailDuplicatedException e) {
 
             String message = URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
             response.sendRedirect("http://localhost:5173/signup?error=" + message);
+        } catch(Exception e) {
+            handlerExceptionResolver.resolveException(
+                    request,
+                    response,
+                    null,
+                    e
+            );
         }
     }
 }

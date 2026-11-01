@@ -51,7 +51,7 @@ public class MemberController {
     public ResponseEntity<?> login(@Valid @RequestBody MemberLoginDTO dto) {
         LoginResponseDTO responseDTO = memberService.login(dto);
 
-        return new ResponseEntity<>(responseDTO.accessToken(), memberService.headersInCookie(responseDTO.refreshToken()), HttpStatus.OK);
+        return new ResponseEntity<>(responseDTO.accessToken(), memberService.createRefreshTokenCookie(responseDTO.refreshToken()), HttpStatus.OK);
     }
 
     // 새로운 access token 생성
@@ -61,7 +61,7 @@ public class MemberController {
 
         LoginResponseDTO responseDTO = authService.reissue(dto, refreshToken);
 
-        return new ResponseEntity<>(responseDTO.accessToken(), memberService.headersInCookie(responseDTO.refreshToken()), HttpStatus.OK);
+        return new ResponseEntity<>(responseDTO.accessToken(), memberService.createRefreshTokenCookie(responseDTO.refreshToken()), HttpStatus.OK);
     }
 
     // 로그아웃
@@ -139,11 +139,11 @@ public class MemberController {
     @PostMapping("/oauth2/exchange")
     public ResponseEntity<?> exchange(@RequestParam String code) {
 
-        LoginResponseDTO dto = socialLoginService.getAndRemove(code);
+        LoginResponseDTO dto = socialLoginService.getAndRemoveLoginCode(code);
 
         return new ResponseEntity<>(
                 dto.accessToken(),
-                memberService.headersInCookie(dto.refreshToken()),
+                memberService.createRefreshTokenCookie(dto.refreshToken()),
                 HttpStatus.OK
         );
     }

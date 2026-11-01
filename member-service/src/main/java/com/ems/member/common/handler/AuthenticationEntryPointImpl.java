@@ -16,11 +16,11 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
 @Component
-public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
+public class AuthenticationEntryPointImpl implements AuthenticationEntryPoint {
 
     private final ObjectMapper objectMapper;
 
-    public CustomAuthenticationEntryPoint(ObjectMapper objectMapper) {
+    public AuthenticationEntryPointImpl(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
 

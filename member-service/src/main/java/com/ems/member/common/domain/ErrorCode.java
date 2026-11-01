@@ -8,8 +8,9 @@ public enum ErrorCode {
 
     // 400 Bad Request
     VALIDATION_ERROR(HttpStatus.BAD_REQUEST),
-    INVALID_REQUEST(HttpStatus.BAD_REQUEST),
     INVALID_ROLE(HttpStatus.BAD_REQUEST),
+    INVALID_REQUEST(HttpStatus.BAD_REQUEST),
+    INVALID_OAUTH_CODE(HttpStatus.BAD_REQUEST),
 
     // 401 Unauthorized
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED),
@@ -17,7 +18,6 @@ public enum ErrorCode {
     INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED),
     INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED),
     REFRESH_TOKEN_REUSED(HttpStatus.UNAUTHORIZED),
-    SOCIAL_MEMBER_NOT_FOUND(HttpStatus.UNAUTHORIZED),
 
     // 403 Forbidden
     FORBIDDEN(HttpStatus.FORBIDDEN),
@@ -27,19 +27,12 @@ public enum ErrorCode {
 
     // 409 Conflict
     MEMBER_EMAIL_DUPLICATED(HttpStatus.CONFLICT),
-    SOCIAL_MEMBER_DUPLICATED(HttpStatus.CONFLICT),
 
     // 500 Interval Server Error
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR),
 
     // 502 Bad Gateway
-    UPSTREAM_SERVICE_ERROR(HttpStatus.BAD_GATEWAY),
-
-    // 503 Service Unavailable
-    SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE),
-
-    // 504 Gateway Timeout
-    UPSTREAM_TIMEOUT(HttpStatus.GATEWAY_TIMEOUT);
+    UPSTREAM_SERVICE_ERROR(HttpStatus.BAD_GATEWAY);
 
     private final HttpStatus status;
 

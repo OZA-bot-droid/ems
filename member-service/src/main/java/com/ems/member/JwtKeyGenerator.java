@@ -6,6 +6,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.util.Base64;
 
+// 공개키와 개인키를 생성하기 위한 용도 한 번 생성 후 환경변수 등록 후에 삭제해도 문제 없음
 public class JwtKeyGenerator {
 
     // 나중에 파일을 생성 및 관리하지 않고 AWS KMS(private key)/JWKS(public key) 기반으로 전환 예정

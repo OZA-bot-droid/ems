@@ -14,9 +14,6 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPrivateKey;
@@ -35,27 +32,16 @@ public class JwtTokenConfig {
     @Value("${jwt.public-key}")
     private String publicKey;
 
-    @Bean
-    public RSAPrivateKey rsaPrivateKey() throws Exception {
-
-        byte[] keyBytes = Base64.getDecoder().decode(privateKey);
-
-        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
-
+    private RSAPublicKey loadPublicKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
+        byte[] publicKeyBytes = Base64.getDecoder().decode(publicKey);
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
 
-        return (RSAPrivateKey) keyFactory.generatePrivate(keySpec);
-    }
-
-    @Bean RSAPublicKey rsaPublicKey() throws Exception {
-
-        byte[] keyBytes = Base64.getDecoder().decode(publicKey);
-
-        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
-
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-
-        return (RSAPublicKey) keyFactory.generatePublic(keySpec);
+        // RSAPublicKey : RSA 공개키 객체
+        return (RSAPublicKey) keyFactory.generatePublic(
+                // 공개키 데이터를 표현하는 규격
+                // X509EncodedKeySpec : 공개키 바이트 데이터가 X.509 형식으로 인코딩되어 있다는 걸 Java에 알려주는 객체
+                new X509EncodedKeySpec(publicKeyBytes)
+        );
     }
 
     // jwt encoder
@@ -63,21 +49,9 @@ public class JwtTokenConfig {
     @Bean
     public JwtEncoder jwtEncoder() throws Exception {
 
-        // 개인키 파일 읽기
-        // 해당 경로에 있는 파일의 문자열을 읽기
-        String privateKeyFile = Files.readString(
-                Path.of(privateKey)
-        );
-
         // \\s : 정규식에서 공백이나 줄바꿈 같은 공백 문자를 의미
         // Base64로 인코딩된 문자열을 원래 바이트 데이터로 되돌리는 방법
-        byte[] privateByte = Base64.getDecoder().decode(
-                // replace : 일반 문자열 전체 치환
-                // replaceAll : 정규식 기반 전체 치환
-                privateKeyFile.replace("-----BEGIN PRIVATE KEY-----", "")
-                        .replace("-----END PRIVATE KEY-----", "")
-                        .replaceAll("\\s", "")
-        );
+        byte[] privateKeyBytes = Base64.getDecoder().decode(privateKey);
 
         // RSA 키 객체 생성 - 생성 및 복원에 사용
         // KeyFactory : 키 데이터를 실제 Java Key 객체로 변환하는 클래스
@@ -93,7 +67,7 @@ public class JwtTokenConfig {
                 // 개인키 데이터를 표현하는 규격
                 // 개인키 바이트 데이터가 PKCS#8 형식이라는 걸 나타내는 객체
                 // PKCS#8 : 개인키 데이터를 저장하는 표준 포맷
-                new PKCS8EncodedKeySpec(privateByte)
+                new PKCS8EncodedKeySpec(privateKeyBytes)
         );
         RSAPublicKey publicKey = loadPublicKey();
 
@@ -129,29 +103,6 @@ public class JwtTokenConfig {
         return NimbusJwtDecoder.withPublicKey(publicKey)
                 .signatureAlgorithm(SignatureAlgorithm.RS256)
                 .build();
-    }
-
-    private RSAPublicKey loadPublicKey() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-
-        // 공개키 파일 읽기
-        String publicKeyFile = Files.readString(
-                Path.of(publicKey)
-        );
-        byte[] publicByte = Base64.getDecoder().decode(
-
-                publicKeyFile.replace("-----BEGIN PUBLIC KEY-----", "")
-                        .replace("-----END PUBLIC KEY-----", "")
-                        .replaceAll("\\s", "")
-        );
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-
-
-        // RSAPublicKey : RSA 공개키 객체
-        return (RSAPublicKey) keyFactory.generatePublic(
-                // 공개키 데이터를 표현하는 규격
-                // X509EncodedKeySpec : 공개키 바이트 데이터가 X.509 형식으로 인코딩되어 있다는 걸 Java에 알려주는 객체
-                new X509EncodedKeySpec(publicByte)
-        );
     }
 }
 

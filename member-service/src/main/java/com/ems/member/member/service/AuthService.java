@@ -16,7 +16,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.util.HexFormat;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -30,21 +34,21 @@ public class AuthService {
     private final long refreshTokenExpiration;
     private final MemberRepository memberRepository;
     private final RefreshTokenHistoryRepository refreshTokenHistoryRepository;
-    private final RefreshTokenHistoryService refreshTokenHistoryService;
 
     public AuthService(RefreshTokenRepository refreshTokenRepository,
                        JwtTokenService jwtTokenService,
-                       @Value("${jwt.refresh-token-expiration}") long refreshTokenExpiration, MemberRepository memberRepository, RefreshTokenHistoryRepository refreshTokenHistoryRepository, RefreshTokenHistoryService refreshTokenHistoryService) {
+                       @Value("${jwt.refresh-token-expiration}") long refreshTokenExpiration,
+                       MemberRepository memberRepository,
+                       RefreshTokenHistoryRepository refreshTokenHistoryRepository) {
         this.refreshTokenRepository = refreshTokenRepository;
         this.jwtTokenService = jwtTokenService;
         this.refreshTokenExpiration = refreshTokenExpiration;
         this.memberRepository = memberRepository;
         this.refreshTokenHistoryRepository = refreshTokenHistoryRepository;
-        this.refreshTokenHistoryService = refreshTokenHistoryService;
     }
 
     // refresh token entity 생성 및 DB 저장
-    public void changeRefreshToken(Member member, String refreshToken, String clientId) {
+    public void replaceRefreshToken(Member member, String refreshToken, String clientId) {
 
         // 기본 세션 종료
         refreshTokenRepository.deleteByMemberAndClientId(member, clientId);
@@ -55,7 +59,7 @@ public class AuthService {
         );
     }
 
-    public void changeRefreshToken(Member member, String refreshToken, String clientId, String sessionId) {
+    public void replaceRefreshToken(Member member, String refreshToken, String clientId, String sessionId) {
 
         // 기본 세션 종료
         refreshTokenRepository.deleteByMemberAndClientId(member, clientId);
@@ -64,6 +68,22 @@ public class AuthService {
         refreshTokenRepository.save(
                 RefreshToken.toBuilder(member, refreshToken, clientId, refreshTokenExpiration, sessionId)
         );
+    }
+
+    public String hashRefreshToken(String refreshToken) {
+        try {
+            // MessageDigest : 해시 알고리즘을 사용하는 클래스
+            // digest : 실제 데이터를 해시값으로 변환하는 메서드
+            MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+            byte[] tokenHash = messageDigest.digest(refreshToken.getBytes(StandardCharsets.UTF_8));
+
+            // HexFormat.of() : 16진수 변환을 위한 HexFormat 객체 생성
+            // formatHex : byte 배열을 16진수 문자열로 변환
+            return HexFormat.of().formatHex(tokenHash);
+        } catch (NoSuchAlgorithmException e) {
+            // INTERNAL_SERVER_ERROR 500
+            throw new IllegalStateException("SHA-256 알고리즘을 사용할 수 없습니다.", e);
+        }
     }
 
     // 새로운 accessToken과 refreshToken 발급
@@ -78,7 +98,7 @@ public class AuthService {
         Optional<RefreshToken> optionalEntity = refreshTokenRepository.findByToken(refreshToken);
 
         // 요청 Refresh Token hash
-        String tokenHash = refreshTokenHistoryService.refreshTokenHash(refreshToken);
+        String tokenHash = hashRefreshToken(refreshToken);
 
 
         // 활성화된 refresh token이 없을 경우

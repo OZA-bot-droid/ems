@@ -1,8 +1,6 @@
 package com.ems.member.common.config;
 
-import com.ems.member.common.handler.CustomAccessDeniedHandler;
-import com.ems.member.common.handler.CustomAuthenticationEntryPoint;
-import com.ems.member.member.handler.OAuth2LoginSuccessHandler;
+import com.ems.member.common.handler.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -15,15 +13,15 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
-    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
-    private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final AuthenticationEntryPointImpl authenticationEntryPoint;
+    private final AccessDeniedHandlerImpl accessDeniedHandler;
 
     public SecurityConfig(OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler,
-                          CustomAuthenticationEntryPoint customAuthenticationEntryPoint,
-                          CustomAccessDeniedHandler customAccessDeniedHandler) {
+                          AuthenticationEntryPointImpl authenticationEntryPoint,
+                          AccessDeniedHandlerImpl accessDeniedHandler) {
         this.oAuth2LoginSuccessHandler = oAuth2LoginSuccessHandler;
-        this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
-        this.customAccessDeniedHandler = customAccessDeniedHandler;
+        this.authenticationEntryPoint = authenticationEntryPoint;
+        this.accessDeniedHandler = accessDeniedHandler;
     }
 
     @Bean
@@ -79,9 +77,9 @@ public class SecurityConfig {
                 // controller에 도달하기 전에 발생하는 Security 예외이기 때문에 별도 Handler가 필요
                 .exceptionHandling(exception -> exception
                         // 인증 실패
-                        .authenticationEntryPoint(customAuthenticationEntryPoint)
+                        .authenticationEntryPoint(authenticationEntryPoint)
                         // 인가 실패
-                        .accessDeniedHandler(customAccessDeniedHandler)
+                        .accessDeniedHandler(accessDeniedHandler)
                 )
                 .build();
     }

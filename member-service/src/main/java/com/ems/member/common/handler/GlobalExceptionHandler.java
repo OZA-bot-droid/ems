@@ -57,7 +57,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<APIErrorResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException e, HttpServletRequest request) {
 
         // Role enum 변환 실패 => HttpMessageNotReadableException
-        ErrorCode errorCode = ErrorCode.INVALID_REQUEST;
+        ErrorCode errorCode = ErrorCode.VALIDATION_ERROR;
         String message = "요청 형식이 올바르지 않습니다.";
 
         // 예외 종류 받기

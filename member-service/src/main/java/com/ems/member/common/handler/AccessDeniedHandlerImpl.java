@@ -15,11 +15,11 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
 @Component
-public class CustomAccessDeniedHandler implements AccessDeniedHandler {
+public class AccessDeniedHandlerImpl implements AccessDeniedHandler {
 
     private final ObjectMapper objectMapper;
 
-    public CustomAccessDeniedHandler(ObjectMapper objectMapper) {
+    public AccessDeniedHandlerImpl(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
 

@@ -1,8 +1,9 @@
 package com.ems.member.member.service;
 
-import com.ems.member.common.exception.InvalidRequestException;
-import com.ems.member.common.exception.SocialMemberDuplicatedException;
-import com.ems.member.common.exception.SocialMemberNotFoundException;
+import com.ems.member.common.domain.BaseException;
+import com.ems.member.common.exception.InvalidCredentialsException;
+import com.ems.member.common.exception.InvalidOAuthCodeException;
+import com.ems.member.common.exception.MemberEmailDuplicatedException;
 import com.ems.member.member.domain.Member;
 import com.ems.member.member.domain.Role;
 import com.ems.member.member.dto.LoginResponseDTO;
@@ -28,10 +29,10 @@ public class SocialLoginService {
     }
 
     // 소셜 회원가입
-    public void register(SocialLoginDTO dto, Role role) {
+    public void socialRegister(SocialLoginDTO dto, Role role) {
 
         if(memberRepository.existsByProviderAndProviderId(dto.provider(), dto.providerId())) {
-            throw new SocialMemberDuplicatedException("이미 가입된 회원입니다.");
+            throw new MemberEmailDuplicatedException("이미 가입된 회원입니다.");
         } else {
 
             memberRepository.save(
@@ -46,12 +47,12 @@ public class SocialLoginService {
         }
     }
 
-    public Member login(SocialLoginDTO dto) {
+    public Member socialLogin(SocialLoginDTO dto) {
         return memberRepository.findByProviderAndProviderId(dto.provider(), dto.providerId())
-                .orElseThrow(() -> new SocialMemberNotFoundException("가입되지 않는 회원입니다."));
+                .orElseThrow(() -> new InvalidCredentialsException("가입되지 않는 회원입니다."));
     }
 
-    public String save(String accessToken, String refreshToken) {
+    public String saveLoginCode(String accessToken, String refreshToken) {
 
         String code = UUID.randomUUID().toString();
 
@@ -63,12 +64,12 @@ public class SocialLoginService {
         return code;
     }
 
-    public LoginResponseDTO getAndRemove(String code) {
+    public LoginResponseDTO getAndRemoveLoginCode(String code) {
 
         LoginResponseDTO result = loginCodes.remove(code);
 
         if(result == null) {
-            throw new InvalidRequestException("유효하지 않은 로그인 코드입니다.");
+            throw new InvalidOAuthCodeException("유효하지 않은 로그인 코드입니다.");
         }
 
         return result;

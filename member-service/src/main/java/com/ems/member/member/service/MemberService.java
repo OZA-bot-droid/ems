@@ -1,8 +1,8 @@
 package com.ems.member.member.service;
 
-import com.ems.member.common.exception.MemberLoginException;
+import com.ems.member.common.exception.InvalidCredentialsException;
 import com.ems.member.common.exception.MemberNotFoundException;
-import com.ems.member.common.exception.MemberSignupException;
+import com.ems.member.common.exception.MemberEmailDuplicatedException;
 import com.ems.member.member.domain.Member;
 import com.ems.member.member.dto.LoginResponseDTO;
 import com.ems.member.member.dto.MemberInformationDTO;
@@ -40,7 +40,7 @@ public class MemberService {
     public void registerMember(MemberRegisterDTO dto) {
 
         if(memberRepository.existsByEmail(dto.email())) {
-            throw new MemberSignupException("이미 가입된 이메일입니다.");
+            throw new MemberEmailDuplicatedException("이미 가입된 이메일입니다.");
         }
 
         memberRepository.save(
@@ -55,26 +55,26 @@ public class MemberService {
 
         // 회원 존재 여부 => 없으면 401 에러
         Member member = memberRepository.findByEmail(dto.email())
-                .orElseThrow(() -> new MemberLoginException("이메일 또는 비밀번호가 일치하지 않습니다."));
+                .orElseThrow(() -> new InvalidCredentialsException("이메일 또는 비밀번호가 일치하지 않습니다."));
 
         // 비밀번호 확인
-        if(passwordEncoder.matches(dto.password(), member.getPasswordHash())) {
+        if(!passwordEncoder.matches(dto.password(), member.getPasswordHash())) {
 
             // token 생성
             String accessToken = jwtTokenService.createAccessToken(member.getId(), member.getRole());
             String refreshToken = jwtTokenService.createRefreshToken(member.getId(), member.getRole());
 
             // refresh token entity 생성 및 DB 저장
-            authService.changeRefreshToken(member, refreshToken, dto.clientId());
+            authService.replaceRefreshToken(member, refreshToken, dto.clientId());
 
             return new LoginResponseDTO(accessToken, refreshToken);
 
         } else {
-            throw new MemberLoginException("이메일 또는 비밀번호가 일치하지 않습니다.");
+            throw new InvalidCredentialsException("이메일 또는 비밀번호가 일치하지 않습니다.");
         }
     }
 
-    public MultiValueMap<String, String> headersInCookie(String refreshToken) {
+    public MultiValueMap<String, String> createRefreshTokenCookie(String refreshToken) {
 
         // 응답에 cookie를 넣어서 client에 저장하기 위함
         ResponseCookie refreshCookie = ResponseCookie

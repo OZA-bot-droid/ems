@@ -8,61 +8,60 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.UUID;
 
 // token 관련 서비스
 @Service
-@Transactional
 public class JwtTokenService {
 
     // JwtTokenConfig에서 등록한 NimbusJwtEncoder(JwtEncoder의 하위 클래스)
     private final JwtEncoder jwtEncoder;
     private final JwtDecoder jwtDecoder;
+    private final MemberRepository memberRepository;
     private final String issuer;
     private final long accessTokenExpiration;
     private final long refreshTokenExpiration;
-    private final MemberRepository memberRepository;
 
     public JwtTokenService(JwtEncoder jwtEncoder,
                            JwtDecoder jwtDecoder,
+                           MemberRepository memberRepository,
                            @Value("${jwt.issuer}") String issuer,
                            @Value("${jwt.access-token-expiration}") long accessTokenExpiration,
-                           @Value("${jwt.refresh-token-expiration}") long refreshTokenExpiration, MemberRepository memberRepository) {
+                           @Value("${jwt.refresh-token-expiration}") long refreshTokenExpiration) {
         this.jwtEncoder = jwtEncoder;
         this.jwtDecoder = jwtDecoder;
+        this.memberRepository = memberRepository;
         this.issuer = issuer;
         this.accessTokenExpiration = accessTokenExpiration;
         this.refreshTokenExpiration = refreshTokenExpiration;
-        this.memberRepository = memberRepository;
     }
 
     // accessToken 생성
     public String createAccessToken(long id, Role role) {
-
         return createToken(id, accessTokenExpiration, "access", role);
     }
     public String createAccessToken(long id) {
-
-        Role role = memberRepository.findById(id)
-                .orElseThrow(() -> new MemberNotFoundException("회원을 찾을 수 없습니다."))
-                .getRole();
-        return createToken(id, accessTokenExpiration, "access", role);
+        return createAccessToken(
+                id,
+                memberRepository.findById(id)
+                        .orElseThrow(() -> new MemberNotFoundException("해당 회원은 존재하지 않습니다."))
+                        .getRole()
+        );
     }
 
     // refreshToken 생성
     public String createRefreshToken(long id, Role role) {
-
         return createToken(id, refreshTokenExpiration, "refresh", role);
     }
     public String createRefreshToken(long id) {
-
-        Role role = memberRepository.findById(id)
-                .orElseThrow(() -> new MemberNotFoundException("회원을 찾을 수 없습니다."))
-                .getRole();
-        return createToken(id, refreshTokenExpiration, "refresh", role);
+        return createRefreshToken(
+                id,
+                memberRepository.findById(id)
+                        .orElseThrow(() -> new MemberNotFoundException("해당 회원은 존재하지 않습니다."))
+                        .getRole()
+        );
     }
 
     // token 생성
@@ -96,15 +95,19 @@ public class JwtTokenService {
     // refresh token 확인 및 sub 확인
     public Long validateRefreshToken(String refreshToken) {
 
-        // jwt 토큰 검증
-        Jwt jwt = jwtDecoder.decode(refreshToken);
+        try {
+            // jwt 토큰 검증
+            Jwt jwt = jwtDecoder.decode(refreshToken);
 
-        // refresh token 여부
-        if(!"refresh".equals(jwt.getClaimAsString("token_type"))){
-            throw new InvalidRefreshTokenException("refresh token이 아님");
+            // refresh token 여부
+            if (!"refresh".equals(jwt.getClaimAsString("token_type"))) {
+                throw new InvalidRefreshTokenException("유효하지 않은 refresh token입니다.");
+            }
+
+            // refresh token이면 sub => member id 가져오기
+            return Long.valueOf(jwt.getSubject());
+        } catch(JwtException | NumberFormatException e) {
+            throw new InvalidRefreshTokenException("유효하지 않은 refresh token입니다.");
         }
-
-        // refresh token이면 sub => member id 가져오기
-        return Long.valueOf(jwt.getSubject());
     }
 }
