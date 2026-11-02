@@ -18,6 +18,7 @@ import com.ems.event.session.SessionRepository;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -25,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
 /** DB 없이 EventService의 규칙만 검사한다 (Repository는 가짜 객체 Mock) */
@@ -99,24 +101,26 @@ class EventServiceTest {
     void draftIsNotFoundForMember() {
         when(eventRepository.findById(eventId)).thenReturn(Optional.of(seminar(null)));
 
-        assertThatThrownBy(() -> eventService.getEvent(eventId, false))
+        assertThatThrownBy(() -> eventService.getEvent(eventId, 2L))
                 .isInstanceOf(BusinessException.class)
                 .extracting("code").isEqualTo("EVENT_NOT_FOUND");
     }
 
     @Test
-    @DisplayName("화상 회의 링크는 관리자에게만 보인다")
-    void meetingUrlOnlyForAdmin() {
+    @DisplayName("화상 회의 링크는 그 행사를 만든 관리자에게만 보인다 (일반 회원·다른 관리자·비로그인은 null)")
+    void meetingUrlOnlyForOwner() {
         when(eventRepository.findById(eventId)).thenReturn(Optional.of(openSeminar("https://zoom.us/j/1")));
 
-        assertThat(eventService.getEvent(eventId, false).meetingUrl()).isNull();
-        assertThat(eventService.getEvent(eventId, true).meetingUrl()).isEqualTo("https://zoom.us/j/1");
+        assertThat(eventService.getEvent(eventId, 2L).meetingUrl()).isNull();              // 일반 회원
+        assertThat(eventService.getEvent(eventId, OTHER_ADMIN_ID).meetingUrl()).isNull();  // 다른 관리자
+        assertThat(eventService.getEvent(eventId, null).meetingUrl()).isNull();            // 비로그인
+        assertThat(eventService.getEvent(eventId, OWNER_ID).meetingUrl()).isEqualTo("https://zoom.us/j/1");
     }
 
     @Test
-    @DisplayName("일반 회원이 DRAFT 목록을 요청하면 DB를 조회하지 않고 빈 목록")
-    void memberCannotListDrafts() {
-        PageResponse<EventResponse> page = eventService.getEvents(EventStatus.DRAFT, PageRequest.of(0, 10), false);
+    @DisplayName("로그인하지 않고 DRAFT 목록을 요청하면 DB를 조회하지 않고 빈 목록")
+    void anonymousCannotListDrafts() {
+        PageResponse<EventResponse> page = eventService.getEvents(EventStatus.DRAFT, PageRequest.of(0, 10), null);
 
         assertThat(page.content()).isEmpty();
         assertThat(page.totalElements()).isZero();
@@ -132,6 +136,20 @@ class EventServiceTest {
         assertThatThrownBy(() -> eventService.updateEvent(eventId, OWNER_ID, request))
                 .isInstanceOf(BusinessException.class)
                 .extracting("code").isEqualTo("INVALID_STATUS_CHANGE");
+    }
+
+    @Test
+    @DisplayName("마감된 행사를 수정하면 409 EVENT_CLOSED, 내용이 바뀌지 않는다")
+    void cannotUpdateClosedEvent() {
+        Event closed = openSeminar(null);
+        closed.update(null, null, null, null, null, null, EventStatus.CLOSED);
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(closed));
+        EventUpdateRequest request = new EventUpdateRequest("바뀐 제목", null, null, null, null, null, null);
+
+        assertThatThrownBy(() -> eventService.updateEvent(eventId, OWNER_ID, request))
+                .isInstanceOf(BusinessException.class)
+                .extracting("code").isEqualTo("EVENT_CLOSED");
+        assertThat(closed.getTitle()).isEqualTo("Cloud Native 세미나");
     }
 
     @Test
@@ -256,5 +274,57 @@ class EventServiceTest {
                 .extracting("code").isEqualTo("EVENT_OWNER_REQUIRED");
         verify(eventRepository, never()).delete(any());
         verifyNoInteractions(registrationRepository);
+    }
+
+    // ===== 보기 권한: DRAFT와 화상 회의 링크는 만든 관리자에게만 =====
+
+    @Test
+    @DisplayName("다른 관리자가 남의 DRAFT 행사를 조회하면 404 (없는 행사처럼)")
+    void otherAdminCannotSeeDraft() {
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(seminar("https://zoom.us/j/1")));
+
+        assertThatThrownBy(() -> eventService.getEvent(eventId, OTHER_ADMIN_ID))
+                .isInstanceOf(BusinessException.class)
+                .extracting("code").isEqualTo("EVENT_NOT_FOUND");
+    }
+
+    @Test
+    @DisplayName("만든 관리자는 자기 DRAFT 행사와 회의 링크를 볼 수 있다")
+    void ownerSeesOwnDraft() {
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(seminar("https://zoom.us/j/1")));
+
+        EventResponse found = eventService.getEvent(eventId, OWNER_ID);
+
+        assertThat(found.status()).isEqualTo(EventStatus.DRAFT);
+        assertThat(found.meetingUrl()).isEqualTo("https://zoom.us/j/1");
+    }
+
+    @Test
+    @DisplayName("전체 목록: 로그인한 회원은 '공개 행사 + 내 DRAFT'를 조회하고, 링크는 내 행사에만 보인다")
+    void listShowsPublicAndOwnDrafts() {
+        PageRequest pageable = PageRequest.of(0, 10);
+        Event mine = openSeminar("https://zoom.us/j/mine");                                    // 99번이 만든 행사
+        Event others = new Event("남의 행사", null, 50, at("05:00"), at("08:00"), "https://zoom.us/j/other", OTHER_ADMIN_ID);
+        when(eventRepository.findVisibleTo(List.of(EventStatus.OPEN, EventStatus.CLOSED), EventStatus.DRAFT, OWNER_ID, pageable))
+                .thenReturn(new PageImpl<>(List.of(mine, others), pageable, 2));
+
+        PageResponse<EventResponse> page = eventService.getEvents(null, pageable, OWNER_ID);
+
+        assertThat(page.content()).hasSize(2);
+        assertThat(page.content().get(0).meetingUrl()).isEqualTo("https://zoom.us/j/mine");
+        assertThat(page.content().get(1).meetingUrl()).isNull();
+    }
+
+    @Test
+    @DisplayName("DRAFT 필터: 내가 만든 DRAFT만 조회한다")
+    void draftFilterOnlyMine() {
+        PageRequest pageable = PageRequest.of(0, 10);
+        when(eventRepository.findByStatusAndCreatedBy(EventStatus.DRAFT, OWNER_ID, pageable))
+                .thenReturn(new PageImpl<>(List.of(seminar(null)), pageable, 1));
+
+        PageResponse<EventResponse> page = eventService.getEvents(EventStatus.DRAFT, pageable, OWNER_ID);
+
+        assertThat(page.totalElements()).isEqualTo(1);
+        verify(eventRepository, never()).findByStatus(any(), any());
     }
 }

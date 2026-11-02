@@ -41,8 +41,8 @@ public class EventController {
     public PageResponse<EventResponse> getEvents(
             @RequestParam(required = false) EventStatus status,
             @PageableDefault(sort = "startsAt", direction = Sort.Direction.ASC) Pageable pageable,
-            @RequestHeader(value = "X-User-Role", required = false) String role) {
-        return eventService.getEvents(status, pageable, adminChecker.isAdmin(role)); // 관리자가 아니면 DRAFT 제외
+            @RequestHeader(value = "X-Member-Id", required = false) Long memberId) {
+        return eventService.getEvents(status, pageable, memberId); // DRAFT·회의 링크는 만든 사람에게만
     }
 
 
@@ -50,8 +50,8 @@ public class EventController {
     @GetMapping("/{eventId}")
     public EventResponse getEvent(
             @PathVariable Long eventId,
-            @RequestHeader(value = "X-User-Role", required = false) String role) {
-        return eventService.getEvent(eventId, adminChecker.isAdmin(role));
+            @RequestHeader(value = "X-Member-Id", required = false) Long memberId) {
+        return eventService.getEvent(eventId, memberId);
     }
 
 //   생성

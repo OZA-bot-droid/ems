@@ -1,6 +1,7 @@
 // 09 · 행사 등록 / 수정 모달 (Figma "Modal / Create Event")
 // event가 없으면 "새 행사 등록", 있으면 "행사 수정"으로 동작합니다.
-import { useState } from 'react';
+// 새 등록일 때는 [+ 세션 추가]로 세션을 같이 적어 두면, 행사를 만든 직후 세션도 차례로 만듭니다.
+import { useRef, useState } from 'react';
 import { eventApi } from '../api.js';
 import { instantToKstInput, kstToInstant, nowKstInput } from '../format.js';
 import DateTimeField from './DateTimeField.jsx';
@@ -20,6 +21,17 @@ export default function EventFormModal({ event, onClose, onSaved }) {
   const [fieldErrors, setFieldErrors] = useState({}); // 칸별 빨간 글씨
   const [serverError, setServerError] = useState(null); // 서버가 거절했을 때
   const [saving, setSaving] = useState(false);
+
+  // 함께 만들 세션들 (새 등록일 때만). key는 목록에서 줄을 구분하는 이름표
+  const [sessions, setSessions] = useState([]);
+  const [sessionErrors, setSessionErrors] = useState({}); // { [key]: { title, startsAt, endsAt } }
+  const nextKey = useRef(1);
+
+  const addSession = () =>
+    setSessions((list) => [...list, { key: nextKey.current++, title: '', startsAt: '', endsAt: '' }]);
+  const removeSession = (key) => setSessions((list) => list.filter((s) => s.key !== key));
+  const changeSession = (key, name, value) =>
+    setSessions((list) => list.map((s) => (s.key === key ? { ...s, [name]: value } : s)));
 
   // 시작 일시를 검사할지: 새 등록이면 항상, 수정이면 시작 일시를 바꿨을 때만
   // (이미 지난 행사의 설명만 고칠 때 막히지 않도록)
@@ -43,34 +55,88 @@ export default function EventFormModal({ event, onClose, onSaved }) {
     return errors;
   }
 
+  // 세션 1차 검사: 빈칸, 종료>시작, 행사 시간 안, 세션끼리 겹침
+  // (아직 서버에 없는 세션들이라 겹침도 화면에서 미리 확인할 수 있습니다)
+  function validateSessions() {
+    const errors = {};
+    const put = (key, name, msg) => (errors[key] = { ...errors[key], [name]: msg });
+    const eventOk = form.startsAt && form.endsAt && form.endsAt > form.startsAt;
+
+    for (const s of sessions) {
+      if (!s.title.trim()) put(s.key, 'title', '세션 제목을 입력하세요.');
+      else if (s.title.length > 200) put(s.key, 'title', '세션 제목은 200자까지 입력할 수 있습니다.');
+      if (!s.startsAt) put(s.key, 'startsAt', '시작 일시를 입력하세요.');
+      if (!s.endsAt) put(s.key, 'endsAt', '종료 일시를 입력하세요.');
+      if (s.startsAt && s.endsAt) {
+        if (s.endsAt <= s.startsAt) put(s.key, 'endsAt', '종료 일시는 시작 일시보다 뒤여야 합니다.');
+        else if (eventOk && (s.startsAt < form.startsAt || s.endsAt > form.endsAt))
+          put(s.key, 'startsAt', '세션은 행사 시간 안에서만 만들 수 있습니다.');
+      }
+    }
+
+    // 시작 순으로 줄 세운 뒤, 앞 세션이 끝나기 전에 시작하면 겹침 (끝나는 시각에 바로 시작은 OK)
+    const timed = sessions
+      .filter((s) => !errors[s.key] && s.startsAt && s.endsAt)
+      .sort((a, b) => a.startsAt.localeCompare(b.startsAt));
+    for (let i = 1; i < timed.length; i++) {
+      if (timed[i].startsAt < timed[i - 1].endsAt)
+        put(timed[i].key, 'startsAt', `"${timed[i - 1].title.trim()}" 세션과 시간이 겹칩니다.`);
+    }
+    return errors;
+  }
+
   async function submit(e) {
     e.preventDefault(); // 폼 기본 동작(새로고침) 막기
     setServerError(null);
     const errors = validate();
+    const sErrors = isEdit ? {} : validateSessions();
     setFieldErrors(errors);
-    if (Object.keys(errors).length > 0) return;
+    setSessionErrors(sErrors);
+    if (Object.keys(errors).length > 0 || Object.keys(sErrors).length > 0) return;
 
+    // 빈칸 처리: 새 등록은 null(값 없음). 수정은 ""(빈 글자)를 보내야 지워집니다.
+    // (백엔드 update는 null을 "안 바꿈"으로 보기 때문에, 수정에서 null을 보내면 예전 값이 그대로 남음)
+    const empty = isEdit ? '' : null;
     const body = {
       title: form.title.trim(),
-      description: form.description.trim() || null,
+      description: form.description.trim() || empty,
       startsAt: kstToInstant(form.startsAt),
       endsAt: kstToInstant(form.endsAt),
       capacity: Number(form.capacity),
-      meetingUrl: form.meetingUrl.trim() || null,
+      meetingUrl: form.meetingUrl.trim() || empty,
     };
 
     setSaving(true);
+    let saved;
     try {
-      const saved = isEdit ? await eventApi.update(event.id, body) : await eventApi.create(body);
-      onSaved(saved);
+      saved = isEdit ? await eventApi.update(event.id, body) : await eventApi.create(body);
     } catch (err) {
       // 2차 검사: 서버가 거절한 이유를 알맞은 자리에 보여주기
       if (err.code === 'INVALID_PERIOD') setFieldErrors({ endsAt: err.message });
       else if (err.code === 'PAST_START_TIME') setFieldErrors({ startsAt: err.message });
       else setServerError(err);
-    } finally {
       setSaving(false);
+      return; // 행사가 안 만들어졌으면 세션도 만들지 않음
     }
+
+    // 행사가 만들어졌으면, 적어 둔 세션을 시간 순서대로 하나씩 만들기
+    const result = { created: 0, failed: [] };
+    const ordered = [...sessions].sort((a, b) => a.startsAt.localeCompare(b.startsAt));
+    for (const s of ordered) {
+      try {
+        await eventApi.createSession(saved.id, {
+          title: s.title.trim(),
+          startsAt: kstToInstant(s.startsAt),
+          endsAt: kstToInstant(s.endsAt),
+        });
+        result.created++;
+      } catch (err) {
+        result.failed.push({ title: s.title.trim(), message: err.message });
+      }
+    }
+    setSaving(false);
+    // 행사는 이미 만들어졌으니 실패한 세션이 있어도 창을 닫고 알림으로 알려줍니다 (다시 누르면 행사가 두 개 생기므로)
+    onSaved(saved, result);
   }
 
   return (
@@ -112,7 +178,7 @@ export default function EventFormModal({ event, onClose, onSaved }) {
             <DateTimeField
               id="ev-start"
               value={form.startsAt}
-              minDate={startChanged ? nowKstInput().slice(0, 10) : undefined}
+              min={startChanged ? nowKstInput() : undefined} // 지난 시각은 고를 수 없음
               onChange={(v) => setForm((f) => ({ ...f, startsAt: v }))}
             />
           </Field>
@@ -120,7 +186,7 @@ export default function EventFormModal({ event, onClose, onSaved }) {
             <DateTimeField
               id="ev-end"
               value={form.endsAt}
-              minDate={form.startsAt ? form.startsAt.slice(0, 10) : undefined}
+              min={form.startsAt || undefined} // 시작 이후만 고를 수 있음
               onChange={(v) => setForm((f) => ({ ...f, endsAt: v }))}
             />
           </Field>
@@ -134,6 +200,71 @@ export default function EventFormModal({ event, onClose, onSaved }) {
             </Field>
           </div>
 
+          {/* 새 등록일 때만: 세션 함께 추가 */}
+          {!isEdit && (
+            <div className="flex flex-col gap-3 border-t border-(--ems-line) pt-5">
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-sm font-bold text-(--ems-ink)">세션 {sessions.length > 0 && `· ${sessions.length}개`}</span>
+                  <span className="text-[11px] text-(--ems-muted)">선택 · 행사 시간 안에서 겹치지 않게 (끝나는 시각에 바로 시작은 가능)</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={addSession}
+                  className="h-[34px] rounded-[8px] bg-(--ems-blue-soft) px-3.5 text-xs font-semibold text-(--ems-ink)"
+                >
+                  + 세션 추가
+                </button>
+              </div>
+
+              {sessions.map((s, i) => {
+                const err = sessionErrors[s.key] || {};
+                return (
+                  <div key={s.key} className="flex flex-col gap-3 rounded-[12px] border border-(--ems-line) p-4">
+                    <div className="flex items-center justify-between">
+                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-(--ems-bg) text-[11px] font-bold text-(--ems-muted)">
+                        {i + 1}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => removeSession(s.key)}
+                        className="text-xs font-semibold text-rose-600"
+                      >
+                        빼기
+                      </button>
+                    </div>
+                    <Field label="세션 제목 *" error={err.title}>
+                      <input
+                        className={inputClass}
+                        placeholder="예: 클라우드 아키텍처의 현재"
+                        value={s.title}
+                        onChange={(e) => changeSession(s.key, 'title', e.target.value)}
+                      />
+                    </Field>
+                    <Field label="시작 일시 *" error={err.startsAt}>
+                      <DateTimeField
+                        id={`ns-${s.key}-start`}
+                        value={s.startsAt}
+                        min={form.startsAt || undefined} // 행사 시작~종료 안에서만 고를 수 있음
+                        max={form.endsAt || undefined}
+                        onChange={(v) => changeSession(s.key, 'startsAt', v)}
+                      />
+                    </Field>
+                    <Field label="종료 일시 *" error={err.endsAt}>
+                      <DateTimeField
+                        id={`ns-${s.key}-end`}
+                        value={s.endsAt}
+                        min={s.startsAt || form.startsAt || undefined} // 세션 시작(없으면 행사 시작) 이후
+                        max={form.endsAt || undefined}
+                        onChange={(v) => changeSession(s.key, 'endsAt', v)}
+                      />
+                    </Field>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
           {serverError && (
             <p className="rounded-[8px] bg-rose-50 px-4 py-2.5 text-xs font-semibold text-rose-700">
               {serverError.message} <span className="text-rose-400">({serverError.code})</span>
@@ -141,7 +272,7 @@ export default function EventFormModal({ event, onClose, onSaved }) {
           )}
 
           <p className="rounded-[8px] bg-(--ems-green-soft) px-4 py-2.5 text-xs font-semibold text-(--ems-green)">
-            {isEdit ? '행사 기간을 줄일 때는 세션이 기간 안에 있어야 합니다.' : '행사 등록 후 세션 관리에서 세션을 추가할 수 있습니다. 새 행사는 "작성 중"으로 시작합니다.'}
+            {isEdit ? '행사 기간을 줄일 때는 세션이 기간 안에 있어야 합니다.' : '세션은 지금 함께 추가하거나, 등록 후 세션 관리에서 추가할 수 있습니다. 새 행사는 "작성 중"으로 시작합니다.'}
           </p>
         </div>
 
@@ -151,7 +282,13 @@ export default function EventFormModal({ event, onClose, onSaved }) {
             취소
           </button>
           <button type="submit" disabled={saving} className="h-[43px] flex-1 rounded-[9px] bg-(--ems-green) text-[13px] font-semibold text-white hover:bg-(--ems-green-dark) disabled:opacity-60">
-            {saving ? '저장 중…' : isEdit ? '변경사항 저장' : '행사 등록'}
+            {saving
+              ? '저장 중…'
+              : isEdit
+                ? '변경사항 저장'
+                : sessions.length > 0
+                  ? `행사 + 세션 ${sessions.length}개 등록`
+                  : '행사 등록'}
           </button>
         </div>
       </form>

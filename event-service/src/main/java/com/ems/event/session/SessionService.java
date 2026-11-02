@@ -25,10 +25,10 @@ public class SessionService {
         this.eventRepository = eventRepository;
     }
 
-    /** 행사의 세션 목록 (시작 시각 순). 일반 회원에게 DRAFT 행사의 세션은 보이지 않음 */
-    public List<SessionResponse> getSessions(Long eventId, boolean admin) {
+    /** 행사의 세션 목록 (시작 시각 순). DRAFT 행사의 세션은 그 행사를 만든 관리자에게만 보임 */
+    public List<SessionResponse> getSessions(Long eventId, Long viewerId) {
         Event event = findEvent(eventId); // 없는 행사면 404
-        if (!admin && !event.getStatus().isVisibleToPublic()) {
+        if (!event.getStatus().isVisibleToPublic() && !event.isOwnedBy(viewerId)) {
             throw new BusinessException(
                     HttpStatus.NOT_FOUND, "EVENT_NOT_FOUND", "행사를 찾을 수 없습니다: " + eventId);
         }
@@ -42,6 +42,7 @@ public class SessionService {
     public SessionResponse createSession(Long eventId, Long requesterId, SessionCreateRequest request) {
         Event event = findEvent(eventId);
         requireOwner(event, requesterId);
+        requireNotClosed(event);
         validateTimeSlot(event, request.startsAt(), request.endsAt());
 
         if (sessionRepository.existsOverlap(eventId, request.startsAt(), request.endsAt())) {
@@ -63,6 +64,7 @@ public class SessionService {
         Session session = findSession(eventId, sessionId);
         Event event = session.getEvent();
         requireOwner(event, requesterId);
+        requireNotClosed(event);
 
         // 시작/종료 중 하나만 보내도 "바뀐 뒤의 시간대"로 검사
         Instant startsAt = request.startsAt() != null ? request.startsAt() : session.getStartsAt();
@@ -84,6 +86,7 @@ public class SessionService {
     public void deleteSession(Long eventId, Long sessionId, Long requesterId) {
         Session session = findSession(eventId, sessionId);
         requireOwner(session.getEvent(), requesterId);
+        requireNotClosed(session.getEvent());
         sessionRepository.delete(session);
     }
 
@@ -106,6 +109,14 @@ public class SessionService {
         if (!Objects.equals(event.getCreatedBy(), requesterId)) {
             throw new BusinessException(
                     HttpStatus.FORBIDDEN, "EVENT_OWNER_REQUIRED", "행사 소유자만 세션을 관리할 수 있습니다.");
+        }
+    }
+
+    /** 마감된 행사의 세션은 추가·수정·삭제할 수 없습니다. (조회는 가능) */
+    private void requireNotClosed(Event event) {
+        if (event.isClosed()) {
+            throw new BusinessException(
+                    HttpStatus.CONFLICT, "EVENT_CLOSED", "마감된 행사의 세션은 바꿀 수 없습니다.");
         }
     }
 

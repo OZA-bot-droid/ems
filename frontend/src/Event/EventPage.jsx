@@ -1,22 +1,24 @@
 // 행사 화면의 입구 (이도관 담당)
-// main.jsx는 이 컴포넌트 하나만 불러옵니다. 행사 화면 코드는 전부 Event 폴더 안에 둡니다.
 import { useState } from 'react';
 import './event.css';
 import EventList from './EventList.jsx';
 import EventDetail from './EventDetail.jsx';
 import EventManage from './EventManage.jsx';
+import SessionManage from './SessionManage.jsx';
 import { getDevUser, setDevUser } from '../api.js';
 
 export default function EventPage() {
   const [role, setRole] = useState(getDevUser().role);
   const [selectedId, setSelectedId] = useState(null);
   const [view, setView] = useState('browse'); // 'browse'=둘러보기, 'manage'=행사 관리(관리자)
+  const [sessionEventId, setSessionEventId] = useState(null); // 세션 관리 중인 행사 번호
 
   // 개발용: 관리자/일반 사용자를 바꿔 가며 화면 확인 (로그인 완성 후 삭제)
   const changeRole = (next) => {
     setDevUser(next);
     setRole(next);
     if (next !== 'ADMIN') setView('browse'); // 일반 사용자는 관리 화면 못 봄
+    setSessionEventId(null);
   };
 
   return (
@@ -49,6 +51,7 @@ export default function EventPage() {
                 onClick={() => {
                   setView(v);
                   setSelectedId(null);
+                  setSessionEventId(null);
                 }}
                 className={`rounded-[9px] px-4 py-2 ${
                   view === v ? 'bg-(--ems-ink) text-white' : 'bg-(--ems-surface) text-(--ems-ink)'
@@ -61,7 +64,12 @@ export default function EventPage() {
         )}
 
         {view === 'manage' ? (
-          <EventManage />
+          /* 관리 탭: [세션 관리]를 누른 행사가 있으면 세션 관리, 없으면 행사 관리 */
+          sessionEventId ? (
+            <SessionManage eventId={sessionEventId} onBack={() => setSessionEventId(null)} />
+          ) : (
+            <EventManage onManageSessions={setSessionEventId} />
+          )
         ) : /* 화면 전환: 선택한 행사가 있으면 상세, 없으면 목록 */
         selectedId ? (
           <EventDetail

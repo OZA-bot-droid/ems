@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class OpenApiConfig {
-
+//http://localhost:8082/swagger-ui.html
     @Bean
     public OpenAPI eventServiceOpenApi() {
         return new OpenAPI().info(new Info()
@@ -19,8 +19,8 @@ public class OpenApiConfig {
                 .version("0.1.0")
                 .description("""
                         행사(Event)와 세션(Session) API.
-                        - 생성·수정·삭제는 관리자만 가능: 헤더 X-Member-Id(회원 번호), X-User-Role=ADMIN 필요
-                        - 조회는 누구나 가능. 단, 관리자가 아니면 DRAFT 행사와 화상 회의 링크는 보이지 않음
+                        - 생성은 관리자, 수정·삭제·세션 관리는 그 행사를 만든 관리자만: 헤더 X-Member-Id, X-User-Role=ADMIN
+                        - 조회는 누구나 가능. 단, DRAFT 행사와 화상 회의 링크는 그 행사를 만든 관리자에게만 보임
                         - 시간은 UTC ISO-8601 (예: 2026-11-01T05:00:00Z = 한국 시간 14:00)
                         """));
     }

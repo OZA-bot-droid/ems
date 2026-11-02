@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import com.ems.event.common.BusinessException;
 import com.ems.event.event.Event;
 import com.ems.event.event.EventRepository;
+import com.ems.event.event.EventStatus;
 import com.ems.event.session.dto.SessionCreateRequest;
 import com.ems.event.session.dto.SessionResponse;
 import com.ems.event.session.dto.SessionUpdateRequest;
@@ -108,10 +109,13 @@ class SessionServiceTest {
         when(eventRepository.findById(eventId)).thenReturn(Optional.of(seminar()));
         when(sessionRepository.findByEventIdOrderByStartsAtAsc(eventId)).thenReturn(List.of());
 
-        assertThatThrownBy(() -> sessionService.getSessions(eventId, false))
+        assertThatThrownBy(() -> sessionService.getSessions(eventId, 2L))             // 일반 회원
                 .isInstanceOf(BusinessException.class)
                 .extracting("code").isEqualTo("EVENT_NOT_FOUND");
-        assertThat(sessionService.getSessions(eventId, true)).isEmpty();
+        assertThatThrownBy(() -> sessionService.getSessions(eventId, OTHER_ADMIN_ID)) // 다른 관리자
+                .isInstanceOf(BusinessException.class)
+                .extracting("code").isEqualTo("EVENT_NOT_FOUND");
+        assertThat(sessionService.getSessions(eventId, EVENT_OWNER_ID)).isEmpty();      // 만든 관리자
     }
 
     // ===== 소유권: 행사를 만든 관리자만 세션을 관리할 수 있다 =====
@@ -162,5 +166,61 @@ class SessionServiceTest {
                 new SessionCreateRequest("세션", at("05:00"), at("05:45"))))
                 .isInstanceOf(BusinessException.class)
                 .extracting("code").isEqualTo("EVENT_OWNER_REQUIRED");
+    }
+
+    // ===== 마감: 마감된 행사의 세션은 바꿀 수 없다 =====
+
+    /** 한국 시간 14:00 ~ 17:00 행사 (마감 CLOSED) */
+    private static Event closedSeminar() {
+        Event event = seminar();
+        event.update(null, null, null, null, null, null, EventStatus.OPEN);
+        event.update(null, null, null, null, null, null, EventStatus.CLOSED);
+        return event;
+    }
+
+    @Test
+    @DisplayName("마감된 행사에 세션을 추가하면 409 EVENT_CLOSED, 저장하지 않는다")
+    void cannotCreateSessionInClosedEvent() {
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(closedSeminar()));
+
+        assertThatThrownBy(() -> sessionService.createSession(eventId, EVENT_OWNER_ID,
+                new SessionCreateRequest("마감 후 세션", at("05:00"), at("05:45"))))
+                .isInstanceOf(BusinessException.class)
+                .extracting("code").isEqualTo("EVENT_CLOSED");
+        verify(sessionRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("마감된 행사의 세션을 수정하면 409 EVENT_CLOSED, 내용이 바뀌지 않는다")
+    void cannotUpdateSessionInClosedEvent() {
+        Session session = new Session(closedSeminar(), "원래 제목", at("05:00"), at("05:45"));
+        when(sessionRepository.findByIdAndEventId(sessionId, eventId)).thenReturn(Optional.of(session));
+
+        assertThatThrownBy(() -> sessionService.updateSession(eventId, sessionId, EVENT_OWNER_ID,
+                new SessionUpdateRequest("바뀐 제목", null, null)))
+                .isInstanceOf(BusinessException.class)
+                .extracting("code").isEqualTo("EVENT_CLOSED");
+        assertThat(session.getTitle()).isEqualTo("원래 제목");
+    }
+
+    @Test
+    @DisplayName("마감된 행사의 세션을 삭제하면 409 EVENT_CLOSED, 삭제하지 않는다")
+    void cannotDeleteSessionInClosedEvent() {
+        Session session = new Session(closedSeminar(), "원래 제목", at("05:00"), at("05:45"));
+        when(sessionRepository.findByIdAndEventId(sessionId, eventId)).thenReturn(Optional.of(session));
+
+        assertThatThrownBy(() -> sessionService.deleteSession(eventId, sessionId, EVENT_OWNER_ID))
+                .isInstanceOf(BusinessException.class)
+                .extracting("code").isEqualTo("EVENT_CLOSED");
+        verify(sessionRepository, never()).delete(any());
+    }
+
+    @Test
+    @DisplayName("마감된 행사도 세션 목록은 볼 수 있다")
+    void closedEventSessionsAreVisible() {
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(closedSeminar()));
+        when(sessionRepository.findByEventIdOrderByStartsAtAsc(eventId)).thenReturn(List.of());
+
+        assertThat(sessionService.getSessions(eventId, 2L)).isEmpty();
     }
 }

@@ -69,4 +69,9 @@ export const eventApi = {
   update: (eventId, body) => request(`/events/${eventId}`, { method: 'PATCH', body }),
   remove: (eventId) => request(`/events/${eventId}`, { method: 'DELETE' }),
   sessions: (eventId) => request(`/events/${eventId}/sessions`),
+  createSession: (eventId, body) => request(`/events/${eventId}/sessions`, { method: 'POST', body }),
+  updateSession: (eventId, sessionId, body) =>
+    request(`/events/${eventId}/sessions/${sessionId}`, { method: 'PATCH', body }),
+  removeSession: (eventId, sessionId) =>
+    request(`/events/${eventId}/sessions/${sessionId}`, { method: 'DELETE' }),
 };

@@ -11,14 +11,14 @@ const NEXT_STATUS = {
   OPEN: { to: 'CLOSED', label: '마감' },
 };
 
-export default function EventManage() {
+export default function EventManage({ onManageSessions }) {
   const [page, setPage] = useState(0);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [reload, setReload] = useState(0); // 숫자가 바뀌면 목록을 다시 불러옴
   const [modal, setModal] = useState(null); // null=닫힘, {}=새 행사, {event}=수정
   const [confirm, setConfirm] = useState(null); // 확인 중인 것: { id, type: 'delete' | 'status' }
-  const [notice, setNotice] = useState(null); // 위쪽 알림 한 줄
+  const [notice, setNotice] = useState(null); // 위쪽 알림 한 줄 { type: 'ok' | 'error', text }
 
   useEffect(() => {
     let alive = true;
@@ -33,7 +33,7 @@ export default function EventManage() {
   }, [page, reload]);
 
   const refresh = (message) => {
-    setNotice(message);
+    setNotice({ type: 'ok', text: message });
     setReload((n) => n + 1);
   };
 
@@ -44,7 +44,8 @@ export default function EventManage() {
       setConfirm(null);
       refresh(`"${event.title}" 행사를 ${next.label}했습니다.`);
     } catch (err) {
-      setNotice(`${err.message} (${err.code})`);
+      setConfirm(null);
+      setNotice({ type: 'error', text: `${err.message} (${err.code})` });
     }
   }
 
@@ -54,7 +55,8 @@ export default function EventManage() {
       setConfirm(null);
       refresh(`"${event.title}" 행사를 삭제했습니다.`);
     } catch (err) {
-      setNotice(`${err.message} (${err.code})`);
+      setConfirm(null);
+      setNotice({ type: 'error', text: `${err.message} (${err.code})` });
     }
   }
 
@@ -80,8 +82,12 @@ export default function EventManage() {
       </header>
 
       {notice && (
-        <p className="mb-4 flex justify-between rounded-[8px] bg-(--ems-green-soft) px-4 py-2.5 text-xs font-semibold text-(--ems-green)">
-          {notice}
+        <p
+          className={`mb-4 flex justify-between gap-3 rounded-[8px] px-4 py-2.5 text-xs font-semibold ${
+            notice.type === 'error' ? 'bg-rose-50 text-rose-700' : 'bg-(--ems-green-soft) text-(--ems-green)'
+          }`}
+        >
+          {notice.text}
           <button onClick={() => setNotice(null)} aria-label="알림 닫기">×</button>
         </p>
       )}
@@ -133,7 +139,13 @@ export default function EventManage() {
                   <span className="rounded-[6px] bg-(--ems-surface) px-2.5 py-1 text-xs text-(--ems-muted)">다른 관리자의 행사</span>
                 ) : (
                   <div className="flex items-center gap-2 text-xs font-semibold">
-                    <button onClick={() => setModal({ event })} className="rounded-[6px] bg-(--ems-surface) px-2.5 py-1">수정</button>
+                    {/* 마감된 행사는 수정 불가 → [수정] 숨김, 세션은 보기만 */}
+                    {event.status !== 'CLOSED' && (
+                      <button onClick={() => setModal({ event })} className="rounded-[6px] bg-(--ems-surface) px-2.5 py-1">수정</button>
+                    )}
+                    <button onClick={() => onManageSessions(event.id)} className="rounded-[6px] bg-(--ems-blue-soft) px-2.5 py-1 text-(--ems-ink)">
+                      {event.status === 'CLOSED' ? '세션 보기' : '세션 관리'}
+                    </button>
                     {next && (
                       <button onClick={() => setConfirm({ id: event.id, type: 'status' })} className="rounded-[6px] bg-(--ems-green-soft) px-2.5 py-1 text-(--ems-green)">
                         {next.label}
@@ -162,9 +174,18 @@ export default function EventManage() {
         <EventFormModal
           event={modal.event}
           onClose={() => setModal(null)}
-          onSaved={(saved) => {
+          onSaved={(saved, sessionResult) => {
             setModal(null);
-            refresh(modal.event ? `"${saved.title}" 행사를 수정했습니다.` : `"${saved.title}" 행사를 등록했습니다. (작성 중)`);
+            if (modal.event) return refresh(`"${saved.title}" 행사를 수정했습니다.`);
+            // 새 등록: 함께 만든 세션 결과도 한 줄에
+            const { created = 0, failed = [] } = sessionResult || {};
+            let message = `"${saved.title}" 행사를 등록했습니다. (작성 중)`;
+            if (created > 0) message += ` 세션 ${created}개 추가.`;
+            if (failed.length > 0)
+              message += ` 세션 ${failed.length}개는 추가하지 못했습니다(${failed
+                .map((f) => `${f.title}: ${f.message}`)
+                .join(' / ')}). [세션 관리]에서 다시 추가하세요.`;
+            refresh(message);
           }}
         />
       )}
