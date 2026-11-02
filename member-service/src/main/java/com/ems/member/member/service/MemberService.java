@@ -58,7 +58,7 @@ public class MemberService {
                 .orElseThrow(() -> new InvalidCredentialsException("이메일 또는 비밀번호가 일치하지 않습니다."));
 
         // 비밀번호 확인
-        if(!passwordEncoder.matches(dto.password(), member.getPasswordHash())) {
+        if(passwordEncoder.matches(dto.password(), member.getPasswordHash())) {
 
             // token 생성
             String accessToken = jwtTokenService.createAccessToken(member.getId(), member.getRole());

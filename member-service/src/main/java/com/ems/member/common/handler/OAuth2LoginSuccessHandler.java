@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.UUID;
 
 @Component
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
@@ -107,39 +108,18 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
             if (role != null) {
                 // 회원 가입
-                socialLoginService.socialRegister(socialUser, role);
+                Member member = socialLoginService.socialRegister(socialUser, role);
 
                 // 현재 세션에 저장해 둔 특정 속성 하나를 삭제하는 메서드
                 session.removeAttribute("role");
 
-                // 클라이언트에게 다른 URL로 다시 이동하라고 응답하는 메서드
-                response.sendRedirect("http://localhost:5173");
+                completeLogin(session, member, response);
             } else {
 
                 // 로그인
                 Member member = socialLoginService.socialLogin(socialUser);
 
-                // NullPointerException 주의
-                // clientId라는 이름으로 저장해둔 값을 가져옴
-                Object clientId = session.getAttribute("clientId");
-
-                if (clientId == null) {
-                    throw new InvalidRequestException("OAuth 로그인에 필요한 clientId가 존재하지 않습니다.");
-                }
-
-                String accessToken = jwtTokenService.createAccessToken(member.getId());
-                String refreshToken = jwtTokenService.createRefreshToken(member.getId());
-
-                String loginCode = socialLoginService.saveLoginCode(accessToken, refreshToken);
-                authService.replaceRefreshToken(
-                        member,
-                        refreshToken,
-                        clientId.toString(),
-                        loginCode
-                );
-
-                // Access Token/Refresh Token 자체를 URL에 직접 넣지 않고, 짧게 유효한 일회성 코드만 프론트에 넘긴 다음 그 코드로 서버에서 토큰을 교환하는 구조를 만들기 위함
-                response.sendRedirect("http://localhost:5173/oauth-success?code=" + loginCode);
+                completeLogin(session, member, response);
             }
         } catch (InvalidCredentialsException e) {
 
@@ -157,5 +137,32 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                     e
             );
         }
+    }
+
+    private void completeLogin(HttpSession session, Member member, HttpServletResponse response) throws IOException {
+
+
+        // NullPointerException 주의
+        // clientId라는 이름으로 저장해둔 값을 가져옴
+        Object clientId = session.getAttribute("clientId");
+
+        if (clientId == null) {
+            throw new InvalidRequestException("OAuth 로그인에 필요한 clientId가 존재하지 않습니다.");
+        }
+
+        String accessToken = jwtTokenService.createAccessToken(member.getId());
+        String refreshToken = jwtTokenService.createRefreshToken(member.getId());
+
+        UUID loginCode = socialLoginService.saveLoginCode(accessToken, refreshToken);
+        authService.replaceRefreshToken(
+                member,
+                refreshToken,
+                UUID.fromString(clientId.toString()),
+                loginCode
+        );
+
+        // Access Token/Refresh Token 자체를 URL에 직접 넣지 않고, 짧게 유효한 일회성 코드만 프론트에 넘긴 다음 그 코드로 서버에서 토큰을 교환하는 구조를 만들기 위함
+        // 클라이언트에게 다른 URL로 다시 이동하라고 응답하는 메서드
+        response.sendRedirect("http://localhost:5173/oauth-success?code=" + loginCode);
     }
 }

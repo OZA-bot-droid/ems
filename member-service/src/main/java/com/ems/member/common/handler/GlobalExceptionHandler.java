@@ -37,6 +37,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BaseException.class)
     public ResponseEntity<APIErrorResponse> handleMemberSignupException(BaseException e, HttpServletRequest request) {
 
+        System.out.println(e.getMessage());
         ErrorCode errorCode = e.getErrorCode();
 
         APIErrorResponse response = new APIErrorResponse(
@@ -56,6 +57,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<APIErrorResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException e, HttpServletRequest request) {
 
+        System.out.println(e.getMessage());
         // Role enum 변환 실패 => HttpMessageNotReadableException
         ErrorCode errorCode = ErrorCode.VALIDATION_ERROR;
         String message = "요청 형식이 올바르지 않습니다.";
@@ -95,6 +97,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<APIErrorResponse> handleValidationException(MethodArgumentNotValidException e, HttpServletRequest request) {
 
+        System.out.println(e.getMessage());
         ErrorCode errorCode = ErrorCode.VALIDATION_ERROR;
 
         // @Valid로 검증시 실패할 경우 여기서 message를 가져옴
@@ -122,6 +125,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<APIErrorResponse> handleException(Exception e, HttpServletRequest request) {
 
+        System.out.println(e.getMessage());
         ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
 
         APIErrorResponse response = new APIErrorResponse(

@@ -19,7 +19,7 @@ public record MemberRegisterDTO(@Email(message = "올바른 이메일 형식이 
                                 @NotBlank(message = "이름을 1글자 이상 입력해주세요.")
                                 String name,
 
-                                @NotBlank(message = "회원 유형을 선택해주세요.")
+                                @NotNull(message = "회원 유형을 선택해주세요.")
                                 Role role) {
 
     // @NotBlank : null, 빈 문자열, 공백만 있는 문자열 금지

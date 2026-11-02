@@ -8,7 +8,7 @@ import com.ems.member.member.domain.RefreshToken;
 import com.ems.member.member.domain.RefreshTokenHistory;
 import com.ems.member.member.domain.Role;
 import com.ems.member.member.dto.LoginResponseDTO;
-import com.ems.member.member.dto.RefreshTokenRequestDTO;
+import com.ems.member.member.dto.ClientDTO;
 import com.ems.member.member.repository.MemberRepository;
 import com.ems.member.member.repository.RefreshTokenHistoryRepository;
 import com.ems.member.member.repository.RefreshTokenRepository;
@@ -23,6 +23,7 @@ import java.time.Instant;
 import java.util.HexFormat;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 // 인증 관련 Service
 @Service
@@ -48,7 +49,7 @@ public class AuthService {
     }
 
     // refresh token entity 생성 및 DB 저장
-    public void replaceRefreshToken(Member member, String refreshToken, String clientId) {
+    public void replaceRefreshToken(Member member, String refreshToken, UUID clientId) {
 
         // 기본 세션 종료
         refreshTokenRepository.deleteByMemberAndClientId(member, clientId);
@@ -59,7 +60,7 @@ public class AuthService {
         );
     }
 
-    public void replaceRefreshToken(Member member, String refreshToken, String clientId, String sessionId) {
+    public void replaceRefreshToken(Member member, String refreshToken, UUID clientId, UUID sessionId) {
 
         // 기본 세션 종료
         refreshTokenRepository.deleteByMemberAndClientId(member, clientId);
@@ -89,7 +90,7 @@ public class AuthService {
     // 새로운 accessToken과 refreshToken 발급
     // noRollbackFor : 해당 예외가 발생해도 이 트랜잭션은 rollback하지 않음
     @Transactional(noRollbackFor = RefreshTokenReusedException.class)
-    public LoginResponseDTO reissue(RefreshTokenRequestDTO dto, String refreshToken) {
+    public LoginResponseDTO reissue(ClientDTO dto, String refreshToken) {
 
         // jwt 토큰 검증 및 token 정보 중 member id 가져오기
         Long memberId = jwtTokenService.validateRefreshToken(refreshToken);
@@ -161,7 +162,7 @@ public class AuthService {
         return new LoginResponseDTO(newAccessToken, newRefreshToken);
     }
 
-    public void logout(RefreshTokenRequestDTO dto, String refreshToken) {
+    public void logout(ClientDTO dto, String refreshToken) {
 
         RefreshToken refreshTokenEntity = refreshTokenRepository.findByClientIdAndToken(dto.clientId(), refreshToken)
                 .orElseThrow(() -> new InvalidRefreshTokenException("클라이언트의 정보가 일치하지 않습니다."));

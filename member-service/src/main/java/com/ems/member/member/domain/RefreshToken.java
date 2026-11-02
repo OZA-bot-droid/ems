@@ -21,11 +21,11 @@ public class RefreshToken extends BaseEntity {
 
     // 세션 id
     @Column(name = "session_id", nullable = false, unique = true)
-    private String sessionId;
+    private UUID sessionId;
 
     // 하나의 프롬프트 id => UUID
     @Column(name = "client_id")
-    private String clientId;
+    private UUID clientId;
 
     @Column(nullable = false, unique = true, length = 1000)
     private String token;
@@ -33,18 +33,18 @@ public class RefreshToken extends BaseEntity {
     @Column(name = "expires_at", nullable = false)
     private Instant expiresAt;
 
-    public static RefreshToken toBuilder(Member member, String refreshToken, String clientId, long refreshTokenExpiration) {
+    public static RefreshToken toBuilder(Member member, String refreshToken, UUID clientId, long refreshTokenExpiration) {
 
         return RefreshToken.builder()
                 .member(member)
                 .token(refreshToken)
                 .clientId(clientId)
-                .sessionId(UUID.randomUUID().toString())
+                .sessionId(UUID.randomUUID())
                 .expiresAt(Instant.now().plusSeconds(refreshTokenExpiration))
                 .build();
     }
 
-    public static RefreshToken toBuilder(Member member, String refreshToken, String clientId, long refreshTokenExpiration, String sessionId) {
+    public static RefreshToken toBuilder(Member member, String refreshToken, UUID clientId, long refreshTokenExpiration, UUID sessionId) {
 
         return RefreshToken.builder()
                 .member(member)

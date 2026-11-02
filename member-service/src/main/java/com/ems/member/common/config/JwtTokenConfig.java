@@ -33,7 +33,7 @@ public class JwtTokenConfig {
     private String publicKey;
 
     private RSAPublicKey loadPublicKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
-        byte[] publicKeyBytes = Base64.getDecoder().decode(publicKey);
+        byte[] publicKeyBytes = Base64.getDecoder().decode(publicKey.replaceAll("\\s", ""));
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
 
         // RSAPublicKey : RSA 공개키 객체
@@ -51,7 +51,7 @@ public class JwtTokenConfig {
 
         // \\s : 정규식에서 공백이나 줄바꿈 같은 공백 문자를 의미
         // Base64로 인코딩된 문자열을 원래 바이트 데이터로 되돌리는 방법
-        byte[] privateKeyBytes = Base64.getDecoder().decode(privateKey);
+        byte[] privateKeyBytes = Base64.getDecoder().decode(privateKey.replaceAll("\\s", ""));
 
         // RSA 키 객체 생성 - 생성 및 복원에 사용
         // KeyFactory : 키 데이터를 실제 Java Key 객체로 변환하는 클래스

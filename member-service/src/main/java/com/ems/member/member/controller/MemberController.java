@@ -4,7 +4,7 @@ import com.ems.member.member.domain.Role;
 import com.ems.member.member.dto.LoginResponseDTO;
 import com.ems.member.member.dto.MemberLoginDTO;
 import com.ems.member.member.dto.MemberRegisterDTO;
-import com.ems.member.member.dto.RefreshTokenRequestDTO;
+import com.ems.member.member.dto.ClientDTO;
 import com.ems.member.member.service.AuthService;
 import com.ems.member.member.service.MemberService;
 import com.ems.member.member.service.SocialLoginService;
@@ -16,6 +16,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
@@ -42,6 +43,7 @@ public class MemberController {
     @PostMapping("/register")
     public ResponseEntity<?> registerMember(@Valid @RequestBody MemberRegisterDTO dto) {
 
+        System.out.println("1");
         memberService.registerMember(dto);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
@@ -49,25 +51,27 @@ public class MemberController {
     // 로그인
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody MemberLoginDTO dto) {
-        LoginResponseDTO responseDTO = memberService.login(dto);
 
+        System.out.println("1");
+        LoginResponseDTO responseDTO = memberService.login(dto);
         return new ResponseEntity<>(responseDTO.accessToken(), memberService.createRefreshTokenCookie(responseDTO.refreshToken()), HttpStatus.OK);
     }
 
     // 새로운 access token 생성
     // @CookieValue : 해당 api에 온 정보 중에 특정 cookie의 값을 가져오는 어노테이션
     @PostMapping("/reissue")
-    public ResponseEntity<?> reissue(@RequestBody RefreshTokenRequestDTO dto, @CookieValue("refreshToken") String refreshToken) {
+    public ResponseEntity<?> reissue(@RequestBody ClientDTO dto, @CookieValue("refreshToken") String refreshToken) {
 
+        System.out.println("1");
         LoginResponseDTO responseDTO = authService.reissue(dto, refreshToken);
-
         return new ResponseEntity<>(responseDTO.accessToken(), memberService.createRefreshTokenCookie(responseDTO.refreshToken()), HttpStatus.OK);
     }
 
     // 로그아웃
     @DeleteMapping("/logout")
-    public ResponseEntity<?> logout(@RequestBody RefreshTokenRequestDTO dto, @CookieValue("refreshToken") String refreshToken) {
+    public ResponseEntity<?> logout(@RequestBody ClientDTO dto, @CookieValue("refreshToken") String refreshToken) {
 
+        System.out.println("1");
         if(refreshToken != null) {
             authService.logout(dto, refreshToken);
         }
@@ -89,8 +93,9 @@ public class MemberController {
 
     // 회원 정보
     @GetMapping("/me")
-    public ResponseEntity<?> myPage(@RequestHeader("X-Member-Id") String memberId) {
+    public ResponseEntity<?> myPage(@RequestHeader("X-Member-Id") String memberId, @RequestHeader("Authorization") String authorization) {
 
+        System.out.println("1");
         return new ResponseEntity<>(memberService.myPage(memberId), HttpStatus.OK);
     }
 

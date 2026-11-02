@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.util.UUID;
 
 // 로직을 DB가 아니라 Java 서비스 계층에서 명확하게 관리하려고 했기 때문에 java에서 db 저장
 @Entity
@@ -23,7 +24,7 @@ public class RefreshTokenHistory extends BaseEntity {
     private Member member;
 
     @Column(nullable = false, name = "session_id")
-    private String sessionId;
+    private UUID sessionId;
 
     // 폐기 토큰이 중복 기록 막기
     @Column(nullable = false, unique = true, name = "token_hash")

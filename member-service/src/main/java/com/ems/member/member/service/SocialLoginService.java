@@ -29,13 +29,13 @@ public class SocialLoginService {
     }
 
     // 소셜 회원가입
-    public void socialRegister(SocialLoginDTO dto, Role role) {
+    public Member socialRegister(SocialLoginDTO dto, Role role) {
 
         if(memberRepository.existsByProviderAndProviderId(dto.provider(), dto.providerId())) {
             throw new MemberEmailDuplicatedException("이미 가입된 회원입니다.");
         } else {
 
-            memberRepository.save(
+            return memberRepository.save(
                     Member.builder()
                             .provider(dto.provider())
                             .providerId(dto.providerId())
@@ -52,12 +52,12 @@ public class SocialLoginService {
                 .orElseThrow(() -> new InvalidCredentialsException("가입되지 않는 회원입니다."));
     }
 
-    public String saveLoginCode(String accessToken, String refreshToken) {
+    public UUID saveLoginCode(String accessToken, String refreshToken) {
 
-        String code = UUID.randomUUID().toString();
+        UUID code = UUID.randomUUID();
 
         loginCodes.put(
-                code,
+                code.toString(),
                 new LoginResponseDTO(accessToken, refreshToken)
         );
 
