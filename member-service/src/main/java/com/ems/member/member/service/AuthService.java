@@ -101,7 +101,6 @@ public class AuthService {
         // 요청 Refresh Token hash
         String tokenHash = hashRefreshToken(refreshToken);
 
-
         // 활성화된 refresh token이 없을 경우
         if(optionalEntity.isEmpty()) {
 

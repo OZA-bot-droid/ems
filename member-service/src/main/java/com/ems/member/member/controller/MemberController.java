@@ -43,7 +43,6 @@ public class MemberController {
     @PostMapping("/register")
     public ResponseEntity<?> registerMember(@Valid @RequestBody MemberRegisterDTO dto) {
 
-        System.out.println("1");
         memberService.registerMember(dto);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
@@ -52,7 +51,6 @@ public class MemberController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody MemberLoginDTO dto) {
 
-        System.out.println("1");
         LoginResponseDTO responseDTO = memberService.login(dto);
         return new ResponseEntity<>(responseDTO.accessToken(), memberService.createRefreshTokenCookie(responseDTO.refreshToken()), HttpStatus.OK);
     }
@@ -62,7 +60,6 @@ public class MemberController {
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue(@RequestBody ClientDTO dto, @CookieValue("refreshToken") String refreshToken) {
 
-        System.out.println("1");
         LoginResponseDTO responseDTO = authService.reissue(dto, refreshToken);
         return new ResponseEntity<>(responseDTO.accessToken(), memberService.createRefreshTokenCookie(responseDTO.refreshToken()), HttpStatus.OK);
     }
@@ -71,7 +68,6 @@ public class MemberController {
     @DeleteMapping("/logout")
     public ResponseEntity<?> logout(@RequestBody ClientDTO dto, @CookieValue("refreshToken") String refreshToken) {
 
-        System.out.println("1");
         if(refreshToken != null) {
             authService.logout(dto, refreshToken);
         }
@@ -95,7 +91,6 @@ public class MemberController {
     @GetMapping("/me")
     public ResponseEntity<?> myPage(@RequestHeader("X-Member-Id") String memberId, @RequestHeader("Authorization") String authorization) {
 
-        System.out.println("1");
         return new ResponseEntity<>(memberService.myPage(memberId), HttpStatus.OK);
     }
 
