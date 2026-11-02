@@ -42,7 +42,11 @@ async function request(path, { method = 'GET', body } = {}) {
       body: body === undefined ? undefined : JSON.stringify(body),
     });
   } catch {
-    throw new ApiError(0, 'NETWORK_ERROR', '서버에 연결할 수 없습니다. Gateway와 서비스가 켜져 있는지 확인하세요.');
+    throw new ApiError(
+      0,
+      'NETWORK_ERROR',
+      '서버에 연결할 수 없습니다. Gateway와 서비스가 켜져 있는지 확인하세요.',
+    );
   }
 
   if (response.status === 204) return null; // 삭제 성공: 본문 없음
@@ -69,4 +73,13 @@ export const eventApi = {
   update: (eventId, body) => request(`/events/${eventId}`, { method: 'PATCH', body }),
   remove: (eventId) => request(`/events/${eventId}`, { method: 'DELETE' }),
   sessions: (eventId) => request(`/events/${eventId}/sessions`),
+};
+
+// 참가 신청 API
+export const registrationApi = {
+  apply: (eventId) => request(`/events/${eventId}/registrations`, { method: 'POST' }),
+  mine: ({ page = 0, size = 20 } = {}) =>
+    request(`/events/registrations/me?page=${page}&size=${size}`),
+  cancel: (registrationId) =>
+    request(`/events/registrations/${registrationId}/cancel`, { method: 'PATCH' }),
 };

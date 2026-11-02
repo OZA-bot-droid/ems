@@ -1,78 +1,77 @@
 import { useEffect, useMemo, useState } from 'react';
+import { eventApi, registrationApi, setDevUser } from '../../api.js';
+import Header from './Header.jsx';
+import './registration-page.scss';
 
-const STATUS_LABELS = {
-  PENDING: '승인 대기',
-  APPROVED: '승인 완료',
-  REJECTED: '거절',
-  CANCELLED: '취소됨',
+const STATUS = {
+  PENDING: { label: '승인 대기', tone: 'pending' },
+  APPROVED: { label: '승인 완료', tone: 'approved' },
+  REJECTED: { label: '거절', tone: 'rejected' },
+  CANCELLED: { label: '취소됨', tone: 'cancelled' },
 };
 
-async function getErrorMessage(response) {
-  try {
-    const body = await response.json();
-    return body.message || body.detail || body.error || `요청에 실패했습니다. (${response.status})`;
-  } catch {
-    return `요청에 실패했습니다. (${response.status})`;
-  }
-}
+const FILTER_OPTIONS = [
+  ['ALL', '전체'],
+  ['PENDING', '승인 대기'],
+  ['APPROVED', '승인 완료'],
+  ['REJECTED', '거절'],
+  ['CANCELLED', '취소됨'],
+];
 
 function RegistrationPage() {
+  // 화면에 필요한 서버 데이터와 화면 상태
   const [registrations, setRegistrations] = useState([]);
+  const [events, setEvents] = useState({});
   const [filter, setFilter] = useState('ALL');
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [actionError, setActionError] = useState('');
   const [cancellingId, setCancellingId] = useState(null);
+  const [detail, setDetail] = useState(null);
 
+  // 진입 시 내 신청 내역과 행사명을 불러옵니다.
   useEffect(() => {
-    const controller = new AbortController();
-
-    async function loadRegistrations() {
+    let ignore = false;
+    // This design is the USER view; select the existing development user until login is wired.
+    setDevUser('USER');
+    async function load() {
       setLoading(true);
       setLoadError('');
       try {
-        const response = await fetch('/api/events/registrations/me', {
-          credentials: 'include',
-          signal: controller.signal,
-        });
-        if (!response.ok) throw new Error(await getErrorMessage(response));
-
-        const page = await response.json();
-        setRegistrations(Array.isArray(page) ? page : page.content || []);
+        const [page, eventPage] = await Promise.all([
+          registrationApi.mine({ page: 0, size: 100 }),
+          eventApi.list({ page: 0, size: 100 }).catch(() => null),
+        ]);
+        const rows = Array.isArray(page) ? page : (page?.content ?? []);
+        const eventRows = eventPage?.content ?? [];
+        const pairs = eventRows.map((event) => [event.id, event]);
+        if (ignore) return;
+        setRegistrations(rows);
+        setEvents(Object.fromEntries(pairs));
       } catch (error) {
-        if (error.name !== 'AbortError') {
-          setLoadError(error.message || '신청 목록을 불러오지 못했습니다.');
-        }
+        if (!ignore) setLoadError(error.message || '신청 내역을 불러오지 못했습니다.');
       } finally {
-        if (!controller.signal.aborted) setLoading(false);
+        if (!ignore) setLoading(false);
       }
     }
-
-    loadRegistrations();
-    return () => controller.abort();
+    load();
+    return () => {
+      ignore = true;
+    };
   }, []);
 
-  const filteredRegistrations = useMemo(
-    () =>
-      filter === 'ALL'
-        ? registrations
-        : registrations.filter((registration) => registration.status === filter),
+  const filtered = useMemo(
+    () => (filter === 'ALL' ? registrations : registrations.filter((row) => row.status === filter)),
     [filter, registrations],
   );
 
-  async function cancelRegistration(registration) {
+  // 취소 가능한 상태인지 서버가 최종 검증합니다.
+  async function cancel(row) {
     if (!window.confirm('참가 신청을 취소할까요?')) return;
-
-    setCancellingId(registration.id);
+    setCancellingId(row.id);
     setActionError('');
     try {
-      const response = await fetch(`/api/events/registrations/${registration.id}/cancel`, {
-        method: 'PATCH',
-        credentials: 'include',
-      });
-      if (!response.ok) throw new Error(await getErrorMessage(response));
-
-      const updated = await response.json();
+      const updated = await registrationApi.cancel(row.id);
       setRegistrations((current) =>
         current.map((item) => (item.id === updated.id ? updated : item)),
       );
@@ -83,97 +82,178 @@ function RegistrationPage() {
     }
   }
 
+  // 페이지 화면: 좌측 헤더, 제목, 신청 목록
   return (
-    <main className="mx-auto max-w-4xl px-6 py-12">
-      <a className="text-sm text-slate-600 underline" href="/">
-        EMS 홈
-      </a>
-      <h1 className="mt-5 text-3xl font-bold">참가 신청 및 내역</h1>
-      <p className="mt-2 text-slate-600">신청 상태를 확인하고 취소할 수 있어요.</p>
+    <div className="app-shell">
+      <Header activePage="registrations" />
 
-      <section className="mt-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-semibold">나의 참가 신청</h2>
-
-        <div className="mt-4 flex flex-wrap gap-2" aria-label="신청 상태 필터">
-          {[
-            ['ALL', '전체'],
-            ['PENDING', '승인 대기'],
-            ['APPROVED', '승인 완료'],
-            ['REJECTED', '거절'],
-            ['CANCELLED', '취소됨'],
-          ].map(([value, label]) => (
-            <button
-              className={`rounded-lg border px-3 py-2 text-sm ${filter === value ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-300 bg-white'}`}
-              key={value}
-              onClick={() => setFilter(value)}
-              type="button"
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
-        {loading && <p className="mt-6 text-slate-600">신청 내역을 불러오는 중이에요…</p>}
-        {!loading && loadError && (
-          <div className="mt-6 rounded-lg bg-amber-50 p-4 text-amber-900" role="alert">
-            <p>{loadError}</p>
-            <p className="mt-1 text-sm">로그인 상태와 이벤트 서비스 연결을 확인해 주세요.</p>
+      <main className="app-main-content">
+        <header className="registration-heading">
+          <div>
+            <h1>06 · 참가 신청 및 내역</h1>
+            <p>신청 · 취소 · 승인 상태 확인</p>
           </div>
-        )}
-        {actionError && (
-          <p className="mt-4 text-red-700" role="alert">
-            {actionError}
-          </p>
-        )}
-        {!loading && !loadError && filteredRegistrations.length === 0 && (
-          <p className="mt-6 text-slate-600">
-            {registrations.length === 0
-              ? '아직 참가 신청 내역이 없어요.'
-              : '이 상태의 신청 내역이 없어요.'}
-          </p>
-        )}
+          <span className="registration-role">USER</span>
+        </header>
 
-        {!loading && !loadError && filteredRegistrations.length > 0 && (
-          <ul className="mt-6 divide-y divide-slate-200">
-            {filteredRegistrations.map((registration) => {
-              const canCancel = ['PENDING', 'APPROVED'].includes(registration.status);
-              const eventName = registration.eventTitle || registration.eventName;
-
-              return (
-                <li
-                  className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between"
-                  key={registration.id}
+        <section className="registration-card" aria-labelledby="registration-list-title">
+          <div className="registration-card-heading">
+            <h2 id="registration-list-title">나의 참가 신청</h2>
+            <div className="registration-filters" aria-label="신청 상태 필터">
+              {FILTER_OPTIONS.map(([value, label]) => (
+                <button
+                  aria-pressed={filter === value}
+                  className={`${value === 'PENDING' ? 'pending-filter ' : ''}${filter === value ? 'selected' : ''}`}
+                  key={value}
+                  onClick={() => setFilter(value)}
+                  type="button"
                 >
-                  <div>
-                    <strong>{eventName || '행사명 미제공'}</strong>
-                    {!eventName && registration.eventId && (
-                      <p className="mt-1 break-all text-xs text-slate-500">
-                        행사 ID: {registration.eventId}
-                      </p>
-                    )}
-                    <p className="mt-1 text-sm text-slate-600">
-                      {STATUS_LABELS[registration.status] || registration.status}
-                      {registration.requestedAt &&
-                        ` · 신청 ${new Date(registration.requestedAt).toLocaleString('ko-KR')}`}
-                    </p>
-                  </div>
-                  {canCancel && (
-                    <button
-                      className="rounded-lg border border-slate-300 px-3 py-2 text-sm disabled:opacity-50"
-                      disabled={cancellingId === registration.id}
-                      onClick={() => cancelRegistration(registration)}
-                      type="button"
-                    >
-                      {cancellingId === registration.id ? '취소 중…' : '신청 취소'}
-                    </button>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </section>
-    </main>
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {loading && <p className="registration-message">신청 내역을 불러오는 중이에요…</p>}
+          {!loading && loadError && (
+            <div className="registration-error" role="alert">
+              <strong>신청 내역을 불러오지 못했습니다.</strong>
+              <p>{loadError}</p>
+            </div>
+          )}
+          {actionError && (
+            <p className="registration-action-error" role="alert">
+              {actionError}
+            </p>
+          )}
+          {!loading && !loadError && filtered.length === 0 && (
+            <p className="registration-message">
+              {registrations.length
+                ? '이 상태의 신청 내역이 없어요.'
+                : '아직 참가 신청 내역이 없어요.'}
+            </p>
+          )}
+
+          {!loading && !loadError && filtered.length > 0 && (
+            <ul className="registration-list">
+              {filtered.map((row, index) => {
+                const status = STATUS[row.status] ?? { label: row.status, tone: 'pending' };
+                const title = events[row.eventId]?.title || `행사 #${row.eventId}`;
+                const canCancel = ['PENDING', 'APPROVED'].includes(row.status);
+                return (
+                  <li
+                    className={`registration-row ${index % 2 === 0 ? 'striped' : ''}`}
+                    key={row.id}
+                  >
+                    <div className="registration-event">
+                      <strong>{title}</strong>
+                      <span className={`registration-status ${status.tone}`}>{status.label}</span>
+                      {row.requestedAt && (
+                        <time dateTime={row.requestedAt}>
+                          {new Date(row.requestedAt).toLocaleDateString('ko-KR')}
+                        </time>
+                      )}
+                    </div>
+                    <div className="registration-actions">
+                      <button
+                        className="registration-link"
+                        onClick={() => setDetail(row)}
+                        type="button"
+                      >
+                        상세 보기
+                      </button>
+                      {canCancel && (
+                        <button
+                          className="registration-cancel"
+                          disabled={cancellingId === row.id}
+                          onClick={() => cancel(row)}
+                          type="button"
+                        >
+                          {cancellingId === row.id ? '취소 중…' : '신청 취소'}
+                        </button>
+                      )}
+                      {row.status === 'REJECTED' && (
+                        <button
+                          className="registration-link"
+                          onClick={() => setDetail(row)}
+                          type="button"
+                        >
+                          사유 확인
+                        </button>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+
+          <p className="registration-security-note">
+            중복 신청 및 타인의 참가 신청 변경은 서버에서 차단됩니다.
+          </p>
+        </section>
+        <footer className="registration-footer">
+          EMS · Figma 화면 설계 / 예시 콘텐츠 / 실제 API 연결
+        </footer>
+      </main>
+
+      {/* 신청 행의 상세 정보 팝업 */}
+      {detail && (
+        <div
+          className="registration-dialog-backdrop"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setDetail(null);
+          }}
+        >
+          <section
+            className="registration-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="registration-dialog-title"
+          >
+            <button
+              className="registration-dialog-close"
+              onClick={() => setDetail(null)}
+              type="button"
+              aria-label="닫기"
+            >
+              ×
+            </button>
+            <p className="registration-dialog-eyebrow">참가 신청 상세</p>
+            <h2 id="registration-dialog-title">
+              {events[detail.eventId]?.title || `행사 #${detail.eventId}`}
+            </h2>
+            <dl>
+              <div>
+                <dt>상태</dt>
+                <dd>{STATUS[detail.status]?.label || detail.status}</dd>
+              </div>
+              <div>
+                <dt>신청 일시</dt>
+                <dd>
+                  {detail.requestedAt
+                    ? new Date(detail.requestedAt).toLocaleString('ko-KR')
+                    : '정보 없음'}
+                </dd>
+              </div>
+              <div>
+                <dt>결정 일시</dt>
+                <dd>
+                  {detail.decidedAt
+                    ? new Date(detail.decidedAt).toLocaleString('ko-KR')
+                    : '아직 결정 전'}
+                </dd>
+              </div>
+            </dl>
+            {detail.status === 'REJECTED' && (
+              <p className="registration-dialog-note">
+                현재 API 응답에는 거절 사유가 포함되지 않습니다.
+              </p>
+            )}
+          </section>
+        </div>
+      )}
+    </div>
   );
 }
 

@@ -1,7 +1,7 @@
 // 04 · 행사 상세 화면
 // 흐름: 화면이 뜨면 → 행사 정보 + 세션 목록을 "동시에" 요청(Promise.all) → 둘 다 오면 그리기
 import { useEffect, useState } from 'react';
-import { eventApi, getDevUser } from '../api.js';
+import { eventApi, getDevUser, registrationApi } from '../api.js';
 import { formatRange, formatTimeRange, STATUS_BADGE } from '../format.js';
 
 export default function EventDetail({ eventId, onBack }) {
@@ -11,6 +11,8 @@ export default function EventDetail({ eventId, onBack }) {
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [applying, setApplying] = useState(false);
+  const [applyMessage, setApplyMessage] = useState('');
 
   useEffect(() => {
     let ignore = false;
@@ -31,6 +33,19 @@ export default function EventDetail({ eventId, onBack }) {
       ignore = true;
     };
   }, [eventId]);
+
+  async function applyToEvent() {
+    setApplying(true);
+    setApplyMessage('');
+    try {
+      await registrationApi.apply(eventId);
+      setApplyMessage('참가 신청이 완료되었습니다. 신청 내역에서 상태를 확인할 수 있어요.');
+    } catch (applyError) {
+      setApplyMessage(applyError.message || '참가 신청에 실패했습니다.');
+    } finally {
+      setApplying(false);
+    }
+  }
 
   const backButton = (
     <button
@@ -155,18 +170,25 @@ export default function EventDetail({ eventId, onBack }) {
             )}
           </section>
 
-          {/* 참가 신청: 이도형 님의 신청 모달과 연결할 자리 */}
-          <div className="flex justify-end">
+          {/* 행사 신청 API 호출 */}
+          <div className="flex flex-col items-end gap-2">
+            {applyMessage && (
+              <p className="text-right text-[13px] text-(--ems-muted)" role="status">
+                {applyMessage}
+              </p>
+            )}
             <button
-              disabled={!canApply}
-              onClick={() => alertApply(event)}
+              disabled={!canApply || applying}
+              onClick={applyToEvent}
               className="h-[42px] min-w-[197px] rounded-[10px] bg-(--ems-green) px-4 text-[13px] font-semibold text-white hover:bg-(--ems-green-dark) disabled:cursor-not-allowed disabled:bg-slate-300"
             >
-              {canApply
-                ? '참가 신청하기'
-                : event.status === 'CLOSED'
-                  ? '신청이 마감되었습니다'
-                  : '아직 모집 전입니다'}
+              {applying
+                ? '신청 중…'
+                : canApply
+                  ? '참가 신청하기'
+                  : event.status === 'CLOSED'
+                    ? '신청이 마감되었습니다'
+                    : '아직 모집 전입니다'}
             </button>
           </div>
         </div>
@@ -186,9 +208,4 @@ function InfoRow({ striped = false, children }) {
       {children}
     </div>
   );
-}
-
-// TODO(이도형 님과 연결): 신청 모달 열기. 지금은 콘솔에만 남김
-function alertApply(event) {
-  console.log('[참가 신청] eventId =', event.id);
 }
