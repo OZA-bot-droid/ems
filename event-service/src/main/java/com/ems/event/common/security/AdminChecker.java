@@ -1,4 +1,6 @@
-package com.ems.event.common;
+package com.ems.event.common.security;
+
+import com.ems.event.common.exception.BusinessException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;

@@ -1,6 +1,6 @@
 package com.ems.event.session.dto;
 
-import com.ems.event.session.Session;
+import com.ems.event.session.entity.Session;
 import java.time.Instant;
 
 public record SessionResponse(

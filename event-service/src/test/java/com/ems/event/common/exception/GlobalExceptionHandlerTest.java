@@ -1,7 +1,8 @@
-package com.ems.event.common;
+package com.ems.event.common.exception;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.ems.event.common.dto.ErrorResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;

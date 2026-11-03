@@ -2,7 +2,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import RegistrationPage from './pages/user/RegistrationPage.jsx';
 import './style.css';
-import EventPage from './Event/EventPage.jsx'; // 행사 화면 (이도관)
+import EventDiscoveryPage from './pages/user/EventDiscoveryPage.jsx';
 
 function BootstrapPage() {
   const [data, setData] = React.useState({});
@@ -49,12 +49,13 @@ function BootstrapPage() {
 }
 
 // 임시 주소 나누기 (팀 라우터가 정해지면 교체)
-// /registrations → 참가 신청(이도형), /bootstrap → 서버 연결 확인, 나머지 → 행사 화면(이도관)
+// /events → 행사 찾기, /registrations → 참가 신청, /bootstrap → 서버 연결 확인
 function App() {
   const path = window.location.pathname;
+  if (path === '/events') return <EventDiscoveryPage />;
   if (path === '/registrations') return <RegistrationPage />;
   if (path === '/bootstrap') return <BootstrapPage />;
-  return <EventPage />;
+  return <BootstrapPage />;
 }
 
 createRoot(document.getElementById('root')).render(

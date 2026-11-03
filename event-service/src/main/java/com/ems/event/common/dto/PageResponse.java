@@ -1,4 +1,4 @@
-package com.ems.event.common;
+package com.ems.event.common.dto;
 
 import java.util.List;
 import java.util.function.Function;

@@ -1,7 +1,7 @@
 package com.ems.event.event.dto;
 
-import com.ems.event.event.Event;
-import com.ems.event.event.EventStatus;
+import com.ems.event.event.entity.Event;
+import com.ems.event.event.entity.EventStatus;
 import java.time.Instant;
 
 public record EventResponse(

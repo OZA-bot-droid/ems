@@ -1,6 +1,6 @@
 package com.ems.event.event.dto;
 
-import com.ems.event.event.EventStatus;
+import com.ems.event.event.entity.EventStatus;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import java.time.Instant;

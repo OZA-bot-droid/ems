@@ -1,4 +1,6 @@
-package com.ems.event.common;
+package com.ems.event.common.exception;
+
+import com.ems.event.common.dto.ErrorResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.stream.Collectors;

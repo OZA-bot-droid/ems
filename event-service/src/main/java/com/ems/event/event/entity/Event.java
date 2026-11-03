@@ -1,4 +1,4 @@
-package com.ems.event.event;
+package com.ems.event.event.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

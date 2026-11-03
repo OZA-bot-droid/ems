@@ -1,5 +1,6 @@
-package com.ems.event.session;
+package com.ems.event.session.repository;
 
+import com.ems.event.session.entity.Session;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;

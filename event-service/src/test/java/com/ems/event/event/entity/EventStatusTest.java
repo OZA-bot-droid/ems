@@ -1,4 +1,4 @@
-package com.ems.event.event;
+package com.ems.event.event.entity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -1,4 +1,4 @@
-package com.ems.event.session;
+package com.ems.event.session.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -7,10 +7,18 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+<<<<<<< HEAD:event-service/src/test/java/com/ems/event/session/SessionServiceTest.java
 import com.ems.event.common.BusinessException;
 import com.ems.event.event.Event;
 import com.ems.event.event.EventRepository;
 import com.ems.event.event.EventStatus;
+=======
+import com.ems.event.common.exception.BusinessException;
+import com.ems.event.event.entity.Event;
+import com.ems.event.event.repository.EventRepository;
+import com.ems.event.session.entity.Session;
+import com.ems.event.session.repository.SessionRepository;
+>>>>>>> origin/feature/Event-Service:event-service/src/test/java/com/ems/event/session/service/SessionServiceTest.java
 import com.ems.event.session.dto.SessionCreateRequest;
 import com.ems.event.session.dto.SessionResponse;
 import com.ems.event.session.dto.SessionUpdateRequest;

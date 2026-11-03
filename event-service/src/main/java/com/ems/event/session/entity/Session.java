@@ -1,6 +1,6 @@
-package com.ems.event.session;
+package com.ems.event.session.entity;
 
-import com.ems.event.event.Event;
+import com.ems.event.event.entity.Event;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
