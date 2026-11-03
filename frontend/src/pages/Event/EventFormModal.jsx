@@ -1,8 +1,8 @@
 // 09 · 행사 등록 / 수정 모달 (Figma "Modal / Create Event")
 // event가 없으면 "새 행사 등록", 있으면 "행사 수정"으로 동작합니다.
 import { useState } from 'react';
-import { eventApi } from '../api.js';
-import { instantToKstInput, kstToInstant, nowKstInput } from '../format.js';
+import { eventApi } from '../../api.js';
+import { instantToKstInput, kstToInstant, nowKstInput } from '../../format.js';
 import DateTimeField from './DateTimeField.jsx';
 
 export default function EventFormModal({ event, onClose, onSaved }) {

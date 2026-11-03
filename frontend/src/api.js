@@ -9,9 +9,15 @@ export const DEV_USERS = {
   ADMIN: { id: '1', role: 'ADMIN' },
   USER: { id: '2', role: 'USER' },
 };
-let currentUser = DEV_USERS.ADMIN;
+const savedDevRole =
+  typeof window === 'undefined' ? null : window.sessionStorage.getItem('ems-dev-role');
+let currentUser = DEV_USERS[savedDevRole] ?? DEV_USERS.ADMIN;
 export function setDevUser(role) {
+  if (!DEV_USERS[role]) return;
   currentUser = DEV_USERS[role];
+  if (typeof window !== 'undefined') {
+    window.sessionStorage.setItem('ems-dev-role', role);
+  }
 }
 export function getDevUser() {
   return currentUser;

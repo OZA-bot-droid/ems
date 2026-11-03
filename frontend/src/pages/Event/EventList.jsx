@@ -1,8 +1,8 @@
 // 03 · 행사 목록 화면
 // 흐름: 화면이 뜨면 → eventApi.list() 로 목록 요청 → 받은 content 를 카드로 그리기
 import { useEffect, useState } from 'react';
-import { eventApi, getDevUser } from '../api.js';
-import { formatShort, STATUS_BADGE } from '../format.js';
+import { eventApi, getDevUser } from '../../api.js';
+import { formatShort, STATUS_BADGE } from '../../format.js';
 
 const PAGE_SIZE = 8;
 
