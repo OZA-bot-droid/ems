@@ -1,14 +1,10 @@
 package com.ems.member.member.controller;
 
 import com.ems.member.member.domain.Role;
-import com.ems.member.member.dto.LoginResponseDTO;
-import com.ems.member.member.dto.MemberLoginDTO;
-import com.ems.member.member.dto.MemberRegisterDTO;
-import com.ems.member.member.dto.ClientDTO;
+import com.ems.member.member.dto.*;
 import com.ems.member.member.service.AuthService;
 import com.ems.member.member.service.MemberService;
 import com.ems.member.member.service.SocialLoginService;
-import com.nimbusds.openid.connect.sdk.claims.ClaimsSet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -17,15 +13,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/members")
@@ -56,7 +50,7 @@ public class MemberController {
     public ResponseEntity<?> login(@Valid @RequestBody MemberLoginDTO dto) {
 
         LoginResponseDTO responseDTO = memberService.login(dto);
-        return new ResponseEntity<>(responseDTO.accessToken(), memberService.createRefreshTokenCookie(responseDTO.refreshToken()), HttpStatus.OK);
+        return new ResponseEntity<>(new AccessTokenResponseDTO(responseDTO.accessToken()), memberService.createRefreshTokenCookie(responseDTO.refreshToken()), HttpStatus.OK);
     }
 
     // 새로운 access token 생성
@@ -65,7 +59,7 @@ public class MemberController {
     public ResponseEntity<?> reissue(@RequestBody ClientDTO dto, @CookieValue("refreshToken") String refreshToken) {
 
         LoginResponseDTO responseDTO = authService.reissue(dto, refreshToken);
-        return new ResponseEntity<>(responseDTO.accessToken(), memberService.createRefreshTokenCookie(responseDTO.refreshToken()), HttpStatus.OK);
+        return new ResponseEntity<>(new AccessTokenResponseDTO(responseDTO.accessToken()), memberService.createRefreshTokenCookie(responseDTO.refreshToken()), HttpStatus.OK);
     }
 
     // 로그아웃
@@ -86,11 +80,9 @@ public class MemberController {
                 .maxAge(0)  // cookie 삭제를 의미
                 .build();
 
-        // MultiValueMap : 하나의 key에 여러 개의 value를 저장할 수 있는 Map 인터페이스
-        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
-        headers.add(HttpHeaders.SET_COOKIE, deleteCookie.toString());
-
-        return new ResponseEntity<>(headers, HttpStatus.OK);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
+                .body(new LogoutResponseDTO(true));
     }
 
     // 회원 정보
@@ -148,7 +140,7 @@ public class MemberController {
         LoginResponseDTO dto = socialLoginService.getAndRemoveLoginCode(code);
 
         return new ResponseEntity<>(
-                dto.accessToken(),
+                new AccessTokenResponseDTO(dto.accessToken()),
                 memberService.createRefreshTokenCookie(dto.refreshToken()),
                 HttpStatus.OK
         );
