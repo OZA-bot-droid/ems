@@ -1,14 +1,9 @@
 // 04 · 행사 상세 화면
 // 흐름: 화면이 뜨면 → 행사 정보 + 세션 목록을 "동시에" 요청(Promise.all) → 둘 다 오면 그리기
 import { useEffect, useState } from 'react';
-<<<<<<< HEAD:frontend/src/Event/EventDetail.jsx
-import { eventApi, getDevUser, registrationApi } from '../api.js';
-import { formatRange, formatTimeRange, instantToKstInput, STATUS_BADGE } from '../format.js';
-=======
 import { eventApi, getDevUser, registrationApi } from '../../api.js';
-import { formatRange, formatTimeRange, STATUS_BADGE } from '../../format.js';
+import { formatRange, formatTimeRange, instantToKstInput, STATUS_BADGE } from '../../format.js';
 import RegistrationApplyModal from './RegistrationApplyModal.jsx';
->>>>>>> origin/feature/Event-Service:frontend/src/pages/Event/EventDetail.jsx
 
 export default function EventDetail({ eventId, onBack }) {
   const [event, setEvent] = useState(null);

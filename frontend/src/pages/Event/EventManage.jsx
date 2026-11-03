@@ -10,6 +10,8 @@ const NEXT_STATUS = {
   DRAFT: { to: 'OPEN', label: '공개' },
   OPEN: { to: 'CLOSED', label: '마감' },
 };
+// 배지에 보여 줄 "다음 상태" 이름 (STATUS_BADGE의 화면 이름과 같게)
+const NEXT_LABEL = { DRAFT: '모집 중', OPEN: '마감' };
 
 export default function EventManage({ onManageSessions }) {
   const [page, setPage] = useState(0);
@@ -113,9 +115,21 @@ export default function EventManage({ onManageSessions }) {
                     <strong title={event.title}>{event.title}</strong>
                     <span>{formatShort(event.startsAt)} · 정원 {event.capacity}명</span>
                   </div>
-                  <span className={`event-manage-status is-${event.status.toLowerCase()}`}>
-                    {badge.label}
-                  </span>
+                  {/* 상태 배지: 내 행사이고 다음 단계가 있으면 눌러서 바꿈 (DRAFT → OPEN → CLOSED, 확인 후) */}
+                  {isMine(event) && next ? (
+                    <button
+                      className={`event-manage-status is-${event.status.toLowerCase()} is-clickable`}
+                      onClick={() => setConfirm({ id: event.id, type: 'status' })}
+                      title={`눌러서 ${NEXT_LABEL[event.status]}(으)로 바꾸기`}
+                      type="button"
+                    >
+                      {badge.label} <span aria-hidden="true">›</span>
+                    </button>
+                  ) : (
+                    <span className={`event-manage-status is-${event.status.toLowerCase()}`}>
+                      {badge.label}
+                    </span>
+                  )}
 
                   {isConfirming ? (
                     <div className="event-manage-confirm">

@@ -1,11 +1,11 @@
 // 행사 화면의 입구 (이도관 담당)
 import { useState } from 'react';
-import './event.css';
+import './event.scss';
 import EventList from './EventList.jsx';
 import EventDetail from './EventDetail.jsx';
 import EventManage from './EventManage.jsx';
 import SessionManage from './SessionManage.jsx';
-import { getDevUser, setDevUser } from '../api.js';
+import { getDevUser, setDevUser } from '../../api.js';
 
 export default function EventPage() {
   const [role, setRole] = useState(getDevUser().role);

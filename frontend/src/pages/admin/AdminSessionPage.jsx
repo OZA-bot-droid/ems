@@ -2,10 +2,10 @@
 // 공통 레이아웃(사이드바 Header) + 세션 관리 본문(Event/SessionManage)을 붙이는 페이지입니다.
 // 화면 내용은 Event/SessionManage.jsx, 디자인은 Event/session-manage.scss에 있습니다.
 import { useState } from 'react';
-import '../../Event/event.scss';
-import SessionManage from '../../Event/SessionManage.jsx';
+import '../Event/event.scss';
+import SessionManage from '../Event/SessionManage.jsx';
 import { setDevUser } from '../../api.js';
-import Header from '../user/Header.jsx';
+import Header from '../../component/Header.jsx';
 
 export default function AdminSessionPage() {
   // ⚠️ 개발용: 로그인(JWT) 완성 전까지 관리자 1번으로 요청 (RegistrationPage의 setDevUser('USER')와 같은 방식)

@@ -2,8 +2,8 @@
 // session이 없으면 "새 세션 추가", 있으면 "세션 수정"
 // 검사 2겹: ① 화면에서 먼저(빈칸, 종료>시작, 행사 시간 안) ② 서버(겹침 등)가 거절하면 알맞은 자리에 표시
 import { useState } from 'react';
-import { eventApi } from '../api.js';
-import { formatRange, instantToKstInput, kstToInstant } from '../format.js';
+import { eventApi } from '../../api.js';
+import { formatRange, instantToKstInput, kstToInstant } from '../../format.js';
 import DateTimeField from './DateTimeField.jsx';
 import './session-manage.scss';
 

@@ -2,8 +2,8 @@
 // 흐름: 내 행사 목록 불러오기 → [행사 선택] → 그 행사의 정보 + 세션 목록 → 추가/수정/삭제는 모달·확인 후 다시 불러오기
 // eventId(처음 선택할 행사)는 없어도 동작합니다. → 사이드바 [세션 관리]로 바로 들어와도 첫 행사가 선택됨
 import { useEffect, useState } from 'react';
-import { eventApi, getDevUser } from '../api.js';
-import { formatRange, formatTimeRange, instantToKstInput, STATUS_BADGE } from '../format.js';
+import { eventApi, getDevUser } from '../../api.js';
+import { formatRange, formatTimeRange, instantToKstInput, STATUS_BADGE } from '../../format.js';
 import SessionFormModal from './SessionFormModal.jsx';
 import './session-manage.scss';
 
