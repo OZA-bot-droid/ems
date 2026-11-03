@@ -1,12 +1,14 @@
 package com.ems.member.common.config;
 
 import com.ems.member.common.handler.*;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
@@ -53,7 +55,7 @@ public class SecurityConfig {
 
     // Spring Security에서 어떤 요청에 어떤 보안 규칙을 적용할지 정의하는 필터 체인 객체
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, @Qualifier("accessTokenDecoder") JwtDecoder accessDecoder) throws Exception {
 
         // Spring Security의 CSRF(Cross-Site Request Forgery) 보호 기능을 끄는 설정
         // 사용자가 원하지 않는 요청을 다른 사이트가 대신 보내는 공격을 막는 기능
@@ -93,7 +95,8 @@ public class SecurityConfig {
                         // Bean으로 Spring에 등록한 JwtDecoder를 찾아서 사용
                         // Spring Security가 JWT 인증할 때 해당 converter를 사용
                         oauth2.jwt(jwt ->
-                                jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())
+                                jwt.decoder(accessDecoder)
+                                        .jwtAuthenticationConverter(jwtAuthenticationConverter())
                         )
                 )
                 // 소셜 계정으로 로그인시 handler 실행

@@ -4,6 +4,7 @@ import com.ems.member.common.exception.InvalidRefreshTokenException;
 import com.ems.member.common.exception.MemberNotFoundException;
 import com.ems.member.member.domain.Role;
 import com.ems.member.member.repository.MemberRepository;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
@@ -18,24 +19,24 @@ public class JwtTokenService {
 
     // JwtTokenConfig에서 등록한 NimbusJwtEncoder(JwtEncoder의 하위 클래스)
     private final JwtEncoder jwtEncoder;
-    private final JwtDecoder jwtDecoder;
     private final MemberRepository memberRepository;
     private final String issuer;
     private final long accessTokenExpiration;
     private final long refreshTokenExpiration;
+    private final JwtDecoder refreshDecoder;
 
     public JwtTokenService(JwtEncoder jwtEncoder,
-                           JwtDecoder jwtDecoder,
                            MemberRepository memberRepository,
                            @Value("${jwt.issuer}") String issuer,
                            @Value("${jwt.access-token-expiration}") long accessTokenExpiration,
-                           @Value("${jwt.refresh-token-expiration}") long refreshTokenExpiration) {
+                           @Value("${jwt.refresh-token-expiration}") long refreshTokenExpiration,
+                           @Qualifier("refreshTokenDecoder")JwtDecoder refreshDecoder) {
         this.jwtEncoder = jwtEncoder;
-        this.jwtDecoder = jwtDecoder;
         this.memberRepository = memberRepository;
         this.issuer = issuer;
         this.accessTokenExpiration = accessTokenExpiration;
         this.refreshTokenExpiration = refreshTokenExpiration;
+        this.refreshDecoder = refreshDecoder;
     }
 
     // accessToken 생성
@@ -97,7 +98,7 @@ public class JwtTokenService {
 
         try {
             // jwt 토큰 검증
-            Jwt jwt = jwtDecoder.decode(refreshToken);
+            Jwt jwt = refreshDecoder.decode(refreshToken);
 
             // refresh token 여부
             if (!"refresh".equals(jwt.getClaimAsString("token_type"))) {

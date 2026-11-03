@@ -8,6 +8,10 @@ import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
 
@@ -108,17 +112,45 @@ public class JwtTokenConfig {
         return new NimbusJwtEncoder(jwkSource);
     }
 
-    @Bean
-    public JwtDecoder jwtDecoder(@Value("${jwt.issuer}") String issuer) throws Exception {
+    @Bean("accessTokenDecoder")
+    public JwtDecoder accessTokenDecoder(@Value("${jwt.issuer}") String issuer) throws Exception {
+        return createDecoder(issuer, "access");
+    }
 
-        RSAPublicKey publicKey = loadPublicKey();
+    @Bean("refreshTokenDecoder")
+    public JwtDecoder refreshTokenDecoder(@Value("${jwt.issuer}") String issuer) throws Exception {
+        return createDecoder(issuer, "refresh");
+    }
 
-        NimbusJwtDecoder decoder = NimbusJwtDecoder.withPublicKey(publicKey)
-                .signatureAlgorithm(SignatureAlgorithm.RS256)
-                .build();
+    private JwtDecoder createDecoder(String issuer, String expectedType) throws Exception {
+
+        NimbusJwtDecoder decoder =
+                NimbusJwtDecoder.withPublicKey(loadPublicKey())
+                        .signatureAlgorithm(SignatureAlgorithm.RS256)
+                        .build();
+
+        OAuth2TokenValidator<Jwt> typeValidator = jwt -> {
+            if (expectedType.equals(
+                    jwt.getClaimAsString("token_type"))) {
+                return OAuth2TokenValidatorResult.success();
+            }
+
+            return OAuth2TokenValidatorResult.failure(
+                    new OAuth2Error(
+                            "invalid_token",
+                            "잘못된 토큰 유형입니다.",
+                            null
+                    )
+            );
+        };
+
         decoder.setJwtValidator(
-                JwtValidators.createDefaultWithIssuer(issuer)
+                new DelegatingOAuth2TokenValidator<>(
+                        JwtValidators.createDefaultWithIssuer(issuer),
+                        typeValidator
+                )
         );
+
         return decoder;
     }
 }
