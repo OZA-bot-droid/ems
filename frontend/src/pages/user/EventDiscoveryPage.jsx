@@ -5,7 +5,7 @@ import EventList from '../Event/EventList.jsx';
 import EventDetail from '../Event/EventDetail.jsx';
 import EventManage from '../Event/EventManage.jsx';
 import { getDevUser, setDevUser } from '../../api.js';
-import Header from '../Header.jsx';
+import Header from '../../component/Header.jsx';
 
 export default function EventDiscoveryPage() {
   const [role, setRole] = useState(getDevUser().role);
