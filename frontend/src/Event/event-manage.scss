@@ -54,6 +54,13 @@
     line-height: 1;
     cursor: pointer;
   }
+
+  // 실패 알림 (삭제·상태 변경 거절 등)
+  &.is-error {
+    border-color: #f2c8c5;
+    background: #fef3f2;
+    color: #b42318;
+  }
 }
 
 .event-manage-card {

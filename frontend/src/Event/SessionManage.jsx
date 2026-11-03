@@ -1,25 +1,48 @@
-// 10 · 세션 관리 (그 행사를 만든 관리자 전용, Figma "10 세션 관리")
-// 흐름: 행사 정보 + 세션 목록 불러오기 → [+ 세션 추가]/[수정]은 모달 → 저장·삭제하면 다시 불러오기
-// eventId만 받으면 동작하므로, 나중에 라우터 주소(/admin/events/:eventId/sessions)에 그대로 붙일 수 있다
+// ADMIN / 10 · 세션 관리 (Figma "ADMIN / 10 · 세션 관리")
+// 흐름: 내 행사 목록 불러오기 → [행사 선택] → 그 행사의 정보 + 세션 목록 → 추가/수정/삭제는 모달·확인 후 다시 불러오기
+// eventId(처음 선택할 행사)는 없어도 동작합니다. → 사이드바 [세션 관리]로 바로 들어와도 첫 행사가 선택됨
 import { useEffect, useState } from 'react';
-import { eventApi } from '../api.js';
-import { formatRange, STATUS_BADGE } from '../format.js';
+import { eventApi, getDevUser } from '../api.js';
+import { formatRange, formatTimeRange, instantToKstInput, STATUS_BADGE } from '../format.js';
 import SessionFormModal from './SessionFormModal.jsx';
+import './session-manage.scss';
 
-export default function SessionManage({ eventId, onBack }) {
+export default function SessionManage({ eventId = null, onBack }) {
+  const [myEvents, setMyEvents] = useState(null); // 행사 선택 목록 (내가 만든 행사만)
+  const [selectedId, setSelectedId] = useState(eventId);
   const [event, setEvent] = useState(null);
   const [sessions, setSessions] = useState([]);
   const [error, setError] = useState(null);
-  const [reload, setReload] = useState(0); // 숫자가 바뀌면 다시 불러옴
+  const [reload, setReload] = useState(0); // 숫자가 바뀌면 세션을 다시 불러옴
   const [modal, setModal] = useState(null); // null=닫힘, {}=새 세션, {session}=수정
   const [confirmId, setConfirmId] = useState(null); // 삭제 확인 중인 세션 번호
   const [notice, setNotice] = useState(null); // { type: 'ok' | 'error', text }
 
-  // 행사 정보와 세션 목록을 동시에 요청
+  // ① 행사 선택 목록: 내가 만든 행사만 (세션은 행사를 만든 관리자만 관리 가능)
   useEffect(() => {
     let alive = true;
+    const myId = String(getDevUser().id);
+    eventApi
+      .list({ page: 0, size: 100 })
+      .then((data) => {
+        if (!alive) return;
+        const mine = (data?.content ?? []).filter((e) => String(e.createdBy) === myId);
+        setMyEvents(mine);
+        // 처음 선택: 받은 eventId가 내 행사면 그것, 아니면 첫 행사
+        setSelectedId((current) => (mine.some((e) => e.id === current) ? current : mine[0]?.id ?? null));
+      })
+      .catch((err) => alive && setError(err));
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  // ② 선택한 행사의 정보 + 세션 목록을 동시에
+  useEffect(() => {
+    if (!selectedId) return;
+    let alive = true;
     setError(null);
-    Promise.all([eventApi.get(eventId), eventApi.sessions(eventId)])
+    Promise.all([eventApi.get(selectedId), eventApi.sessions(selectedId)])
       .then(([ev, list]) => {
         if (!alive) return;
         setEvent(ev);
@@ -29,16 +52,23 @@ export default function SessionManage({ eventId, onBack }) {
     return () => {
       alive = false;
     };
-  }, [eventId, reload]);
+  }, [selectedId, reload]);
 
   const refresh = (text) => {
     setNotice({ type: 'ok', text });
     setReload((n) => n + 1);
   };
 
+  function selectEvent(id) {
+    setSelectedId(Number(id));
+    setEvent(null);
+    setConfirmId(null);
+    setNotice(null);
+  }
+
   async function remove(session) {
     try {
-      await eventApi.removeSession(eventId, session.id);
+      await eventApi.removeSession(selectedId, session.id);
       setConfirmId(null);
       refresh(`"${session.title}" 세션을 삭제했습니다.`);
     } catch (err) {
@@ -47,109 +77,152 @@ export default function SessionManage({ eventId, onBack }) {
     }
   }
 
-  // 불러오기 실패 (예: 404 남의 DRAFT·없는 행사)
-  if (error) {
-    return (
-      <section>
-        <BackButton onBack={onBack} />
-        <p className="rounded-[14px] bg-(--ems-surface) py-10 text-center text-sm text-rose-600">
-          {error.status === 404 ? '행사를 찾을 수 없습니다.' : `세션 정보를 불러오지 못했습니다. (${error.code})`}
-        </p>
-      </section>
-    );
-  }
-  if (!event) {
-    return <p className="py-10 text-center text-sm text-(--ems-muted)">불러오는 중…</p>;
-  }
-
-  const badge = STATUS_BADGE[event.status] ?? { label: event.status, className: 'bg-slate-100' };
   // 마감된 행사는 보기만 (서버도 EVENT_CLOSED 409로 막음)
-  const locked = event.status === 'CLOSED';
+  const locked = event?.status === 'CLOSED';
+  const badge = event && (STATUS_BADGE[event.status] ?? { label: event.status });
+  // 여러 날에 걸친 행사면 세션에 날짜도 표시
+  const multiDay =
+    event && instantToKstInput(event.startsAt).slice(0, 10) !== instantToKstInput(event.endsAt).slice(0, 10);
 
   return (
-    <section>
-      <BackButton onBack={onBack} />
-
-      {/* 머리 */}
-      <header className="mb-6 flex items-end justify-between gap-4">
-        <div>
-          <h1 className="text-[28px] font-bold">{locked ? '세션 보기' : '세션 관리'}</h1>
-          <p className="mt-1 text-[13px] text-(--ems-muted)">
-            {locked ? '마감된 행사라 세션을 볼 수만 있습니다.' : '행사 시간 안에서 겹치지 않게 세션을 구성합니다.'}
-          </p>
-        </div>
-        {!locked && (
-        <button
-          onClick={() => setModal({})}
-          className="h-[43px] rounded-[9px] bg-(--ems-green) px-5 text-[13px] font-semibold text-white hover:bg-(--ems-green-dark)"
-        >
-          + 세션 추가
+    <section className="session-manage-page" aria-label="세션 관리">
+      {onBack && (
+        <button className="session-manage-back" onClick={onBack} type="button">
+          ← 행사 관리로
         </button>
-        )}
+      )}
+
+      <header className="session-manage-header">
+        <div>
+          <h1>세션 관리</h1>
+          <p>행사별 세션 추가 및 일정</p>
+        </div>
+        <span className="session-manage-role">ADMIN</span>
       </header>
 
-      {/* 어떤 행사의 세션인지 */}
-      <div className="mb-4 flex flex-wrap items-center gap-3 rounded-[14px] bg-(--ems-green-soft) px-5 py-4">
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-[17px] font-bold">{event.title}</p>
-          <p className="mt-0.5 text-xs text-(--ems-muted)">행사 시간 · {formatRange(event.startsAt, event.endsAt)}</p>
-        </div>
-        <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${badge.className}`}>{badge.label}</span>
-      </div>
-
       {notice && (
-        <p
-          className={`mb-4 flex justify-between rounded-[8px] px-4 py-2.5 text-xs font-semibold ${
-            notice.type === 'ok' ? 'bg-(--ems-green-soft) text-(--ems-green)' : 'bg-rose-50 text-rose-700'
-          }`}
-        >
+        <p className={`session-manage-notice${notice.type === 'error' ? ' is-error' : ''}`} role="status">
           {notice.text}
-          <button onClick={() => setNotice(null)} aria-label="알림 닫기">×</button>
+          <button onClick={() => setNotice(null)} aria-label="알림 닫기" type="button">
+            ×
+          </button>
         </p>
       )}
 
-      {/* 세션 목록 */}
-      <div className="rounded-[14px] bg-(--ems-surface) p-6">
-        <h2 className="mb-4 text-[19px] font-bold">세션 목록 · {sessions.length}개</h2>
+      <section className="session-manage-card" aria-labelledby="session-manage-title">
+        <h2 id="session-manage-title">행사별 세션 관리</h2>
 
-        {sessions.length === 0 && (
-          <p className="py-8 text-center text-sm text-(--ems-muted)">
-            {locked ? '등록된 세션이 없습니다.' : '아직 세션이 없습니다. [+ 세션 추가]로 시작하세요.'}
+        {/* 행사 선택 */}
+        <label className="session-manage-label" htmlFor="session-event-select">
+          행사 선택
+        </label>
+        {myEvents === null ? (
+          <p className="session-manage-feedback">행사 목록을 불러오는 중이에요…</p>
+        ) : myEvents.length === 0 ? (
+          <p className="session-manage-feedback">
+            내가 만든 행사가 없습니다. ‘행사 관리’에서 행사를 먼저 등록하세요.
           </p>
+        ) : (
+          <>
+            <select
+              id="session-event-select"
+              className="session-manage-select"
+              value={selectedId ?? ''}
+              onChange={(e) => selectEvent(e.target.value)}
+            >
+              {myEvents.map((e) => (
+                <option key={e.id} value={e.id}>
+                  {e.title}
+                </option>
+              ))}
+            </select>
+            {event && (
+              <p className="session-manage-event-meta">
+                <span className={`session-manage-status is-${event.status.toLowerCase()}`}>{badge.label}</span>
+                행사 시간 · {formatRange(event.startsAt, event.endsAt)}
+              </p>
+            )}
+          </>
         )}
 
-        <ul className="flex flex-col gap-2">
-          {sessions.map((session, i) => (
-            <li key={session.id} className="flex min-h-[52px] flex-wrap items-center gap-3 rounded-[9px] bg-(--ems-row) px-4 py-2.5">
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-(--ems-surface) text-xs font-bold text-(--ems-muted)">
-                {i + 1}
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold">{session.title}</p>
-                <p className="text-xs text-(--ems-muted)">{formatRange(session.startsAt, session.endsAt)}</p>
-              </div>
+        {/* 등록된 세션 */}
+        {error ? (
+          <p className="session-manage-feedback is-error" role="alert">
+            {error.status === 404 ? '행사를 찾을 수 없습니다.' : `세션 정보를 불러오지 못했습니다. (${error.code})`}
+          </p>
+        ) : (
+          event && (
+            <>
+              <h3 className="session-manage-subtitle">
+                등록된 세션 <span>{sessions.length}개</span>
+              </h3>
 
-              {locked ? null : confirmId === session.id ? (
-                // 삭제 확인 (줄 안에서 한 번 더 묻기)
-                <div className="flex items-center gap-2 text-xs">
-                  <span className="text-rose-600">정말 삭제할까요?</span>
-                  <button onClick={() => remove(session)} className="rounded-[6px] bg-rose-600 px-2.5 py-1 font-semibold text-white">삭제</button>
-                  <button onClick={() => setConfirmId(null)} className="rounded-[6px] bg-(--ems-surface) px-2.5 py-1 font-semibold">취소</button>
-                </div>
+              {sessions.length === 0 ? (
+                <p className="session-manage-feedback">
+                  {locked ? '등록된 세션이 없습니다.' : '아직 세션이 없습니다. ‘새 세션 추가’로 시작하세요.'}
+                </p>
               ) : (
-                <div className="flex items-center gap-2 text-xs font-semibold">
-                  <button onClick={() => setModal({ session })} className="rounded-[6px] bg-(--ems-surface) px-2.5 py-1">수정</button>
-                  <button onClick={() => setConfirmId(session.id)} className="rounded-[6px] px-2.5 py-1 text-rose-600">삭제</button>
+                <ul className="session-manage-list">
+                  {sessions.map((session) => (
+                    <li className="session-manage-row" key={session.id}>
+                      <span className="session-manage-time">
+                        {multiDay
+                          ? formatRange(session.startsAt, session.endsAt)
+                          : formatTimeRange(session.startsAt, session.endsAt).replace('–', '-')}
+                      </span>
+                      <strong className="session-manage-name" title={session.title}>
+                        {session.title}
+                      </strong>
+
+                      {locked ? null : confirmId === session.id ? (
+                        <div className="session-manage-confirm">
+                          <span>정말 삭제할까요?</span>
+                          <button className="is-danger" onClick={() => remove(session)} type="button">
+                            삭제
+                          </button>
+                          <button onClick={() => setConfirmId(null)} type="button">
+                            취소
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="session-manage-actions">
+                          <button onClick={() => setModal({ session })} type="button">
+                            수정
+                          </button>
+                          <details className="session-manage-more">
+                            <summary aria-label={`${session.title} 기타 메뉴`}>···</summary>
+                            <div>
+                              <button className="is-danger" onClick={() => setConfirmId(session.id)} type="button">
+                                삭제
+                              </button>
+                            </div>
+                          </details>
+                        </div>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {locked ? (
+                <p className="session-manage-locked">마감된 행사라 세션을 볼 수만 있습니다.</p>
+              ) : (
+                <div className="session-manage-footer">
+                  <button className="session-manage-create" onClick={() => setModal({})} type="button">
+                    ＋ 새 세션 추가
+                  </button>
                 </div>
               )}
-            </li>
-          ))}
-        </ul>
+            </>
+          )
+        )}
+      </section>
 
-        <p className="mt-5 text-[11px] text-(--ems-muted)">세션은 행사 시간 안에서만 · 다른 세션과 겹침 불가 (끝나는 시각에 바로 시작은 가능)</p>
-      </div>
+      <p className="session-manage-note">
+        세션은 행사 시간 안에서만 · 다른 세션과 겹침 불가 (끝나는 시각에 바로 시작은 가능)
+      </p>
 
-      {modal && (
+      {modal && event && (
         <SessionFormModal
           event={event}
           session={modal.session}
@@ -161,13 +234,5 @@ export default function SessionManage({ eventId, onBack }) {
         />
       )}
     </section>
-  );
-}
-
-function BackButton({ onBack }) {
-  return (
-    <button onClick={onBack} className="mb-4 text-[13px] font-semibold text-(--ems-muted) hover:text-(--ems-ink)">
-      ← 행사 관리로
-    </button>
   );
 }

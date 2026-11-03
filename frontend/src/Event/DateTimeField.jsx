@@ -10,7 +10,8 @@ const MINUTES = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, '
 const boxClass =
   'h-[43px] rounded-[9px] border border-transparent bg-(--ems-bg) px-3 text-[13px] text-(--ems-ink) focus:border-(--ems-green) focus:outline-none';
 
-export default function DateTimeField({ id, value, onChange, minDate, maxDate, min, max }) {
+// compact: 칸이 좁을 때(모달에서 시작·종료를 나란히 둘 때) 시·분 선택을 좁게
+export default function DateTimeField({ id, value, onChange, minDate, maxDate, min, max, compact = false }) {
   // 처음 값 "2026-11-03T14:05" → 날짜 / 시 / 분 세 조각으로 나눠서 기억
   const [parts, setParts] = useState(() => {
     const [date = '', time = ''] = (value || '').split('T');
@@ -40,6 +41,8 @@ export default function DateTimeField({ id, value, onChange, minDate, maxDate, m
     return Boolean((min && v < min) || (max && v > max));
   };
 
+  const selectWidth = compact ? 'w-[72px] shrink-0 pl-2 pr-0.5' : 'w-[88px]';
+
   const minuteOptions =
     parts.minute && !MINUTES.includes(parts.minute) ? [...MINUTES, parts.minute].sort() : MINUTES;
 
@@ -57,7 +60,7 @@ export default function DateTimeField({ id, value, onChange, minDate, maxDate, m
       <select
         id={`${id}-hour`}
         aria-label="시"
-        className={`${boxClass} w-[88px]`}
+        className={`${boxClass} ${selectWidth}`}
         value={parts.hour}
         onChange={(e) => update('hour', e.target.value)}
       >
@@ -71,7 +74,7 @@ export default function DateTimeField({ id, value, onChange, minDate, maxDate, m
       <select
         id={`${id}-minute`}
         aria-label="분"
-        className={`${boxClass} w-[88px]`}
+        className={`${boxClass} ${selectWidth}`}
         value={parts.minute}
         onChange={(e) => update('minute', e.target.value)}
       >
