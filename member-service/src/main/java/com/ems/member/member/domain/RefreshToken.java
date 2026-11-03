@@ -27,37 +27,37 @@ public class RefreshToken extends BaseEntity {
     @Column(name = "client_id")
     private UUID clientId;
 
-    @Column(nullable = false, unique = true, length = 1000)
-    private String token;
+    @Column(name = "token_hash", nullable = false, unique = true, length = 64)
+    private String tokenHash;
 
     @Column(name = "expires_at", nullable = false)
     private Instant expiresAt;
 
-    public static RefreshToken toBuilder(Member member, String refreshToken, UUID clientId, long refreshTokenExpiration) {
+    public static RefreshToken toBuilder(Member member, String tokenHash, UUID clientId, long refreshTokenExpiration) {
 
         return RefreshToken.builder()
                 .member(member)
-                .token(refreshToken)
+                .tokenHash(tokenHash)
                 .clientId(clientId)
                 .sessionId(UUID.randomUUID())
                 .expiresAt(Instant.now().plusSeconds(refreshTokenExpiration))
                 .build();
     }
 
-    public static RefreshToken toBuilder(Member member, String refreshToken, UUID clientId, long refreshTokenExpiration, UUID sessionId) {
+    public static RefreshToken toBuilder(Member member, String tokenHash, UUID clientId, long refreshTokenExpiration, UUID sessionId) {
 
         return RefreshToken.builder()
                 .member(member)
-                .token(refreshToken)
+                .tokenHash(tokenHash)
                 .clientId(clientId)
                 .sessionId(sessionId)
                 .expiresAt(Instant.now().plusSeconds(refreshTokenExpiration))
                 .build();
     }
 
-    public void rotate(String newToken, Instant newExpiresAt) {
+    public void rotate(String newTokenHash, Instant newExpiresAt) {
 
-        this.token = newToken;
+        this.tokenHash = newTokenHash;
         this.expiresAt = newExpiresAt;
     }
 }

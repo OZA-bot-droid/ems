@@ -79,9 +79,9 @@ public class SecurityConfig {
                                     "/login/oauth2/**"      // /login/oauth2/code/google
                                 )
                                 .permitAll()
-                                .requestMatchers("/members/test/admin").hasRole("ADMIN")
-                                .requestMatchers("/members/test/user").hasRole("USER")
-                                .requestMatchers("/members/test/all").hasAnyRole("USER", "ADMIN")
+                                //.requestMatchers("/members/admin").hasRole("ADMIN")
+                                //.requestMatchers("/members/user").hasRole("USER")
+                                //.requestMatchers("/members/all").hasAnyRole("USER", "ADMIN")
                                 .anyRequest()
                                 .authenticated()
                 )

@@ -92,7 +92,7 @@ public class JwtTokenService {
         ).getTokenValue();  // 완성된 JWT Token을 문자열로 변환
     }
 
-    // refresh token 확인 및 sub 확인
+    // refresh token 확인 및 sub return
     public Long validateRefreshToken(String refreshToken) {
 
         try {

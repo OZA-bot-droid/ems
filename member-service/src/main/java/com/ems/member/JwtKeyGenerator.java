@@ -2,6 +2,7 @@ package com.ems.member;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.util.Base64;
@@ -21,26 +22,45 @@ public class JwtKeyGenerator {
 
 
         // 지정한 경로로 Path 객체 생성
-        Path keyDirectory = Path.of("C:/Dev/keys");
+        String keyDir = System.getenv("JWT_KEY_DIR");
+
+        if (keyDir == null || keyDir.isBlank()) {
+            throw new IllegalStateException(
+                    "JWT_KEY_DIR 환경변수가 필요합니다."
+            );
+        }
+
+        Path keyDirectory = Path.of(keyDir);
         Files.createDirectories(keyDirectory);
+
+        Path privatePath = keyDirectory.resolve("private_key.pem");
+        Path publicPath = keyDirectory.resolve("public_key.pem");
+
+        if (Files.exists(privatePath) || Files.exists(publicPath)) {
+            throw new IllegalStateException(
+                    "RSA 키 파일이 이미 존재합니다. 기존 키를 유지합니다."
+            );
+        }
 
         // 문자열을 파일로 저장
         Files.writeString(
                 // 기존 경로에 파일 이름을 결합
                 // .pem은 암호화 키 같은 데이터를 텍스트 형태로 저장할 때 널리 사용하는 파일 형식
-                keyDirectory.resolve("private_key.pem"),
+                privatePath,
                 createPem(
                         "PRIVATE KEY",
                         keyPair.getPrivate().getEncoded()
-                )
+                ),
+                StandardOpenOption.CREATE_NEW
         );
 
         Files.writeString(
-                keyDirectory.resolve("public_key.pem"),
+                publicPath,
                 createPem(
                         "PUBLIC KEY",
                         keyPair.getPublic().getEncoded()
-                )
+                ),
+                StandardOpenOption.CREATE_NEW
         );
     }
 

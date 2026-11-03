@@ -66,6 +66,7 @@ public class MemberService {
 
             // refresh token entity 생성 및 DB 저장
             authService.replaceRefreshToken(member, refreshToken, dto.clientId());
+            memberRepository.findByIdForUpdate(member.getId());
 
             return new LoginResponseDTO(accessToken, refreshToken);
 

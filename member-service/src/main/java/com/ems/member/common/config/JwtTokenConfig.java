@@ -9,11 +9,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.jwt.*;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPrivateKey;
@@ -27,13 +27,20 @@ import java.util.Base64;
 public class JwtTokenConfig {
 
     @Value("${jwt.private-key}")
-    private String privateKey;
+    private String privateKeyPath;
 
     @Value("${jwt.public-key}")
-    private String publicKey;
+    private String publicKeyPath;
 
-    private RSAPublicKey loadPublicKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
-        byte[] publicKeyBytes = Base64.getDecoder().decode(publicKey.replaceAll("\\s", ""));
+    private RSAPublicKey loadPublicKey() throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
+
+        String publicKeyFile = Files.readString(Path.of(publicKeyPath));
+
+        byte[] publicKeyBytes = Base64.getDecoder().decode(
+                publicKeyFile.replace("-----BEGIN PUBLIC KEY-----", "")
+                        .replace("-----END PUBLIC KEY-----", "")
+                        .replaceAll("\\s", "")
+        );
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
 
         // RSAPublicKey : RSA 공개키 객체
@@ -49,9 +56,15 @@ public class JwtTokenConfig {
     @Bean
     public JwtEncoder jwtEncoder() throws Exception {
 
+        String privateKeyFile = Files.readString(Path.of(privateKeyPath));
+
         // \\s : 정규식에서 공백이나 줄바꿈 같은 공백 문자를 의미
         // Base64로 인코딩된 문자열을 원래 바이트 데이터로 되돌리는 방법
-        byte[] privateKeyBytes = Base64.getDecoder().decode(privateKey.replaceAll("\\s", ""));
+        byte[] privateKeyBytes = Base64.getDecoder().decode(
+                privateKeyFile.replace("-----BEGIN PRIVATE KEY-----", "")
+                        .replace("-----END PRIVATE KEY-----", "")
+                        .replaceAll("\\s", "")
+        );
 
         // RSA 키 객체 생성 - 생성 및 복원에 사용
         // KeyFactory : 키 데이터를 실제 Java Key 객체로 변환하는 클래스
@@ -96,13 +109,17 @@ public class JwtTokenConfig {
     }
 
     @Bean
-    public JwtDecoder jwtDecoder() throws Exception {
+    public JwtDecoder jwtDecoder(@Value("${jwt.issuer}") String issuer) throws Exception {
 
         RSAPublicKey publicKey = loadPublicKey();
 
-        return NimbusJwtDecoder.withPublicKey(publicKey)
+        NimbusJwtDecoder decoder = NimbusJwtDecoder.withPublicKey(publicKey)
                 .signatureAlgorithm(SignatureAlgorithm.RS256)
                 .build();
+        decoder.setJwtValidator(
+                JwtValidators.createDefaultWithIssuer(issuer)
+        );
+        return decoder;
     }
 }
 

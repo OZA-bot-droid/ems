@@ -8,6 +8,7 @@ import com.ems.member.member.dto.ClientDTO;
 import com.ems.member.member.service.AuthService;
 import com.ems.member.member.service.MemberService;
 import com.ems.member.member.service.SocialLoginService;
+import com.nimbusds.openid.connect.sdk.claims.ClaimsSet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -17,6 +18,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtClaimsSet;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
@@ -68,6 +72,8 @@ public class MemberController {
     @DeleteMapping("/logout")
     public ResponseEntity<?> logout(@RequestBody ClientDTO dto, @CookieValue("refreshToken") String refreshToken) {
 
+
+
         if(refreshToken != null) {
             authService.logout(dto, refreshToken);
         }
@@ -90,6 +96,7 @@ public class MemberController {
     // 회원 정보
     @GetMapping("/me")
     public ResponseEntity<?> myPage(@RequestHeader("X-Member-Id") String memberId, @RequestHeader("Authorization") String authorization) {
+
 
         return new ResponseEntity<>(memberService.myPage(memberId), HttpStatus.OK);
     }

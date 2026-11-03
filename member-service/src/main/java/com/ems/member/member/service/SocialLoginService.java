@@ -1,6 +1,5 @@
 package com.ems.member.member.service;
 
-import com.ems.member.common.domain.BaseException;
 import com.ems.member.common.exception.InvalidCredentialsException;
 import com.ems.member.common.exception.InvalidOAuthCodeException;
 import com.ems.member.common.exception.MemberEmailDuplicatedException;

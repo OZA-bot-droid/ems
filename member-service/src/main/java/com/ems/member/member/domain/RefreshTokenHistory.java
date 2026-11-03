@@ -27,7 +27,7 @@ public class RefreshTokenHistory extends BaseEntity {
     private UUID sessionId;
 
     // 폐기 토큰이 중복 기록 막기
-    @Column(nullable = false, unique = true, name = "token_hash")
+    @Column(nullable = false, unique = true, name = "token_hash", length = 64)
     private String tokenHash;
 
     // refresh token 폐기 시점
