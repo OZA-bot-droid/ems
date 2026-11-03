@@ -95,10 +95,9 @@ public class MemberController {
 
     // 회원 정보
     @GetMapping("/me")
-    public ResponseEntity<?> myPage(@RequestHeader("X-Member-Id") String memberId, @RequestHeader("Authorization") String authorization) {
+    public ResponseEntity<?> me(JwtAuthenticationToken authentication) {
 
-
-        return new ResponseEntity<>(memberService.myPage(memberId), HttpStatus.OK);
+        return ResponseEntity.ok(memberService.myPage(authentication.getToken().getSubject()));
     }
 
 

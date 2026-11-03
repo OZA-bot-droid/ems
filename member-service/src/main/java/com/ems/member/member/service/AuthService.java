@@ -190,7 +190,7 @@ public class AuthService {
 
     public void logout(ClientDTO dto, String refreshToken) {
 
-        RefreshToken refreshTokenEntity = refreshTokenRepository.findByClientIdAndTokenHash(dto.clientId(), refreshToken)
+        RefreshToken refreshTokenEntity = refreshTokenRepository.findByClientIdAndTokenHash(dto.clientId(), hashRefreshToken(refreshToken))
                 .orElseThrow(() -> new InvalidRefreshTokenException("클라이언트의 정보가 일치하지 않습니다."));
 
         refreshTokenRepository.delete(refreshTokenEntity);
