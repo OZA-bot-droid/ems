@@ -1,9 +1,15 @@
 // 09 · 행사 등록 / 수정 모달 (Figma "Modal / Create Event")
 // event가 없으면 "새 행사 등록", 있으면 "행사 수정"으로 동작합니다.
+<<<<<<< HEAD:frontend/src/Event/EventFormModal.jsx
 // 새 등록일 때는 [+ 세션 추가]로 세션을 같이 적어 두면, 행사를 만든 직후 세션도 차례로 만듭니다.
 import { useRef, useState } from 'react';
 import { eventApi } from '../api.js';
 import { instantToKstInput, kstToInstant, nowKstInput } from '../format.js';
+=======
+import { useState } from 'react';
+import { eventApi } from '../../api.js';
+import { instantToKstInput, kstToInstant, nowKstInput } from '../../format.js';
+>>>>>>> origin/feature/Event-Service:frontend/src/pages/Event/EventFormModal.jsx
 import DateTimeField from './DateTimeField.jsx';
 
 export default function EventFormModal({ event, onClose, onSaved }) {

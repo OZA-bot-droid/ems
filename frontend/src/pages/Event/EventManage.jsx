@@ -1,7 +1,7 @@
 // ADMIN / 09 · 행사 관리의 본문 (좌측 공통 헤더와 페이지 헤더는 상위 레이아웃에서 제공합니다.)
 import { useEffect, useState } from 'react';
-import { eventApi, getDevUser } from '../api.js';
-import { formatShort, STATUS_BADGE } from '../format.js';
+import { eventApi, getDevUser } from '../../api.js';
+import { formatShort, STATUS_BADGE } from '../../format.js';
 import EventFormModal from './EventFormModal.jsx';
 import './event-manage.scss';
 

@@ -1,8 +1,14 @@
 // 04 · 행사 상세 화면
 // 흐름: 화면이 뜨면 → 행사 정보 + 세션 목록을 "동시에" 요청(Promise.all) → 둘 다 오면 그리기
 import { useEffect, useState } from 'react';
+<<<<<<< HEAD:frontend/src/Event/EventDetail.jsx
 import { eventApi, getDevUser, registrationApi } from '../api.js';
 import { formatRange, formatTimeRange, instantToKstInput, STATUS_BADGE } from '../format.js';
+=======
+import { eventApi, getDevUser, registrationApi } from '../../api.js';
+import { formatRange, formatTimeRange, STATUS_BADGE } from '../../format.js';
+import RegistrationApplyModal from './RegistrationApplyModal.jsx';
+>>>>>>> origin/feature/Event-Service:frontend/src/pages/Event/EventDetail.jsx
 
 export default function EventDetail({ eventId, onBack }) {
   const [event, setEvent] = useState(null);
@@ -11,6 +17,8 @@ export default function EventDetail({ eventId, onBack }) {
   const [error, setError] = useState(null);
   const [applying, setApplying] = useState(false);
   const [applyMessage, setApplyMessage] = useState('');
+  const [showApplyModal, setShowApplyModal] = useState(false);
+  const [applyError, setApplyError] = useState('');
 
   useEffect(() => {
     let ignore = false;
@@ -34,12 +42,13 @@ export default function EventDetail({ eventId, onBack }) {
 
   async function applyToEvent() {
     setApplying(true);
-    setApplyMessage('');
+    setApplyError('');
     try {
       await registrationApi.apply(eventId);
+      setShowApplyModal(false);
       setApplyMessage('참가 신청이 완료되었습니다. 신청 내역에서 상태를 확인할 수 있어요.');
     } catch (applyError) {
-      setApplyMessage(applyError.message || '참가 신청에 실패했습니다.');
+      setApplyError(applyError.message || '참가 신청에 실패했습니다.');
     } finally {
       setApplying(false);
     }
@@ -181,20 +190,29 @@ export default function EventDetail({ eventId, onBack }) {
             )}
             <button
               disabled={!canApply || applying}
-              onClick={applyToEvent}
+              onClick={() => {
+                setApplyError('');
+                setShowApplyModal(true);
+              }}
               className="h-[42px] min-w-[197px] rounded-[10px] bg-(--ems-green) px-4 text-[13px] font-semibold text-white hover:bg-(--ems-green-dark) disabled:cursor-not-allowed disabled:bg-slate-300"
             >
-              {applying
-                ? '신청 중…'
-                : canApply
-                  ? '참가 신청하기'
-                  : event.status === 'CLOSED'
-                    ? '신청이 마감되었습니다'
-                    : '아직 모집 전입니다'}
+              {canApply ? '참가 신청하기' : event.status === 'CLOSED' ? '신청이 마감되었습니다' : '아직 모집 전입니다'}
             </button>
           </div>
         </div>
       </article>
+
+      {showApplyModal && (
+        <RegistrationApplyModal
+          event={event}
+          applying={applying}
+          error={applyError}
+          onClose={() => {
+            if (!applying) setShowApplyModal(false);
+          }}
+          onSubmit={applyToEvent}
+        />
+      )}
     </section>
   );
 }
