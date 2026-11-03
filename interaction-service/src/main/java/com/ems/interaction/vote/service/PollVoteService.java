@@ -12,18 +12,23 @@ import com.ems.interaction.vote.domain.PollVote;
 import com.ems.interaction.vote.dto.PollResultDTO;
 import com.ems.interaction.vote.dto.PollVoteResultDTO;
 import com.ems.interaction.vote.dto.PollVoteSaveDTO;
+import com.ems.interaction.vote.event.PollVoteUpdatedEvent;
 import com.ems.interaction.vote.repository.PollVoteRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 
 // 임시 권한 데이터
 import com.ems.interaction.mock.DemoData;
-
 
 @Service
 @Transactional
@@ -32,31 +37,29 @@ public class PollVoteService {
     private final PollRepository pollRepository;
     private final PollOptionRepository pollOptionRepository;
     private final PollVoteRepository pollVoteRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     // 임시 권한 데이터
     private final DemoData demoData;
 
-    public PollVote createVote(PollVoteSaveDTO dto, Long pollId,Long userId) {
+    //투표 진행
+    public PollVote createVote(PollVoteSaveDTO dto, Long pollId, Long userId) {
 
         // 1. 투표 조회
-        Poll poll = pollRepository.findById(pollId).orElseThrow(()
-                -> new ApiException(ErrorCode.POLL_NOT_FOUND));
+        Poll poll = pollRepository.findById(pollId).orElseThrow(() -> new ApiException(ErrorCode.POLL_NOT_FOUND));
 
         // 해당 세션 참가 승인 여부 확인
         boolean isApproved = false;
 
         for (DemoData.DemoRegistration reg : demoData.registrations) {
-            if (reg.userId().equals(userId)
-                    && reg.eventId().equals(poll.getEventId())
-                    && reg.sessionId().equals(poll.getSessionId())
-                    && "APPROVED".equals(reg.status())) {
+            if (reg.userId().equals(userId) && reg.eventId().equals(poll.getEventId()) && reg.sessionId().equals(poll.getSessionId()) && "APPROVED".equals(reg.status())) {
 
                 isApproved = true;
                 break;
             }
         }
 
-        if(!isApproved){
+        if (!isApproved) {
             throw new ApiException(ErrorCode.REGISTRATION_NOT_APPROVED);
         }
 
@@ -80,12 +83,21 @@ public class PollVoteService {
         // 5. DTO → Entity 변환
         PollVote pollVote = dto.toEntity(userId, poll);
 
-        // 6. 저장
-        return pollVoteRepository.save(pollVote);
+//        // 6. 저장
+//        return pollVoteRepository.save(pollVote);
+
+        // WebSocket 연동 이후
+        // 6. 투표 저장
+        PollVote savedVote = pollVoteRepository.save(pollVote);
+
+        // 7. 투표 결과 변경 이벤트 발행
+        eventPublisher.publishEvent(new PollVoteUpdatedEvent(pollId));
+
+        return savedVote;
     }
 
     // 활성화 상태인 투표의 유저의 투표 기록 조회
-    public List<PollVoteResultDTO> getActivePollVotes(Long userId, List<Long> pollIds){
+    public List<PollVoteResultDTO> getActivePollVotes(Long userId, List<Long> pollIds) {
 
         if (pollIds == null || pollIds.isEmpty()) {
             return List.of();
@@ -98,10 +110,7 @@ public class PollVoteService {
 
         for (PollVote vote : votes) {
 
-            result.add(PollVoteResultDTO.from(
-                    vote.getPollId(),
-                    vote.getPollOptionId())
-            );
+            result.add(PollVoteResultDTO.from(vote.getPollId(), vote.getPollOptionId()));
         }
 
         return result;
@@ -112,8 +121,7 @@ public class PollVoteService {
     public PollResultDTO getPollResults(Long pollId, Long userId) {
 
         // 1. 투표 조회
-        Poll poll = pollRepository.findById(pollId)
-                .orElseThrow(() -> new ApiException(ErrorCode.POLL_NOT_FOUND));
+        Poll poll = pollRepository.findById(pollId).orElseThrow(() -> new ApiException(ErrorCode.POLL_NOT_FOUND));
 
         // 2. 사용자 확인
         if (userId == null || !demoData.members.containsKey(userId)) {
@@ -127,10 +135,7 @@ public class PollVoteService {
         boolean isApproved = false;
 
         for (DemoData.DemoRegistration reg : demoData.registrations) {
-            if (reg.userId().equals(userId)
-                    && reg.eventId().equals(poll.getEventId())
-                    && reg.sessionId().equals(poll.getSessionId())
-                    && "APPROVED".equals(reg.status())) {
+            if (reg.userId().equals(userId) && reg.eventId().equals(poll.getEventId()) && reg.sessionId().equals(poll.getSessionId()) && "APPROVED".equals(reg.status())) {
 
                 isApproved = true;
                 break;
@@ -145,16 +150,13 @@ public class PollVoteService {
         // 6. 결과 공개 조건 확인
         // 생성자는 조회 허용
         // 참가자는 실시간 공개이거나 종료된 투표일 때만 허용
-        if (!isOwner
-                && !poll.isShowLiveResults()
-                && poll.getStatus() != Status.CLOSED) {
+        if (!isOwner && !poll.isShowLiveResults() && poll.getStatus() != Status.CLOSED) {
 
             throw new ApiException(HttpStatus.FORBIDDEN, "RESULT_NOT_AVAILABLE", "투표 종료 후 결과를 확인할 수 있습니다.");
         }
 
         // 7. 해당 투표의 선택지 조회
-        List<PollOption> options =
-                pollOptionRepository.findByPollIdOrderByDisplayOrderAsc(pollId);
+        List<PollOption> options = pollOptionRepository.findByPollIdOrderByDisplayOrderAsc(pollId);
 
         // 8. 전체 투표 수 조회
         long totalVotes = pollVoteRepository.countByPollId(pollId);
@@ -164,16 +166,9 @@ public class PollVoteService {
 
         for (PollOption option : options) {
 
-            long voteCount = pollVoteRepository.countByPollIdAndPollOptionId(
-                    pollId,
-                    option.getId()
-            );
+            long voteCount = pollVoteRepository.countByPollIdAndPollOptionId(pollId, option.getId());
 
-            optionResults.add(PollResultDTO.OptionResultDTO.from(
-                    option.getId(),
-                    option.getContent(),
-                    voteCount
-            ));
+            optionResults.add(PollResultDTO.OptionResultDTO.from(option.getId(), option.getContent(), voteCount));
         }
 
         // 10. 최종 응답 DTO 생성

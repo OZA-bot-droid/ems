@@ -4,10 +4,7 @@ package com.ems.interaction.poll.dto;
 import com.ems.interaction.poll.domain.Poll;
 import com.ems.interaction.poll.domain.PollOption;
 import com.ems.interaction.poll.domain.Status;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.Instant;
 import java.util.List;

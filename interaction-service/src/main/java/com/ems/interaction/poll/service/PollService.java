@@ -1,31 +1,34 @@
 package com.ems.interaction.poll.service;
 
-import com.ems.interaction.common.exception.ApiException;
 import com.ems.interaction.common.exception.ErrorCode;
+import com.ems.interaction.poll.dto.PollManagementDTO;
+import com.ems.interaction.common.exception.ApiException;
 import com.ems.interaction.poll.domain.Poll;
 import com.ems.interaction.poll.domain.PollOption;
-import com.ems.interaction.poll.domain.Status;
-import com.ems.interaction.poll.dto.PollManagementDTO;
-import com.ems.interaction.poll.dto.PollResponseDTO;
 import com.ems.interaction.poll.dto.PollSaveDTO;
-import com.ems.interaction.poll.repository.PollOptionRepository;
+import com.ems.interaction.poll.dto.PollResponseDTO;
 import com.ems.interaction.poll.repository.PollRepository;
+import com.ems.interaction.poll.repository.PollOptionRepository;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
+
+import org.springframework.http.HttpStatus;
+import com.ems.interaction.poll.domain.Status;
 
 
 //    데모용 유저, 이벤트, 세션, 허가 데이터
 import com.ems.interaction.mock.DemoData;
-
+import java.util.Map;
+import java.util.stream.Collectors;
+import com.ems.interaction.poll.event.PollStatusChangedEvent;
+import org.springframework.context.ApplicationEventPublisher;
 
 @Service
 @Transactional
@@ -34,12 +37,12 @@ public class PollService {
 
     private final PollRepository pollRepository;
     private final PollOptionRepository pollOptionRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
-    //    데모용 유저, 이벤트, 세션, 허가 데이터
+//    데모용 유저, 이벤트, 세션, 허가 데이터
     private final DemoData demoData;
 
     // 투표 생성
-    @Transactional
     public PollResponseDTO createPoll(PollSaveDTO dto, Long userId) {
 
         // 인증된 관리자 ID 검증
@@ -197,6 +200,16 @@ public class PollService {
         }
 
         poll.activate();
+
+        //WebSocket 알림 연동 추가
+        eventPublisher.publishEvent(
+                new PollStatusChangedEvent(
+                        poll.getId(),
+                        poll.getSessionId(),
+                        Status.ACTIVE
+                )
+        );
+
         return pollId;
     }
 
@@ -215,6 +228,16 @@ public class PollService {
         }
 
         poll.close();
+
+        //WebSocket 알림 연동 추가
+        eventPublisher.publishEvent(
+                new PollStatusChangedEvent(
+                        poll.getId(),
+                        poll.getSessionId(),
+                        Status.CLOSED
+                )
+        );
+
         return pollId;
     }
 }
