@@ -20,7 +20,7 @@ const MENUS = {
       { id: 'votes', label: '실시간 투표', href: '#' },
     ],
   },
-  // href: null = 아직 백엔드 API가 없어 화면을 연결하지 않은 메뉴 ("준비 중"으로 표시)
+  // href: null = 아직 백엔드 API가 없어 화면을 연결하지 않은 메뉴 (보이기만 하고 누를 수 없음)
   ADMIN: {
     heading: 'ADMIN WORKSPACE',
     items: [
@@ -48,9 +48,8 @@ function RoleHeader({ role, activePage }) {
       <nav className="registration-nav" aria-label={`${role} 주 메뉴`}>
         {menu.items.map(({ id, label, href }) =>
           href === null ? (
-            <span className="is-disabled" aria-disabled="true" key={id} title="백엔드 API 연결 전">
+            <span className="is-disabled" aria-disabled="true" key={id}>
               ◦　 {label}
-              <small>준비 중</small>
             </span>
           ) : (
             <a
