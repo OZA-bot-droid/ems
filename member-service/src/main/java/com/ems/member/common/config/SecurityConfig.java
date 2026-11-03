@@ -7,6 +7,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -27,6 +29,26 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    // jwt의 role claim -> Spring Security의 권한(GrantedAuthority)으로 변환하는 설정
+    @Bean
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+
+        // jwt 안에 있는 claim을 읽어서 Spring Security의 권한인 GrantedAuthority로 변환하는 클래스
+        JwtGrantedAuthoritiesConverter authoritiesConverter = new JwtGrantedAuthoritiesConverter();
+        // jwt에서 role이라느 이름의 claim을 권한으로 사용 설정
+        authoritiesConverter.setAuthoritiesClaimName("role");
+        // ROLE_ 접두사 추가
+        // hasRole은 내부적으로 ROLE_... 을 찾는 방식
+        authoritiesConverter.setAuthorityPrefix("ROLE_");
+
+
+        // JWT 인증 결과를 Spring Security가 사용하는 Authentication 객체로 변환하는 클래스
+        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
+        // authorities = [ROLE_ADMIN] 이런 형태로 변환
+        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(authoritiesConverter);
+        return jwtAuthenticationConverter;
     }
 
     // Spring Security에서 어떤 요청에 어떤 보안 규칙을 적용할지 정의하는 필터 체인 객체
@@ -57,6 +79,9 @@ public class SecurityConfig {
                                     "/login/oauth2/**"      // /login/oauth2/code/google
                                 )
                                 .permitAll()
+                                .requestMatchers("/members/test/admin").hasRole("ADMIN")
+                                .requestMatchers("/members/test/user").hasRole("USER")
+                                .requestMatchers("/members/test/all").hasAnyRole("USER", "ADMIN")
                                 .anyRequest()
                                 .authenticated()
                 )
@@ -65,9 +90,11 @@ public class SecurityConfig {
                 // JWT가 들어오면 Spring Security한테 Bearer Token을 JWT로 해석해서 인증 상태로 만듬
                 .oauth2ResourceServer(oauth2 ->
 
-                        // {} : 별도의 세부 설정을 추가하지 않고 기본 JWT 인증 방식을 사용
                         // Bean으로 Spring에 등록한 JwtDecoder를 찾아서 사용
-                        oauth2.jwt(jwt -> {})
+                        // Spring Security가 JWT 인증할 때 해당 converter를 사용
+                        oauth2.jwt(jwt ->
+                                jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())
+                        )
                 )
                 // 소셜 계정으로 로그인시 handler 실행
                 .oauth2Login(oauth2 ->
