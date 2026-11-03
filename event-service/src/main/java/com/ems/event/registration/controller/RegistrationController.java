@@ -1,7 +1,7 @@
 package com.ems.event.registration.controller;
 
 import com.ems.event.registration.entity.Registration;
-import com.ems.event.common.AdminChecker;
+import com.ems.event.common.security.AdminChecker;
 import com.ems.event.registration.service.RegistrationService;
 import java.time.Instant;
 import org.springframework.data.domain.Page;

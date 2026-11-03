@@ -1,4 +1,4 @@
-package com.ems.event.event;
+package com.ems.event.event.entity;
 
 /* 흐름: DRAFT → OPEN → CLOSED*/
 public enum EventStatus {

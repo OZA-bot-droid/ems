@@ -1,5 +1,7 @@
-package com.ems.event.event;
+package com.ems.event.event.repository;
 
+import com.ems.event.event.entity.Event;
+import com.ems.event.event.entity.EventStatus;
 import jakarta.persistence.LockModeType;
 import java.util.Collection;
 import java.util.Optional;

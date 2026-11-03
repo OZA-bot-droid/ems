@@ -1,7 +1,9 @@
-package com.ems.event.event;
+package com.ems.event.event.controller;
 
-import com.ems.event.common.AdminChecker;
-import com.ems.event.common.PageResponse;
+import com.ems.event.common.security.AdminChecker;
+import com.ems.event.common.dto.PageResponse;
+import com.ems.event.event.entity.EventStatus;
+import com.ems.event.event.service.EventService;
 import com.ems.event.event.dto.EventCreateRequest;
 import com.ems.event.event.dto.EventResponse;
 import com.ems.event.event.dto.EventUpdateRequest;

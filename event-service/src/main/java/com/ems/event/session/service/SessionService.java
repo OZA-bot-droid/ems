@@ -1,8 +1,10 @@
-package com.ems.event.session;
+package com.ems.event.session.service;
 
-import com.ems.event.common.BusinessException;
-import com.ems.event.event.Event;
-import com.ems.event.event.EventRepository;
+import com.ems.event.common.exception.BusinessException;
+import com.ems.event.event.entity.Event;
+import com.ems.event.event.repository.EventRepository;
+import com.ems.event.session.entity.Session;
+import com.ems.event.session.repository.SessionRepository;
 import com.ems.event.session.dto.SessionCreateRequest;
 import com.ems.event.session.dto.SessionResponse;
 import com.ems.event.session.dto.SessionUpdateRequest;

@@ -1,6 +1,7 @@
-package com.ems.event.session;
+package com.ems.event.session.controller;
 
-import com.ems.event.common.AdminChecker;
+import com.ems.event.common.security.AdminChecker;
+import com.ems.event.session.service.SessionService;
 import com.ems.event.session.dto.SessionCreateRequest;
 import com.ems.event.session.dto.SessionResponse;
 import com.ems.event.session.dto.SessionUpdateRequest;

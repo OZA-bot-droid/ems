@@ -1,4 +1,4 @@
-package com.ems.event.common;
+package com.ems.event.common.config;
 
 import java.time.Clock;
 import org.springframework.context.annotation.Bean;

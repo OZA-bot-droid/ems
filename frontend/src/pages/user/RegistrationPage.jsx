@@ -82,15 +82,15 @@ function RegistrationPage() {
     }
   }
 
-  // 페이지 화면: 좌측 헤더, 제목, 신청 목록
+  // USER 페이지: 분리된 Header 컴포넌트와 제목, 신청 목록을 배치합니다.
   return (
     <div className="app-shell">
-      <Header activePage="registrations" />
+      <Header role="USER" activePage="registrations" />
 
       <main className="app-main-content">
         <header className="registration-heading">
           <div>
-            <h1>06 · 참가 신청 및 내역</h1>
+            <h1>참가 신청 및 내역</h1>
             <p>신청 · 취소 · 승인 상태 확인</p>
           </div>
           <span className="registration-role">USER</span>

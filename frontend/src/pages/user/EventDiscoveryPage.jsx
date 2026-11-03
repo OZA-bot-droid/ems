@@ -1,14 +1,13 @@
-// 행사 화면의 입구 (이도관 담당)
-// main.jsx는 이 컴포넌트 하나만 불러옵니다. 행사 화면 코드는 전부 Event 폴더 안에 둡니다.
+// USER 행사 찾기 페이지
 import { useState } from 'react';
-import './event.css';
-import EventList from './EventList.jsx';
-import EventDetail from './EventDetail.jsx';
-import EventManage from './EventManage.jsx';
-import { getDevUser, setDevUser } from '../api.js';
-import Header from '../pages/user/Header.jsx';
+import '../../Event/event.scss';
+import EventList from '../../Event/EventList.jsx';
+import EventDetail from '../../Event/EventDetail.jsx';
+import EventManage from '../../Event/EventManage.jsx';
+import { getDevUser, setDevUser } from '../../api.js';
+import Header from './Header.jsx';
 
-export default function EventPage() {
+export default function EventDiscoveryPage() {
   const [role, setRole] = useState(getDevUser().role);
   const [selectedId, setSelectedId] = useState(null);
   const [view, setView] = useState('browse'); // 'browse'=둘러보기, 'manage'=행사 관리(관리자)
@@ -22,9 +21,15 @@ export default function EventPage() {
 
   return (
     <div className="app-shell">
-      <Header activePage="events" />
+      <Header role={role} activePage="events" />
       <main className="app-main-content">
-        <div className="mx-auto max-w-[840px] px-6 py-9">
+        <div
+          className={
+            view === 'manage'
+              ? 'w-full px-8 py-9'
+              : 'mx-auto max-w-[840px] px-6 py-9'
+          }
+        >
           <div className="mb-6 flex items-center gap-2 text-xs">
             <span className="text-(--ems-muted)">개발용 사용자</span>
             {['ADMIN', 'USER'].map((r) => (

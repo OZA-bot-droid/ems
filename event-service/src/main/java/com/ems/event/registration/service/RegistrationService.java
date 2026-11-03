@@ -1,7 +1,7 @@
 package com.ems.event.registration.service;
 
-import com.ems.event.event.Event;
-import com.ems.event.event.EventRepository;
+import com.ems.event.event.entity.Event;
+import com.ems.event.event.repository.EventRepository;
 import com.ems.event.registration.entity.Registration;
 import com.ems.event.registration.entity.RegistrationStatus;
 import com.ems.event.registration.repository.RegistrationRepository;

@@ -1,4 +1,4 @@
-package com.ems.event.event;
+package com.ems.event.event.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -8,13 +8,16 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import com.ems.event.common.BusinessException;
-import com.ems.event.common.PageResponse;
+import com.ems.event.common.exception.BusinessException;
+import com.ems.event.common.dto.PageResponse;
+import com.ems.event.event.entity.Event;
+import com.ems.event.event.entity.EventStatus;
+import com.ems.event.event.repository.EventRepository;
 import com.ems.event.event.dto.EventCreateRequest;
 import com.ems.event.event.dto.EventResponse;
 import com.ems.event.event.dto.EventUpdateRequest;
 import com.ems.event.registration.repository.RegistrationRepository;
-import com.ems.event.session.SessionRepository;
+import com.ems.event.session.repository.SessionRepository;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;

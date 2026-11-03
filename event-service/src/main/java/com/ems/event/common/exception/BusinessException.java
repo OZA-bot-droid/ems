@@ -1,4 +1,4 @@
-package com.ems.event.common;
+package com.ems.event.common.exception;
 
 import org.springframework.http.HttpStatus;
 
