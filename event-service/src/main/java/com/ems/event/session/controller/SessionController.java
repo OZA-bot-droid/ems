@@ -35,8 +35,8 @@ public class SessionController {
     @GetMapping
     public List<SessionResponse> getSessions(
             @PathVariable Long eventId,
-            @RequestHeader(value = "X-User-Role", required = false) String role) {
-        return sessionService.getSessions(eventId, adminChecker.isAdmin(role));
+            @RequestHeader(value = "X-Member-Id", required = false) Long memberId) {
+        return sessionService.getSessions(eventId, memberId);
     }
 
 //    세션 생성 (ADMIN)

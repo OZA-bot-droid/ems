@@ -23,5 +23,15 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     /** 여러 상태 중 하나인 행사 (일반 회원용 목록: OPEN, CLOSED) */
     Page<Event> findByStatusIn(Collection<EventStatus> statuses, Pageable pageable);
+
+    /** 공개 상태(OPEN, CLOSED) 전체 + 내가 만든 DRAFT (로그인한 회원의 목록) */
+    @Query("select e from Event e where e.status in :statuses or (e.status = :draft and e.createdBy = :ownerId)")
+    Page<Event> findVisibleTo(@Param("statuses") Collection<EventStatus> statuses,
+                              @Param("draft") EventStatus draft,
+                              @Param("ownerId") Long ownerId,
+                              Pageable pageable);
+
+    /** 내가 만든 특정 상태 행사 (status=DRAFT 필터용) */
+    Page<Event> findByStatusAndCreatedBy(EventStatus status, Long createdBy, Pageable pageable);
 }
 

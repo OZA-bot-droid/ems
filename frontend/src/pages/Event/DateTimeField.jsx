@@ -1,6 +1,7 @@
 // 날짜 + 시 + 분을 따로 고르는 입력칸 (분은 5분 단위)
 // 바깥(부모)과는 지금처럼 "2026-11-03T14:05" 한 줄 문자열로 주고받습니다.
 // → 검사(validate)와 서버 변환(kstToInstant)은 그대로 쓸 수 있습니다.
+// min / max (예: "2026-12-10T13:00")를 주면 그 범위 밖의 날짜·시·분은 고를 수 없게(회색) 막습니다.
 import { useState } from 'react';
 
 const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0')); // 00 ~ 23
@@ -9,7 +10,8 @@ const MINUTES = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, '
 const boxClass =
   'h-[43px] rounded-[9px] border border-transparent bg-(--ems-bg) px-3 text-[13px] text-(--ems-ink) focus:border-(--ems-green) focus:outline-none';
 
-export default function DateTimeField({ id, value, onChange, minDate }) {
+// compact: 칸이 좁을 때(모달에서 시작·종료를 나란히 둘 때) 시·분 선택을 좁게
+export default function DateTimeField({ id, value, onChange, minDate, maxDate, min, max, compact = false }) {
   // 처음 값 "2026-11-03T14:05" → 날짜 / 시 / 분 세 조각으로 나눠서 기억
   const [parts, setParts] = useState(() => {
     const [date = '', time = ''] = (value || '').split('T');
@@ -26,6 +28,21 @@ export default function DateTimeField({ id, value, onChange, minDate }) {
   }
 
   // 예전에 5분 단위가 아닌 값(예: 14:07)으로 저장된 행사를 수정할 때도 원래 값이 보이도록
+  // 범위: 날짜는 달력 min/max로, 시·분은 그 날짜가 범위의 첫날/마지막 날일 때만 잘라냄
+  const lowDate = minDate ?? min?.slice(0, 10);
+  const highDate = maxDate ?? max?.slice(0, 10);
+  const hourBlocked = (h) =>
+    Boolean(parts.date) &&
+    ((min && parts.date === min.slice(0, 10) && h < min.slice(11, 13)) ||
+      (max && parts.date === max.slice(0, 10) && h > max.slice(11, 13)));
+  const minuteBlocked = (m) => {
+    if (!parts.date || !parts.hour) return false;
+    const v = `${parts.date}T${parts.hour}:${m}`; // 같은 모양의 문자열이라 크기 비교가 곧 시간 비교
+    return Boolean((min && v < min) || (max && v > max));
+  };
+
+  const selectWidth = compact ? 'w-[72px] shrink-0 pl-2 pr-0.5' : 'w-[88px]';
+
   const minuteOptions =
     parts.minute && !MINUTES.includes(parts.minute) ? [...MINUTES, parts.minute].sort() : MINUTES;
 
@@ -34,7 +51,8 @@ export default function DateTimeField({ id, value, onChange, minDate }) {
       <input
         id={id}
         type="date"
-        min={minDate}
+        min={lowDate}
+        max={highDate}
         className={`${boxClass} min-w-0 flex-1`}
         value={parts.date}
         onChange={(e) => update('date', e.target.value)}
@@ -42,13 +60,13 @@ export default function DateTimeField({ id, value, onChange, minDate }) {
       <select
         id={`${id}-hour`}
         aria-label="시"
-        className={`${boxClass} w-[88px]`}
+        className={`${boxClass} ${selectWidth}`}
         value={parts.hour}
         onChange={(e) => update('hour', e.target.value)}
       >
         <option value="">시</option>
         {HOURS.map((h) => (
-          <option key={h} value={h}>
+          <option key={h} value={h} disabled={hourBlocked(h)}>
             {h}시
           </option>
         ))}
@@ -56,13 +74,13 @@ export default function DateTimeField({ id, value, onChange, minDate }) {
       <select
         id={`${id}-minute`}
         aria-label="분"
-        className={`${boxClass} w-[88px]`}
+        className={`${boxClass} ${selectWidth}`}
         value={parts.minute}
         onChange={(e) => update('minute', e.target.value)}
       >
         <option value="">분</option>
         {minuteOptions.map((m) => (
-          <option key={m} value={m}>
+          <option key={m} value={m} disabled={minuteBlocked(m)}>
             {m}분
           </option>
         ))}

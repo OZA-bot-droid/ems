@@ -83,6 +83,16 @@ public class Event {
         if (status != null) this.status = status;
     }
 
+    /** 마감된 행사인가? 마감되면 행사·세션을 더 이상 바꿀 수 없다 */
+    public boolean isClosed() {
+        return status == EventStatus.CLOSED;
+    }
+
+    /** 이 행사를 만든 회원인가? (회원 번호가 없으면 false) */
+    public boolean isOwnedBy(Long memberId) {
+        return memberId != null && memberId.equals(createdBy);
+    }
+
     public Long getId() { return id; }
     public String getTitle() { return title; }
     public String getDescription() { return description; }

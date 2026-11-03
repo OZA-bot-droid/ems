@@ -10,15 +10,17 @@ const NEXT_STATUS = {
   DRAFT: { to: 'OPEN', label: '공개' },
   OPEN: { to: 'CLOSED', label: '마감' },
 };
+// 배지에 보여 줄 "다음 상태" 이름 (STATUS_BADGE의 화면 이름과 같게)
+const NEXT_LABEL = { DRAFT: '모집 중', OPEN: '마감' };
 
-export default function EventManage() {
+export default function EventManage({ onManageSessions }) {
   const [page, setPage] = useState(0);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
-  const [reload, setReload] = useState(0);
-  const [modal, setModal] = useState(null);
-  const [confirm, setConfirm] = useState(null);
-  const [notice, setNotice] = useState(null);
+  const [reload, setReload] = useState(0); // 숫자가 바뀌면 목록을 다시 불러옴
+  const [modal, setModal] = useState(null); // null=닫힘, {}=새 행사, {event}=수정
+  const [confirm, setConfirm] = useState(null); // 확인 중인 것: { id, type: 'delete' | 'status' }
+  const [notice, setNotice] = useState(null); // 위쪽 알림 한 줄 { type: 'ok' | 'error', text }
 
   useEffect(() => {
     let alive = true;
@@ -33,8 +35,8 @@ export default function EventManage() {
   }, [page, reload]);
 
   const refresh = (message) => {
-    setNotice(message);
-    setReload((current) => current + 1);
+    setNotice({ type: 'ok', text: message });
+    setReload((n) => n + 1);
   };
 
   async function changeStatus(event) {
@@ -44,7 +46,8 @@ export default function EventManage() {
       setConfirm(null);
       refresh(`"${event.title}" 행사를 ${next.label}했습니다.`);
     } catch (err) {
-      setNotice(`${err.message} (${err.code})`);
+      setConfirm(null);
+      setNotice({ type: 'error', text: `${err.message} (${err.code})` });
     }
   }
 
@@ -54,9 +57,14 @@ export default function EventManage() {
       setConfirm(null);
       refresh(`"${event.title}" 행사를 삭제했습니다.`);
     } catch (err) {
-      setNotice(`${err.message} (${err.code})`);
+      setConfirm(null);
+      setNotice({ type: 'error', text: `${err.message} (${err.code})` });
     }
   }
+
+  // [세션 관리]: 부모가 화면 전환을 넘겨주면 그걸 쓰고, 아니면 세션 관리 페이지로 이동
+  const openSessions = (eventId) =>
+    onManageSessions ? onManageSessions(eventId) : (window.location.href = `/admin/sessions?eventId=${eventId}`);
 
   const events = result?.content ?? [];
   const myId = String(getDevUser().id);
@@ -71,8 +79,8 @@ export default function EventManage() {
       </div>
 
       {notice && (
-        <p className="event-manage-notice" role="status">
-          {notice}
+        <p className={`event-manage-notice${notice.type === 'error' ? ' is-error' : ''}`} role="status">
+          {notice.text}
           <button onClick={() => setNotice(null)} aria-label="알림 닫기" type="button">
             ×
           </button>
@@ -107,10 +115,21 @@ export default function EventManage() {
                     <strong title={event.title}>{event.title}</strong>
                     <span>{formatShort(event.startsAt)} · 정원 {event.capacity}명</span>
                   </div>
-
-                  <span className={`event-manage-status is-${event.status.toLowerCase()}`}>
-                    {badge.label}
-                  </span>
+                  {/* 상태 배지: 내 행사이고 다음 단계가 있으면 눌러서 바꿈 (DRAFT → OPEN → CLOSED, 확인 후) */}
+                  {isMine(event) && next ? (
+                    <button
+                      className={`event-manage-status is-${event.status.toLowerCase()} is-clickable`}
+                      onClick={() => setConfirm({ id: event.id, type: 'status' })}
+                      title={`눌러서 ${NEXT_LABEL[event.status]}(으)로 바꾸기`}
+                      type="button"
+                    >
+                      {badge.label} <span aria-hidden="true">›</span>
+                    </button>
+                  ) : (
+                    <span className={`event-manage-status is-${event.status.toLowerCase()}`}>
+                      {badge.label}
+                    </span>
+                  )}
 
                   {isConfirming ? (
                     <div className="event-manage-confirm">
@@ -132,12 +151,12 @@ export default function EventManage() {
                     <span className="event-manage-readonly">다른 관리자의 행사</span>
                   ) : (
                     <div className="event-manage-actions">
-                      <button onClick={() => setModal({ event })} type="button">수정</button>
-                      <button
-                        onClick={() => setNotice('세션 관리 화면은 아직 연결되어 있지 않습니다.')}
-                        type="button"
-                      >
-                        세션 관리
+                      {/* 마감된 행사는 수정 불가 → [수정] 숨김, 세션은 보기만 */}
+                      {event.status !== 'CLOSED' && (
+                        <button onClick={() => setModal({ event })} type="button">수정</button>
+                      )}
+                      <button onClick={() => openSessions(event.id)} type="button">
+                        {event.status === 'CLOSED' ? '세션 보기' : '세션 관리'}
                       </button>
                       <details className="event-manage-more">
                         <summary aria-label={`${event.title} 기타 관리 메뉴`}>···</summary>
@@ -192,13 +211,18 @@ export default function EventManage() {
         <EventFormModal
           event={modal.event}
           onClose={() => setModal(null)}
-          onSaved={(saved) => {
+          onSaved={(saved, sessionResult) => {
             setModal(null);
-            refresh(
-              modal.event
-                ? `"${saved.title}" 행사를 수정했습니다.`
-                : `"${saved.title}" 행사를 등록했습니다. (작성 중)`,
-            );
+            if (modal.event) return refresh(`"${saved.title}" 행사를 수정했습니다.`);
+            // 새 등록: 함께 만든 세션 결과도 한 줄에
+            const { created = 0, failed = [] } = sessionResult || {};
+            let message = `"${saved.title}" 행사를 등록했습니다. (작성 중)`;
+            if (created > 0) message += ` 세션 ${created}개 추가.`;
+            if (failed.length > 0)
+              message += ` 세션 ${failed.length}개는 추가하지 못했습니다(${failed
+                .map((f) => `${f.title}: ${f.message}`)
+                .join(' / ')}). [세션 관리]에서 다시 추가하세요.`;
+            refresh(message);
           }}
         />
       )}

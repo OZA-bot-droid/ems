@@ -67,7 +67,7 @@ export default function EventList({ onSelect }) {
           <option value="">전체 행사</option>
           <option value="OPEN">모집 중</option>
           <option value="CLOSED">마감</option>
-          {isAdmin && <option value="DRAFT">작성 중 (관리자)</option>}
+          {isAdmin && <option value="DRAFT">작성 중</option>}
         </select>
       </div>
 

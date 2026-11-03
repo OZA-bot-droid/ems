@@ -42,33 +42,34 @@ public class EventService {
     }
 
     /**
-     * 목록 조회. status가 없으면 전체
-     * - 관리자: 모든 상태
-     * - 일반 회원: OPEN, CLOSED만 (DRAFT는 작성 중이라 숨김), 화상 회의 링크도 숨김
+     * 목록 조회 (viewerId = 요청한 회원 번호, 로그인 안 했으면 null)
+     * - OPEN, CLOSED: 누구에게나 보임
+     * - DRAFT: 그 행사를 만든 관리자에게만 보임 (다른 관리자에게도 숨김)
+     * - 화상 회의 링크(meetingUrl): 그 행사를 만든 관리자에게만 보임
      */
-    public PageResponse<EventResponse> getEvents(EventStatus status, Pageable pageable, boolean admin) {
+    public PageResponse<EventResponse> getEvents(EventStatus status, Pageable pageable, Long viewerId) {
         Page<Event> page;
-        if (admin) {
-            page = (status == null)
-                    ? eventRepository.findAll(pageable)
-                    : eventRepository.findByStatus(status, pageable);
-        } else {
-            List<EventStatus> visible = (status == null) ? PUBLIC_STATUSES
-                    : (status.isVisibleToPublic() ? List.of(status) : List.of());
-            page = visible.isEmpty()
+        if (status == null) {                                   // 전체: 공개 상태 + 내 DRAFT
+            page = (viewerId == null)
+                    ? eventRepository.findByStatusIn(PUBLIC_STATUSES, pageable)
+                    : eventRepository.findVisibleTo(PUBLIC_STATUSES, EventStatus.DRAFT, viewerId, pageable);
+        } else if (status.isVisibleToPublic()) {                // OPEN 또는 CLOSED만
+            page = eventRepository.findByStatus(status, pageable);
+        } else {                                                // DRAFT만: 내 것만
+            page = (viewerId == null)
                     ? Page.empty(pageable)
-                    : eventRepository.findByStatusIn(visible, pageable);
+                    : eventRepository.findByStatusAndCreatedBy(EventStatus.DRAFT, viewerId, pageable);
         }
-        return PageResponse.of(page, event -> EventResponse.from(event, admin));
+        return PageResponse.of(page, event -> EventResponse.from(event, event.isOwnedBy(viewerId)));
     }
 
-    /** 상세 조회. 일반 회원이 DRAFT 행사를 조회하면 없는 행사처럼 404 */
-    public EventResponse getEvent(Long eventId, boolean admin) {
+    /** 상세 조회. 남의 DRAFT는 없는 행사처럼 404, 화상 회의 링크는 만든 사람에게만 */
+    public EventResponse getEvent(Long eventId, Long viewerId) {
         Event event = findEvent(eventId);
-        if (!admin && !event.getStatus().isVisibleToPublic()) {
+        if (!event.getStatus().isVisibleToPublic() && !event.isOwnedBy(viewerId)) {
             throw notFound(eventId);
         }
-        return EventResponse.from(event, admin);
+        return EventResponse.from(event, event.isOwnedBy(viewerId));
     }
 
     @Transactional
@@ -94,6 +95,10 @@ public class EventService {
     public EventResponse updateEvent(Long eventId, Long requesterId, EventUpdateRequest request) {
         Event event = findEvent(eventId);
         requireOwner(event, requesterId); // 행사를 만든 관리자만 수정·공개·마감
+        if (event.isClosed()) {           // 마감된 행사는 내용·상태 모두 잠금 (삭제는 별도 규칙)
+            throw new BusinessException(
+                    HttpStatus.CONFLICT, "EVENT_CLOSED", "마감된 행사는 수정할 수 없습니다.");
+        }
         // 시작/종료 중 하나만 바꿔도 바뀐 뒤의 기간이 올바른지 확인
         Instant startsAt = request.startsAt() != null ? request.startsAt() : event.getStartsAt();
         Instant endsAt = request.endsAt() != null ? request.endsAt() : event.getEndsAt();

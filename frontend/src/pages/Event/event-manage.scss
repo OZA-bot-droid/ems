@@ -54,6 +54,13 @@
     line-height: 1;
     cursor: pointer;
   }
+
+  // 실패 알림 (삭제·상태 변경 거절 등)
+  &.is-error {
+    border-color: #f2c8c5;
+    background: #fef3f2;
+    color: #b42318;
+  }
 }
 
 .event-manage-card {
@@ -140,6 +147,29 @@
   &.is-closed {
     background: #eef0f3;
     color: #667085;
+  }
+
+  // 눌러서 다음 상태로 바꿀 수 있는 배지
+  &.is-clickable {
+    border: 1px solid transparent;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color 150ms ease, filter 150ms ease;
+
+    span {
+      margin-left: 2px;
+      opacity: 0.7;
+    }
+
+    &:hover {
+      border-color: currentColor;
+      filter: brightness(0.97);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--ems-green);
+      outline-offset: 2px;
+    }
   }
 }
 

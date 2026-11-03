@@ -1613,6 +1613,122 @@
           "response": []
         },
         {
+          "name": "14-1. 다른 관리자(3번)가 남의 DRAFT 상세 → 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404 응답', () => pm.response.to.have.status(404));",
+                  "pm.test('code = EVENT_NOT_FOUND', () => pm.expect(pm.response.json().code).to.eql('EVENT_NOT_FOUND'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Member-Id",
+                "value": "3"
+              },
+              {
+                "key": "X-User-Role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/events/{{exEventId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "events",
+                "{{exEventId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "14-2. 다른 관리자(3번)의 DRAFT 목록 → 남의 DRAFT 없음",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 응답', () => pm.response.to.have.status(200));",
+                  "pm.test('예외 테스트 행사(exEventId)가 목록에 없음', () => pm.expect(pm.response.json().content.map(e => e.id)).to.not.include(Number(pm.collectionVariables.get('exEventId'))));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Member-Id",
+                "value": "3"
+              },
+              {
+                "key": "X-User-Role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/events?status=DRAFT",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "events?status=DRAFT"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "14-3. 만든 관리자(1번)는 자기 DRAFT 상세·링크 보임 → 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 응답', () => pm.response.to.have.status(200));",
+                  "pm.test('DRAFT', () => pm.expect(pm.response.json().status).to.eql('DRAFT'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Member-Id",
+                "value": "{{adminId}}"
+              },
+              {
+                "key": "X-User-Role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/events/{{exEventId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "events",
+                "{{exEventId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "15. 세션 생성 - USER → 403",
           "event": [
             {
@@ -2178,6 +2294,45 @@
           "response": []
         },
         {
+          "name": "25-1. 다른 관리자(3번)가 공개된 행사 상세 → 200, 회의 링크 숨김",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 응답', () => pm.response.to.have.status(200));",
+                  "pm.test('링크 숨김', () => pm.expect(pm.response.json().meetingUrl).to.eql(null));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Member-Id",
+                "value": "3"
+              },
+              {
+                "key": "X-User-Role",
+                "value": "ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/events/{{exEventId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "events",
+                "{{exEventId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "26. 행사 삭제 - USER → 403",
           "event": [
             {
@@ -2667,6 +2822,111 @@
               "path": [
                 "events",
                 "{{regEventId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "34. 마감된 행사(D) 수정 → 409 EVENT_CLOSED",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('409 응답', () => pm.response.to.have.status(409));",
+                  "pm.test('code = EVENT_CLOSED', () => pm.expect(pm.response.json().code).to.eql('EVENT_CLOSED'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Member-Id",
+                "value": "{{adminId}}"
+              },
+              {
+                "key": "X-User-Role",
+                "value": "ADMIN"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"마감 후 바꾼 제목\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/events/{{eventD}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "events",
+                "{{eventD}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "35. 마감된 행사(D)에 세션 추가 → 409 EVENT_CLOSED",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('409 응답', () => pm.response.to.have.status(409));",
+                  "pm.test('code = EVENT_CLOSED', () => pm.expect(pm.response.json().code).to.eql('EVENT_CLOSED'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Member-Id",
+                "value": "{{adminId}}"
+              },
+              {
+                "key": "X-User-Role",
+                "value": "ADMIN"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"마감 후 세션\",\n  \"startsAt\": \"2027-11-12T10:00:00Z\",\n  \"endsAt\": \"2027-11-12T11:00:00Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/events/{{eventD}}/sessions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "events",
+                "{{eventD}}",
+                "sessions"
               ]
             }
           },
