@@ -99,7 +99,7 @@ export default function AdminApprovalPage() {
                         onClick={() => decide(registration, 'approve')}
                         type="button"
                       >
-                        승인
+                        [승인]
                       </button>
                       <button
                         className="is-reject"
@@ -107,7 +107,7 @@ export default function AdminApprovalPage() {
                         onClick={() => decide(registration, 'reject')}
                         type="button"
                       >
-                        거절
+                        [거절]
                       </button>
                     </div>
                   </li>
