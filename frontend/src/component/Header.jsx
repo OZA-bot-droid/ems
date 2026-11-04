@@ -27,7 +27,7 @@ const MENUS = {
       { id: 'dashboard', label: '운영 대시보드', href: null }, // 통계·집계 API 없음
       { id: 'events', label: '행사 관리', href: '/admin/events' }, // Event Service /events
       { id: 'sessions', label: '세션 관리', href: '/admin/sessions' }, // /events/{id}/sessions
-      { id: 'approvals', label: '참가 승인', href: null }, // 승인·거절 API는 있으나 관리자용 신청 목록 조회 API 없음
+      { id: 'approvals', label: '참가 승인', href: '/admin/approvals' }, // ADMIN / 11 참가 승인
       { id: 'votes', label: '투표 관리', href: null }, // Interaction Service 미구현
       { id: 'statistics', label: '기본 통계', href: null }, // 통계 API 없음
     ],

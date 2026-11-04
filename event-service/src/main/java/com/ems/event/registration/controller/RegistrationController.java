@@ -3,6 +3,7 @@ package com.ems.event.registration.controller;
 import com.ems.event.registration.entity.Registration;
 import com.ems.event.common.security.AdminChecker;
 import com.ems.event.registration.service.RegistrationService;
+import jakarta.servlet.http.HttpServletRequest;
 import java.time.Instant;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,12 +28,15 @@ public class RegistrationController {
 
     /** 로그인한 사용자의 행사 참가 신청을 생성합니다. */
     @PostMapping("/{eventId}/registrations")
-    public ResponseEntity<RegistrationResponse> apply(
+    public ResponseEntity<RegistrationSuccessResponse> apply(
             @PathVariable Long eventId,
-            @RequestHeader(value = "X-Member-Id", required = false) Long memberId) {
+            @RequestHeader(value = "X-Member-Id", required = false) Long memberId,
+            HttpServletRequest request) {
         requireUser(memberId);
         Registration created = registrationService.apply(memberId, eventId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(RegistrationResponse.from(created));
+        RegistrationSuccessResponse response = successResponse(
+                created, "참가 신청이 완료되었습니다.", HttpStatus.CREATED.value(), request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     /** 로그인한 사용자의 신청 목록을 페이지 단위로 반환합니다. */
@@ -48,33 +52,39 @@ public class RegistrationController {
 
     /** 관리자만 신청을 승인할 수 있습니다. */
     @PatchMapping("/registrations/{registrationId}/approve")
-    public RegistrationResponse approve(
+    public RegistrationSuccessResponse approve(
             @PathVariable Long registrationId,
             @RequestHeader(value = "X-Member-Id", required = false) Long memberId,
-            @RequestHeader(value = "X-User-Role", required = false) String role) {
+            @RequestHeader(value = "X-User-Role", required = false) String role,
+            HttpServletRequest request) {
         adminChecker.requireAdmin(memberId, role);
-        return RegistrationResponse.from(registrationService.approve(registrationId, memberId));
+        Registration approved = registrationService.approve(registrationId, memberId);
+        return successResponse(approved, "참가 신청이 승인되었습니다.", HttpStatus.OK.value(), request);
     }
 
     /** 관리자만 신청을 거절할 수 있습니다. */
     @PatchMapping("/registrations/{registrationId}/reject")
-    public RegistrationResponse reject(
+    public RegistrationSuccessResponse reject(
             @PathVariable Long registrationId,
             @RequestHeader(value = "X-Member-Id", required = false) Long memberId,
-            @RequestHeader(value = "X-User-Role", required = false) String role) {
+            @RequestHeader(value = "X-User-Role", required = false) String role,
+            HttpServletRequest request) {
         adminChecker.requireAdmin(memberId, role);
-        return RegistrationResponse.from(registrationService.reject(registrationId, memberId));
+        Registration rejected = registrationService.reject(registrationId, memberId);
+        return successResponse(rejected, "참가 신청이 거절되었습니다.", HttpStatus.OK.value(), request);
     }
 
     /** 신청자 본인 또는 관리자가 신청을 취소합니다. */
     @PatchMapping("/registrations/{registrationId}/cancel")
-    public RegistrationResponse cancel(
+    public RegistrationSuccessResponse cancel(
             @PathVariable Long registrationId,
             @RequestHeader(value = "X-Member-Id", required = false) Long requesterId,
-            @RequestHeader(value = "X-User-Role", required = false) String role) {
+            @RequestHeader(value = "X-User-Role", required = false) String role,
+            HttpServletRequest request) {
         requireUser(requesterId);
-        return RegistrationResponse.from(registrationService.cancel(
-                registrationId, requesterId, adminChecker.isAdmin(role)));
+        Registration cancelled = registrationService.cancel(
+                registrationId, requesterId, adminChecker.isAdmin(role));
+        return successResponse(cancelled, "참가 신청이 취소되었습니다.", HttpStatus.OK.value(), request);
     }
 
     /** 관리자에게 행사별 신청 상태 건수를 반환합니다. */
@@ -93,6 +103,19 @@ public class RegistrationController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
         }
     }
+
+    private RegistrationSuccessResponse successResponse(
+            Registration registration, String message, int status, HttpServletRequest request) {
+        String requestPath = request.getRequestURI();
+        String externalPath = requestPath.startsWith("/api/") ? requestPath : "/api" + requestPath;
+        return new RegistrationSuccessResponse(true, RegistrationResponse.from(registration), message,
+                status, Instant.now(), externalPath, null);
+    }
+
+    /** 참가 신청·승인·취소 성공 시 반환하는 공통 응답입니다. */
+    private record RegistrationSuccessResponse(
+            boolean success, RegistrationResponse data, String message, int status,
+            Instant timestamp, String path, String traceId) { }
 
     /** 프런트엔드에 전달할 신청 정보입니다. */
     private record RegistrationResponse(

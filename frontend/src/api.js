@@ -87,10 +87,14 @@ export const eventApi = {
 };
 
 // 참가 신청 API
+const unwrapSuccessData = (response) =>
+  response?.success === true && Object.hasOwn(response, 'data') ? response.data : response;
+
 export const registrationApi = {
-  apply: (eventId) => request(`/events/${eventId}/registrations`, { method: 'POST' }),
+  apply: async (eventId) =>
+    unwrapSuccessData(await request(`/events/${eventId}/registrations`, { method: 'POST' })),
   mine: ({ page = 0, size = 20 } = {}) =>
     request(`/events/registrations/me?page=${page}&size=${size}`),
-  cancel: (registrationId) =>
-    request(`/events/registrations/${registrationId}/cancel`, { method: 'PATCH' }),
+  cancel: async (registrationId) =>
+    unwrapSuccessData(await request(`/events/registrations/${registrationId}/cancel`, { method: 'PATCH' })),
 };
