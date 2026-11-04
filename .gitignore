@@ -1,5 +1,4 @@
 # environment / credentials
-**/bin/
 .env
 .env.*
 !.env.example
