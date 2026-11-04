@@ -4,6 +4,7 @@
 import { useEffect, useState } from 'react';
 import { eventApi, getDevUser } from '../../api.js';
 import { formatRange, formatTimeRange, instantToKstInput, STATUS_BADGE } from '../../format.js';
+import EventPicker from './EventPicker.jsx';
 import SessionFormModal from './SessionFormModal.jsx';
 import './session-manage.scss';
 
@@ -124,18 +125,13 @@ export default function SessionManage({ eventId = null, onBack }) {
           </p>
         ) : (
           <>
-            <select
+            {/* 상태 배지 · 제목(굵게) · 시작 일시(흐리게)를 구별해서 보여 주는 선택 상자 */}
+            <EventPicker
               id="session-event-select"
-              className="session-manage-select"
-              value={selectedId ?? ''}
-              onChange={(e) => selectEvent(e.target.value)}
-            >
-              {myEvents.map((e) => (
-                <option key={e.id} value={e.id}>
-                  {e.title}
-                </option>
-              ))}
-            </select>
+              events={myEvents}
+              value={selectedId}
+              onChange={selectEvent}
+            />
             {event && (
               <p className="session-manage-event-meta">
                 <span className={`session-manage-status is-${event.status.toLowerCase()}`}>{badge.label}</span>

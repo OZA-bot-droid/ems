@@ -72,9 +72,11 @@ async function request(path, { method = 'GET', body } = {}) {
 
 // 행사·세션 API (백엔드 Controller와 1:1로 대응)
 export const eventApi = {
-  list: ({ status, page = 0, size = 10 } = {}) => {
+  // sort: 'startsAt,asc' 처럼 "칸,방향" (Spring Pageable 규칙). 안 보내면 서버 기본(시작일 빠른 순)
+  list: ({ status, page = 0, size = 10, sort } = {}) => {
     const query = new URLSearchParams({ page, size });
     if (status) query.set('status', status);
+    if (sort) query.set('sort', sort);
     return request(`/events?${query}`);
   },
   get: (eventId) => request(`/events/${eventId}`),
