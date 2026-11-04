@@ -36,7 +36,7 @@ public class RegistrationController {
         requireUser(memberId);
         Registration created = registrationService.apply(memberId, eventId);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiSuccessResponse.created(RegistrationResponse.from(created), "참가 신청 완료", httpRequest));
+                .body(ApiSuccessResponse.created(RegistrationResponse.from(created), "참가 신청이 완료되었습니다.", httpRequest));
     }
 
     /** 로그인한 사용자의 신청 목록을 페이지 단위로 반환합니다. */
@@ -61,7 +61,7 @@ public class RegistrationController {
             HttpServletRequest httpRequest) {
         adminChecker.requireAdmin(memberId, role);
         return ApiSuccessResponse.ok(RegistrationResponse.from(registrationService.approve(registrationId, memberId)),
-                "참가 승인 완료", httpRequest);
+                "참가 신청이 승인되었습니다.", httpRequest);
     }
 
     /** 관리자만 신청을 거절할 수 있습니다. */
@@ -73,7 +73,7 @@ public class RegistrationController {
             HttpServletRequest httpRequest) {
         adminChecker.requireAdmin(memberId, role);
         return ApiSuccessResponse.ok(RegistrationResponse.from(registrationService.reject(registrationId, memberId)),
-                "참가 거절 완료", httpRequest);
+                "참가 신청이 거절되었습니다.", httpRequest);
     }
 
     /** 신청자 본인 또는 관리자가 신청을 취소합니다. */
@@ -85,7 +85,7 @@ public class RegistrationController {
             HttpServletRequest httpRequest) {
         requireUser(requesterId);
         return ApiSuccessResponse.ok(RegistrationResponse.from(registrationService.cancel(
-                registrationId, requesterId, adminChecker.isAdmin(role))), "참가 취소 완료", httpRequest);
+                registrationId, requesterId, adminChecker.isAdmin(role))), "참가 신청이 취소되었습니다.", httpRequest);
     }
 
     /** 관리자에게 행사별 신청 상태 건수를 반환합니다. */

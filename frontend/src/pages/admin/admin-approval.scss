@@ -1,0 +1,265 @@
+.admin-approval-page {
+  display: flex;
+  width: 100%;
+  max-width: 1120px;
+  min-height: 731px;
+  flex-direction: column;
+  color: var(--ems-ink);
+  font-family: var(--ems-font);
+}
+
+.admin-approval-header {
+  display: flex;
+  min-height: 62px;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 46px;
+
+  h1 {
+    margin: 0;
+    color: var(--ems-ink);
+    font-size: 27px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+  }
+
+  p {
+    margin: 8px 0 0;
+    color: var(--ems-muted);
+    font-size: 13px;
+    line-height: 1.4;
+  }
+}
+
+.admin-approval-role,
+.admin-approval-pending {
+  display: inline-flex;
+  min-height: 29px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #fff4e8;
+  color: #966420;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.admin-approval-role {
+  min-width: 95px;
+  margin-top: 7px;
+}
+
+.admin-approval-card {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 542px;
+  padding: 24px;
+  border-radius: 14px;
+  background: var(--ems-surface);
+}
+
+.admin-approval-card-heading {
+  display: flex;
+  min-height: 33px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 34px;
+
+  h2 {
+    margin: 0;
+    color: var(--ems-ink);
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+}
+
+.admin-approval-pending {
+  min-width: 114px;
+}
+
+.admin-approval-list {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-approval-row {
+  display: flex;
+  min-height: 52px;
+  align-items: center;
+  gap: 12px;
+  padding: 0 17px;
+  border-radius: 9px;
+  background: var(--ems-row);
+
+  &:nth-child(even) {
+    background: var(--ems-surface);
+  }
+}
+
+.admin-approval-applicant {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 9px;
+  color: var(--ems-ink);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.admin-approval-name,
+.admin-approval-event {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin-approval-name {
+  flex: 0 0 auto;
+}
+
+.admin-approval-separator {
+  color: var(--ems-muted);
+}
+
+.admin-approval-event {
+  min-width: 0;
+}
+
+.admin-approval-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 5px;
+
+  button {
+    padding: 4px 2px;
+    border: 0;
+    background: transparent;
+    color: var(--ems-ink);
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    &:focus-visible {
+      border-radius: 3px;
+      outline: 2px solid var(--ems-green);
+      outline-offset: 2px;
+    }
+  }
+
+  .is-approve:hover {
+    color: var(--ems-green-dark);
+  }
+
+  .is-reject:hover {
+    color: #b42318;
+  }
+}
+
+.admin-approval-status {
+  flex: 0 0 auto;
+  margin-left: 2px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+
+  &.is-approved {
+    background: var(--ems-green-soft);
+    color: var(--ems-green-dark);
+  }
+
+  &.is-rejected {
+    background: #fef3f2;
+    color: #b42318;
+  }
+}
+
+.admin-approval-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: -19px 0 14px;
+  padding: 9px 12px;
+  border: 1px solid #c8e6d5;
+  border-radius: 8px;
+  background: #f0faf4;
+  color: #216b46;
+  font-size: 12px;
+
+  button {
+    flex: 0 0 auto;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+  }
+}
+
+.admin-approval-policy {
+  margin: 72px 0 0;
+  color: var(--ems-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.admin-approval-footer {
+  margin: auto 0 0;
+  padding-top: 18px;
+  color: var(--ems-muted);
+  font-size: 11px;
+}
+
+@media (max-width: 760px) {
+  .admin-approval-page {
+    min-height: calc(100vh - 180px);
+  }
+
+  .admin-approval-header {
+    margin-bottom: 30px;
+  }
+
+  .admin-approval-card {
+    min-height: 500px;
+    padding: 20px 16px;
+  }
+
+  .admin-approval-card-heading {
+    margin-bottom: 24px;
+  }
+
+  .admin-approval-row {
+    flex-wrap: wrap;
+    gap: 4px 10px;
+    padding: 10px 13px;
+  }
+
+  .admin-approval-applicant {
+    flex: 1 1 100%;
+    gap: 7px;
+  }
+
+  .admin-approval-actions {
+    margin-left: auto;
+  }
+
+  .admin-approval-policy {
+    margin-top: 40px;
+  }
+}

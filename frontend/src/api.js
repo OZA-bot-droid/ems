@@ -90,12 +90,16 @@ export const eventApi = {
 };
 
 // 참가 신청 API
+const unwrapSuccessData = (response) =>
+  response?.success === true && Object.hasOwn(response, 'data') ? response.data : response;
+
 export const registrationApi = {
-  apply: (eventId) => request(`/events/${eventId}/registrations`, { method: 'POST' }),
+  apply: async (eventId) =>
+    unwrapSuccessData(await request(`/events/${eventId}/registrations`, { method: 'POST' })),
   mine: ({ page = 0, size = 20 } = {}) =>
     request(`/events/registrations/me?page=${page}&size=${size}`),
-  cancel: (registrationId) =>
-    request(`/events/registrations/${registrationId}/cancel`, { method: 'PATCH' }),
+  cancel: async (registrationId) =>
+    unwrapSuccessData(await request(`/events/registrations/${registrationId}/cancel`, { method: 'PATCH' })),
   // 관리자: 행사별 신청 현황 (대기·승인·거절·취소 건수)
   summary: (eventId) => request(`/events/${eventId}/summary`),
 };
