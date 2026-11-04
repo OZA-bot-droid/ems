@@ -11,6 +11,8 @@ public record APISuccessResponse<T>(boolean success,
                                     String traceId) {
 
     public APISuccessResponse {
-        path = "/api" + path;
+        if(!path.startsWith("/api/")) {
+            path = "/api" + path;
+        }
     }
 }

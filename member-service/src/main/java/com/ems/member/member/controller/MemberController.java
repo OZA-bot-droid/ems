@@ -1,5 +1,6 @@
 package com.ems.member.member.controller;
 
+import com.ems.member.common.domain.SuccessCode;
 import com.ems.member.member.domain.Role;
 import com.ems.member.member.dto.*;
 import com.ems.member.member.service.AuthService;
@@ -45,7 +46,10 @@ public class MemberController {
     public ResponseEntity<?> registerMember(@Valid @RequestBody MemberRegisterDTO dto) {
 
         memberService.registerMember(dto);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return new ResponseEntity<>(
+                new MessageResponseDTO<>(null, SuccessCode.MEMBER_REGISTERED),
+                HttpStatus.CREATED
+        );
     }
 
     // 로그인
@@ -53,7 +57,16 @@ public class MemberController {
     public ResponseEntity<?> login(@Valid @RequestBody MemberLoginDTO dto) {
 
         LoginResponseDTO responseDTO = memberService.login(dto);
-        return new ResponseEntity<>(new AccessTokenResponseDTO(responseDTO.accessToken()), memberService.createRefreshTokenCookie(responseDTO.refreshToken()), HttpStatus.OK);
+        return new ResponseEntity<>(
+                new MessageResponseDTO<>(
+                        new AccessTokenResponseDTO(responseDTO.accessToken()),
+                        SuccessCode.LOGIN_SUCCESS
+                ),
+                memberService.createRefreshTokenCookie(
+                        responseDTO.refreshToken()
+                ),
+                HttpStatus.OK
+        );
     }
 
     // 새로운 access token 생성
@@ -62,7 +75,14 @@ public class MemberController {
     public ResponseEntity<?> reissue(@RequestBody ClientDTO dto, @CookieValue("refreshToken") String refreshToken) {
 
         LoginResponseDTO responseDTO = authService.reissue(dto, refreshToken);
-        return new ResponseEntity<>(new AccessTokenResponseDTO(responseDTO.accessToken()), memberService.createRefreshTokenCookie(responseDTO.refreshToken()), HttpStatus.OK);
+        return new ResponseEntity<>(
+                new MessageResponseDTO<>(
+                        new AccessTokenResponseDTO(responseDTO.accessToken()),
+                        SuccessCode.TOKEN_REISSUED
+                ),
+                memberService.createRefreshTokenCookie(responseDTO.refreshToken()),
+                HttpStatus.OK
+        );
     }
 
     // 로그아웃
@@ -83,14 +103,24 @@ public class MemberController {
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
-                .body(new LogoutResponseDTO(true));
+                .body(
+                        new MessageResponseDTO<>(
+                                new LogoutResponseDTO(true),
+                                SuccessCode.LOGOUT_SUCCESS
+                        )
+                );
     }
 
     // 회원 정보
     @GetMapping("/me")
     public ResponseEntity<?> me(JwtAuthenticationToken authentication) {
 
-        return ResponseEntity.ok(memberService.myPage(authentication.getToken().getSubject()));
+        return ResponseEntity.ok(
+                new MessageResponseDTO<>(
+                        memberService.myPage(authentication.getToken().getSubject()),
+                        SuccessCode.REQUEST_SUCCESS
+                )
+        );
     }
 
 
@@ -141,7 +171,10 @@ public class MemberController {
         LoginResponseDTO dto = socialLoginService.getAndRemoveLoginCode(code);
 
         return new ResponseEntity<>(
-                new AccessTokenResponseDTO(dto.accessToken()),
+                new MessageResponseDTO<>(
+                        new AccessTokenResponseDTO(dto.accessToken()),
+                        SuccessCode.LOGIN_SUCCESS
+                ),
                 memberService.createRefreshTokenCookie(dto.refreshToken()),
                 HttpStatus.OK
         );
@@ -155,14 +188,20 @@ public class MemberController {
 
         // 회원이 없는 이메일이어도 똑같이 200 응답
         // 이메일 존재 여부 노출x
-        return new ResponseEntity<>(new MessageResponseDTO("입력하신 이메일로 비밀번호 재설정 안내를 전송했습니다."), HttpStatus.OK);
+        return new ResponseEntity<>(
+                new MessageResponseDTO<>(null, SuccessCode.REQUEST_SUCCESS),
+                HttpStatus.OK
+        );
     }
 
     @PostMapping("/password/reset")
-    public ResponseEntity<MessageResponseDTO> resetPassword(@Valid @RequestBody PasswordResetDTO dto) {
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody PasswordResetDTO dto) {
 
         System.out.println(dto);
         passwordResetService.resetPassword(dto.token(), dto.newPassword());
-        return new ResponseEntity<>(new MessageResponseDTO("비밀번호가 변경되었습니다."), HttpStatus.OK);
+        return new ResponseEntity<>(
+                new MessageResponseDTO<>(null, SuccessCode.REQUEST_SUCCESS),
+                HttpStatus.OK
+        );
     }
 }

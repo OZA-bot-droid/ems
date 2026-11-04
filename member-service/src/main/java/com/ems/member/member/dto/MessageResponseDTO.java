@@ -1,4 +1,6 @@
 package com.ems.member.member.dto;
 
-public record MessageResponseDTO(String message) {
+import com.ems.member.common.domain.SuccessCode;
+
+public record MessageResponseDTO<T>(T data, SuccessCode successCode) {
 }
