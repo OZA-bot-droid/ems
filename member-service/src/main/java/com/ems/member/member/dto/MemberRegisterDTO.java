@@ -14,7 +14,8 @@ public record MemberRegisterDTO(@Email(message = "올바른 이메일 형식이 
                                 @Pattern(
                                         regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*])[A-Za-z\\d!@#$%^&*]+$",
                                         message = "비밀번호는 8~20자이며 영문, 숫자, 특수문자(!@#$%^&*)를 포함해야 합니다."
-                                ) String password,
+                                )
+                                String password,
 
                                 @NotBlank(message = "이름을 1글자 이상 입력해주세요.")
                                 String name,

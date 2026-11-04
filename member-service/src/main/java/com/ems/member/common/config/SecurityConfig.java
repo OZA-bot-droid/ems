@@ -78,7 +78,10 @@ public class SecurityConfig {
                                     "/members/oauth2/exchange",
                                     // Spring Security OAuth2 Login이 내부적으로 사용하는 기본 endpoint 패턴
                                     "/oauth2/**",           // /oauth2/authorization/google
-                                    "/login/oauth2/**"      // /login/oauth2/code/google
+                                    "/login/oauth2/**",     // /login/oauth2/code/google
+
+                                    "/members/password/reset-request",
+                                    "/members/password/reset"
                                 )
                                 .permitAll()
                                 //.requestMatchers("/members/admin").hasRole("ADMIN")

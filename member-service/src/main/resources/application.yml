@@ -30,6 +30,20 @@ spring:
     time-zone: UTC
     serialization:
       write-dates-as-timestamps: false
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 3000
+          writetimeout: 5000
   security:
     oauth2:
       client:
@@ -72,3 +86,7 @@ jwt:
   issuer: ems-auth
   access-token-expiration: 900
   refresh-token-expiration: 604800
+password-reset:
+  token-expiration: 900
+  # 메일 서버가 응답하지 않을 때 스레드가 무한정 대기하지 않도록 timeout 값을 두는 것도 Spring Boot 공식 문서에서 권장하는 형태
+  frontend-url: ${FRONT_END_URL}

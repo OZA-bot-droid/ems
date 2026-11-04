@@ -56,6 +56,9 @@ public class MemberService {
         // 회원 존재 여부 => 없으면 401 에러
         Member member = memberRepository.findByEmail(dto.email())
                 .orElseThrow(() -> new InvalidCredentialsException("이메일 또는 비밀번호가 일치하지 않습니다."));
+        if(!"LOCAL".equalsIgnoreCase(member.getProvider())) {
+            throw new InvalidCredentialsException("이메일 또는 비밀번호가 일치하지 않습니다.");
+        }
 
         // 비밀번호 확인
         if(passwordEncoder.matches(dto.password(), member.getPasswordHash())) {
@@ -66,7 +69,6 @@ public class MemberService {
 
             // refresh token entity 생성 및 DB 저장
             authService.replaceRefreshToken(member, refreshToken, dto.clientId());
-            memberRepository.findByIdForUpdate(member.getId());
 
             return new LoginResponseDTO(accessToken, refreshToken);
 

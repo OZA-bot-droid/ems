@@ -1,5 +1,6 @@
 package com.ems.member.common.handler;
 
+import com.ems.member.common.dto.APIErrorResponse;
 import com.ems.member.common.dto.APISuccessResponse;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
@@ -30,7 +31,7 @@ public class ResponseBodyAdviceImpl implements ResponseBodyAdvice<Object> {
                                   Class<? extends HttpMessageConverter<?>> selectedConverterType,
                                   ServerHttpRequest request,
                                   ServerHttpResponse response) {
-        if (body instanceof APISuccessResponse<?>) {
+        if (body instanceof APIErrorResponse || body instanceof APISuccessResponse<?>) {
             return body;
         }
 

@@ -11,6 +11,7 @@ public enum ErrorCode {
     INVALID_ROLE(HttpStatus.BAD_REQUEST),
     INVALID_REQUEST(HttpStatus.BAD_REQUEST),
     INVALID_OAUTH_CODE(HttpStatus.BAD_REQUEST),
+    INVALID_PASSWORD_RESET_TOKEN(HttpStatus.BAD_REQUEST),
 
     // 401 Unauthorized
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED),
