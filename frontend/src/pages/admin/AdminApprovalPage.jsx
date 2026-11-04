@@ -1,35 +1,51 @@
-import { useEffect, useState } from 'react';
-import { setDevUser } from '../../api.js';
+import { useCallback, useEffect, useState } from 'react';
+import { registrationApi, setDevUser } from '../../api.js';
 import Header from '../../component/Header.jsx';
 import '../Event/event.scss';
 import './admin-approval.scss';
 
-const SAMPLE_REGISTRATIONS = [
-  { id: 1, name: '김하늘', eventTitle: '클라우드 네이티브 컨퍼런스', status: 'PENDING' },
-  { id: 2, name: '이서준', eventTitle: '실시간 웹 기술 세미나', status: 'PENDING' },
-  { id: 3, name: '박지민', eventTitle: '마이크로서비스 실습 워크숍', status: 'PENDING' },
-  { id: 4, name: '최유진', eventTitle: '클라우드 네이티브 컨퍼런스', status: 'PENDING' },
-];
-
-const STATUS_LABEL = {
-  APPROVED: '승인 완료',
-  REJECTED: '거절 완료',
-};
-
 export default function AdminApprovalPage() {
-  useEffect(() => setDevUser('ADMIN'), []);
-
-  const [registrations, setRegistrations] = useState(SAMPLE_REGISTRATIONS);
+  const [registrations, setRegistrations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [busyId, setBusyId] = useState(null);
+  const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
-  const pendingCount = registrations.filter((item) => item.status === 'PENDING').length;
 
-  function updateSampleStatus(registration, status) {
-    setRegistrations((current) =>
-      current.map((item) => (item.id === registration.id ? { ...item, status } : item)),
-    );
-    setNotice(
-      `${registration.name}님의 신청을 ${STATUS_LABEL[status]} 처리했어요. 예시 화면에만 반영됐습니다.`,
-    );
+  const loadRegistrations = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const result = await registrationApi.adminList({ status: 'PENDING', page: 0, size: 100 });
+      setRegistrations(result?.content ?? []);
+    } catch (requestError) {
+      setError(requestError.message || '신청 목록을 불러오지 못했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    setDevUser('ADMIN');
+    loadRegistrations();
+  }, [loadRegistrations]);
+
+  async function decide(registration, decision) {
+    setBusyId(registration.id);
+    setError('');
+    setNotice('');
+    try {
+      if (decision === 'approve') {
+        await registrationApi.approve(registration.id);
+      } else {
+        await registrationApi.reject(registration.id);
+      }
+      setRegistrations((current) => current.filter((item) => item.id !== registration.id));
+      setNotice(`회원 ${registration.userId}님의 참가 신청을 ${decision === 'approve' ? '승인' : '거절'}했어요.`);
+    } catch (requestError) {
+      setError(requestError.message || '신청을 처리하지 못했습니다.');
+    } finally {
+      setBusyId(null);
+    }
   }
 
   return (
@@ -40,8 +56,8 @@ export default function AdminApprovalPage() {
         <section className="admin-approval-page" aria-labelledby="admin-approval-title">
           <header className="admin-approval-header">
             <div>
-              <h1 id="admin-approval-title">11 · 참가 승인</h1>
-              <p>PENDING / APPROVED / REJECTED</p>
+              <h1 id="admin-approval-title">참가 승인</h1>
+              <p>내가 주최한 행사의 참가 신청을 확인하고 처리합니다.</p>
             </div>
             <span className="admin-approval-role">ADMIN</span>
           </header>
@@ -49,7 +65,7 @@ export default function AdminApprovalPage() {
           <section className="admin-approval-card" aria-labelledby="approval-card-title">
             <div className="admin-approval-card-heading">
               <h2 id="approval-card-title">참가 승인 관리</h2>
-              <span className="admin-approval-pending">승인 대기{pendingCount > 0 ? ` · ${pendingCount}` : ''}</span>
+              <span className="admin-approval-pending">승인 대기 · {registrations.length}</span>
             </div>
 
             {notice && (
@@ -61,48 +77,51 @@ export default function AdminApprovalPage() {
               </p>
             )}
 
-            <ul className="admin-approval-list" aria-label="참가 신청 예시 목록">
-              {registrations.map((registration, index) => (
-                <li className="admin-approval-row" key={registration.id}>
-                  <div className="admin-approval-applicant">
-                    <span className="admin-approval-name">{registration.name}</span>
-                    <span className="admin-approval-separator" aria-hidden="true">·</span>
-                    <span className="admin-approval-event">{registration.eventTitle}</span>
-                  </div>
+            {error && <p className="admin-approval-error" role="alert">{error}</p>}
+            {loading ? (
+              <p className="admin-approval-message" role="status">신청 목록을 불러오는 중입니다…</p>
+            ) : registrations.length === 0 ? (
+              <p className="admin-approval-message">승인 대기 중인 신청이 없습니다.</p>
+            ) : (
+              <ul className="admin-approval-list" aria-label="승인 대기 신청 목록">
+                {registrations.map((registration) => (
+                  <li className="admin-approval-row" key={registration.id}>
+                    <div className="admin-approval-applicant">
+                      <span className="admin-approval-name">회원 {registration.userId}</span>
+                      <span className="admin-approval-separator" aria-hidden="true">·</span>
+                      <span className="admin-approval-event">{registration.eventTitle}</span>
+                    </div>
 
-                  {registration.status === 'PENDING' ? (
-                    <div className="admin-approval-actions" aria-label={`${registration.name} 신청 처리`}>
+                    <div className="admin-approval-actions" aria-label={`회원 ${registration.userId} 신청 처리`}>
                       <button
                         className="is-approve"
-                        onClick={() => updateSampleStatus(registration, 'APPROVED')}
+                        disabled={busyId === registration.id}
+                        onClick={() => decide(registration, 'approve')}
                         type="button"
                       >
                         승인
                       </button>
                       <button
                         className="is-reject"
-                        onClick={() => updateSampleStatus(registration, 'REJECTED')}
+                        disabled={busyId === registration.id}
+                        onClick={() => decide(registration, 'reject')}
                         type="button"
                       >
                         거절
                       </button>
                     </div>
-                  ) : (
-                    <span className={`admin-approval-status is-${registration.status.toLowerCase()}`}>
-                      {STATUS_LABEL[registration.status]}
-                    </span>
-                  )}
-                </li>
-              ))}
-            </ul>
+                  </li>
+                ))}
+              </ul>
+            )}
 
             <p className="admin-approval-policy">
-              정원 초과·중복 승인 및 비인가 변경은 Event Service에서 검증
+              정원 초과·중복 승인 및 비인가 변경은 Event Service에서 검증합니다.
             </p>
           </section>
 
           <p className="admin-approval-footer">
-            EMS · Figma 화면 설계 / 예시 콘텐츠 / 실제 API 미연결
+            신청자 이름은 Member Service의 신청자 정보 API 연결 후 표시됩니다.
           </p>
         </section>
       </main>

@@ -47,13 +47,19 @@
 }
 
 .session-manage-role {
+  display: inline-flex;
+  min-width: 95px;
+  min-height: 29px;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
   margin-top: 7px;
-  padding: 5px 14px;
-  border-radius: 14px;
+  border-radius: 999px;
   background: #fff4e8;
   color: #966420;
   font-size: 12px;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .session-manage-notice {

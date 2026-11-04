@@ -98,6 +98,14 @@ export const registrationApi = {
     unwrapSuccessData(await request(`/events/${eventId}/registrations`, { method: 'POST' })),
   mine: ({ page = 0, size = 20 } = {}) =>
     request(`/events/registrations/me?page=${page}&size=${size}`),
+  adminList: ({ status = 'PENDING', page = 0, size = 20 } = {}) => {
+    const query = new URLSearchParams({ status, page, size });
+    return request(`/events/registrations?${query}`);
+  },
+  approve: (registrationId) =>
+    request(`/events/registrations/${registrationId}/approve`, { method: 'PATCH' }),
+  reject: (registrationId) =>
+    request(`/events/registrations/${registrationId}/reject`, { method: 'PATCH' }),
   cancel: async (registrationId) =>
     unwrapSuccessData(await request(`/events/registrations/${registrationId}/cancel`, { method: 'PATCH' })),
   // 관리자: 행사별 신청 현황 (대기·승인·거절·취소 건수)

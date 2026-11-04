@@ -82,6 +82,24 @@
   min-width: 114px;
 }
 
+.admin-approval-error,
+.admin-approval-message {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.admin-approval-error {
+  background: #fef3f2;
+  color: #b42318;
+}
+
+.admin-approval-message {
+  color: var(--ems-muted);
+}
+
 .admin-approval-list {
   display: grid;
   gap: 7px;
@@ -146,6 +164,11 @@
     font: inherit;
     font-size: 13px;
     cursor: pointer;
+
+    &:disabled {
+      cursor: wait;
+      opacity: 0.55;
+    }
 
     &:hover {
       text-decoration: underline;

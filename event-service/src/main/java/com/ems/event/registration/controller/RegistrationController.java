@@ -2,6 +2,7 @@ package com.ems.event.registration.controller;
 
 import com.ems.event.common.dto.ApiSuccessResponse;
 import com.ems.event.registration.entity.Registration;
+import com.ems.event.registration.entity.RegistrationStatus;
 import com.ems.event.common.security.AdminChecker;
 import com.ems.event.registration.service.RegistrationService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,6 +38,22 @@ public class RegistrationController {
         Registration created = registrationService.apply(memberId, eventId);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiSuccessResponse.created(RegistrationResponse.from(created), "참가 신청이 완료되었습니다.", httpRequest));
+    }
+
+    /** 관리자가 본인 주최 행사들의 신청을 상태별로 조회합니다. */
+    @GetMapping("/registrations")
+    public ApiSuccessResponse<Page<RegistrationService.AdminRegistration>> forAdmin(
+            @RequestParam(defaultValue = "PENDING") RegistrationStatus status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestHeader(value = "X-Member-Id", required = false) Long memberId,
+            @RequestHeader(value = "X-User-Role", required = false) String role,
+            HttpServletRequest httpRequest) {
+        adminChecker.requireAdmin(memberId, role);
+        Pageable pageable = PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 100));
+        Page<RegistrationService.AdminRegistration> registrations =
+                registrationService.findForOwner(memberId, status, pageable);
+        return ApiSuccessResponse.ok(registrations, "참가 신청 목록 조회 성공", httpRequest);
     }
 
     /** 로그인한 사용자의 신청 목록을 페이지 단위로 반환합니다. */
