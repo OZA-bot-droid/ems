@@ -20,6 +20,10 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
+import jakarta.servlet.http.HttpServletRequest;
+import com.ems.interaction.common.response.ApiResponseBuilder;
 
 
 @RestController
@@ -28,67 +32,81 @@ import java.util.List;
 public class PollController {
 
     private final PollService pollService;
+    private final ApiResponseBuilder apiResponseBuilder;
 
     // 투표 생성
     @PostMapping("/polls")
     public ResponseEntity<?> createPoll(@Valid @RequestBody PollSaveDTO dto,
                                         @RequestHeader("X-Member-Id") Long userId,
-                                        @RequestHeader("X-User-Role") String role) {
+                                        @RequestHeader("X-User-Role") String role,
+                                        HttpServletRequest request) {
         checkAdmin(role);
 
         PollResponseDTO response = pollService.createPoll(dto, userId);
 
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        String resourcePath = "/api/interactions/polls/" + response.getId();
+
+        return apiResponseBuilder.created(response, "투표 생성 완료", resourcePath, request);
     }
 
     // 투표 내용 상세 조회
     @GetMapping("/polls/{pollId}")
-    public ResponseEntity<?> getPoll(@PathVariable Long pollId) {
+    public ResponseEntity<?> getPoll(@PathVariable Long pollId, HttpServletRequest request) {
 
-        return new ResponseEntity<>(pollService.getPoll(pollId), HttpStatus.OK);
+        PollResponseDTO response = pollService.getPoll(pollId);
+
+        return apiResponseBuilder.ok(response, "투표 조회 성공", request);
     }
 
 
     // 관리자가 생성한 투표 조회
     @GetMapping("/polls/mycreated")
     public ResponseEntity<?> getMyCreatedPolls(@RequestHeader("X-Member-Id") Long userId,
-                                                @RequestHeader("X-User-Role") String role) {
+                                               @RequestHeader("X-User-Role") String role,
+                                               HttpServletRequest request) {
         checkAdmin(role);
 
         List<PollManagementDTO> response = pollService.getMyCreatedPolls(userId);
 
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return apiResponseBuilder.ok(response, "관리자 투표 목록 조회 성공", request);
     }
 
     // 유저가 참여 중인 세션의 활성화 상태인 투표 목록 전달
     @GetMapping("/polls/getpolls")
     public ResponseEntity<?> getActivePolls(@RequestHeader("X-Member-Id") Long userId,
-                                            @RequestHeader("X-User-Role") String role) {
+                                            @RequestHeader("X-User-Role") String role,
+                                            HttpServletRequest request) {
 
         List<PollResponseDTO> response = pollService.getActivePolls(userId);
 
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return apiResponseBuilder.ok(response, "Active 투표 목록 조회 성공", request);
     }
 
 
     // 투표 활성화
-    @PatchMapping("/polls/active/{pollId}")
+    @PatchMapping("/polls/{pollId}/activate")
     public ResponseEntity<?> pollActive(@PathVariable Long pollId,
                                         @RequestHeader("X-Member-Id") Long userId,
-                                        @RequestHeader("X-User-Role") String role){
+                                        @RequestHeader("X-User-Role") String role,
+                                        HttpServletRequest request) {
         checkAdmin(role);
 
-        return new ResponseEntity<>(pollService.setPollActive(userId, pollId), HttpStatus.OK);
+        Long pollIdResult = pollService.setPollActive(userId, pollId);
+
+        return apiResponseBuilder.ok(Map.of("pollId", pollIdResult), "투표 활성화 성공", request);
     }
 
     // 투표 종료
-    @PatchMapping("/polls/close/{pollId}")
+    @PatchMapping("/polls/{pollId}/close")
     public ResponseEntity<?> pollClose(@PathVariable Long pollId,
-                                        @RequestHeader("X-Member-Id") Long userId,
-                                        @RequestHeader("X-User-Role") String role){
+                                       @RequestHeader("X-Member-Id") Long userId,
+                                       @RequestHeader("X-User-Role") String role,
+                                       HttpServletRequest request) {
         checkAdmin(role);
 
-        return new ResponseEntity<>(pollService.setPollClose(userId, pollId), HttpStatus.OK);
+        Long pollIdResult = pollService.setPollClose(userId, pollId);
+
+        return apiResponseBuilder.ok(Map.of("pollId", pollIdResult), "투표 종료 성공", request);
     }
 
     //관리자 권한 체크

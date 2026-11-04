@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
+import jakarta.validation.constraints.NotNull;
 
 @Getter
 @Builder
@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class PollVoteSaveDTO {
 
+    @NotNull
     private Long pollOptionId;
 
     // 요청 DTO → PollVote Entity 변환
