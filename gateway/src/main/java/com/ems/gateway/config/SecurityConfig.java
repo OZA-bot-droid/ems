@@ -1,6 +1,7 @@
 package com.ems.gateway.config;
 
 import com.ems.gateway.error.GatewayErrorWriter;
+import com.ems.gateway.error.GatewayErrorCode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,7 @@ import java.util.List;
 @Configuration
 @EnableWebFluxSecurity
 public class SecurityConfig {
+
     @Bean
     public SecurityWebFilterChain filterChain(ServerHttpSecurity http, GatewayErrorWriter errors) {
         CorsConfiguration cors = new CorsConfiguration();
@@ -28,9 +30,9 @@ public class SecurityConfig {
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .exceptionHandling(e -> e
                     .authenticationEntryPoint((exchange, ex) -> errors.write(exchange,
-                        HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "인증이 필요합니다."))
+                        HttpStatus.UNAUTHORIZED, GatewayErrorCode.UNAUTHORIZED, "인증이 필요합니다."))
                     .accessDeniedHandler((exchange, ex) -> errors.write(exchange,
-                        HttpStatus.FORBIDDEN, "FORBIDDEN", "접근 권한이 없습니다.")))
+                        HttpStatus.FORBIDDEN, GatewayErrorCode.FORBIDDEN, "접근 권한이 없습니다.")))
                 .authorizeExchange(a -> a.anyExchange().permitAll())
                 .build();
     }

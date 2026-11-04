@@ -1,6 +1,7 @@
 package com.ems.gateway.auth;
 
 import com.ems.gateway.error.GatewayErrorWriter;
+import com.ems.gateway.error.GatewayErrorCode;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -47,7 +48,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
         String authorization = cleanRequest.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if (authorization == null || !authorization.startsWith("Bearer ")) {
-            return errors.write(cleaned, HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "인증 토큰이 필요합니다.");
+            return errors.write(cleaned, HttpStatus.UNAUTHORIZED, GatewayErrorCode.UNAUTHORIZED, "인증 토큰이 필요합니다.");
         }
         try {
             String token = authorization.substring(7).trim();
@@ -70,7 +71,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     }
 
     private Mono<Void> invalid(ServerWebExchange exchange) {
-        return errors.write(exchange, HttpStatus.UNAUTHORIZED, "INVALID_TOKEN", "유효하지 않은 인증 토큰입니다.");
+        return errors.write(exchange, HttpStatus.UNAUTHORIZED, GatewayErrorCode.INVALID_TOKEN, "유효하지 않은 인증 토큰입니다.");
     }
 
     private boolean isPublicPath(String path, HttpMethod method) {
