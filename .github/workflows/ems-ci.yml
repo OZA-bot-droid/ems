@@ -31,6 +31,7 @@ jobs:
           - member-service
           - event-service
           - interaction-service
+          - gateway
 
     steps:
       - name: Checkout Repository
