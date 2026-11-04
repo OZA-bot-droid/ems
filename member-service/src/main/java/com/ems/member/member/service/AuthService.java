@@ -51,13 +51,29 @@ public class AuthService {
     // refresh token entity 생성 및 DB 저장
     public void replaceRefreshToken(Member member, String refreshToken, UUID clientId) {
 
-        // 기본 세션 종료
-        refreshTokenRepository.deleteByMemberAndClientId(member, clientId);
+        // 동일 회원의 로그인 요청을 직렬화하기 위한 행 잠금
+        Member lockedMember = memberRepository.findByIdForUpdate(member.getId())
+                .orElseThrow(() -> new MemberNotFoundException("존재하지 않는 회원입니다."));
 
-        // 새 세션 생성
-        refreshTokenRepository.save(
-                RefreshToken.toBuilder(member, hashRefreshToken(refreshToken), clientId, refreshTokenExpiration)
-        );
+        String tokenHash = hashRefreshToken(refreshToken);
+        Optional<RefreshToken> existingToken = refreshTokenRepository.findByMemberAndClientId(member, clientId);
+
+        if(existingToken.isPresent()) {
+            existingToken.get().rotate(
+                    tokenHash,
+                    Instant.now().plusSeconds(refreshTokenExpiration)
+            );
+        } else {
+            // 처음 로그인하는 클라이언트라면 INSERT
+            refreshTokenRepository.save(
+                    RefreshToken.toBuilder(
+                            member,
+                            tokenHash,
+                            clientId,
+                            refreshTokenExpiration
+                    )
+            );
+        }
     }
 
     public void replaceRefreshToken(Member member, String refreshToken, UUID clientId, UUID sessionId) {

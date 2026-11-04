@@ -18,7 +18,7 @@ public class MailService {
     }
 
     public void sendPasswordResetEmail(String email, String resetToken) {
-        String resetUrl = frontendUrl + "/password-reset?token=" + resetToken;
+        String resetUrl = frontendUrl + "/password/reset?token=" + resetToken;
         SimpleMailMessage message = new SimpleMailMessage();
 
         message.setTo(email);

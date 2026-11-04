@@ -69,8 +69,6 @@ public class MemberController {
     @DeleteMapping("/logout")
     public ResponseEntity<?> logout(@RequestBody ClientDTO dto, @CookieValue("refreshToken") String refreshToken) {
 
-
-
         if(refreshToken != null) {
             authService.logout(dto, refreshToken);
         }
@@ -149,7 +147,7 @@ public class MemberController {
         );
     }
 
-    // password 재설정 이메일 전송
+    // password 재설정 이메일 전송 -----------------------------------------------------
     @PostMapping("/password/reset-request")
     public ResponseEntity<?> requestPasswordReset(@Valid @RequestBody PasswordResetRequestDTO dto) {
 
@@ -163,6 +161,7 @@ public class MemberController {
     @PostMapping("/password/reset")
     public ResponseEntity<MessageResponseDTO> resetPassword(@Valid @RequestBody PasswordResetDTO dto) {
 
+        System.out.println(dto);
         passwordResetService.resetPassword(dto.token(), dto.newPassword());
         return new ResponseEntity<>(new MessageResponseDTO("비밀번호가 변경되었습니다."), HttpStatus.OK);
     }

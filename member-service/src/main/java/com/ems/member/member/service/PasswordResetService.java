@@ -52,7 +52,7 @@ public class PasswordResetService {
             return;
         }
         Member member = optionalMember.get();
-        if(!member.getProvider().equalsIgnoreCase("LOCAL")) {
+        if(!"LOCAL".equalsIgnoreCase(member.getProvider())) {
             return;
         }
 
@@ -114,8 +114,8 @@ public class PasswordResetService {
         }
 
         Member member = resetToken.getMember();
-        if(!member.getProvider().equalsIgnoreCase("LOCAL")) {
-            return;
+        if(!"LOCAL".equalsIgnoreCase(member.getProvider())) {
+            throw new InvalidPasswordResetTokenException("유효하지 않은 비밀번호 재설정 토큰입니다.");
         }
         String encodedPassword = passwordEncoder.encode(newPassword);
 

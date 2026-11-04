@@ -89,4 +89,4 @@ jwt:
 password-reset:
   token-expiration: 900
   # 메일 서버가 응답하지 않을 때 스레드가 무한정 대기하지 않도록 timeout 값을 두는 것도 Spring Boot 공식 문서에서 권장하는 형태
-  frontend-url: http://localhost:5173
+  frontend-url: ${FRONT_END_URL}
