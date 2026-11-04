@@ -52,6 +52,9 @@ public class PasswordResetService {
             return;
         }
         Member member = optionalMember.get();
+        if(!member.getProvider().equalsIgnoreCase("LOCAL")) {
+            return;
+        }
 
         // 기존 재설정 토큰 폐기
         passwordResetTokenRepository.deleteByMember(member);
@@ -111,6 +114,9 @@ public class PasswordResetService {
         }
 
         Member member = resetToken.getMember();
+        if(!member.getProvider().equalsIgnoreCase("LOCAL")) {
+            return;
+        }
         String encodedPassword = passwordEncoder.encode(newPassword);
 
         member.changePassword(encodedPassword);
