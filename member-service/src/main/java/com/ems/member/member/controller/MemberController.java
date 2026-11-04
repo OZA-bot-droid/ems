@@ -4,6 +4,7 @@ import com.ems.member.member.domain.Role;
 import com.ems.member.member.dto.*;
 import com.ems.member.member.service.AuthService;
 import com.ems.member.member.service.MemberService;
+import com.ems.member.member.service.PasswordResetService;
 import com.ems.member.member.service.SocialLoginService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -28,12 +29,14 @@ public class MemberController {
     private final MemberService memberService;
     private final AuthService authService;
     private final SocialLoginService socialLoginService;
+    private final PasswordResetService passwordResetService;
 
     public MemberController(MemberService memberService,
-                            AuthService authService, SocialLoginService socialLoginService) {
+                            AuthService authService, SocialLoginService socialLoginService, PasswordResetService passwordResetService) {
         this.memberService = memberService;
         this.authService = authService;
         this.socialLoginService = socialLoginService;
+        this.passwordResetService = passwordResetService;
     }
 
     // 회원가입
@@ -133,7 +136,7 @@ public class MemberController {
         response.sendRedirect("http://localhost:8080/api/oauth2/authorization/naver");
     }
 
-    // 소셜 로그인 ---------------------------------------------------
+    // 소셜 로그인 token exchange ---------------------------------------------------
     @PostMapping("/oauth2/exchange")
     public ResponseEntity<?> exchange(@RequestParam String code) {
 
@@ -144,5 +147,23 @@ public class MemberController {
                 memberService.createRefreshTokenCookie(dto.refreshToken()),
                 HttpStatus.OK
         );
+    }
+
+    // password 재설정 이메일 전송
+    @PostMapping("/password/reset-request")
+    public ResponseEntity<?> requestPasswordReset(@Valid @RequestBody PasswordResetRequestDTO dto) {
+
+        passwordResetService.requestResetToken(dto.email());
+
+        // 회원이 없는 이메일이어도 똑같이 200 응답
+        // 이메일 존재 여부 노출x
+        return new ResponseEntity<>(new MessageResponseDTO("입력하신 이메일로 비밀번호 재설정 안내를 전송했습니다."), HttpStatus.OK);
+    }
+
+    @PostMapping("/password/reset")
+    public ResponseEntity<MessageResponseDTO> resetPassword(@Valid @RequestBody PasswordResetDTO dto) {
+
+        passwordResetService.resetPassword(dto.token(), dto.newPassword());
+        return new ResponseEntity<>(new MessageResponseDTO("비밀번호가 변경되었습니다."), HttpStatus.OK);
     }
 }

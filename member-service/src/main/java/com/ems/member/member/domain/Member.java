@@ -20,7 +20,7 @@ public class Member extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(name = "password_hash", nullable = false)
+    @Column(name = "password_hash")
     private String passwordHash;
 
     @Column(nullable = false)
@@ -42,4 +42,8 @@ public class Member extends BaseEntity {
     @Enumerated(value = EnumType.STRING)
     @Builder.Default
     private Role role = Role.USER;
+
+    public void changePassword(String encodedPassword) {
+        this.passwordHash = encodedPassword;
+    }
 }

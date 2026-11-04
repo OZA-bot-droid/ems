@@ -24,7 +24,7 @@ public class PasswordResetToken extends BaseEntity {
     @Column(name = "expires_at", nullable = false)
     private Instant expiresAt;
 
-    @Column(name = "user_at")
+    @Column(name = "used_at")
     private Instant usedAt;
 
     public static PasswordResetToken toBuilder(Member member, String tokenHash, long expirationSeconds) {
@@ -33,5 +33,9 @@ public class PasswordResetToken extends BaseEntity {
                 .tokenHash(tokenHash)
                 .expiresAt(Instant.now().plusSeconds(expirationSeconds))
                 .build();
+    }
+
+    public void use() {
+        this.usedAt = Instant.now();
     }
 }
