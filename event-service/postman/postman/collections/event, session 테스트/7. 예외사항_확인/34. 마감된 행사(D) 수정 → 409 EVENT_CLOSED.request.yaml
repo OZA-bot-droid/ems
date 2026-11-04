@@ -1,0 +1,20 @@
+$kind: http-request
+url: "{{baseUrl}}/events/{{eventD}}"
+method: PATCH
+headers:
+  Content-Type: application/json
+  X-Member-Id: "{{adminId}}"
+  X-User-Role: ADMIN
+body:
+  type: json
+  content: |-
+    {
+      "title": "마감 후 바꾼 제목"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('409 응답', () => pm.response.to.have.status(409));
+      pm.test('code = EVENT_CLOSED', () => pm.expect(pm.response.json().code).to.eql('EVENT_CLOSED'));
+    language: text/javascript
+order: 41000

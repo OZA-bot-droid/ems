@@ -1,0 +1,22 @@
+$kind: http-request
+url: "{{baseUrl}}/events/{{eventA}}/sessions"
+method: POST
+headers:
+  Content-Type: application/json
+  X-Member-Id: "{{adminId}}"
+  X-User-Role: ADMIN
+body:
+  type: json
+  content: |-
+    {
+      "title": "te ",
+      "startsAt": "2027-11-01T01:00:00Z",
+      "endsAt": "2027-11-01T02:00:00Z"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('201 응답', () => pm.response.to.have.status(201));
+      pm.collectionVariables.set('sessionA1', pm.response.json().data.id); // 6번 삭제에서 사용
+    language: text/javascript
+order: 2000

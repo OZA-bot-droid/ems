@@ -1,0 +1,25 @@
+$kind: http-request
+url: "{{baseUrl}}/events"
+method: POST
+headers:
+  Content-Type: application/json
+  X-Member-Id: "{{adminId}}"
+  X-User-Role: ADMIN
+body:
+  type: json
+  content: |-
+    {
+      "title": "실시간 웹 기술 세미나",
+      "description": "WebSocket과 STOMP로 실시간 서비스를 만드는 방법을 다룹니다.",
+      "capacity": 50,
+      "startsAt": "2027-11-02T05:00:00Z",
+      "endsAt": "2027-11-02T07:00:00Z",
+      "meetingUrl": "https://meet.example.com/realtime-web"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('201 응답', () => pm.response.to.have.status(201));
+      pm.collectionVariables.set('eventB', pm.response.json().data.id);
+    language: text/javascript
+order: 1000

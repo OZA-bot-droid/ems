@@ -1,0 +1,15 @@
+$kind: http-request
+name: 33. 신청자 있는 행사 삭제 → 409 EVENT_HAS_REGISTRATIONS
+url: "{{baseUrl}}/events/{{regEventId}}"
+method: DELETE
+headers:
+  X-Member-Id: "{{adminId}}"
+  X-User-Role: ADMIN
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('409 응답', () => pm.response.to.have.status(409));
+      pm.test('code = EVENT_HAS_REGISTRATIONS', () => pm.expect(pm.response.json().code).to.eql('EVENT_HAS_REGISTRATIONS'));
+      // 참고: 이 행사는 신청 기록 때문에 지워지지 않고 DB에 남습니다 (의도된 동작)
+    language: text/javascript
+order: 40000

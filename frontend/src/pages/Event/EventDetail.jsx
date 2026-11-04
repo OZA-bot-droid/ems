@@ -5,6 +5,10 @@ import { eventApi, getDevUser, registrationApi } from '../../api.js';
 import { formatRange, formatTimeRange, instantToKstInput, STATUS_BADGE } from '../../format.js';
 import RegistrationApplyModal from './RegistrationApplyModal.jsx';
 
+// 참가 승인 화면 주소. 관리자용 "신청 목록 조회" API가 아직 없어서 화면이 없음 → null이면 버튼 비활성
+// (승인 화면이 생기면 예: (id) => `/admin/approvals?eventId=${id}` 로 바꾸면 바로 연결됨)
+const APPROVAL_HREF = null;
+
 export default function EventDetail({ eventId, onBack }) {
   const [event, setEvent] = useState(null);
   const [sessions, setSessions] = useState([]);
@@ -14,6 +18,8 @@ export default function EventDetail({ eventId, onBack }) {
   const [applyMessage, setApplyMessage] = useState('');
   const [showApplyModal, setShowApplyModal] = useState(false);
   const [applyError, setApplyError] = useState('');
+  const isAdmin = getDevUser().role === 'ADMIN';
+  const [summary, setSummary] = useState(null); // 관리자: 신청 현황 (실패하면 그냥 안 보여줌)
 
   useEffect(() => {
     let ignore = false;
@@ -30,10 +36,18 @@ export default function EventDetail({ eventId, onBack }) {
       .catch((e) => !ignore && setError(e)) // 둘 중 하나라도 실패하면 여기로
       .finally(() => !ignore && setLoading(false));
 
+    // 관리자면 신청 현황(승인 대기 몇 명인지)도 같이 가져옴 — 실패해도 상세 화면은 그대로
+    if (isAdmin) {
+      registrationApi
+        .summary(eventId)
+        .then((data) => !ignore && setSummary(data))
+        .catch(() => !ignore && setSummary(null));
+    }
+
     return () => {
       ignore = true;
     };
-  }, [eventId]);
+  }, [eventId, isAdmin]);
 
   async function applyToEvent() {
     setApplying(true);
@@ -176,7 +190,34 @@ export default function EventDetail({ eventId, onBack }) {
             )}
           </section>
 
-          {/* 행사 신청 API 호출 */}
+          {/* 관리자: [세션 관리] [참가 승인] / 일반 사용자: [참가 신청하기] */}
+          {isAdmin ? (
+            <div className="flex flex-col items-end gap-2">
+              <div className="flex flex-wrap justify-end gap-2">
+                <button
+                  disabled={!isOwner}
+                  title={isOwner ? '이 행사의 세션을 추가·수정합니다' : '내가 만든 행사만 관리할 수 있습니다'}
+                  onClick={() => window.location.assign(`/admin/sessions?eventId=${event.id}`)}
+                  className="h-[42px] min-w-[150px] rounded-[10px] border border-(--ems-green) bg-(--ems-surface) px-4 text-[13px] font-semibold text-(--ems-green) hover:bg-(--ems-green-soft) disabled:cursor-not-allowed disabled:border-slate-300 disabled:text-slate-400 disabled:hover:bg-(--ems-surface)"
+                >
+                  세션 관리
+                </button>
+                <button
+                  disabled={!APPROVAL_HREF}
+                  title={APPROVAL_HREF ? '신청자를 승인·거절합니다' : '참가 승인 화면 준비 중 (관리자용 신청 목록 API 필요)'}
+                  onClick={() => APPROVAL_HREF && window.location.assign(APPROVAL_HREF(event.id))}
+                  className="h-[42px] min-w-[150px] rounded-[10px] bg-(--ems-green) px-4 text-[13px] font-semibold text-white hover:bg-(--ems-green-dark) disabled:cursor-not-allowed disabled:bg-slate-300"
+                >
+                  참가 승인{summary ? ` · 대기 ${summary.pending}명` : ''}
+                </button>
+              </div>
+              {summary && (
+                <p className="text-right text-[12px] text-(--ems-muted) tabular-nums">
+                  승인 {summary.approved} · 거절 {summary.rejected} · 취소 {summary.cancelled}
+                </p>
+              )}
+            </div>
+          ) : (
           <div className="flex flex-col items-end gap-2">
             {applyMessage && (
               <p className="text-right text-[13px] text-(--ems-muted)" role="status">
@@ -194,10 +235,11 @@ export default function EventDetail({ eventId, onBack }) {
               {canApply ? '참가 신청하기' : event.status === 'CLOSED' ? '신청이 마감되었습니다' : '아직 모집 전입니다'}
             </button>
           </div>
+          )}
         </div>
       </article>
 
-      {showApplyModal && (
+      {!isAdmin && showApplyModal && (
         <RegistrationApplyModal
           event={event}
           applying={applying}

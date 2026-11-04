@@ -62,7 +62,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('201 응답', () => pm.response.to.have.status(201));\npm.collectionVariables.set('eventA', pm.response.json().id);"
+                  "pm.test('201 응답', () => pm.response.to.have.status(201));\npm.collectionVariables.set('eventA', pm.response.json().data.id);"
                 ]
               }
             }
@@ -113,7 +113,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('201 응답', () => pm.response.to.have.status(201));",
-                  "pm.collectionVariables.set('sessionA1', pm.response.json().id); // 6번 삭제에서 사용"
+                  "pm.collectionVariables.set('sessionA1', pm.response.json().data.id); // 6번 삭제에서 사용"
                 ]
               }
             }
@@ -269,7 +269,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('200 응답', () => pm.response.to.have.status(200));\npm.test('OPEN이 됨', () => pm.expect(pm.response.json().status).to.eql('OPEN'));"
+                  "pm.test('200 응답', () => pm.response.to.have.status(200));\npm.test('OPEN이 됨', () => pm.expect(pm.response.json().data.status).to.eql('OPEN'));"
                 ]
               }
             }
@@ -326,7 +326,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('201 응답', () => pm.response.to.have.status(201));",
-                  "pm.collectionVariables.set('eventB', pm.response.json().id);"
+                  "pm.collectionVariables.set('eventB', pm.response.json().data.id);"
                 ]
               }
             }
@@ -433,7 +433,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('201 응답', () => pm.response.to.have.status(201));",
-                  "pm.collectionVariables.set('eventC', pm.response.json().id);"
+                  "pm.collectionVariables.set('eventC', pm.response.json().data.id);"
                 ]
               }
             }
@@ -489,7 +489,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('201 응답', () => pm.response.to.have.status(201));",
-                  "pm.collectionVariables.set('eventD', pm.response.json().id);"
+                  "pm.collectionVariables.set('eventD', pm.response.json().data.id);"
                 ]
               }
             }
@@ -646,7 +646,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('200 응답', () => pm.response.to.have.status(200));\npm.test('DRAFT 없음', () => pm.expect(pm.response.json().content.map(e => e.status)).to.not.include('DRAFT'));\npm.test('3개', () => pm.expect(pm.response.json().totalElements).to.eql(3));"
+                  "pm.test('200 응답', () => pm.response.to.have.status(200));\npm.test('DRAFT 없음', () => pm.expect(pm.response.json().data.content.map(e => e.status)).to.not.include('DRAFT'));\npm.test('3개', () => pm.expect(pm.response.json().data.totalElements).to.eql(3));"
                 ]
               }
             }
@@ -693,7 +693,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('200 응답', () => pm.response.to.have.status(200));\npm.test('4개', () => pm.expect(pm.response.json().totalElements).to.eql(4));"
+                  "pm.test('200 응답', () => pm.response.to.have.status(200));\npm.test('4개', () => pm.expect(pm.response.json().data.totalElements).to.eql(4));"
                 ]
               }
             }
@@ -741,7 +741,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('200 응답', () => pm.response.to.have.status(200));",
-                  "pm.test('2개', () => pm.expect(pm.response.json().totalElements).to.eql(2));"
+                  "pm.test('2개', () => pm.expect(pm.response.json().data.totalElements).to.eql(2));"
                 ]
               }
             }
@@ -784,7 +784,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('200 응답', () => pm.response.to.have.status(200));\npm.test('링크 숨김', () => pm.expect(pm.response.json().meetingUrl).to.eql(null));"
+                  "pm.test('200 응답', () => pm.response.to.have.status(200));\npm.test('링크 숨김', () => pm.expect(pm.response.json().data.meetingUrl).to.eql(null));"
                 ]
               }
             }
@@ -823,7 +823,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('200 응답', () => pm.response.to.have.status(200));",
-                  "pm.test('3개', () => pm.expect(pm.response.json().length).to.eql(3));"
+                  "pm.test('3개', () => pm.expect(pm.response.json().data.length).to.eql(3));"
                 ]
               }
             }
@@ -1347,8 +1347,8 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('201 응답', () => pm.response.to.have.status(201));",
-                  "pm.collectionVariables.set('exEventId', pm.response.json().id);",
-                  "pm.test('새 행사는 DRAFT', () => pm.expect(pm.response.json().status).to.eql('DRAFT'));"
+                  "pm.collectionVariables.set('exEventId', pm.response.json().data.id);",
+                  "pm.test('새 행사는 DRAFT', () => pm.expect(pm.response.json().data.status).to.eql('DRAFT'));"
                 ]
               }
             }
@@ -1399,7 +1399,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('201 응답', () => pm.response.to.have.status(201));",
-                  "pm.collectionVariables.set('exSessionA', pm.response.json().id);"
+                  "pm.collectionVariables.set('exSessionA', pm.response.json().data.id);"
                 ]
               }
             }
@@ -1452,7 +1452,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('201 응답', () => pm.response.to.have.status(201));",
-                  "pm.collectionVariables.set('exSessionB', pm.response.json().id);"
+                  "pm.collectionVariables.set('exSessionB', pm.response.json().data.id);"
                 ]
               }
             }
@@ -1583,7 +1583,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('200 응답', () => pm.response.to.have.status(200));",
-                  "pm.test('0개', () => pm.expect(pm.response.json().totalElements).to.eql(0));"
+                  "pm.test('0개', () => pm.expect(pm.response.json().data.totalElements).to.eql(0));"
                 ]
               }
             }
@@ -1660,7 +1660,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('200 응답', () => pm.response.to.have.status(200));",
-                  "pm.test('예외 테스트 행사(exEventId)가 목록에 없음', () => pm.expect(pm.response.json().content.map(e => e.id)).to.not.include(Number(pm.collectionVariables.get('exEventId'))));"
+                  "pm.test('예외 테스트 행사(exEventId)가 목록에 없음', () => pm.expect(pm.response.json().data.content.map(e => e.id)).to.not.include(Number(pm.collectionVariables.get('exEventId'))));"
                 ]
               }
             }
@@ -1698,7 +1698,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('200 응답', () => pm.response.to.have.status(200));",
-                  "pm.test('DRAFT', () => pm.expect(pm.response.json().status).to.eql('DRAFT'));"
+                  "pm.test('DRAFT', () => pm.expect(pm.response.json().data.status).to.eql('DRAFT'));"
                 ]
               }
             }
@@ -2159,7 +2159,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('200 응답', () => pm.response.to.have.status(200));",
-                  "pm.test('OPEN이 됨', () => pm.expect(pm.response.json().status).to.eql('OPEN'));"
+                  "pm.test('OPEN이 됨', () => pm.expect(pm.response.json().data.status).to.eql('OPEN'));"
                 ]
               }
             }
@@ -2263,7 +2263,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('200 응답', () => pm.response.to.have.status(200));",
-                  "pm.test('meetingUrl은 null', () => pm.expect(pm.response.json().meetingUrl).to.eql(null));"
+                  "pm.test('meetingUrl은 null', () => pm.expect(pm.response.json().data.meetingUrl).to.eql(null));"
                 ]
               }
             }
@@ -2302,7 +2302,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('200 응답', () => pm.response.to.have.status(200));",
-                  "pm.test('링크 숨김', () => pm.expect(pm.response.json().meetingUrl).to.eql(null));"
+                  "pm.test('링크 숨김', () => pm.expect(pm.response.json().data.meetingUrl).to.eql(null));"
                 ]
               }
             }
@@ -2653,8 +2653,8 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('201 응답', () => pm.response.to.have.status(201));",
-                  "pm.collectionVariables.set('regEventId', pm.response.json().id);",
-                  "pm.test('새 행사는 DRAFT', () => pm.expect(pm.response.json().status).to.eql('DRAFT'));"
+                  "pm.collectionVariables.set('regEventId', pm.response.json().data.id);",
+                  "pm.test('새 행사는 DRAFT', () => pm.expect(pm.response.json().data.status).to.eql('DRAFT'));"
                 ]
               }
             }
@@ -2705,7 +2705,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('200 응답', () => pm.response.to.have.status(200));",
-                  "pm.test('OPEN이 됨', () => pm.expect(pm.response.json().status).to.eql('OPEN'));"
+                  "pm.test('OPEN이 됨', () => pm.expect(pm.response.json().data.status).to.eql('OPEN'));"
                 ]
               }
             }
@@ -3006,6 +3006,19 @@
           "    pm.expect(err.path).to.match(/^\\/api\\//);",
           "    pm.expect(err.timestamp).to.match(/Z$/);",
           "  });",
+          "}",
+          "// [공통 성공 규격 검사] 2xx이고 본문이 있으면 7칸 래퍼인지 확인 (204는 본문 없음)",
+          "if (pm.response.code >= 200 && pm.response.code < 300 && pm.response.code !== 204 && pm.response.text()) {",
+          "  const ok = pm.response.json();",
+          "  pm.test('[공통] 성공 응답 7칸 (success, data, message, status, timestamp, path, traceId)', () => {",
+          "    pm.expect(ok).to.have.all.keys('success', 'data', 'message', 'status', 'timestamp', 'path', 'traceId');",
+          "    pm.expect(ok.success).to.eql(true);",
+          "    pm.expect(ok.status).to.eql(pm.response.code);",
+          "    pm.expect(ok.path).to.match(/^\\/api\\//);",
+          "  });",
+          "}",
+          "if (pm.response.code === 204) {",
+          "  pm.test('[공통] 204는 본문 없음', () => pm.expect(pm.response.text()).to.eql(''));",
           "}"
         ]
       }

@@ -1,0 +1,24 @@
+$kind: http-request
+url: "{{baseUrl}}/events"
+method: POST
+headers:
+  Content-Type: application/json
+  X-Member-Id: "{{adminId}}"
+  X-User-Role: ADMIN
+body:
+  type: json
+  content: |-
+    {
+      "title": "마이크로서비스 실습 워크숍",
+      "description": "Docker Compose로 서비스를 나누고 연결하는 실습입니다.",
+      "capacity": 30,
+      "startsAt": "2027-11-06T01:00:00Z",
+      "endsAt": "2027-11-06T06:00:00Z"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('201 응답', () => pm.response.to.have.status(201));
+      pm.collectionVariables.set('eventC', pm.response.json().data.id);
+    language: text/javascript
+order: 1000

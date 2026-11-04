@@ -1,0 +1,24 @@
+$kind: http-request
+url: "{{baseUrl}}/events"
+method: POST
+headers:
+  Content-Type: application/json
+  X-Member-Id: "{{adminId}}"
+  X-User-Role: ADMIN
+body:
+  type: json
+  content: |-
+    {
+      "title": "지난 날짜 행사",
+      "description": "시작이 과거라서 막혀야 함",
+      "capacity": 10,
+      "startsAt": "2026-01-01T05:00:00Z",
+      "endsAt": "2026-01-01T08:00:00Z"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('400 응답', () => pm.response.to.have.status(400));
+      pm.test('code = PAST_START_TIME', () => pm.expect(pm.response.json().code).to.eql('PAST_START_TIME'));
+    language: text/javascript
+order: 36000

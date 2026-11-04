@@ -1,6 +1,7 @@
 package com.ems.event.common.exception;
 
 import com.ems.event.common.dto.ErrorResponse;
+import com.ems.event.common.web.ApiPath;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.stream.Collectors;
@@ -102,8 +103,7 @@ public class GlobalExceptionHandler {
      * getRequestURI()는 쿼리(?page=1)를 포함하지 않으므로 개인정보가 섞이지 않는다.
      */
     static String externalPath(HttpServletRequest request) {
-        String uri = request.getRequestURI();
-        return uri.startsWith("/api/") ? uri : "/api" + uri;
+        return ApiPath.external(request); // 성공 응답(ApiSuccessResponse)과 같은 규칙
     }
 
     /** 규격 3절 "공통 HTTP 상태 기준"의 기본 code */

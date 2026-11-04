@@ -64,6 +64,9 @@ async function request(path, { method = 'GET', body } = {}) {
       data?.message ?? `요청이 실패했습니다 (HTTP ${response.status})`,
     );
   }
+  // 성공 응답은 { success, data, message, ... } 로 감싸져 온다 (docs/api-response-standard.md).
+  // 화면 코드는 알맹이(data)만 쓰면 되므로 여기서 한 번만 벗겨 준다.
+  if (data && data.success === true && 'data' in data) return data.data;
   return data;
 }
 
@@ -93,4 +96,6 @@ export const registrationApi = {
     request(`/events/registrations/me?page=${page}&size=${size}`),
   cancel: (registrationId) =>
     request(`/events/registrations/${registrationId}/cancel`, { method: 'PATCH' }),
+  // 관리자: 행사별 신청 현황 (대기·승인·거절·취소 건수)
+  summary: (eventId) => request(`/events/${eventId}/summary`),
 };

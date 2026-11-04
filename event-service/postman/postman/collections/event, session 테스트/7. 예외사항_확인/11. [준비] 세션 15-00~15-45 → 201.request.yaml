@@ -1,0 +1,23 @@
+$kind: http-request
+name: 11. [준비] 세션 15:00~15:45 → 201
+url: "{{baseUrl}}/events/{{exEventId}}/sessions"
+method: POST
+headers:
+  Content-Type: application/json
+  X-Member-Id: "{{adminId}}"
+  X-User-Role: ADMIN
+body:
+  type: json
+  content: |-
+    {
+      "title": "예외 세션 B",
+      "startsAt": "2027-12-01T06:00:00Z",
+      "endsAt": "2027-12-01T06:45:00Z"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('201 응답', () => pm.response.to.have.status(201));
+      pm.collectionVariables.set('exSessionB', pm.response.json().data.id);
+    language: text/javascript
+order: 11000

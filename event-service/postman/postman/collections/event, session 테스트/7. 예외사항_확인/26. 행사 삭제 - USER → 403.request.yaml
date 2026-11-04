@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{baseUrl}}/events/{{exEventId}}"
+method: DELETE
+headers:
+  X-Member-Id: "{{userId}}"
+  X-User-Role: USER
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('403 응답', () => pm.response.to.have.status(403));
+      pm.test('code = FORBIDDEN', () => pm.expect(pm.response.json().code).to.eql('FORBIDDEN'));
+    language: text/javascript
+order: 30000

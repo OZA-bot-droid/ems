@@ -1,0 +1,19 @@
+$kind: http-request
+name: 17. 세션 제목만 수정 → 200 (자기 자신과는 안 겹침)
+url: "{{baseUrl}}/events/{{exEventId}}/sessions/{{exSessionB}}"
+method: PATCH
+headers:
+  Content-Type: application/json
+  X-Member-Id: "{{adminId}}"
+  X-User-Role: ADMIN
+body:
+  type: json
+  content: |-
+    {
+      "title": "예외 세션 B (제목 수정)"
+    }
+scripts:
+  - type: afterResponse
+    code: pm.test('200 응답', () => pm.response.to.have.status(200));
+    language: text/javascript
+order: 20000

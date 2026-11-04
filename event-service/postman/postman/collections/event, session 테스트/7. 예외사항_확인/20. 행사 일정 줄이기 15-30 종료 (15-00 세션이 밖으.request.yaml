@@ -1,0 +1,21 @@
+$kind: http-request
+name: 20. 행사 일정 줄이기 15:30 종료 (15:00 세션이 밖으로) → 409
+url: "{{baseUrl}}/events/{{exEventId}}"
+method: PATCH
+headers:
+  Content-Type: application/json
+  X-Member-Id: "{{adminId}}"
+  X-User-Role: ADMIN
+body:
+  type: json
+  content: |-
+    {
+      "endsAt": "2027-12-01T06:30:00Z"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('409 응답', () => pm.response.to.have.status(409));
+      pm.test('code = SESSION_OUT_OF_EVENT', () => pm.expect(pm.response.json().code).to.eql('SESSION_OUT_OF_EVENT'));
+    language: text/javascript
+order: 23000

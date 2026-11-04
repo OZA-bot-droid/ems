@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{baseUrl}}/events/{{eventA}}/sessions"
+method: GET
+headers:
+  X-Member-Id: "{{userId}}"
+  X-User-Role: USER
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('200 응답', () => pm.response.to.have.status(200));
+      pm.test('3개', () => pm.expect(pm.response.json().data.length).to.eql(3));
+    language: text/javascript
+order: 5000

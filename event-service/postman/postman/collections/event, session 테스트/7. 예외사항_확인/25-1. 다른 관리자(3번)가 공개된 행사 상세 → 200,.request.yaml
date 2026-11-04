@@ -1,0 +1,14 @@
+$kind: http-request
+name: 25-1. 다른 관리자(3번)가 공개된 행사 상세 → 200, 회의 링크 숨김
+url: "{{baseUrl}}/events/{{exEventId}}"
+method: GET
+headers:
+  X-Member-Id: "3"
+  X-User-Role: ADMIN
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('200 응답', () => pm.response.to.have.status(200));
+      pm.test('링크 숨김', () => pm.expect(pm.response.json().data.meetingUrl).to.eql(null));
+    language: text/javascript
+order: 29000

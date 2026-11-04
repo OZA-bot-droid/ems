@@ -1,0 +1,20 @@
+$kind: http-request
+url: "{{baseUrl}}/events/{{exEventId}}/sessions/999999999"
+method: PATCH
+headers:
+  Content-Type: application/json
+  X-Member-Id: "{{adminId}}"
+  X-User-Role: ADMIN
+body:
+  type: json
+  content: |-
+    {
+      "title": "없는 세션"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('404 응답', () => pm.response.to.have.status(404));
+      pm.test('code = SESSION_NOT_FOUND', () => pm.expect(pm.response.json().code).to.eql('SESSION_NOT_FOUND'));
+    language: text/javascript
+order: 22000

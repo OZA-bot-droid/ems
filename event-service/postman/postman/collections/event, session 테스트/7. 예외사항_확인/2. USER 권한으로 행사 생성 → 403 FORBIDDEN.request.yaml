@@ -1,0 +1,25 @@
+$kind: http-request
+url: "{{baseUrl}}/events"
+method: POST
+headers:
+  Content-Type: application/json
+  X-Member-Id: "{{userId}}"
+  X-User-Role: USER
+body:
+  type: json
+  content: |-
+    {
+      "title": "exception",
+      "description": "test를 위한 세미나",
+      "capacity": 79,
+      "startsAt": "2027-11-20T05:00:00Z",
+      "endsAt": "2027-11-20T08:00:00Z",
+      "meetingUrl": "https://meet.example.com/test"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('403 응답', () => pm.response.to.have.status(403));
+      pm.test('code = FORBIDDEN', () => pm.expect(pm.response.json().code).to.eql('FORBIDDEN'));
+    language: text/javascript
+order: 2000

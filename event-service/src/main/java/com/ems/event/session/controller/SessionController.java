@@ -1,10 +1,12 @@
 package com.ems.event.session.controller;
 
+import com.ems.event.common.dto.ApiSuccessResponse;
 import com.ems.event.common.security.AdminChecker;
 import com.ems.event.session.service.SessionService;
 import com.ems.event.session.dto.SessionCreateRequest;
 import com.ems.event.session.dto.SessionResponse;
 import com.ems.event.session.dto.SessionUpdateRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
@@ -33,36 +35,40 @@ public class SessionController {
 
 //    세션 목록 (누구나)
     @GetMapping
-    public List<SessionResponse> getSessions(
+    public ApiSuccessResponse<List<SessionResponse>> getSessions(
             @PathVariable Long eventId,
-            @RequestHeader(value = "X-Member-Id", required = false) Long memberId) {
-        return sessionService.getSessions(eventId, memberId);
+            @RequestHeader(value = "X-Member-Id", required = false) Long memberId,
+            HttpServletRequest httpRequest) {
+        return ApiSuccessResponse.ok(sessionService.getSessions(eventId, memberId), "세션 목록 조회 성공", httpRequest);
     }
 
 //    세션 생성 (ADMIN)
     @PostMapping
-    public ResponseEntity<SessionResponse> createSession(
+    public ResponseEntity<ApiSuccessResponse<SessionResponse>> createSession(
             @PathVariable Long eventId,
             @Valid @RequestBody SessionCreateRequest request,
             @RequestHeader(value = "X-Member-Id", required = false) Long userId,
-            @RequestHeader(value = "X-User-Role", required = false) String role) {
+            @RequestHeader(value = "X-User-Role", required = false) String role,
+            HttpServletRequest httpRequest) {
         adminChecker.requireAdmin(userId, role);
         SessionResponse created = sessionService.createSession(eventId, userId, request);
         return ResponseEntity
                 .created(URI.create("/api/events/" + eventId + "/sessions/" + created.id()))
-                .body(created);
+                .body(ApiSuccessResponse.created(created, "세션 생성 완료", httpRequest));
     }
 
 //    세션 수정 (ADMIN)
     @PatchMapping("/{sessionId}")
-    public SessionResponse updateSession(
+    public ApiSuccessResponse<SessionResponse> updateSession(
             @PathVariable Long eventId,
             @PathVariable Long sessionId,
             @Valid @RequestBody SessionUpdateRequest request,
             @RequestHeader(value = "X-Member-Id", required = false) Long userId,
-            @RequestHeader(value = "X-User-Role", required = false) String role) {
+            @RequestHeader(value = "X-User-Role", required = false) String role,
+            HttpServletRequest httpRequest) {
         adminChecker.requireAdmin(userId, role);
-        return sessionService.updateSession(eventId, sessionId, userId, request);
+        return ApiSuccessResponse.ok(sessionService.updateSession(eventId, sessionId, userId, request),
+                "세션 수정 완료", httpRequest);
     }
 
 //    세션 삭제 (ADMIN)

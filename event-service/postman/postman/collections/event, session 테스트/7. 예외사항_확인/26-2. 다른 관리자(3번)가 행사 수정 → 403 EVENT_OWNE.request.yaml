@@ -1,0 +1,21 @@
+$kind: http-request
+name: 26-2. 다른 관리자(3번)가 행사 수정 → 403 EVENT_OWNER_REQUIRED
+url: "{{baseUrl}}/events/{{exEventId}}"
+method: PATCH
+headers:
+  Content-Type: application/json
+  X-Member-Id: "3"
+  X-User-Role: ADMIN
+body:
+  type: json
+  content: |-
+    {
+      "title": "남이 바꾼 제목"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('403 응답', () => pm.response.to.have.status(403));
+      pm.test('code = EVENT_OWNER_REQUIRED', () => pm.expect(pm.response.json().code).to.eql('EVENT_OWNER_REQUIRED'));
+    language: text/javascript
+order: 32000
