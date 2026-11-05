@@ -153,16 +153,15 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         String accessToken = jwtTokenService.createAccessToken(member.getId());
         String refreshToken = jwtTokenService.createRefreshToken(member.getId());
 
-        UUID loginCode = socialLoginService.saveLoginCode(accessToken, refreshToken);
         authService.replaceRefreshToken(
                 member,
                 refreshToken,
-                UUID.fromString(clientId.toString()),
-                loginCode
+                UUID.fromString(clientId.toString())
         );
 
         // Access Token/Refresh Token 자체를 URL에 직접 넣지 않고, 짧게 유효한 일회성 코드만 프론트에 넘긴 다음 그 코드로 서버에서 토큰을 교환하는 구조를 만들기 위함
         // 클라이언트에게 다른 URL로 다시 이동하라고 응답하는 메서드
+        UUID loginCode = socialLoginService.saveLoginCode(accessToken, refreshToken);
         response.sendRedirect("http://localhost:5173/oauth-success?code=" + loginCode);
     }
 }

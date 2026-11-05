@@ -78,17 +78,6 @@ public class AuthService {
         }
     }
 
-    public void replaceRefreshToken(Member member, String refreshToken, UUID clientId, UUID sessionId) {
-
-        // 기본 세션 종료
-        refreshTokenRepository.deleteByMemberAndClientId(member, clientId);
-
-        // 새 세션 생성
-        refreshTokenRepository.save(
-                RefreshToken.toBuilder(member, hashRefreshToken(refreshToken), clientId, refreshTokenExpiration, sessionId)
-        );
-    }
-
     public String hashRefreshToken(String refreshToken) {
         try {
             // MessageDigest : 해시 알고리즘을 사용하는 클래스

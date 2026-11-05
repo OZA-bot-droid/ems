@@ -44,17 +44,6 @@ public class RefreshToken extends BaseEntity {
                 .build();
     }
 
-    public static RefreshToken toBuilder(Member member, String tokenHash, UUID clientId, long refreshTokenExpiration, UUID sessionId) {
-
-        return RefreshToken.builder()
-                .member(member)
-                .tokenHash(tokenHash)
-                .clientId(clientId)
-                .sessionId(sessionId)
-                .expiresAt(Instant.now().plusSeconds(refreshTokenExpiration))
-                .build();
-    }
-
     public void rotate(String newTokenHash, Instant newExpiresAt) {
 
         this.tokenHash = newTokenHash;

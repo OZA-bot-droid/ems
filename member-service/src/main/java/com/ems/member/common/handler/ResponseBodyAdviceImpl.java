@@ -62,8 +62,8 @@ public class ResponseBodyAdviceImpl implements ResponseBodyAdvice<Object> {
 
         // Controller에서 전달한 SuccessCode 확인
         if (body instanceof MessageResponseDTO<?>(Object res, SuccessCode code)) {
-            successCode = code;
             data = res;
+            successCode = code;
         }
 
         return new APISuccessResponse<>(
