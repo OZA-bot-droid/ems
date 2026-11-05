@@ -51,6 +51,7 @@ services:
       MEMBER_SERVICE_URL: http://member:8081
       EVENT_SERVICE_URL: http://event:8082
       INTERACTION_SERVICE_URL: http://interaction:8083
+      INTERACTION_WS_URL: ws://interaction:8083
       JWT_PUBLIC_KEY_PATH: /app/keys/public_key.pem
     volumes:
       - ./local-secrets/jwt/public_key.pem:/app/keys/public_key.pem:ro
