@@ -39,6 +39,18 @@ public class SessionService {
                 .toList();
     }
 
+    /**
+     * 관리자용 세션 목록 (세션 관리 화면). 행사를 만든 관리자만 볼 수 있고, DRAFT 행사도 볼 수 있음
+     * - 공개 목록(getSessions)과 달리 로그인·소유자 확인이 필수 → Gateway의 보호 경로로 호출됨
+     */
+    public List<SessionResponse> getSessionsForOwner(Long eventId, Long ownerId) {
+        Event event = findEvent(eventId);
+        requireOwner(event, ownerId);
+        return sessionRepository.findByEventIdOrderByStartsAtAsc(eventId).stream()
+                .map(SessionResponse::from)
+                .toList();
+    }
+
     /** 세션 생성: 행사 시간 안에서, 다른 세션과 겹치지 않게 */
     @Transactional
     public SessionResponse createSession(Long eventId, Long requesterId, SessionCreateRequest request) {

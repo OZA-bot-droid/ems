@@ -330,4 +330,19 @@ class EventServiceTest {
         assertThat(page.totalElements()).isEqualTo(1);
         verify(eventRepository, never()).findByStatus(any(), any());
     }
+
+    @Test
+    @DisplayName("내 행사 목록(행사 관리): 내가 만든 행사만 조회하고 회의 링크도 보인다")
+    void myEventsOnlyMine() {
+        PageRequest pageable = PageRequest.of(0, 10);
+        Event mine = new Event("내 행사", null, 50, at("05:00"), at("08:00"), "https://zoom.us/j/mine", OWNER_ID);
+        when(eventRepository.findByCreatedBy(OWNER_ID, pageable))
+                .thenReturn(new PageImpl<>(List.of(mine), pageable, 1));
+
+        PageResponse<EventResponse> page = eventService.getMyEvents(OWNER_ID, null, pageable);
+
+        assertThat(page.totalElements()).isEqualTo(1);
+        assertThat(page.content().get(0).meetingUrl()).isEqualTo("https://zoom.us/j/mine");
+        verify(eventRepository, never()).findVisibleTo(any(), any(), any(), any()); // 남의 행사가 섞이는 조회는 안 씀
+    }
 }

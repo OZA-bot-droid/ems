@@ -52,6 +52,20 @@ public class EventController {
     }
 
 
+//  내 행사 목록 (ADMIN, 행사 관리 화면): 내가 만든 행사만 · 모든 상태
+//  /events/mine 은 글자 주소라 아래 /{eventId}(숫자)보다 먼저 연결됨
+    @GetMapping("/mine")
+    public ApiSuccessResponse<PageResponse<EventResponse>> getMyEvents(
+            @RequestParam(required = false) EventStatus status,
+            @PageableDefault(sort = "startsAt", direction = Sort.Direction.ASC) Pageable pageable,
+            @RequestHeader(value = "X-Member-Id", required = false) Long userId,
+            @RequestHeader(value = "X-User-Role", required = false) String role,
+            HttpServletRequest httpRequest) {
+        adminChecker.requireAdmin(userId, role); // ADMIN만
+        return ApiSuccessResponse.ok(eventService.getMyEvents(userId, status, pageable),
+                "내 행사 목록 조회 성공", httpRequest);
+    }
+
 //  상세목록
     @GetMapping("/{eventId}")
     public ApiSuccessResponse<EventResponse> getEvent(
