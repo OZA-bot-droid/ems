@@ -1,7 +1,8 @@
 // 04 · 행사 상세 화면
 // 흐름: 화면이 뜨면 → 행사 정보 + 세션 목록을 "동시에" 요청(Promise.all) → 둘 다 오면 그리기
 import { useEffect, useState } from 'react';
-import { eventApi, getDevUser, registrationApi } from '../../api.js';
+import { eventApi, registrationApi } from '../../api.js';
+import { useAuth } from '../../page/AuthContext.jsx';
 import { formatRange, formatTimeRange, instantToKstInput, STATUS_BADGE } from '../../format.js';
 import RegistrationApplyModal from './RegistrationApplyModal.jsx';
 
@@ -10,6 +11,7 @@ import RegistrationApplyModal from './RegistrationApplyModal.jsx';
 const APPROVAL_HREF = null;
 
 export default function EventDetail({ eventId, onBack }) {
+  const { role, memberId } = useAuth();
   const [event, setEvent] = useState(null);
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,7 +20,7 @@ export default function EventDetail({ eventId, onBack }) {
   const [applyMessage, setApplyMessage] = useState('');
   const [showApplyModal, setShowApplyModal] = useState(false);
   const [applyError, setApplyError] = useState('');
-  const isAdmin = getDevUser().role === 'ADMIN';
+  const isAdmin = role === 'ADMIN';
   const [summary, setSummary] = useState(null); // 관리자: 신청 현황 (실패하면 그냥 안 보여줌)
 
   useEffect(() => {
@@ -103,7 +105,7 @@ export default function EventDetail({ eventId, onBack }) {
   const badge = STATUS_BADGE[event.status] ?? { label: event.status, className: 'bg-slate-100' };
   const canApply = event.status === 'OPEN';
   // 참여 링크는 행사를 만든 관리자에게만 옴 → 내 행사가 아니면 "없음"이 아니라 "승인 후 제공"
-  const isOwner = String(event.createdBy) === String(getDevUser().id);
+  const isOwner = String(event.createdBy) === String(memberId);
   // 여러 날에 걸친 행사면 세션에 날짜도 같이 표시
   const multiDay = instantToKstInput(event.startsAt).slice(0, 10) !== instantToKstInput(event.endsAt).slice(0, 10);
 

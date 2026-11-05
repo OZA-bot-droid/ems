@@ -3,6 +3,7 @@ import '../style.css';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getClientId } from '../util/getClientId';
 import { useAuth } from './AuthContext';
+import { apiClient, apiUrl, getAccessToken, getRoleFromAccessToken } from '../util/apiClient.js';
 
 function BrandPanel() {
   return (
@@ -41,40 +42,27 @@ function LoginForm() {
 
   const googleLogin = () => {
     localStorage.removeItem('isLoginSession');
-    window.location.href = `http://localhost:8080/api/members/google?clientId=${clientId}`;
+    window.location.href = apiUrl('/members/google?clientId=' + encodeURIComponent(clientId));
   };
 
   const naverLogin = () => {
-    window.location.href = `http://localhost:8080/api/members/naver?clientId=${clientId}`;
+    window.location.href = apiUrl('/members/naver?clientId=' + encodeURIComponent(clientId));
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     try {
-      const res = await fetch(`http://localhost:8080/api/members/login`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-type': 'application/json;charset=utf-8',
-        },
-        body: JSON.stringify({ email: email, password: password, clientId: clientId }),
-      });
-
-      if (res.ok) {
-        alert('로그인 성공');
-        const data = await res.text();
-
-        setAccessToken(data);
-        localStorage.setItem('isLoginSession', 'true');
-        navigate('/login/success');
-      } else {
-        alert('로그인 실패');
-        const data = await res.json();
-        console.log(data);
-      }
-    } catch {
-      alert('에러 발생');
+      const response = await apiClient.post('/members/login', { email, password, clientId });
+      const accessToken = getAccessToken(response.data);
+      if (!accessToken) throw new Error('로그인 응답에 access token이 없습니다.');
+      alert('로그인 성공');
+      setAccessToken(accessToken);
+      localStorage.setItem('isLoginSession', 'true');
+      navigate(getRoleFromAccessToken(accessToken) === 'ADMIN' ? '/admin/events' : '/events');
+    } catch (error) {
+      console.error(error.response?.data ?? error);
+      alert(error.response?.data?.message ?? '로그인 요청에 실패했습니다.');
     }
   };
 

@@ -28,13 +28,7 @@ const LoginSuccess = () => {
         method: 'GET',
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        console.log(data);
-      } else {
-        console.log('에러 발생');
-        console.log(res);
-      }
+      console.log(res.data);
     } catch (err) {
       console.log(err);
     }

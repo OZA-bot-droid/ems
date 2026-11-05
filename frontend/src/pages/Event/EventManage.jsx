@@ -1,6 +1,7 @@
 // ADMIN / 09 · 행사 관리의 본문 (좌측 공통 헤더와 페이지 헤더는 상위 레이아웃에서 제공합니다.)
 import { useEffect, useState } from 'react';
-import { eventApi, getDevUser } from '../../api.js';
+import { eventApi } from '../../api.js';
+import { useAuth } from '../../page/AuthContext.jsx';
 import { formatShort, STATUS_BADGE } from '../../format.js';
 import EventFormModal from './EventFormModal.jsx';
 import './event-manage.scss';
@@ -14,6 +15,7 @@ const NEXT_STATUS = {
 const NEXT_LABEL = { DRAFT: '모집 중', OPEN: '마감' };
 
 export default function EventManage({ onManageSessions }) {
+  const { memberId } = useAuth();
   const [page, setPage] = useState(0);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
@@ -67,7 +69,7 @@ export default function EventManage({ onManageSessions }) {
     onManageSessions ? onManageSessions(eventId) : (window.location.href = `/admin/sessions?eventId=${eventId}`);
 
   const events = result?.content ?? [];
-  const myId = String(getDevUser().id);
+  const myId = String(memberId);
   const isMine = (event) => String(event.createdBy) === myId;
 
   return (

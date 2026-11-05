@@ -1,125 +1,82 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { apiClient, getAccessToken, getMemberIdFromAccessToken, getRoleFromAccessToken, setApiAccessToken } from '../util/apiClient.js';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [accessToken, setAccessToken] = useState(null);
+  const [accessToken, setRawAccessToken] = useState(null);
+  const [role, setRole] = useState(null);
+  const [memberId, setMemberId] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const refreshPromiseRef = useRef(null);
   const initializedRef = useRef(false);
   const navigate = useNavigate();
 
-  // const newAccessToken = await refreshAccessToken(); 사용 가능
-  const refreshAccessToken = useCallback(async () => {
-    if (refreshPromiseRef.current) {
-      return refreshPromiseRef.current;
-    }
+  const setAccessToken = useCallback((token) => {
+    setRawAccessToken(token);
+    setRole(getRoleFromAccessToken(token));
+    setMemberId(getMemberIdFromAccessToken(token));
+    setApiAccessToken(token);
+  }, []);
 
+  const refreshAccessToken = useCallback(async () => {
+    if (refreshPromiseRef.current) return refreshPromiseRef.current;
     const clientId = localStorage.getItem('clientId');
-    if (!clientId) {
-      console.log('clientId 없음');
-      return null;
-    }
+    if (!clientId) return null;
 
     refreshPromiseRef.current = (async () => {
       try {
-        const res = await fetch(`http://localhost:8080/api/members/reissue`, {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-type': 'application/json;charset=utf-8',
-          },
-          body: JSON.stringify({ clientId }),
-        });
-
-        if (!res.ok) {
-          const errorResponse = await res.json();
-          setAccessToken(null);
-          localStorage.removeItem('isLoginSession');
-          throw errorResponse;
-        } else {
-          const data = await res.text();
-          setAccessToken(data);
-          return data;
-        }
+        const response = await apiClient.post('/members/reissue', { clientId });
+        const token = getAccessToken(response.data);
+        if (!token) throw new Error('토큰 재발급 응답에 access token이 없습니다.');
+        setAccessToken(token);
+        return token;
+      } catch (error) {
+        setAccessToken(null);
+        localStorage.removeItem('isLoginSession');
+        throw error;
       } finally {
         refreshPromiseRef.current = null;
       }
     })();
-
     return refreshPromiseRef.current;
   }, []);
 
-  // cookie, accessToken, postgresDB refreshToken 삭제
   const logout = async () => {
     const clientId = localStorage.getItem('clientId');
-
     try {
-      if (clientId) {
-        const res = await fetch('http://localhost:8080/api/members/logout', {
-          method: 'DELETE',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            clientId,
-          }),
-        });
-
-        if (res.ok) {
-          navigate('/');
-        } else {
-          const data = await res.json();
-          console.log(data);
-        }
-      }
-    } catch {
-      alert('에러 발생');
+      if (clientId) await apiClient.delete('/members/logout', { data: { clientId } });
+    } catch (error) {
+      console.error(error.response?.data ?? error);
+      alert('로그아웃 요청에 실패했습니다.');
     } finally {
       setAccessToken(null);
       localStorage.removeItem('isLoginSession');
-      navigate("/");
+      navigate('/login');
     }
   };
 
   useEffect(() => {
-    if (initializedRef.current) {
-      return;
-    }
-
+    if (initializedRef.current) return;
     initializedRef.current = true;
-
-    const initailizeAuth = async () => {
+    const initializeAuth = async () => {
       try {
-        const isOAuthCallback = window.location.pathname === '/oauth-success';
-        if (isOAuthCallback) {
-          return;
+        if (window.location.pathname !== '/oauth-success' && localStorage.getItem('isLoginSession')) {
+          await refreshAccessToken();
         }
-
-        const isLogin = localStorage.getItem('isLoginSession');
-        if (!isLogin) {
-          return;
-        }
-
-        await refreshAccessToken();
-      } catch (err) {
-        console.error(err);
-        setAuthLoading(null);
+      } catch (error) {
+        console.error(error);
         localStorage.removeItem('isLoginSession');
       } finally {
         setAuthLoading(false);
       }
     };
-
-    initailizeAuth();
+    initializeAuth();
   }, [refreshAccessToken]);
 
   return (
-    <AuthContext.Provider
-      value={{ accessToken, setAccessToken, refreshAccessToken, logout, authLoading }}
-    >
+    <AuthContext.Provider value={{ accessToken, role, memberId, setAccessToken, refreshAccessToken, logout, authLoading }}>
       {children}
     </AuthContext.Provider>
   );
@@ -127,9 +84,6 @@ export function AuthProvider({ children }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth는 AuthProvider 내부에서 사용해야 합니다.');
-  }
-
+  if (!context) throw new Error('useAuth는 AuthProvider 내부에서 사용해야 합니다.');
   return context;
 }

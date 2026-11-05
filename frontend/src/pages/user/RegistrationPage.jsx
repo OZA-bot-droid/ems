@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { eventApi, registrationApi, setDevUser } from '../../api.js';
+import { eventApi, registrationApi } from '../../api.js';
 import Header from '../../component/Header.jsx';
 import './registration-page.scss';
 
@@ -32,8 +32,6 @@ function RegistrationPage() {
   // 진입 시 내 신청 내역과 행사명을 불러옵니다.
   useEffect(() => {
     let ignore = false;
-    // This design is the USER view; select the existing development user until login is wired.
-    setDevUser('USER');
     async function load() {
       setLoading(true);
       setLoadError('');

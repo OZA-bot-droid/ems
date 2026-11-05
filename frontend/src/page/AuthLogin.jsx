@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
+import { apiClient, getAccessToken, getRoleFromAccessToken } from '../util/apiClient.js';
 
 const AuthLogin = () => {
   const navigate = useNavigate();
@@ -8,42 +9,20 @@ const AuthLogin = () => {
   const { setAccessToken } = useAuth();
 
   useEffect(() => {
-    // 이미 토큰 교환을 시도했다면 다시 실행하지 않음
-    if (exchanged.current) {
-      return;
-    }
+    if (exchanged.current) return;
     exchanged.current = true;
+    const code = new URLSearchParams(window.location.search).get('code');
+    if (!code) return;
 
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get('code');
-
-    if (!code) {
-      return;
-    }
-
-    fetch(`http://localhost:8080/api/members/oauth2/exchange?code=${code}`, {
-      method: 'POST',
-      credentials: 'include',
-    })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error('소셜 로그인 토큰 교환 실패');
-        } else {
-          return res.text();
-        }
+    apiClient.post('/members/oauth2/exchange?code=' + encodeURIComponent(code))
+      .then((response) => {
+        const token = getAccessToken(response.data);
+        if (!token) throw new Error('accessToken이 없습니다.');
+        setAccessToken(token);
+        localStorage.setItem('isLoginSession', 'true');
+        navigate(getRoleFromAccessToken(token) === 'ADMIN' ? '/admin/events' : '/events');
       })
-      .then((data) => {
-        if (!data) {
-          throw new Error('accessToken이 없습니다.');
-        } else {
-          setAccessToken(data);
-          localStorage.setItem('isLoginSession', 'true');
-          navigate('/login/success');
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+      .catch((error) => console.error(error.response?.data ?? error));
   }, [setAccessToken, navigate]);
 
   return <div>로그인 중...</div>;

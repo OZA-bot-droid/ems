@@ -1,7 +1,9 @@
 # environment / credentials
 **/bin/
 .env
-.env.*
+.env.development
+.env.test
+.env.production
 !.env.example
 !.env.*.example
 *.pem
@@ -23,7 +25,6 @@ Thumbs.db
 logs/
 # Local secrets
 /local-secrets/
-/.env
 # RSA keys
 *.pem
 *.key

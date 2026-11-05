@@ -2,26 +2,7 @@
 // 모든 주소는 /api 로 시작합니다. Vite가 Gateway(8080)로 넘겨 주고,
 // Gateway가 /api 를 떼서 각 서비스로 보냅니다.
 
-// ⚠️ 임시 사용자: 로그인(JWT)이 완성되기 전까지만 씁니다.
-// 로그인이 붙으면 Gateway가 X-Member-Id / X-User-Role 을 대신 넣어 주므로 이 부분은 지웁니다.
-// (헤더 이름은 팀 표준: 회원 번호 = X-Member-Id, 권한 = X-User-Role)
-export const DEV_USERS = {
-  ADMIN: { id: '1', role: 'ADMIN' },
-  USER: { id: '2', role: 'USER' },
-};
-const savedDevRole =
-  typeof window === 'undefined' ? null : window.sessionStorage.getItem('ems-dev-role');
-let currentUser = DEV_USERS[savedDevRole] ?? DEV_USERS.ADMIN;
-export function setDevUser(role) {
-  if (!DEV_USERS[role]) return;
-  currentUser = DEV_USERS[role];
-  if (typeof window !== 'undefined') {
-    window.sessionStorage.setItem('ems-dev-role', role);
-  }
-}
-export function getDevUser() {
-  return currentUser;
-}
+import { apiClient } from './util/apiClient.js';
 
 // 서버가 보내는 에러 {code, message} 를 담는 상자
 export class ApiError extends Error {
@@ -34,40 +15,23 @@ export class ApiError extends Error {
 
 // 모든 요청이 지나가는 함수
 async function request(path, { method = 'GET', body } = {}) {
-  const headers = {
-    'X-Member-Id': currentUser.id,
-    'X-User-Role': currentUser.role,
-  };
-  if (body !== undefined) headers['Content-Type'] = 'application/json';
-
-  let response;
   try {
-    response = await fetch('/api' + path, {
-      method,
-      headers,
-      body: body === undefined ? undefined : JSON.stringify(body),
-    });
-  } catch {
+    const response = await apiClient.request({ url: path, method, data: body });
+    if (response.status === 204) return null;
+    const data = response.data;
+    if (data && data.success === true && 'data' in data) return data.data;
+    return data;
+  } catch (error) {
+    const status = error.response?.status ?? 0;
+    const data = error.response?.data;
     throw new ApiError(
-      0,
-      'NETWORK_ERROR',
-      '서버에 연결할 수 없습니다. Gateway와 서비스가 켜져 있는지 확인하세요.',
+      status,
+      data?.code ?? (status === 0 ? 'NETWORK_ERROR' : 'UNKNOWN'),
+      data?.message ?? (status === 0
+        ? '서버에 연결할 수 없습니다. Gateway와 서비스가 켜져 있는지 확인하세요.'
+        : '요청이 실패했습니다 (HTTP ' + status + ')'),
     );
   }
-
-  if (response.status === 204) return null; // 삭제 성공: 본문 없음
-  const data = await response.json().catch(() => null);
-  if (!response.ok) {
-    throw new ApiError(
-      response.status,
-      data?.code ?? 'UNKNOWN',
-      data?.message ?? `요청이 실패했습니다 (HTTP ${response.status})`,
-    );
-  }
-  // 성공 응답은 { success, data, message, ... } 로 감싸져 온다 (docs/api-response-standard.md).
-  // 화면 코드는 알맹이(data)만 쓰면 되므로 여기서 한 번만 벗겨 준다.
-  if (data && data.success === true && 'data' in data) return data.data;
-  return data;
 }
 
 // 행사·세션 API (백엔드 Controller와 1:1로 대응)

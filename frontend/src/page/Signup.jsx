@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getClientId } from '../util/getClientId';
+import { apiClient, apiUrl } from '../util/apiClient.js';
 
 function BrandPanel() {
   return (
@@ -44,7 +45,7 @@ function SignupForm() {
   // google 회원가입
   const googleSignup = () => {
     if (role !== '') {
-      window.location.href = `http://localhost:8080/api/members/google?clientId=${clientId}&role=${role}`;
+      window.location.href = apiUrl('/members/google?clientId=' + encodeURIComponent(clientId) + '&role=' + encodeURIComponent(role));
     } else {
       alert('회원 유형을 선택 후 회원가입을 진행해주세요.');
     }
@@ -53,7 +54,7 @@ function SignupForm() {
   // naver 회원가입
   const naverSignup = () => {
     if (role !== '') {
-      window.location.href = `http://localhost:8080/api/members/naver?clientId=${clientId}&role=${role}`;
+      window.location.href = apiUrl('/members/naver?clientId=' + encodeURIComponent(clientId) + '&role=' + encodeURIComponent(role));
     } else {
       alert('회원 유형을 선택 후 회원가입을 진행해주세요.');
     }
@@ -89,24 +90,12 @@ function SignupForm() {
     }
 
     try {
-      const res = await fetch(`http://localhost:8080/api/members/register`, {
-        method: 'POST',
-        headers: {
-          'Content-type': 'application/json;charset=utf-8',
-        },
-        body: JSON.stringify({ ...member, role: role }),
-      });
-
-      if (res.ok) {
-        alert('회원가입 성공');
-        navigate('/');
-      } else {
-        alert('통신 에러1');
-        const data = await res.json();
-        console.log(data);
-      }
-    } catch {
-      alert('통신 에러2');
+      await apiClient.post('/members/register', { ...member, role });
+      alert('회원가입 성공');
+      navigate('/login');
+    } catch (error) {
+      alert(error.response?.data?.message ?? '회원가입 요청에 실패했습니다.');
+      console.error(error.response?.data ?? error);
     }
   };
 

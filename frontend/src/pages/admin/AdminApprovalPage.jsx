@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { registrationApi, setDevUser } from '../../api.js';
+import { registrationApi } from '../../api.js';
 import Header from '../../component/Header.jsx';
 import '../Event/event.scss';
 import './admin-approval.scss';
@@ -25,7 +25,6 @@ export default function AdminApprovalPage() {
   }, []);
 
   useEffect(() => {
-    setDevUser('ADMIN');
     loadRegistrations();
   }, [loadRegistrations]);
 

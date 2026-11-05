@@ -1,6 +1,6 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './page/AuthContext.jsx';
 import AuthLogin from './page/AuthLogin.jsx';
 import Login from './page/Login.jsx';
@@ -11,6 +11,8 @@ import RegistrationPage from './pages/user/RegistrationPage.jsx';
 import AdminEventPage from './pages/admin/AdminEventPage.jsx';
 import AdminSessionPage from './pages/admin/AdminSessionPage.jsx';
 import AdminApprovalPage from './pages/admin/AdminApprovalPage.jsx';
+import { apiClient } from './util/apiClient.js';
+import { useAuth } from './page/AuthContext.jsx';
 import './style.css';
 
 function BootstrapPage() {
@@ -20,11 +22,11 @@ function BootstrapPage() {
     Promise.all(
       ['members', 'events', 'interactions'].map(async (service) => {
         try {
-          const response = await fetch(`/api/${service}/ping`);
-          if (!response.ok) throw new Error(`HTTP ${response.status}`);
-          return [service, await response.json()];
+          const response = await apiClient.get('/' + service + '/ping');
+          return [service, response.data];
         } catch (error) {
-          return [service, { status: 'ERROR', error: error.message }];
+          const message = error.response ? 'HTTP ' + error.response.status : error.message;
+          return [service, { status: 'ERROR', error: message }];
         }
       }),
     ).then((result) => setData(Object.fromEntries(result)));
@@ -47,9 +49,9 @@ function BootstrapPage() {
       </section>
       <a
         className="mt-8 inline-block rounded-lg bg-slate-900 px-4 py-2 text-white"
-        href="/registrations"
+        href="/login"
       >
-        나의 참가 신청 보기
+        로그인
       </a>
       <p className="mt-8 text-sm text-slate-500">
         현재는 서비스 연결 상태와 후속 구현 내용을 확인하는 화면입니다.
@@ -58,20 +60,39 @@ function BootstrapPage() {
   );
 }
 
+function RequireRole({ allowedRole, children }) {
+  const { accessToken, role, authLoading } = useAuth();
+
+  if (authLoading) {
+    return <p className="p-8 text-slate-600">로그인 상태를 확인하고 있어요…</p>;
+  }
+
+  if (!accessToken || !role) {
+    return <Navigate to="/login" replace />;
+  }
+
+  const allowedRoles = Array.isArray(allowedRole) ? allowedRole : [allowedRole];
+  if (!allowedRoles.includes(role)) {
+    return <Navigate to={role === 'ADMIN' ? '/admin/events' : '/events'} replace />;
+  }
+
+  return children;
+}
+
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          <Route path="/" element={<Login />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/oauth-success" element={<AuthLogin />} />
-          <Route path="/login/success" element={<LoginSuccess />} />
-          <Route path="/events" element={<EventDiscoveryPage />} />
-          <Route path="/registrations" element={<RegistrationPage />} />
-          <Route path="/admin/events" element={<AdminEventPage />} />
-          <Route path="/admin/sessions" element={<AdminSessionPage />} />
-          <Route path="/admin/approvals" element={<AdminApprovalPage />} />
+          <Route path="/login/success" element={<RequireRole allowedRole={['USER', 'ADMIN']}><LoginSuccess /></RequireRole>} />
+          <Route path="/events" element={<RequireRole allowedRole="USER"><EventDiscoveryPage /></RequireRole>} />
+          <Route path="/registrations" element={<RequireRole allowedRole="USER"><RegistrationPage /></RequireRole>} />
+          <Route path="/admin/events" element={<RequireRole allowedRole="ADMIN"><AdminEventPage /></RequireRole>} />
+          <Route path="/admin/sessions" element={<RequireRole allowedRole="ADMIN"><AdminSessionPage /></RequireRole>} />
+          <Route path="/admin/approvals" element={<RequireRole allowedRole="ADMIN"><AdminApprovalPage /></RequireRole>} />
           <Route path="/bootstrap" element={<BootstrapPage />} />
           <Route path="*" element={<BootstrapPage />} />
         </Routes>
