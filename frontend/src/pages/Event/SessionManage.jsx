@@ -2,7 +2,7 @@
 // 흐름: 내 행사 목록 불러오기 → [행사 선택] → 그 행사의 정보 + 세션 목록 → 추가/수정/삭제는 모달·확인 후 다시 불러오기
 // eventId(처음 선택할 행사)는 없어도 동작합니다. → 사이드바 [세션 관리]로 바로 들어와도 첫 행사가 선택됨
 import { useEffect, useState } from 'react';
-import { eventApi, getDevUser } from '../../api.js';
+import { eventApi, getCurrentUser } from '../../api.js';
 import { formatRange, formatTimeRange, instantToKstInput, STATUS_BADGE } from '../../format.js';
 import EventPicker from './EventPicker.jsx';
 import SessionFormModal from './SessionFormModal.jsx';
@@ -22,9 +22,9 @@ export default function SessionManage({ eventId = null, onBack }) {
   // ① 행사 선택 목록: 내가 만든 행사만 (세션은 행사를 만든 관리자만 관리 가능)
   useEffect(() => {
     let alive = true;
-    const myId = String(getDevUser().id);
+    const myId = String(getCurrentUser().id);
     eventApi
-      .list({ page: 0, size: 100 })
+      .mine({ page: 0, size: 100 }) // 내가 만든 행사만 (DRAFT 포함)
       .then((data) => {
         if (!alive) return;
         const mine = (data?.content ?? []).filter((e) => String(e.createdBy) === myId);
@@ -38,22 +38,22 @@ export default function SessionManage({ eventId = null, onBack }) {
     };
   }, []);
 
-  // ② 선택한 행사의 정보 + 세션 목록을 동시에
+  // ② 선택한 행사의 정보 + 세션 목록
+  // 행사 정보는 ①에서 받은 내 행사 목록에서 꺼내고, 세션은 관리자용 주소로 불러옴
+  // → 작성 중(DRAFT) 행사도 정보·세션이 보이고 세션을 추가할 수 있음
   useEffect(() => {
-    if (!selectedId) return;
+    if (!selectedId || !myEvents) return;
     let alive = true;
     setError(null);
-    Promise.all([eventApi.get(selectedId), eventApi.sessions(selectedId)])
-      .then(([ev, list]) => {
-        if (!alive) return;
-        setEvent(ev);
-        setSessions(list);
-      })
+    setEvent(myEvents.find((e) => e.id === selectedId) ?? null);
+    eventApi
+      .manageSessions(selectedId)
+      .then((list) => alive && setSessions(list))
       .catch((err) => alive && setError(err));
     return () => {
       alive = false;
     };
-  }, [selectedId, reload]);
+  }, [selectedId, reload, myEvents]);
 
   const refresh = (text) => {
     setNotice({ type: 'ok', text });
@@ -214,14 +214,12 @@ export default function SessionManage({ eventId = null, onBack }) {
         )}
       </section>
 
-      <p className="session-manage-note">
-        세션은 행사 시간 안에서만 · 다른 세션과 겹침 불가 (끝나는 시각에 바로 시작은 가능)
-      </p>
 
       {modal && event && (
         <SessionFormModal
           event={event}
           session={modal.session}
+          sessions={sessions}
           onClose={() => setModal(null)}
           onSaved={(saved) => {
             setModal(null);

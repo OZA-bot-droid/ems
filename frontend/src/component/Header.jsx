@@ -25,6 +25,7 @@ const MENUS = {
     heading: 'ADMIN WORKSPACE',
     items: [
       { id: 'dashboard', label: '운영 대시보드', href: null }, // 통계·집계 API 없음
+      { id: 'event-list', label: '행사 목록', href: '/events' }, // 사용자와 같은 행사 목록 (관리자는 상단에 [행사 관리] 탭도 보임)
       { id: 'events', label: '행사 관리', href: '/admin/events' }, // Event Service /events
       { id: 'sessions', label: '세션 관리', href: '/admin/sessions' }, // /events/{id}/sessions
       { id: 'approvals', label: '참가 승인', href: '/admin/approvals' }, // ADMIN / 11 참가 승인
@@ -63,7 +64,6 @@ function RoleHeader({ role, activePage }) {
           ),
         )}
       </nav>
-      <p className="registration-sidebar-note">시안 / API 연결 전</p>
     </header>
   );
 }

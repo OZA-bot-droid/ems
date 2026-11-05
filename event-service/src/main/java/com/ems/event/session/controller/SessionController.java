@@ -42,6 +42,19 @@ public class SessionController {
         return ApiSuccessResponse.ok(sessionService.getSessions(eventId, memberId), "세션 목록 조회 성공", httpRequest);
     }
 
+//    관리자용 세션 목록 (ADMIN · 행사 주인만, DRAFT 행사 포함) → 세션 관리 화면
+//    /sessions/manage 는 글자 주소라 PATCH·DELETE의 /{sessionId}(숫자)와 겹치지 않음
+    @GetMapping("/manage")
+    public ApiSuccessResponse<List<SessionResponse>> getSessionsForOwner(
+            @PathVariable Long eventId,
+            @RequestHeader(value = "X-Member-Id", required = false) Long userId,
+            @RequestHeader(value = "X-User-Role", required = false) String role,
+            HttpServletRequest httpRequest) {
+        adminChecker.requireAdmin(userId, role);
+        return ApiSuccessResponse.ok(sessionService.getSessionsForOwner(eventId, userId),
+                "세션 목록 조회 성공", httpRequest);
+    }
+
 //    세션 생성 (ADMIN)
     @PostMapping
     public ResponseEntity<ApiSuccessResponse<SessionResponse>> createSession(

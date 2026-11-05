@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react';
-import { setDevUser } from '../../api.js';
+import { useState } from 'react';
 import Header from '../../component/Header.jsx';
 import '../Event/event.scss';
 import './admin-approval.scss';
@@ -17,8 +16,6 @@ const STATUS_LABEL = {
 };
 
 export default function AdminApprovalPage() {
-  useEffect(() => setDevUser('ADMIN'), []);
-
   const [registrations, setRegistrations] = useState(SAMPLE_REGISTRATIONS);
   const [notice, setNotice] = useState('');
   const pendingCount = registrations.filter((item) => item.status === 'PENDING').length;

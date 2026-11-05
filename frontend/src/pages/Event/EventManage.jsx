@@ -1,6 +1,6 @@
 // ADMIN / 09 · 행사 관리의 본문 (좌측 공통 헤더와 페이지 헤더는 상위 레이아웃에서 제공합니다.)
 import { useEffect, useState } from 'react';
-import { eventApi, getDevUser } from '../../api.js';
+import { eventApi, getCurrentUser } from '../../api.js';
 import { formatShort, STATUS_BADGE } from '../../format.js';
 import EventFormModal from './EventFormModal.jsx';
 import './event-manage.scss';
@@ -36,7 +36,7 @@ export default function EventManage({ onManageSessions }) {
     let alive = true;
     setError(null);
     eventApi
-      .list({ page, size: 10, sort })
+      .mine({ page, size: 10, sort }) // 내가 만든 행사만 (다른 관리자의 행사는 서버에서 제외)
       .then((data) => alive && setResult(data))
       .catch((err) => alive && setError(err));
     return () => {
@@ -77,7 +77,7 @@ export default function EventManage({ onManageSessions }) {
     onManageSessions ? onManageSessions(eventId) : (window.location.href = `/admin/sessions?eventId=${eventId}`);
 
   const events = result?.content ?? [];
-  const myId = String(getDevUser().id);
+  const myId = String(getCurrentUser().id);
   const isMine = (event) => String(event.createdBy) === myId;
 
   return (
@@ -229,9 +229,7 @@ export default function EventManage({ onManageSessions }) {
           </nav>
         )}
 
-        <p className="event-manage-note">
-          행사 생성·수정 ADMIN 권한 검증 · 필수 필드 및 일정 유효성 검사
-        </p>
+
       </section>
 
       {modal && (
