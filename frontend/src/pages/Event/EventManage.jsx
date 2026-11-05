@@ -1,11 +1,7 @@
 // ADMIN / 09 · 행사 관리의 본문 (좌측 공통 헤더와 페이지 헤더는 상위 레이아웃에서 제공합니다.)
 import { useEffect, useState } from 'react';
-<<<<<<< HEAD
 import { eventApi } from '../../api.js';
 import { useAuth } from '../../page/AuthContext.jsx';
-=======
-import { eventApi, getCurrentUser } from '../../api.js';
->>>>>>> origin/feature/service_dou
 import { formatShort, STATUS_BADGE } from '../../format.js';
 import EventFormModal from './EventFormModal.jsx';
 import './event-manage.scss';
@@ -83,11 +79,7 @@ export default function EventManage({ onManageSessions }) {
     onManageSessions ? onManageSessions(eventId) : (window.location.href = `/admin/sessions?eventId=${eventId}`);
 
   const events = result?.content ?? [];
-<<<<<<< HEAD
   const myId = String(memberId);
-=======
-  const myId = String(getCurrentUser().id);
->>>>>>> origin/feature/service_dou
   const isMine = (event) => String(event.createdBy) === myId;
 
   return (

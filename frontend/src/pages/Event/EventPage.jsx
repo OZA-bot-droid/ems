@@ -5,7 +5,6 @@ import EventList from './EventList.jsx';
 import EventDetail from './EventDetail.jsx';
 import EventManage from './EventManage.jsx';
 import SessionManage from './SessionManage.jsx';
-<<<<<<< HEAD
 import { useAuth } from '../../page/AuthContext.jsx';
 
 export default function EventPage() {
@@ -13,26 +12,10 @@ export default function EventPage() {
   const [selectedId, setSelectedId] = useState(null);
   const [view, setView] = useState('browse'); // 'browse'=둘러보기, 'manage'=행사 관리(관리자)
   const [sessionEventId, setSessionEventId] = useState(null); // 세션 관리 중인 행사 번호
-=======
-import DevLogin, { useCurrentUser } from '../../component/DevLogin.jsx';
-
-export default function EventPage() {
-  const user = useCurrentUser();
-  const role = user.role;
-  const [selectedId, setSelectedId] = useState(null);
-  const [view, setView] = useState('browse'); // 'browse'=둘러보기, 'manage'=행사 관리(관리자)
-  const [sessionEventId, setSessionEventId] = useState(null); // 세션 관리 중인 행사 번호
-  const shownView = role === 'ADMIN' ? view : 'browse';
->>>>>>> origin/feature/service_dou
 
   return (
     <div className="min-h-screen bg-(--ems-bg) font-(family-name:--ems-font) text-(--ems-ink)">
       <div className="mx-auto max-w-[840px] px-6 py-9">
-<<<<<<< HEAD
-=======
-        <DevLogin />
-
->>>>>>> origin/feature/service_dou
         {/* 관리자에게만 보이는 탭: 둘러보기 / 행사 관리 */}
         {role === 'ADMIN' && (
           <div className="mb-6 flex gap-2 text-[13px] font-semibold">

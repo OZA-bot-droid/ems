@@ -1,22 +1,14 @@
-<<<<<<< HEAD
 import { useCallback, useEffect, useState } from 'react';
 import { registrationApi } from '../../api.js';
-=======
-import { useState } from 'react';
->>>>>>> origin/feature/service_dou
 import Header from '../../component/Header.jsx';
 import '../Event/event.scss';
 import './admin-approval.scss';
 
 export default function AdminApprovalPage() {
-<<<<<<< HEAD
   const [registrations, setRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState(null);
   const [error, setError] = useState('');
-=======
-  const [registrations, setRegistrations] = useState(SAMPLE_REGISTRATIONS);
->>>>>>> origin/feature/service_dou
   const [notice, setNotice] = useState('');
 
   const loadRegistrations = useCallback(async () => {
