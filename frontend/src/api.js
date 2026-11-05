@@ -14,87 +14,7 @@ export const http = axios.create({
   withCredentials: true, // 다른 포트(5173→8080)로 보내도 refreshToken 쿠키를 같이 보냄 (토큰 재발급용)
 });
 
-// ===== 로그인 (JWT) =====
-// 로그인하면 Member Service가 Access Token(회원증)을 줍니다. 요청마다 Authorization: Bearer 토큰으로 보내고,
-// Gateway가 토큰을 검사한 뒤 X-Member-Id / X-User-Role 을 대신 붙여 줍니다. (화면이 직접 X-헤더를 보내면 안 됨)
-// 토큰은 sessionStorage에 둡니다 → 탭을 닫으면 사라짐. 정식 로그인 화면(member-front)이 붙으면 setAccessToken()만 부르면 됩니다.
-const TOKEN_KEY = 'ems-access-token';
-const EMAIL_KEY = 'ems-login-email';
-const GUEST = { id: null, role: null, email: null }; // 로그인 안 한 손님
-
-const storage = typeof window === 'undefined' ? null : window.sessionStorage;
-let accessToken = storage?.getItem(TOKEN_KEY) ?? null;
-const listeners = new Set();
-
-// 토큰 가운데 부분(payload)을 열어 sub(회원 번호)·role·exp(만료)를 읽음
-// ※ 화면에서 버튼을 보일지 정하는 용도. 진짜 권한 검사는 Gateway와 서버가 다시 함
-function readToken(token) {
-  try {
-    const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-    return JSON.parse(atob(base64));
-  } catch {
-    return null;
-  }
-}
-
-let currentUser = toUser(accessToken);
-function toUser(token) {
-  const payload = token && readToken(token);
-  if (!payload || (payload.exp && payload.exp * 1000 <= Date.now())) return GUEST; // 없거나 만료
-  return { id: payload.sub, role: payload.role, email: storage?.getItem(EMAIL_KEY) ?? null };
-}
-
-export function setAccessToken(token, email = null) {
-  accessToken = token || null;
-  if (accessToken) {
-    storage?.setItem(TOKEN_KEY, accessToken);
-    if (email) storage?.setItem(EMAIL_KEY, email);
-  } else {
-    storage?.removeItem(TOKEN_KEY);
-    storage?.removeItem(EMAIL_KEY);
-  }
-  currentUser = toUser(accessToken);
-  listeners.forEach((fn) => fn());
-}
-
-// 지금 로그인한 사람 { id, role, email }. 로그인 안 했으면 id·role이 null
-export function getCurrentUser() {
-  return currentUser;
-}
-// 로그인 상태가 바뀌면 알려 달라고 등록 (화면 새로 그리기용). 반환값을 부르면 등록 해제
-export function subscribeAuth(fn) {
-  listeners.add(fn);
-  return () => listeners.delete(fn);
-}
-
-// 이 브라우저의 기기 번호 (Refresh Token이 기기별로 묶임). member-front와 같은 키를 씀
-function getClientId() {
-  let id = window.localStorage.getItem('clientId');
-  if (!id) {
-    id = window.crypto.randomUUID();
-    window.localStorage.setItem('clientId', id);
-  }
-  return id;
-}
-
-export async function login(email, password) {
-  const data = await request('/members/login', {
-    method: 'POST',
-    body: { email, password, clientId: getClientId() },
-    auth: false,
-  });
-  setAccessToken(data?.accessToken, email);
-  return getCurrentUser();
-}
-
-export async function logout() {
-  try {
-    await request('/members/logout', { method: 'DELETE', body: { clientId: getClientId() }, auth: false });
-  } catch {
-    // 서버 쪽 로그아웃이 실패해도 화면에서는 토큰을 지움
-  }
-  setAccessToken(null);
-}
+import { apiClient } from './util/apiClient.js';
 
 // 서버가 보내는 에러 {code, message} 를 담는 상자
 export class ApiError extends Error {
@@ -106,6 +26,7 @@ export class ApiError extends Error {
 }
 
 // 모든 요청이 지나가는 함수
+<<<<<<< HEAD
 async function request(path, { method = 'GET', body, auth = true } = {}) {
   const headers = {};
   if (auth && accessToken) headers.Authorization = `Bearer ${accessToken}`;
@@ -140,6 +61,26 @@ async function request(path, { method = 'GET', body, auth = true } = {}) {
   // 화면 코드는 알맹이(data)만 쓰면 되므로 여기서 한 번만 벗겨 준다.
   if (data && data.success === true && 'data' in data) return data.data;
   return data;
+=======
+async function request(path, { method = 'GET', body } = {}) {
+  try {
+    const response = await apiClient.request({ url: path, method, data: body });
+    if (response.status === 204) return null;
+    const data = response.data;
+    if (data && data.success === true && 'data' in data) return data.data;
+    return data;
+  } catch (error) {
+    const status = error.response?.status ?? 0;
+    const data = error.response?.data;
+    throw new ApiError(
+      status,
+      data?.code ?? (status === 0 ? 'NETWORK_ERROR' : 'UNKNOWN'),
+      data?.message ?? (status === 0
+        ? '서버에 연결할 수 없습니다. Gateway와 서비스가 켜져 있는지 확인하세요.'
+        : '요청이 실패했습니다 (HTTP ' + status + ')'),
+    );
+  }
+>>>>>>> origin/feature/Event-Service
 }
 
 // 행사·세션 API (백엔드 Controller와 1:1로 대응)
@@ -181,6 +122,14 @@ export const registrationApi = {
     unwrapSuccessData(await request(`/events/${eventId}/registrations`, { method: 'POST' })),
   mine: ({ page = 0, size = 20 } = {}) =>
     request(`/events/registrations/me?page=${page}&size=${size}`),
+  adminList: ({ status = 'PENDING', page = 0, size = 20 } = {}) => {
+    const query = new URLSearchParams({ status, page, size });
+    return request(`/events/registrations?${query}`);
+  },
+  approve: (registrationId) =>
+    request(`/events/registrations/${registrationId}/approve`, { method: 'PATCH' }),
+  reject: (registrationId) =>
+    request(`/events/registrations/${registrationId}/reject`, { method: 'PATCH' }),
   cancel: async (registrationId) =>
     unwrapSuccessData(await request(`/events/registrations/${registrationId}/cancel`, { method: 'PATCH' })),
   // 관리자: 행사별 신청 현황 (대기·승인·거절·취소 건수)

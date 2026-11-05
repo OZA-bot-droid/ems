@@ -13,9 +13,14 @@
   "dependencies": {
     "@tailwindcss/vite": "4.1.5",
     "@vitejs/plugin-react": "4.4.1",
+<<<<<<< HEAD
     "axios": "1.21.0",
+=======
+    "axios": "^1.21.0",
+>>>>>>> origin/feature/Event-Service
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "react-router-dom": "^6.30.3",
     "tailwindcss": "4.1.5",
     "vite": "6.3.4"
   },

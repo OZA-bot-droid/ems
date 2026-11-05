@@ -4,34 +4,14 @@
 import '../Event/event.scss';
 import EventManage from '../Event/EventManage.jsx';
 import Header from '../../component/Header.jsx';
-import DevLogin, { useCurrentUser } from '../../component/DevLogin.jsx';
 import './admin-page.scss';
 
 export default function AdminEventPage() {
-  const user = useCurrentUser();
-  if (user.role !== 'ADMIN') {
-    // 로그인 안 했거나 관리자가 아니면 안내 + 개발용 로그인
-    return (
-      <div className="app-shell">
-        <Header role={user.role ?? 'COMMON'} activePage="events" />
-        <main className="app-main-content">
-          <section className="admin-page">
-            <DevLogin />
-            <p className="text-sm text-(--ems-muted)">
-              {user.id ? '관리자 계정으로 로그인해야 볼 수 있는 화면입니다.' : '로그인이 필요합니다. 관리자 계정으로 로그인하세요.'}
-            </p>
-          </section>
-        </main>
-      </div>
-    );
-  }
-
   return (
     <div className="app-shell">
       <Header role="ADMIN" activePage="events" />
       <main className="app-main-content">
         <section className="admin-page">
-          <DevLogin />
           <header className="admin-page-header">
             <div>
               <h1>행사 관리</h1>
@@ -39,7 +19,7 @@ export default function AdminEventPage() {
             </div>
             <span className="admin-page-role">ADMIN</span>
           </header>
-          <EventManage key={user.id} />
+          <EventManage />
         </section>
       </main>
     </div>

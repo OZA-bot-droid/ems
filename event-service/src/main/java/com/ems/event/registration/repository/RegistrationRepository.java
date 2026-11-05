@@ -3,6 +3,7 @@ package com.ems.event.registration.repository;
 import com.ems.event.registration.entity.Registration;
 import com.ems.event.registration.entity.RegistrationStatus;
 import jakarta.persistence.LockModeType;
+import java.util.Collection;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +27,10 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
 
     /** 특정 사용자가 특정 행사에 이미 신청했는지 확인합니다. */
     Optional<Registration> findByUserIdAndEventId(Long userId, Long eventId);
+
+    /** 주최자 소유 행사들에 대한 특정 상태의 신청을 최근 신청 순으로 조회합니다. */
+    Page<Registration> findAllByEventIdInAndStatusOrderByRequestedAtDesc(
+            Collection<Long> eventIds, RegistrationStatus status, Pageable pageable);
 
     /** 사용자의 신청 내역을 최근 신청 순으로 페이지 단위 조회합니다. */
     Page<Registration> findAllByUserIdOrderByRequestedAtDesc(Long userId, Pageable pageable);

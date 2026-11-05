@@ -5,6 +5,11 @@ import com.ems.event.event.repository.EventRepository;
 import com.ems.event.registration.entity.Registration;
 import com.ems.event.registration.entity.RegistrationStatus;
 import com.ems.event.registration.repository.RegistrationRepository;
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,7 +17,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import java.util.Objects;
 
 /** 참가 신청의 중복 검사, 상태 변경, 본인 권한 검사를 처리합니다. */
 @Service
@@ -47,6 +51,31 @@ public class RegistrationService {
     @Transactional(readOnly = true)
     public Page<Registration> findMine(Long userId, Pageable pageable) {
         return registrationRepository.findAllByUserIdOrderByRequestedAtDesc(userId, pageable);
+    }
+
+    /** 관리자가 주최한 행사의 신청을 상태와 페이지 조건으로 조회합니다. */
+    @Transactional(readOnly = true)
+    public Page<AdminRegistration> findForOwner(Long ownerId, RegistrationStatus status, Pageable pageable) {
+        List<Event> ownedEvents = eventRepository.findAllByCreatedBy(ownerId);
+        if (ownedEvents.isEmpty()) {
+            return Page.empty(pageable);
+        }
+
+        Map<Long, String> eventTitles = ownedEvents.stream()
+                .collect(Collectors.toMap(Event::getId, Event::getTitle));
+        List<Long> eventIds = ownedEvents.stream().map(Event::getId).toList();
+
+        return registrationRepository.findAllByEventIdInAndStatusOrderByRequestedAtDesc(
+                        eventIds, status, pageable)
+                .map(registration -> new AdminRegistration(
+                        registration.getId(),
+                        registration.getEventId(),
+                        eventTitles.get(registration.getEventId()),
+                        registration.getUserId(),
+                        registration.getStatus(),
+                        registration.getRequestedAt(),
+                        registration.getUpdatedAt(),
+                        registration.getDecidedAt()));
     }
 
     /** 행사별 잠금으로 승인 요청을 직렬화하고 정원 안에서만 승인합니다. */
@@ -136,6 +165,11 @@ public class RegistrationService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, exception.getMessage(), exception);
         }
     }
+
+    /** 관리자가 확인할 신청 목록 행입니다. */
+    public record AdminRegistration(
+            Long id, Long eventId, String eventTitle, Long userId, RegistrationStatus status,
+            Instant requestedAt, Instant updatedAt, Instant decidedAt) { }
 
     /** 행사별 신청 상태 건수 응답입니다. */
     public record EventRegistrationSummary(

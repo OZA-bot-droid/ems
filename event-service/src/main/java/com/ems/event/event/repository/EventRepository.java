@@ -5,6 +5,7 @@ import com.ems.event.event.entity.EventStatus;
 import jakarta.persistence.LockModeType;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +23,9 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     Optional<Event> findByIdForUpdate(@Param("eventId") Long eventId);
 
     Page<Event> findByStatus(EventStatus status, Pageable pageable);
+
+    /** 특정 회원이 주최한 행사 목록입니다. */
+    List<Event> findAllByCreatedBy(Long createdBy);
 
     /** 여러 상태 중 하나인 행사 (일반 회원용 목록: OPEN, CLOSED) */
     Page<Event> findByStatusIn(Collection<EventStatus> statuses, Pageable pageable);
