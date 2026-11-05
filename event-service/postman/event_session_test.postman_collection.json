@@ -2,12 +2,349 @@
   "info": {
     "_postman_id": "12a970c7-68b0-495a-a6df-4eded7b0c8b5",
     "name": "event, session 테스트",
-    "description": "0\\. 서버 확인\n\nevent, session 생성 및 조회, 삭제 확인",
+    "description": "0\\. 서버 확인\n\nevent, session 생성 및 조회, 삭제 확인\n\n[2026-11-05] Gateway(localhost:8080/api) + 실제 JWT 방식으로 변경. 먼저 \"00. 실제 회원가입 · 로그인\"을 실행하세요.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "57145652",
     "_collection_link": "https://go.postman.co/collection/57145652-12a970c7-68b0-495a-a6df-4eded7b0c8b5?source=collection_link"
   },
   "item": [
+    {
+      "name": "00. 실제 회원가입 · 로그인 (토큰 발급)",
+      "description": "Gateway(8080) 경유. 관리자1 → {{accessToken}}(컬렉션 기본 인증), 관리자2 → {{admin2Token}}, 사용자1 → {{userToken}}. 회원가입은 처음만 201, 이후엔 409가 정상.",
+      "item": [
+        {
+          "name": "관리자1 회원가입 (처음 1번만 201, 이미 있으면 409도 OK)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201 가입 또는 409 이미 가입됨', () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin1@test.com\",\n  \"password\": \"test1234!\",\n  \"name\": \"관리자1\",\n  \"role\": \"ADMIN\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/members/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "members",
+                "register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "관리자2 회원가입 (처음 1번만 201, 이미 있으면 409도 OK)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201 가입 또는 409 이미 가입됨', () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin2@test.com\",\n  \"password\": \"test1234!\",\n  \"name\": \"관리자2\",\n  \"role\": \"ADMIN\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/members/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "members",
+                "register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "사용자1 회원가입 (처음 1번만 201, 이미 있으면 409도 OK)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201 가입 또는 409 이미 가입됨', () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user1@test.com\",\n  \"password\": \"test1234!\",\n  \"name\": \"사용자1\",\n  \"role\": \"USER\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/members/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "members",
+                "register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "관리자1 로그인 → accessToken",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "",
+                  "if (pm.response.code === 200 && json.data?.accessToken) {",
+                  "    pm.collectionVariables.set(",
+                  "        \"accessToken\",",
+                  "        json.data.accessToken",
+                  "    );",
+                  "",
+                  "    console.log(\"accessToken 저장 완료\");",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin1@test.com\",\n  \"password\": \"test1234!\",\n  \"clientId\": \"b38defd4-1a08-4070-907e-2a3a2826fca0\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/members/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "members",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "관리자2 로그인 → admin2Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "",
+                  "if (pm.response.code === 200 && json.data?.accessToken) {",
+                  "    pm.collectionVariables.set(",
+                  "        \"admin2Token\",",
+                  "        json.data.accessToken",
+                  "    );",
+                  "",
+                  "    console.log(\"admin2Token 저장 완료\");",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin2@test.com\",\n  \"password\": \"test1234!\",\n  \"clientId\": \"{{$guid}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/members/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "members",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "사용자1 로그인 → userToken",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "",
+                  "if (pm.response.code === 200 && json.data?.accessToken) {",
+                  "    pm.collectionVariables.set(",
+                  "        \"userToken\",",
+                  "        json.data.accessToken",
+                  "    );",
+                  "",
+                  "    console.log(\"userToken 저장 완료\");",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user1@test.com\",\n  \"password\": \"test1234!\",\n  \"clientId\": \"{{$guid}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/members/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "members",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "토큰_재발급",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// 관리자1 로그인 때 받은 refreshToken 쿠키 + 같은 clientId로 accessToken 재발급",
+                  "const json = pm.response.json();",
+                  "",
+                  "if (pm.response.code === 200 && json.data?.accessToken) {",
+                  "    pm.collectionVariables.set(",
+                  "        \"accessToken\",",
+                  "        json.data.accessToken",
+                  "    );",
+                  "",
+                  "    console.log(\"accessToken 저장 완료\");",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientId\": \"b38defd4-1a08-4070-907e-2a3a2826fca0\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/members/reissue",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "members",
+                "reissue"
+              ]
+            }
+          }
+        }
+      ]
+    },
     {
       "name": "0. 서버 확인",
       "item": [
@@ -26,16 +363,7 @@
           ],
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
-              }
-            ],
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/events/ping",
               "host": [
@@ -73,14 +401,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
               }
             ],
             "body": {
@@ -124,14 +444,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
               }
             ],
             "body": {
@@ -176,14 +488,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
               }
             ],
             "body": {
@@ -228,14 +532,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
               }
             ],
             "body": {
@@ -280,14 +576,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
               }
             ],
             "body": {
@@ -337,14 +625,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
               }
             ],
             "body": {
@@ -387,14 +667,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
               }
             ],
             "body": {
@@ -444,14 +716,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
               }
             ],
             "body": {
@@ -500,14 +764,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
               }
             ],
             "body": {
@@ -550,14 +806,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
               }
             ],
             "body": {
@@ -601,14 +849,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
               }
             ],
             "body": {
@@ -653,16 +893,7 @@
           ],
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "X-Member-Id",
-                "value": "{{userId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "USER"
-              }
-            ],
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/events?page=0&size=10",
               "host": [
@@ -679,6 +910,16 @@
                 {
                   "key": "size",
                   "value": "10"
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
                 }
               ]
             }
@@ -700,16 +941,7 @@
           ],
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
-              }
-            ],
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/events?page=0&size=10",
               "host": [
@@ -748,16 +980,7 @@
           ],
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "X-Member-Id",
-                "value": "{{userId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "USER"
-              }
-            ],
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/events?status=OPEN",
               "host": [
@@ -770,6 +993,16 @@
                 {
                   "key": "status",
                   "value": "OPEN"
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
                 }
               ]
             }
@@ -791,16 +1024,7 @@
           ],
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "X-Member-Id",
-                "value": "{{userId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "USER"
-              }
-            ],
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/events/{{eventA}}",
               "host": [
@@ -809,6 +1033,16 @@
               "path": [
                 "events",
                 "{{eventA}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
               ]
             }
           },
@@ -830,16 +1064,7 @@
           ],
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "X-Member-Id",
-                "value": "{{userId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "USER"
-              }
-            ],
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/events/{{eventA}}/sessions",
               "host": [
@@ -849,6 +1074,16 @@
                 "events",
                 "{{eventA}}",
                 "sessions"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
               ]
             }
           },
@@ -867,14 +1102,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
               }
             ],
             "url": {
@@ -905,16 +1132,7 @@
           "name": "세션 삭제 (행사 A 세션 1) → 204",
           "request": {
             "method": "DELETE",
-            "header": [
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
-              }
-            ],
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/events/{{eventA}}/sessions/{{sessionA1}}",
               "host": [
@@ -954,14 +1172,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
               }
             ],
             "body": {
@@ -1005,14 +1215,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "X-Member-Id",
-                "value": "{{userId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "USER"
               }
             ],
             "body": {
@@ -1031,6 +1233,16 @@
               ],
               "path": [
                 "events"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
               ]
             }
           },
@@ -1056,14 +1268,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
               }
             ],
             "body": {
@@ -1109,14 +1313,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
               }
             ],
             "body": {
@@ -1193,6 +1389,9 @@
                   "language": "json"
                 }
               }
+            },
+            "auth": {
+              "type": "noauth"
             }
           },
           "response": []
@@ -1217,14 +1416,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
               }
             ],
             "url": {
@@ -1268,14 +1459,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
               }
             ],
             "url": {
@@ -1315,16 +1498,7 @@
           ],
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
-              }
-            ],
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/events/999999999",
               "host": [
@@ -1359,14 +1533,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
               }
             ],
             "url": {
@@ -1410,14 +1576,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
               }
             ],
             "url": {
@@ -1463,14 +1621,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
               }
             ],
             "url": {
@@ -1512,16 +1662,7 @@
           ],
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "X-Member-Id",
-                "value": "{{userId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "USER"
-              }
-            ],
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/events/{{exEventId}}",
               "host": [
@@ -1530,6 +1671,16 @@
               "path": [
                 "events",
                 "{{exEventId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
               ]
             }
           },
@@ -1550,16 +1701,7 @@
           ],
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "X-Member-Id",
-                "value": "{{userId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "USER"
-              }
-            ],
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/events/{{exEventId}}/sessions",
               "host": [
@@ -1569,6 +1711,16 @@
                 "events",
                 "{{exEventId}}",
                 "sessions"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
               ]
             }
           },
@@ -1590,16 +1742,7 @@
           ],
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "X-Member-Id",
-                "value": "{{userId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "USER"
-              }
-            ],
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/events?status=DRAFT",
               "host": [
@@ -1607,6 +1750,16 @@
               ],
               "path": [
                 "events?status=DRAFT"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
               ]
             }
           },
@@ -1628,16 +1781,7 @@
           ],
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "X-Member-Id",
-                "value": "3"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
-              }
-            ],
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/events/{{exEventId}}",
               "host": [
@@ -1646,6 +1790,16 @@
               "path": [
                 "events",
                 "{{exEventId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin2Token}}",
+                  "type": "string"
+                }
               ]
             }
           },
@@ -1667,16 +1821,7 @@
           ],
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "X-Member-Id",
-                "value": "3"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
-              }
-            ],
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/events?status=DRAFT",
               "host": [
@@ -1684,6 +1829,16 @@
               ],
               "path": [
                 "events?status=DRAFT"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin2Token}}",
+                  "type": "string"
+                }
               ]
             }
           },
@@ -1705,16 +1860,7 @@
           ],
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
-              }
-            ],
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/events/{{exEventId}}",
               "host": [
@@ -1748,14 +1894,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "X-Member-Id",
-                "value": "{{userId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "USER"
               }
             ],
             "url": {
@@ -1777,6 +1915,16 @@
                   "language": "json"
                 }
               }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
             }
           },
           "response": []
@@ -1800,14 +1948,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
               }
             ],
             "url": {
@@ -1852,14 +1992,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
               }
             ],
             "url": {
@@ -1906,14 +2038,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
               }
             ],
             "url": {
@@ -1960,14 +2084,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
               }
             ],
             "url": {
@@ -2014,14 +2130,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
               }
             ],
             "url": {
@@ -2066,14 +2174,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
               }
             ],
             "url": {
@@ -2118,14 +2218,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
               }
             ],
             "url": {
@@ -2170,14 +2262,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
               }
             ],
             "url": {
@@ -2222,14 +2306,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
               }
             ],
             "url": {
@@ -2270,16 +2346,7 @@
           ],
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "X-Member-Id",
-                "value": "{{userId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "USER"
-              }
-            ],
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/events/{{exEventId}}",
               "host": [
@@ -2288,6 +2355,16 @@
               "path": [
                 "events",
                 "{{exEventId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
               ]
             }
           },
@@ -2309,16 +2386,7 @@
           ],
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "X-Member-Id",
-                "value": "3"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
-              }
-            ],
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/events/{{exEventId}}",
               "host": [
@@ -2327,6 +2395,16 @@
               "path": [
                 "events",
                 "{{exEventId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin2Token}}",
+                  "type": "string"
+                }
               ]
             }
           },
@@ -2348,16 +2426,7 @@
           ],
           "request": {
             "method": "DELETE",
-            "header": [
-              {
-                "key": "X-Member-Id",
-                "value": "{{userId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "USER"
-              }
-            ],
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/events/{{exEventId}}",
               "host": [
@@ -2366,6 +2435,16 @@
               "path": [
                 "events",
                 "{{exEventId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
               ]
             }
           },
@@ -2391,14 +2470,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "X-Member-Id",
-                "value": "3"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
               }
             ],
             "url": {
@@ -2421,6 +2492,16 @@
                   "language": "json"
                 }
               }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin2Token}}",
+                  "type": "string"
+                }
+              ]
             }
           },
           "response": []
@@ -2445,14 +2526,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "X-Member-Id",
-                "value": "3"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
               }
             ],
             "url": {
@@ -2473,6 +2546,16 @@
                   "language": "json"
                 }
               }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin2Token}}",
+                  "type": "string"
+                }
+              ]
             }
           },
           "response": []
@@ -2493,16 +2576,7 @@
           ],
           "request": {
             "method": "DELETE",
-            "header": [
-              {
-                "key": "X-Member-Id",
-                "value": "3"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
-              }
-            ],
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/events/{{exEventId}}",
               "host": [
@@ -2511,6 +2585,16 @@
               "path": [
                 "events",
                 "{{exEventId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin2Token}}",
+                  "type": "string"
+                }
               ]
             }
           },
@@ -2531,16 +2615,7 @@
           ],
           "request": {
             "method": "DELETE",
-            "header": [
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
-              }
-            ],
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/events/{{exEventId}}",
               "host": [
@@ -2570,16 +2645,7 @@
           ],
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
-              }
-            ],
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/events/{{exEventId}}",
               "host": [
@@ -2613,14 +2679,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
               }
             ],
             "url": {
@@ -2665,14 +2723,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
               }
             ],
             "url": {
@@ -2716,14 +2766,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
               }
             ],
             "url": {
@@ -2763,16 +2805,7 @@
           ],
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "X-Member-Id",
-                "value": "{{userId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "USER"
-              }
-            ],
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/events/{{regEventId}}/registrations",
               "host": [
@@ -2782,6 +2815,16 @@
                 "events",
                 "{{regEventId}}",
                 "registrations"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
               ]
             }
           },
@@ -2804,16 +2847,7 @@
           ],
           "request": {
             "method": "DELETE",
-            "header": [
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
-              }
-            ],
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/events/{{regEventId}}",
               "host": [
@@ -2847,14 +2881,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
               }
             ],
             "body": {
@@ -2899,14 +2925,6 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "X-Member-Id",
-                "value": "{{adminId}}"
-              },
-              {
-                "key": "X-User-Role",
-                "value": "ADMIN"
               }
             ],
             "body": {
@@ -2938,15 +2956,7 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:8082"
-    },
-    {
-      "key": "adminId",
-      "value": "1"
-    },
-    {
-      "key": "userId",
-      "value": "2"
+      "value": "http://localhost:8080/api"
     },
     {
       "key": "eventA",
@@ -2982,6 +2992,18 @@
     },
     {
       "key": "sessionA1",
+      "value": ""
+    },
+    {
+      "key": "admin2Token",
+      "value": ""
+    },
+    {
+      "key": "userToken",
+      "value": ""
+    },
+    {
+      "key": "accessToken",
       "value": ""
     }
   ],
@@ -3023,5 +3045,15 @@
         ]
       }
     }
-  ]
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  }
 }

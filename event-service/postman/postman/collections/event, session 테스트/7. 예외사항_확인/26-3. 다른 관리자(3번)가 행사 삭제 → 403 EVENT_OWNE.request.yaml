@@ -2,9 +2,10 @@ $kind: http-request
 name: 26-3. 다른 관리자(3번)가 행사 삭제 → 403 EVENT_OWNER_REQUIRED
 url: "{{baseUrl}}/events/{{exEventId}}"
 method: DELETE
-headers:
-  X-Member-Id: "3"
-  X-User-Role: ADMIN
+auth:
+  type: bearer
+  credentials:
+    token: "{{admin2Token}}"
 scripts:
   - type: afterResponse
     code: |-

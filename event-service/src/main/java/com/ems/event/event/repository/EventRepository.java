@@ -35,6 +35,9 @@ public interface EventRepository extends JpaRepository<Event, Long> {
                               @Param("ownerId") Long ownerId,
                               Pageable pageable);
 
+    /** 내가 만든 행사 전체 (행사 관리 화면용, 모든 상태) */
+    Page<Event> findByCreatedBy(Long createdBy, Pageable pageable);
+
     /** 내가 만든 특정 상태 행사 (status=DRAFT 필터용) */
     Page<Event> findByStatusAndCreatedBy(EventStatus status, Long createdBy, Pageable pageable);
 }

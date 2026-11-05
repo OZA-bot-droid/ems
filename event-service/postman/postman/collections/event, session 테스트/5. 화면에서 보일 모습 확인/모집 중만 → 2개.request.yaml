@@ -1,11 +1,12 @@
 $kind: http-request
 url: "{{baseUrl}}/events?status=OPEN"
 method: GET
-headers:
-  X-Member-Id: "{{userId}}"
-  X-User-Role: USER
 queryParams:
   status: OPEN
+auth:
+  type: bearer
+  credentials:
+    token: "{{userToken}}"
 scripts:
   - type: afterResponse
     code: |-

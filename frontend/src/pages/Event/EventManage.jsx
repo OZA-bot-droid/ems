@@ -1,7 +1,11 @@
 // ADMIN / 09 · 행사 관리의 본문 (좌측 공통 헤더와 페이지 헤더는 상위 레이아웃에서 제공합니다.)
 import { useEffect, useState } from 'react';
+<<<<<<< HEAD
 import { eventApi } from '../../api.js';
 import { useAuth } from '../../page/AuthContext.jsx';
+=======
+import { eventApi, getCurrentUser } from '../../api.js';
+>>>>>>> origin/feature/service_dou
 import { formatShort, STATUS_BADGE } from '../../format.js';
 import EventFormModal from './EventFormModal.jsx';
 import './event-manage.scss';
@@ -14,9 +18,19 @@ const NEXT_STATUS = {
 // 배지에 보여 줄 "다음 상태" 이름 (STATUS_BADGE의 화면 이름과 같게)
 const NEXT_LABEL = { DRAFT: '모집 중', OPEN: '마감' };
 
+// 정렬 방법: 서버(Spring Pageable)에 ?sort=칸,방향 으로 보냄 → 여러 쪽으로 나뉘어 있어도 전체 기준으로 정렬됨
+const SORT_OPTIONS = [
+  { value: 'startsAt,asc', label: '시작일 빠른 순' },
+  { value: 'startsAt,desc', label: '시작일 늦은 순' },
+  { value: 'id,desc', label: '최근 등록 순' },
+  { value: 'title,asc', label: '제목 순 (가나다)' },
+  { value: 'capacity,desc', label: '정원 많은 순' },
+];
+
 export default function EventManage({ onManageSessions }) {
   const { memberId } = useAuth();
   const [page, setPage] = useState(0);
+  const [sort, setSort] = useState(SORT_OPTIONS[0].value);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [reload, setReload] = useState(0); // 숫자가 바뀌면 목록을 다시 불러옴
@@ -28,13 +42,13 @@ export default function EventManage({ onManageSessions }) {
     let alive = true;
     setError(null);
     eventApi
-      .list({ page, size: 10 })
+      .mine({ page, size: 10, sort }) // 내가 만든 행사만 (다른 관리자의 행사는 서버에서 제외)
       .then((data) => alive && setResult(data))
       .catch((err) => alive && setError(err));
     return () => {
       alive = false;
     };
-  }, [page, reload]);
+  }, [page, sort, reload]);
 
   const refresh = (message) => {
     setNotice({ type: 'ok', text: message });
@@ -69,12 +83,33 @@ export default function EventManage({ onManageSessions }) {
     onManageSessions ? onManageSessions(eventId) : (window.location.href = `/admin/sessions?eventId=${eventId}`);
 
   const events = result?.content ?? [];
+<<<<<<< HEAD
   const myId = String(memberId);
+=======
+  const myId = String(getCurrentUser().id);
+>>>>>>> origin/feature/service_dou
   const isMine = (event) => String(event.createdBy) === myId;
 
   return (
     <section className="event-manage-page" aria-label="행사 관리">
       <div className="event-manage-toolbar">
+        <label className="event-manage-sort">
+          <span>정렬</span>
+          <select
+            value={sort}
+            onChange={(e) => {
+              setSort(e.target.value);
+              setPage(0); // 정렬을 바꾸면 첫 쪽부터
+            }}
+            aria-label="행사 목록 정렬"
+          >
+            {SORT_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
         <button className="event-manage-create" onClick={() => setModal({})} type="button">
           ＋ 행사 등록
         </button>
@@ -204,9 +239,7 @@ export default function EventManage({ onManageSessions }) {
           </nav>
         )}
 
-        <p className="event-manage-note">
-          행사 생성·수정 ADMIN 권한 검증 · 필수 필드 및 일정 유효성 검사
-        </p>
+
       </section>
 
       {modal && (

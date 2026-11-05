@@ -1,9 +1,10 @@
 $kind: http-request
 url: "{{baseUrl}}/events/{{regEventId}}/registrations"
 method: POST
-headers:
-  X-Member-Id: "{{userId}}"
-  X-User-Role: USER
+auth:
+  type: bearer
+  credentials:
+    token: "{{userToken}}"
 scripts:
   - type: afterResponse
     code: pm.test('201 응답', () => pm.response.to.have.status(201));

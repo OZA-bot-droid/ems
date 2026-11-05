@@ -1,15 +1,23 @@
 // 03 · 행사 목록 화면
 // 흐름: 화면이 뜨면 → eventApi.list() 로 목록 요청 → 받은 content 를 카드로 그리기
 import { useEffect, useState } from 'react';
+<<<<<<< HEAD
 import { eventApi } from '../../api.js';
+=======
+import { eventApi, getCurrentUser } from '../../api.js';
+>>>>>>> origin/feature/service_dou
 import { formatShort, STATUS_BADGE } from '../../format.js';
 import { useAuth } from '../../page/AuthContext.jsx';
 
 const PAGE_SIZE = 8;
 
 export default function EventList({ onSelect }) {
+<<<<<<< HEAD
   const { role } = useAuth();
   const isAdmin = role === 'ADMIN';
+=======
+  const isAdmin = getCurrentUser().role === 'ADMIN';
+>>>>>>> origin/feature/service_dou
 
   // 화면이 기억하는 값들 (바뀌면 화면이 다시 그려짐)
   const [status, setStatus] = useState(''); // '' = 전체

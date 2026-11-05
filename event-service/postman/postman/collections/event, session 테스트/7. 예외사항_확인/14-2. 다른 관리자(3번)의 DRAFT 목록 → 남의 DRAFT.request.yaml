@@ -2,11 +2,12 @@ $kind: http-request
 name: 14-2. 다른 관리자(3번)의 DRAFT 목록 → 남의 DRAFT 없음
 url: "{{baseUrl}}/events?status=DRAFT"
 method: GET
-headers:
-  X-Member-Id: "3"
-  X-User-Role: ADMIN
 queryParams:
   status: DRAFT
+auth:
+  type: bearer
+  credentials:
+    token: "{{admin2Token}}"
 scripts:
   - type: afterResponse
     code: |-

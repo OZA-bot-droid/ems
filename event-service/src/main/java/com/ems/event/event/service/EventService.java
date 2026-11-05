@@ -63,6 +63,17 @@ public class EventService {
         return PageResponse.of(page, event -> EventResponse.from(event, event.isOwnedBy(viewerId)));
     }
 
+    /**
+     * 내가 만든 행사만 (행사 관리 화면). 다른 관리자의 행사는 빠지고, 내 DRAFT·회의 링크는 모두 보임
+     * - status를 주면 그 상태만 (예: ?status=DRAFT)
+     */
+    public PageResponse<EventResponse> getMyEvents(Long ownerId, EventStatus status, Pageable pageable) {
+        Page<Event> page = (status == null)
+                ? eventRepository.findByCreatedBy(ownerId, pageable)
+                : eventRepository.findByStatusAndCreatedBy(status, ownerId, pageable);
+        return PageResponse.of(page, event -> EventResponse.from(event, true)); // 전부 내 행사 → 링크 보임
+    }
+
     /** 상세 조회. 남의 DRAFT는 없는 행사처럼 404, 화상 회의 링크는 만든 사람에게만 */
     public EventResponse getEvent(Long eventId, Long viewerId) {
         Event event = findEvent(eventId);

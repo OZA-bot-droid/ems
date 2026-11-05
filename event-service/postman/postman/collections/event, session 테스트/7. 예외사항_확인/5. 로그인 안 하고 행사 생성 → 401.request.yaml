@@ -13,6 +13,8 @@ body:
       "startsAt": "2027-12-01T05:00:00Z",
       "endsAt": "2027-12-01T08:00:00Z"
     }
+auth:
+  type: noauth
 scripts:
   - type: afterResponse
     code: |-

@@ -3,10 +3,10 @@ description: |-
   0\. 서버 확인
 
   event, session 생성 및 조회, 삭제 확인
+
+  [2026-11-05] Gateway(localhost:8080/api) + 실제 JWT 방식으로 변경. 먼저 "00. 실제 회원가입 · 로그인"을 실행하세요.
 variables:
-  baseUrl: http://localhost:8082
-  adminId: "1"
-  userId: "2"
+  baseUrl: http://localhost:8080/api
   eventA: ""
   eventB: ""
   eventC: ""
@@ -16,9 +16,17 @@ variables:
   exSessionB: ""
   regEventId: ""
   sessionA1: ""
+  admin2Token: ""
+  userToken: ""
+  accessToken: ""
 scripts:
   - type: http:afterResponse
     code: |-
+      // [진단] 3xx 이상이거나 본문이 비어 있으면 요청 이름 · 상태 코드 · 본문을 콘솔에 남김 (Postman 왼쪽 아래 Console)
+      const _body = pm.response.text();
+      if (pm.response.code >= 300 || !_body) {
+        console.warn('[확인] ' + pm.info.requestName + ' → ' + pm.response.code + ' ' + pm.request.method + ' ' + pm.request.url.toString(), _body || '(본문 없음)');
+      }
       // [공통 오류 규격 검사] 모든 요청에 자동 적용: 4xx/5xx 응답이면 7칸이 다 있는지 확인
       if (pm.response.code >= 400 && pm.response.text()) {
         const err = pm.response.json();
@@ -49,3 +57,9 @@ scripts:
         pm.test('[공통] 204는 본문 없음', () => pm.expect(pm.response.text()).to.eql(''));
       }
     language: text/javascript
+auth:
+  - id: f74f77ee-d79e-40d1-a8ba-605994e54136
+    type: bearer
+    name: bearer auth
+    credentials:
+      token: "{{accessToken}}"

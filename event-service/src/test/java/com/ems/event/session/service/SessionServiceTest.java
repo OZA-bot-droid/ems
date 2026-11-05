@@ -120,6 +120,18 @@ class SessionServiceTest {
         assertThat(sessionService.getSessions(eventId, EVENT_OWNER_ID)).isEmpty();      // 만든 관리자
     }
 
+    @Test
+    @DisplayName("관리자용 세션 목록: 만든 관리자는 DRAFT 행사 세션도 보고, 다른 관리자는 403")
+    void manageSessionsOnlyOwner() {
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(seminar())); // seminar() = DRAFT
+        when(sessionRepository.findByEventIdOrderByStartsAtAsc(eventId)).thenReturn(List.of());
+
+        assertThat(sessionService.getSessionsForOwner(eventId, EVENT_OWNER_ID)).isEmpty();
+        assertThatThrownBy(() -> sessionService.getSessionsForOwner(eventId, OTHER_ADMIN_ID))
+                .isInstanceOf(BusinessException.class)
+                .extracting("code").isEqualTo("EVENT_OWNER_REQUIRED");
+    }
+
     // ===== 소유권: 행사를 만든 관리자만 세션을 관리할 수 있다 =====
 
     @Test

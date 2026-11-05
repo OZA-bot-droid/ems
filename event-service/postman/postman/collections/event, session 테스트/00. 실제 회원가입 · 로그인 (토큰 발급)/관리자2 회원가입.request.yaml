@@ -1,0 +1,19 @@
+$kind: http-request
+url: "{{baseUrl}}/members/register"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "email": "admin2@test.com",
+      "password": "test1234!",
+      "name": "관리자2",
+      "role": "ADMIN"
+    }
+scripts:
+  - type: afterResponse
+    code: pm.test('201 가입 또는 409 이미 가입됨', () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));
+    language: text/javascript
+order: 2000

@@ -1,12 +1,13 @@
 $kind: http-request
 url: "{{baseUrl}}/events?page=0&size=10"
 method: GET
-headers:
-  X-Member-Id: "{{userId}}"
-  X-User-Role: USER
 queryParams:
   page: "0"
   size: "10"
+auth:
+  type: bearer
+  credentials:
+    token: "{{userToken}}"
 scripts:
   - type: afterResponse
     code: |-

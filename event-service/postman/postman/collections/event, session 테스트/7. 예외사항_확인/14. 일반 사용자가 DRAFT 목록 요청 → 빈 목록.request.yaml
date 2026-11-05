@@ -1,11 +1,12 @@
 $kind: http-request
 url: "{{baseUrl}}/events?status=DRAFT"
 method: GET
-headers:
-  X-Member-Id: "{{userId}}"
-  X-User-Role: USER
 queryParams:
   status: DRAFT
+auth:
+  type: bearer
+  credentials:
+    token: "{{userToken}}"
 scripts:
   - type: afterResponse
     code: |-
