@@ -1,0 +1,80 @@
+package com.ems.member;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.util.Base64;
+
+// 공개키와 개인키를 생성하기 위한 용도 한 번 생성 후 환경변수 등록 후에 삭제해도 문제 없음
+public class JwtKeyGenerator {
+
+    // 나중에 파일을 생성 및 관리하지 않고 AWS KMS(private key)/JWKS(public key) 기반으로 전환 예정
+    public static void main(String[] args) throws Exception {
+
+        // RSA 알고리즘(비대칭키 암호화 알고리즘)을 사용하는 키 생성기, 키 크기를 3072비트로 설정
+        KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
+        generator.initialize(3072);
+
+        // 공개키와 개인키를 생성
+        KeyPair keyPair = generator.generateKeyPair();
+
+
+        // 지정한 경로로 Path 객체 생성
+        String keyDir = System.getenv("JWT_KEY_DIR");
+
+        if (keyDir == null || keyDir.isBlank()) {
+            throw new IllegalStateException(
+                    "JWT_KEY_DIR 환경변수가 필요합니다."
+            );
+        }
+
+        Path keyDirectory = Path.of(keyDir);
+        Files.createDirectories(keyDirectory);
+
+        Path privatePath = keyDirectory.resolve("private_key.pem");
+        Path publicPath = keyDirectory.resolve("public_key.pem");
+
+        if (Files.exists(privatePath) || Files.exists(publicPath)) {
+            throw new IllegalStateException(
+                    "RSA 키 파일이 이미 존재합니다. 기존 키를 유지합니다."
+            );
+        }
+
+        // 문자열을 파일로 저장
+        Files.writeString(
+                // 기존 경로에 파일 이름을 결합
+                // .pem은 암호화 키 같은 데이터를 텍스트 형태로 저장할 때 널리 사용하는 파일 형식
+                privatePath,
+                createPem(
+                        "PRIVATE KEY",
+                        keyPair.getPrivate().getEncoded()
+                ),
+                StandardOpenOption.CREATE_NEW
+        );
+
+        Files.writeString(
+                publicPath,
+                createPem(
+                        "PUBLIC KEY",
+                        keyPair.getPublic().getEncoded()
+                ),
+                StandardOpenOption.CREATE_NEW
+        );
+    }
+
+    public static String createPem(String type, byte[] key) {
+
+        // 줄바꿈을 포함하는 Base64 인코더
+        // encodeToString : 바이트 배열을 Base64 문자열로 변환
+        String encoded = Base64.getMimeEncoder(
+                64,
+                new byte[]{'\n'}
+        ).encodeToString(key);
+
+        return "-----BEGIN " + type + "-----\n"
+                + encoded + "\n"
+                + "-----END " + type + "-----\n";
+    }
+}

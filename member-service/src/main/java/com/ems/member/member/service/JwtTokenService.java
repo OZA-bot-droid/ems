@@ -1,0 +1,114 @@
+package com.ems.member.member.service;
+
+import com.ems.member.common.exception.InvalidRefreshTokenException;
+import com.ems.member.common.exception.MemberNotFoundException;
+import com.ems.member.member.domain.Role;
+import com.ems.member.member.repository.MemberRepository;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
+import org.springframework.security.oauth2.jwt.*;
+import org.springframework.stereotype.Service;
+
+import java.time.Instant;
+import java.util.UUID;
+
+// token 관련 서비스
+@Service
+public class JwtTokenService {
+
+    // JwtTokenConfig에서 등록한 NimbusJwtEncoder(JwtEncoder의 하위 클래스)
+    private final JwtEncoder jwtEncoder;
+    private final MemberRepository memberRepository;
+    private final String issuer;
+    private final long accessTokenExpiration;
+    private final long refreshTokenExpiration;
+    private final JwtDecoder refreshDecoder;
+
+    public JwtTokenService(JwtEncoder jwtEncoder,
+                           MemberRepository memberRepository,
+                           @Value("${jwt.issuer}") String issuer,
+                           @Value("${jwt.access-token-expiration}") long accessTokenExpiration,
+                           @Value("${jwt.refresh-token-expiration}") long refreshTokenExpiration,
+                           @Qualifier("refreshTokenDecoder")JwtDecoder refreshDecoder) {
+        this.jwtEncoder = jwtEncoder;
+        this.memberRepository = memberRepository;
+        this.issuer = issuer;
+        this.accessTokenExpiration = accessTokenExpiration;
+        this.refreshTokenExpiration = refreshTokenExpiration;
+        this.refreshDecoder = refreshDecoder;
+    }
+
+    // accessToken 생성
+    public String createAccessToken(long id, Role role) {
+        return createToken(id, accessTokenExpiration, "access", role);
+    }
+    public String createAccessToken(long id) {
+        return createAccessToken(
+                id,
+                memberRepository.findById(id)
+                        .orElseThrow(() -> new MemberNotFoundException("해당 회원은 존재하지 않습니다."))
+                        .getRole()
+        );
+    }
+
+    // refreshToken 생성
+    public String createRefreshToken(long id, Role role) {
+        return createToken(id, refreshTokenExpiration, "refresh", role);
+    }
+    public String createRefreshToken(long id) {
+        return createRefreshToken(
+                id,
+                memberRepository.findById(id)
+                        .orElseThrow(() -> new MemberNotFoundException("해당 회원은 존재하지 않습니다."))
+                        .getRole()
+        );
+    }
+
+    // token 생성
+    private String createToken(long id, long expiration, String type, Role role) {
+
+        // Instant : 특정 시점을 나타내는 클래스
+        Instant now = Instant.now();
+
+        // JwtClaimsSet : JWT의 payload 내용을 만드는 클래스
+        JwtClaimsSet claimsSet = JwtClaimsSet.builder()
+                .id(UUID.randomUUID().toString())
+                .issuer(issuer)                     // 발급자 설정
+                .issuedAt(now)                      // 발급 시간
+                .subject(String.valueOf(id))        // 식별자 설정
+                .expiresAt(now.plusSeconds(expiration)) // 만료 시간 설정
+                .claim("token_type", type)
+                .claim("role", role.name())
+                .build();
+
+        // JWT 헤더에 RS256 알고리즘 지정
+        // 실제 서명은 JwtEncoder가 설정한 private key를 통해 수행
+        JwsHeader header = JwsHeader.with(SignatureAlgorithm.RS256).build();
+
+        // JwtEncoderParameters.from : header와 claimsSet을 발급 입력값으로 묶음
+        // encode : JWT를 인코딩하고 서명
+        return jwtEncoder.encode(
+                JwtEncoderParameters.from(header, claimsSet)
+        ).getTokenValue();  // 완성된 JWT Token을 문자열로 변환
+    }
+
+    // refresh token 확인 및 sub return
+    public Long validateRefreshToken(String refreshToken) {
+
+        try {
+            // jwt 토큰 검증
+            Jwt jwt = refreshDecoder.decode(refreshToken);
+
+            // refresh token 여부
+            if (!"refresh".equals(jwt.getClaimAsString("token_type"))) {
+                throw new InvalidRefreshTokenException("유효하지 않은 refresh token입니다.");
+            }
+
+            // refresh token이면 sub => member id 가져오기
+            return Long.valueOf(jwt.getSubject());
+        } catch(JwtException | NumberFormatException e) {
+            throw new InvalidRefreshTokenException("유효하지 않은 refresh token입니다.");
+        }
+    }
+}
