@@ -3,12 +3,14 @@ package com.ems.event.event.repository;
 import com.ems.event.event.entity.Event;
 import com.ems.event.event.entity.EventStatus;
 import jakarta.persistence.LockModeType;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -36,5 +38,14 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     /** 내가 만든 특정 상태 행사 (status=DRAFT 필터용) */
     Page<Event> findByStatusAndCreatedBy(EventStatus status, Long createdBy, Pageable pageable);
-}
 
+    /**
+     * 끝난 행사 자동 마감: 작성 중(DRAFT)·공개(OPEN) 행사 중 종료 시각(endsAt)이 지난 것을 한 번에 CLOSED로 바꾼다.
+     * 행사를 하나씩 불러와 바꾸지 않고 UPDATE 문 한 번으로 처리 → 바뀐 행 수를 돌려준다.
+     */
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("update Event e set e.status = :closed where e.status in :targets and e.endsAt <= :now")
+    int closeEndedEvents(@Param("targets") Collection<EventStatus> targets,
+                         @Param("closed") EventStatus closed,
+                         @Param("now") Instant now);
+}

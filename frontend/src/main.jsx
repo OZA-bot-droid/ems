@@ -2,6 +2,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import RegistrationPage from './pages/user/RegistrationPage.jsx';
 import './style.css';
+import { http } from './api.js';
 import EventDiscoveryPage from './pages/user/EventDiscoveryPage.jsx';
 import AdminEventPage from './pages/admin/AdminEventPage.jsx';
 import AdminSessionPage from './pages/admin/AdminSessionPage.jsx';
@@ -13,9 +14,8 @@ function BootstrapPage() {
     Promise.all(
       ['members', 'events', 'interactions'].map(async (service) => {
         try {
-          const response = await fetch('/api/' + service + '/ping');
-          if (!response.ok) throw new Error('HTTP ' + response.status);
-          return [service, await response.json()];
+          const response = await http.get('/' + service + '/ping');
+          return [service, response.data];
         } catch (error) {
           return [service, { status: 'ERROR', error: error.message }];
         }

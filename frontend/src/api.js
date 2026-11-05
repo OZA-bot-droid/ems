@@ -1,6 +1,18 @@
 // 백엔드에 요청을 보내는 공통 함수 모음 (주문서 양식)
-// 모든 주소는 /api 로 시작합니다. Vite가 Gateway(8080)로 넘겨 주고,
+// 요청은 axios로 보냅니다. 서버 주소는 코드에 적지 않고 환경변수 VITE_API_URL 에서 읽습니다.
+//   - 로컬(npm run dev): .env.development → http://localhost:8080 (Gateway)
+//   - 배포(npm run build): .env.production → 비워 둠 → 같은 주소의 /api 로 요청 (nginx가 Gateway로 넘김)
 // Gateway가 /api 를 떼서 각 서비스로 보냅니다.
+import axios from 'axios';
+
+// 끝에 / 가 붙어 있어도 // 가 두 번 생기지 않게 잘라 냄
+const API_BASE_URL = (import.meta.env.VITE_API_URL ?? '').replace(/\/+$/, '');
+
+// 모든 요청이 공통으로 쓰는 axios 설정 (주소 앞부분 + 쿠키 동봉)
+export const http = axios.create({
+  baseURL: `${API_BASE_URL}/api`,
+  withCredentials: true, // 다른 포트(5173→8080)로 보내도 refreshToken 쿠키를 같이 보냄 (토큰 재발급용)
+});
 
 // ===== 로그인 (JWT) =====
 // 로그인하면 Member Service가 Access Token(회원증)을 줍니다. 요청마다 Authorization: Bearer 토큰으로 보내고,
@@ -97,34 +109,33 @@ export class ApiError extends Error {
 async function request(path, { method = 'GET', body, auth = true } = {}) {
   const headers = {};
   if (auth && accessToken) headers.Authorization = `Bearer ${accessToken}`;
-  if (body !== undefined) headers['Content-Type'] = 'application/json';
 
   let response;
   try {
-    response = await fetch('/api' + path, {
-      method,
-      headers,
-      body: body === undefined ? undefined : JSON.stringify(body),
-    });
-  } catch {
+    // axios는 body(data)를 알아서 JSON으로 바꾸고 Content-Type도 붙여 줌
+    response = await http.request({ url: path, method, headers, data: body });
+  } catch (error) {
+    // 응답 자체가 없음 = 서버가 꺼졌거나 주소가 틀림
+    if (!error.response) {
+      throw new ApiError(
+        0,
+        'NETWORK_ERROR',
+        '서버에 연결할 수 없습니다. Gateway와 서비스가 켜져 있는지 확인하세요.',
+      );
+    }
+    // axios는 2xx가 아니면 여기(catch)로 옴 → 서버가 보낸 에러 {code, message} 꺼내기
+    const { status, data } = error.response;
+    // 토큰이 만료·위조로 거절되면 로그아웃 상태로 바꿈 (다시 로그인하도록)
+    if (status === 401 && auth && accessToken) setAccessToken(null);
     throw new ApiError(
-      0,
-      'NETWORK_ERROR',
-      '서버에 연결할 수 없습니다. Gateway와 서비스가 켜져 있는지 확인하세요.',
+      status,
+      data?.code ?? 'UNKNOWN',
+      data?.message ?? `요청이 실패했습니다 (HTTP ${status})`,
     );
   }
 
   if (response.status === 204) return null; // 삭제 성공: 본문 없음
-  const data = await response.json().catch(() => null);
-  if (!response.ok) {
-    // 토큰이 만료·위조로 거절되면 로그아웃 상태로 바꿈 (다시 로그인하도록)
-    if (response.status === 401 && auth && accessToken) setAccessToken(null);
-    throw new ApiError(
-      response.status,
-      data?.code ?? 'UNKNOWN',
-      data?.message ?? `요청이 실패했습니다 (HTTP ${response.status})`,
-    );
-  }
+  const data = response.data === '' ? null : response.data; // axios가 JSON을 이미 객체로 바꿔 줌
   // 성공 응답은 { success, data, message, ... } 로 감싸져 온다 (docs/api-response-standard.md).
   // 화면 코드는 알맹이(data)만 쓰면 되므로 여기서 한 번만 벗겨 준다.
   if (data && data.success === true && 'data' in data) return data.data;

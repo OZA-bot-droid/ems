@@ -143,6 +143,19 @@ public class EventService {
         return EventResponse.from(event); // 트랜잭션이 끝나면 변경 내용이 자동 저장됨
     }
 
+    /** 자동 마감 대상: 작성 중(DRAFT)이든 공개(OPEN)든 끝나면 마감 */
+    private static final List<EventStatus> AUTO_CLOSE_TARGETS = List.of(EventStatus.DRAFT, EventStatus.OPEN);
+
+    /**
+     * 종료 시각(endsAt)이 지난 DRAFT·OPEN 행사를 CLOSED로 자동 마감 (EventAutoCloseScheduler가 1분마다 부름)
+     * - 관리자가 직접 바꿀 때는 DRAFT → CLOSED가 막혀 있지만(EventStatus.canChangeTo), 시간이 지난 행사는 서버가 마감한다
+     * @return 이번에 마감된 행사 수
+     */
+    @Transactional
+    public int closeEndedEvents() {
+        return eventRepository.closeEndedEvents(AUTO_CLOSE_TARGETS, EventStatus.CLOSED, Instant.now(clock));
+    }
+
     @Transactional
     public void deleteEvent(Long eventId, Long requesterId) {
         Event event = findEvent(eventId);

@@ -3,6 +3,7 @@ package com.ems.event.event.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -344,5 +345,19 @@ class EventServiceTest {
         assertThat(page.totalElements()).isEqualTo(1);
         assertThat(page.content().get(0).meetingUrl()).isEqualTo("https://zoom.us/j/mine");
         verify(eventRepository, never()).findVisibleTo(any(), any(), any(), any()); // 남의 행사가 섞이는 조회는 안 씀
+    }
+
+    @Test
+    @DisplayName("자동 마감: 지금 시각을 기준으로 끝난 DRAFT·OPEN 행사를 CLOSED로 바꾸라고 요청한다")
+    void closeEndedEventsUsesNowForDraftAndOpen() {
+        List<EventStatus> targets = List.of(EventStatus.DRAFT, EventStatus.OPEN);
+        when(eventRepository.closeEndedEvents(targets, EventStatus.CLOSED, Instant.now(FIXED_CLOCK)))
+                .thenReturn(3);
+
+        int closed = eventService.closeEndedEvents();
+
+        assertThat(closed).isEqualTo(3);
+        verify(eventRepository).closeEndedEvents(eq(targets), eq(EventStatus.CLOSED),
+                eq(Instant.parse("2026-10-01T00:00:00Z")));
     }
 }
