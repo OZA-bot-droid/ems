@@ -2,38 +2,16 @@ import React from 'react';
 import '../style.css';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getClientId } from '../util/getClientId';
-import { useAuth } from './AuthContext';
-
-function BrandPanel() {
-  return (
-    <aside className="bg-[#17253c] px-8 py-10 text-white sm:px-12 lg:h-full lg:w-[420px] lg:shrink-0 lg:px-14 lg:py-0">
-      <div className="lg:pt-[65px]">
-        <div className="flex items-center gap-3">
-          <span className="h-[39px] w-3 rounded-[5px] bg-[#169b62]" />
-          <h1 className="text-[36px] font-bold leading-none tracking-[-0.02em]">EMS</h1>
-        </div>
-        <p className="mt-5 text-[13px] font-semibold text-[#afc2d2]">CLOUD NATIVE EVENT PLATFORM</p>
-      </div>
-
-      <div className="mt-28 lg:mt-[132px]">
-        <h2 className="text-[29px] font-bold leading-[1.03] tracking-[-0.02em]">
-          함께 만드는
-          <br />더 나은 행사 경험
-        </h2>
-        <p className="mt-12 text-[16px] leading-[1.15] text-[#bbc8d6]">
-          행사 탐색부터 실시간 참여까지
-          <br />
-          통합 이벤트 관리 플랫폼
-        </p>
-      </div>
-    </aside>
-  );
-}
+import { useAuth } from '../auth/AuthContext';
+import NoLoginHeaders from '../common/NoLoginHeaders';
+import { useApiUtil } from '../hook/apiUtil';
 
 function LoginForm() {
   const { setAccessToken } = useAuth();
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
+  const apiReq = useApiUtil();
+
   const [sp] = useSearchParams();
   const errorMessage = sp.get('error');
   const navigate = useNavigate();
@@ -51,7 +29,7 @@ function LoginForm() {
     event.preventDefault();
 
     try {
-      const res = await fetch(`http://localhost:8080/api/members/login`, {
+      const res = await apiReq(`/api/members/login`, {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -70,8 +48,9 @@ function LoginForm() {
         alert('로그인 실패');
         console.log(response);
       }
-    } catch {
-      alert('에러 발생');
+    } catch (err) {
+      alert('로그인 실패');
+      console.log(err);
     }
   };
 
@@ -174,7 +153,7 @@ const Login = () => {
   return (
     <main className="min-h-screen bg-[#f7f9fc] lg:flex lg:items-center lg:justify-center">
       <div className="min-h-screen w-full overflow-hidden bg-[#f7f9fc] lg:min-h-0 lg:h-[790px] lg:w-[1100px] lg:flex">
-        <BrandPanel />
+        <NoLoginHeaders />
 
         <section className="flex-1 px-8 py-14 sm:px-12 lg:px-0 lg:py-0">
           <LoginForm />

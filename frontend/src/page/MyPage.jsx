@@ -1,54 +1,40 @@
-import React, { useEffect } from 'react';
-import { useAuth } from './AuthContext';
-import { useApiUtil } from '../util/apiUtil';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useAuth } from '../auth/AuthContext';
+import { useApiUtil } from '../hook/apiUtil';
 
 const MyPage = () => {
-  const { accessToken, authLoading } = useAuth();
+  const { authLoading, logout } = useAuth();
   const apiReq = useApiUtil();
-  const navigate = useNavigate();
+  const [member, setMember] = useState({
+    email: '',
+    name: '',
+  });
 
   useEffect(() => {
-    if (!authLoading && !accessToken) {
-      navigate('/', { replace: true });
-    } else {
-      const myInfo = async () => {
-        if (authLoading) {
-          return;
+    const myInfo = async () => {
+      try {
+        const res = await apiReq('/api/members/me', {
+          method: 'GET',
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          console.log(data);
+          setMember((m) => ({ ...m, ...data.data }));
+        } else {
+          console.log(res);
         }
-
-        try {
-          const res = await apiReq('/members/me', {
-            method: 'GET',
-          });
-
-          if (res.ok) {
-            const data = await res.json();
-            console.log(data);
-          } else {
-            console.log('에러 발생');
-            console.log(res);
-          }
-        } catch (err) {
-          console.log(err);
-        }
-      };
-      myInfo();
-    }
-  }, [authLoading, accessToken, navigate]);
-
-  if (authLoading || !accessToken) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-[#f7f9fc]">
-        <p className="text-sm text-[#7a879a]">로그인 상태를 확인하고 있습니다.</p>
-      </main>
-    );
-  }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    myInfo();
+  }, [authLoading]);
 
   return (
     <main className="min-h-screen bg-[#f7f9fc] lg:flex lg:items-center lg:justify-center">
       <div className="min-h-screen w-full bg-[#f7f9fc] lg:flex lg:min-h-0 lg:h-[790px] lg:w-[1100px]">
-        {/* 왼쪽 EMS 브랜드 영역 */}
+        {/* header 영역 */}
         <aside className="flex flex-col justify-between bg-[#17253c] px-5 py-7 text-white lg:w-[214px] lg:shrink-0">
           <div>
             {/* EMS 로고 */}
@@ -67,20 +53,32 @@ const MyPage = () => {
               <p className="mb-5 text-[11px] font-semibold text-[#8fa2bb]">MY WORKSPACE</p>
 
               <ul className="space-y-2">
-                {['내 대시보드', '행사 찾기', '신청 내역', '세미나 참여', '실시간 투표'].map(
-                  (menu) => (
-                    <li
-                      key={menu}
-                      className="flex items-center gap-4 rounded-[7px] px-2 py-3 text-[13px] font-medium text-[#b1bfd2]"
-                    >
-                      <span
-                        className="h-[4px] w-[4px] shrink-0 rounded-full border border-[#b1bfd2]"
-                        aria-hidden="true"
-                      />
-                      <span>{menu}</span>
-                    </li>
-                  ),
-                )}
+                <li className="flex items-center gap-4 rounded-[7px] px-2 py-3 text-[13px] font-medium text-[#b1bfd2]">
+                  <span
+                    className="h-[4px] w-[4px] shrink-0 rounded-full border border-[#b1bfd2]"
+                    aria-hidden="true"
+                  />
+                  <button>마이페이지</button>
+                </li>
+                {['행사 찾기', '신청 내역', '세미나 참여', '실시간 투표'].map((menu) => (
+                  <li
+                    key={menu}
+                    className="flex items-center gap-4 rounded-[7px] px-2 py-3 text-[13px] font-medium text-[#b1bfd2]"
+                  >
+                    <span
+                      className="h-[4px] w-[4px] shrink-0 rounded-full border border-[#b1bfd2]"
+                      aria-hidden="true"
+                    />
+                    <span>{menu}</span>
+                  </li>
+                ))}
+                <li className="flex items-center gap-4 rounded-[7px] px-2 py-3 text-[13px] font-medium text-[#b1bfd2]">
+                  <span
+                    className="h-[4px] w-[4px] shrink-0 rounded-full border border-[#b1bfd2]"
+                    aria-hidden="true"
+                  />
+                  <button onClick={logout}>로그아웃</button>
+                </li>
               </ul>
             </nav>
           </div>
@@ -89,7 +87,7 @@ const MyPage = () => {
           <div className="mt-14 text-[11px] text-[#8295ae] lg:mt-0">시안 / API 연결 전</div>
         </aside>
 
-        {/* 오른쪽 My Page 영역 */}
+        {/* My Page 영역 */}
         <section className="min-w-0 flex-1 px-6 py-10 sm:px-10 lg:overflow-y-auto lg:px-12 lg:py-[65px]">
           <div className="mb-8">
             <h2 className="text-[28px] font-bold text-[#142238]">마이페이지</h2>
@@ -110,12 +108,12 @@ const MyPage = () => {
             <div className="mt-5 space-y-4 border-t border-[#e5e9f0] pt-5">
               <div>
                 <p className="text-[12px] text-[#7a879a]">이름</p>
-                <p className="mt-1 text-[14px] font-medium text-[#142238]">정보 연동 예정</p>
+                <p className="mt-1 text-[14px] font-medium text-[#142238]">{member.name}</p>
               </div>
 
               <div>
                 <p className="text-[12px] text-[#7a879a]">이메일</p>
-                <p className="mt-1 text-[14px] font-medium text-[#142238]">정보 연동 예정</p>
+                <p className="mt-1 text-[14px] font-medium text-[#142238]">{member.email}</p>
               </div>
             </div>
           </section>

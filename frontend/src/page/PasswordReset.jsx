@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useApiUtil } from '../hook/apiUtil';
 
 const PasswordReset = () => {
   const params = new URLSearchParams(window.location.search);
@@ -9,6 +10,7 @@ const PasswordReset = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const apiReq = useApiUtil();
 
   const passwordResetSuccess = async (event) => {
     event.preventDefault();
@@ -33,7 +35,7 @@ const PasswordReset = () => {
 
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:8080/api/members/password/reset', {
+      const res = await apiReq('http://localhost:8080/api/members/password/reset', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json;charset=utf-8',

@@ -2,7 +2,7 @@ import React from 'react';
 import { useAuth } from './AuthContext';
 import { Navigate, Outlet } from 'react-router-dom';
 
-const NotLoginOnly = () => {
+const AuthGuard = ({ loginRequired = false }) => {
   const { accessToken, authLoading } = useAuth();
 
   // 새로고침 후 refresh token을 확인하는 동안 대기
@@ -15,11 +15,14 @@ const NotLoginOnly = () => {
   }
 
   // 이미 로그인 했다면 My Page로 이동
-  if (accessToken) {
-    return <Navigate to="/mypage" replace />;
-  } else {
-    return <Outlet />;
+  if (loginRequired && !accessToken) {
+    return <Navigate to="/" replace />;
   }
+  if (!loginRequired && accessToken) {
+    // 수정 예정
+    return <Navigate to="/mypage" replace />;
+  }
+  return <Outlet />;
 };
 
-export default NotLoginOnly;
+export default AuthGuard;
