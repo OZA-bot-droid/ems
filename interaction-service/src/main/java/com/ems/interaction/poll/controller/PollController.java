@@ -65,6 +65,8 @@ public class PollController {
                                                @RequestHeader("X-User-Role") String role,
                                                HttpServletRequest request) {
         checkAdmin(role);
+        System.out.println("관리자가 생성한 투표 조회  X-Member-Id : "+userId+", X-User-Role : "+role);
+
 
         List<PollManagementDTO> response = pollService.getMyCreatedPolls(userId);
 

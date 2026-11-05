@@ -26,7 +26,15 @@ public class PollVoteController {
     private final PollVoteService pollVoteService;
     private final ApiResponseBuilder apiResponseBuilder;
 
+//  토큰 테스트
+    @GetMapping("/polls/test")
+    public ResponseEntity<?> testtoken(@RequestHeader("X-Member-Id") Long userId,
+                                       @RequestHeader("X-User-Role") String role,
+                                                HttpServletRequest request) {
+        System.out.println("X-Member-Id : "+userId+", X-User-Role : "+role);
 
+        return apiResponseBuilder.ok(userId, "토큰 테스트 완료", request);
+    }
     // 투표하기 기능
     @PostMapping("/polls/{pollId}/votes")
     public ResponseEntity<?> createPollVote(@Valid @RequestBody PollVoteSaveDTO dto, @PathVariable Long pollId,

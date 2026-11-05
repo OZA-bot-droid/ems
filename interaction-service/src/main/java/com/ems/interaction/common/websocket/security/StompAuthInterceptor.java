@@ -14,6 +14,7 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.stereotype.Component;
 
 import java.security.Principal;
@@ -21,6 +22,9 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtException;
 
 @Slf4j
 @Component
@@ -30,9 +34,8 @@ public class StompAuthInterceptor implements ChannelInterceptor {
     // 데모용
     private final DemoData demoData;
     private final PollRepository pollRepository;
+    private final JwtDecoder jwtDecoder;
 
-    // 로컬 개발 전용 테스트 토큰
-    private static final String TEST_TOKEN = "Bearer test-token";
 
     // 실제 투표 변경 알림 Topic
     private static final Pattern POLL_TOPIC = Pattern.compile("^/topic/polls/(\\d+)/updates$");
@@ -80,37 +83,48 @@ public class StompAuthInterceptor implements ChannelInterceptor {
 
         String authorization = accessor.getFirstNativeHeader("Authorization");
 
-        if (!TEST_TOKEN.equals(authorization)) {
-            throw new IllegalArgumentException("STOMP 인증 실패: 잘못된 토큰입니다.");
+        if (authorization == null || !authorization.startsWith("Bearer ")) {
+            throw new IllegalArgumentException("STOMP 인증 실패: Access Token이 없습니다.");
         }
 
-        // 로컬 테스트용 사용자 ID
-        String memberIdHeader = accessor.getFirstNativeHeader("X-Member-Id");
+        String accessToken = authorization.substring(7).trim();
 
-        if (memberIdHeader == null || memberIdHeader.isBlank()) {
-            throw new IllegalArgumentException("STOMP 인증 실패: 사용자 ID가 누락되었습니다.");
+        Jwt jwt;
+
+        try {
+            jwt = jwtDecoder.decode(accessToken);
+        } catch (JwtException e) {
+            throw new IllegalArgumentException("STOMP 인증 실패: 유효하지 않은 JWT입니다.");
+        }
+
+        if (!"access".equals(jwt.getClaimAsString("token_type"))) {
+            throw new IllegalArgumentException("STOMP 인증 실패: Access Token이 아닙니다.");
         }
 
         Long userId;
 
         try {
-            userId = Long.valueOf(memberIdHeader);
+            userId = Long.valueOf(jwt.getSubject());
+
+            if (userId <= 0) {
+                throw new NumberFormatException();
+            }
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("STOMP 인증 실패: 사용자 ID 형식이 잘못되었습니다.");
+            throw new IllegalArgumentException("STOMP 인증 실패: 사용자 ID가 올바르지 않습니다.");
         }
 
-        // DemoData 회원 존재 여부 확인
-        if (!demoData.members.containsKey(userId)) {
-            throw new IllegalArgumentException("STOMP 인증 실패: 존재하지 않는 사용자입니다.");
+        String role = jwt.getClaimAsString("role");
+
+        if (!"USER".equals(role) && !"ADMIN".equals(role)) {
+            throw new IllegalArgumentException("STOMP 인증 실패: 사용자 역할이 올바르지 않습니다.");
         }
 
-        // 실제 JWT 연결 시 교체할 부분
-        Principal principal = () -> String.valueOf(userId);
+        // JWT 검증을 마친 사용자 ID를 Principal에 등록
+        accessor.setUser(() -> String.valueOf(userId));
 
-        accessor.setUser(principal);
-
-        log.info("[STOMP] CONNECT 성공 - userId: {}", userId);
+        log.info("[STOMP] JWT CONNECT 성공 - userId: {}, role: {}", userId, role);
     }
+
 
     // 2. Topic 구독 권한 검사
     private void handleSubscribe(StompHeaderAccessor accessor) {
