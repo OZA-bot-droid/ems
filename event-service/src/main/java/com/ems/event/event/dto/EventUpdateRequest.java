@@ -13,6 +13,12 @@ public record EventUpdateRequest(
         Instant startsAt,
         Instant endsAt,
         @Size(max = 500) String meetingUrl,
-        EventStatus status
+        EventStatus status,
+        Instant postedDate // 게시 예약 시각 변경 (작성 중일 때만)
 ) {
+    /** 게시 예약을 바꾸지 않을 때 (기존 코드·테스트 호환용) */
+    public EventUpdateRequest(String title, String description, Integer capacity,
+                              Instant startsAt, Instant endsAt, String meetingUrl, EventStatus status) {
+        this(title, description, capacity, startsAt, endsAt, meetingUrl, status, null);
+    }
 }

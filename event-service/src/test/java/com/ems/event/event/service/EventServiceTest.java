@@ -360,4 +360,72 @@ class EventServiceTest {
         verify(eventRepository).closeEndedEvents(eq(targets), eq(EventStatus.CLOSED),
                 eq(Instant.parse("2026-10-01T00:00:00Z")));
     }
+
+    @Test
+    @DisplayName("게시 예약: 게시일을 넣어 만들면 DRAFT로 저장되고 게시일이 기록된다")
+    void createEventWithPostedDate() {
+        when(eventRepository.save(any(Event.class))).thenAnswer(call -> call.getArgument(0));
+
+        EventResponse created = eventService.createEvent(new EventCreateRequest(
+                "예약 행사", null, 100, at("05:00"), at("08:00"), null, Instant.parse("2026-10-15T00:00:00Z")), 99L);
+
+        assertThat(created.status()).isEqualTo(EventStatus.DRAFT);
+        assertThat(created.postedDate()).isEqualTo(Instant.parse("2026-10-15T00:00:00Z"));
+    }
+
+    @Test
+    @DisplayName("게시 예약: 게시일이 지금보다 과거면 400 INVALID_POSTED_DATE, 저장하지 않는다")
+    void createEventWithPastPostedDate() {
+        EventCreateRequest request = new EventCreateRequest(
+                "예약 행사", null, 100, at("05:00"), at("08:00"), null, Instant.parse("2026-09-30T00:00:00Z"));
+
+        assertThatThrownBy(() -> eventService.createEvent(request, 99L))
+                .isInstanceOf(BusinessException.class)
+                .extracting("code").isEqualTo("INVALID_POSTED_DATE");
+        verify(eventRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("게시 예약: 게시일이 행사 종료 이후면 400 INVALID_POSTED_DATE")
+    void createEventWithPostedDateAfterEnd() {
+        EventCreateRequest request = new EventCreateRequest(
+                "예약 행사", null, 100, at("05:00"), at("08:00"), null, at("09:00"));
+
+        assertThatThrownBy(() -> eventService.createEvent(request, 99L))
+                .isInstanceOf(BusinessException.class)
+                .extracting("code").isEqualTo("INVALID_POSTED_DATE");
+    }
+
+    @Test
+    @DisplayName("관리자가 직접 공개(DRAFT → OPEN)하면 게시일이 지금 시각으로 기록된다")
+    void manualOpenRecordsPostedDate() {
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(seminar(null)));
+        EventUpdateRequest request = new EventUpdateRequest(null, null, null, null, null, null, EventStatus.OPEN);
+
+        EventResponse updated = eventService.updateEvent(eventId, OWNER_ID, request);
+
+        assertThat(updated.status()).isEqualTo(EventStatus.OPEN);
+        assertThat(updated.postedDate()).isEqualTo(Instant.parse("2026-10-01T00:00:00Z"));
+    }
+
+    @Test
+    @DisplayName("이미 공개된 행사의 게시일을 바꾸면 409 EVENT_ALREADY_POSTED")
+    void cannotChangePostedDateAfterOpen() {
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(openSeminar(null)));
+        EventUpdateRequest request = new EventUpdateRequest(
+                null, null, null, null, null, null, null, Instant.parse("2026-10-20T00:00:00Z"));
+
+        assertThatThrownBy(() -> eventService.updateEvent(eventId, OWNER_ID, request))
+                .isInstanceOf(BusinessException.class)
+                .extracting("code").isEqualTo("EVENT_ALREADY_POSTED");
+    }
+
+    @Test
+    @DisplayName("자동 공개: 지금 시각 기준으로 게시일이 지난 DRAFT를 OPEN으로 바꾸라고 요청한다")
+    void openScheduledEventsUsesNow() {
+        when(eventRepository.openScheduledEvents(EventStatus.DRAFT, EventStatus.OPEN, Instant.now(FIXED_CLOCK)))
+                .thenReturn(1);
+
+        assertThat(eventService.openScheduledEvents()).isEqualTo(1);
+    }
 }

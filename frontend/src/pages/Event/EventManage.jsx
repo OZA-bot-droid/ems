@@ -142,7 +142,11 @@ export default function EventManage({ onManageSessions }) {
                 <li className="event-manage-row" key={event.id}>
                   <div className="event-manage-name">
                     <strong title={event.title}>{event.title}</strong>
-                    <span>{formatShort(event.startsAt)} · 정원 {event.capacity}명</span>
+                    <span>
+                      {formatShort(event.startsAt)} · 정원 {event.capacity}명
+                      {/* 작성 중 + 게시 예약이 있으면 언제 자동 공개되는지 안내 */}
+                      {event.status === 'DRAFT' && event.postedDate && ` · ${formatShort(event.postedDate)} 자동 공개 예정`}
+                    </span>
                   </div>
                   {/* 상태 배지: 내 행사이고 다음 단계가 있으면 눌러서 바꿈 (DRAFT → OPEN → CLOSED, 확인 후) */}
                   {isMine(event) && next ? (

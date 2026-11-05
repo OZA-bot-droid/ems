@@ -88,7 +88,8 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/oauth-success" element={<AuthLogin />} />
           <Route path="/login/success" element={<RequireRole allowedRole={['USER', 'ADMIN']}><LoginSuccess /></RequireRole>} />
-          <Route path="/events" element={<RequireRole allowedRole="USER"><EventDiscoveryPage /></RequireRole>} />
+          {/* 행사 목록은 USER(행사 찾기)·ADMIN(사이드바 행사 목록) 모두 사용 */}
+          <Route path="/events" element={<RequireRole allowedRole={['USER', 'ADMIN']}><EventDiscoveryPage /></RequireRole>} />
           <Route path="/registrations" element={<RequireRole allowedRole="USER"><RegistrationPage /></RequireRole>} />
           <Route path="/admin/events" element={<RequireRole allowedRole="ADMIN"><AdminEventPage /></RequireRole>} />
           <Route path="/admin/sessions" element={<RequireRole allowedRole="ADMIN"><AdminSessionPage /></RequireRole>} />

@@ -13,7 +13,8 @@ public record EventResponse(
         Instant endsAt,
         EventStatus status,
         String meetingUrl,
-        Long createdBy
+        Long createdBy,
+        Instant postedDate // 작성 중: 게시 예약 시각 / 공개 후: 실제 공개된 시각
 ) {
     public static EventResponse from(Event event) {
         return from(event, true);
@@ -33,6 +34,7 @@ public record EventResponse(
                 event.getEndsAt(),
                 event.getStatus(),
                 showMeetingUrl ? event.getMeetingUrl() : null,
-                event.getCreatedBy());
+                event.getCreatedBy(),
+                event.getPostedDate());
     }
 }

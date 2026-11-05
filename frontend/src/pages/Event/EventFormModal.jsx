@@ -17,6 +17,7 @@ export default function EventFormModal({ event, onClose, onSaved }) {
     endsAt: instantToKstInput(event?.endsAt),
     capacity: event?.capacity ?? '',
     meetingUrl: event?.meetingUrl ?? '',
+    postedDate: instantToKstInput(event?.postedDate), // 게시 예약 (선택)
   });
   const [fieldErrors, setFieldErrors] = useState({}); // 칸별 빨간 글씨
   const [serverError, setServerError] = useState(null); // 서버가 거절했을 때
@@ -37,6 +38,10 @@ export default function EventFormModal({ event, onClose, onSaved }) {
   // (이미 지난 행사의 설명만 고칠 때 막히지 않도록)
   const startChanged = !isEdit || form.startsAt !== instantToKstInput(event.startsAt);
 
+  // 게시 예약 칸: 새 등록이거나, 아직 작성 중(DRAFT)인 행사를 고칠 때만 보임
+  const canSchedule = !isEdit || event.status === 'DRAFT';
+  const postedChanged = form.postedDate !== instantToKstInput(event?.postedDate);
+
   const change = (name) => (e) => setForm({ ...form, [name]: e.target.value });
 
   // 1차 검사: 서버에 보내기 전에 화면에서 먼저 (백엔드 규칙과 같은 내용)
@@ -51,6 +56,11 @@ export default function EventFormModal({ event, onClose, onSaved }) {
     if (form.startsAt && form.endsAt && form.endsAt <= form.startsAt)
       errors.endsAt = '종료 일시는 시작 일시보다 뒤여야 합니다.';
     if (!form.capacity || Number(form.capacity) < 1) errors.capacity = '참가 정원은 1명 이상이어야 합니다.';
+    if (canSchedule && form.postedDate && postedChanged) {
+      if (form.postedDate <= nowKstInput()) errors.postedDate = '게시일은 현재 시간 이후로 설정하세요.';
+      else if (form.endsAt && form.postedDate >= form.endsAt)
+        errors.postedDate = '게시일은 행사 종료 일시보다 앞이어야 합니다.';
+    }
     if (form.meetingUrl.length > 500) errors.meetingUrl = '500자까지 입력할 수 있습니다.';
     return errors;
   }
@@ -105,6 +115,8 @@ export default function EventFormModal({ event, onClose, onSaved }) {
       capacity: Number(form.capacity),
       meetingUrl: form.meetingUrl.trim() || empty,
     };
+    // 게시 예약: 값을 넣었고(수정이면 바꿨을 때만) 작성 중일 때만 보냄
+    if (canSchedule && form.postedDate && postedChanged) body.postedDate = kstToInstant(form.postedDate);
 
     setSaving(true);
     let saved;
@@ -114,6 +126,7 @@ export default function EventFormModal({ event, onClose, onSaved }) {
       // 2차 검사: 서버가 거절한 이유를 알맞은 자리에 보여주기
       if (err.code === 'INVALID_PERIOD') setFieldErrors({ endsAt: err.message });
       else if (err.code === 'PAST_START_TIME') setFieldErrors({ startsAt: err.message });
+      else if (err.code === 'INVALID_POSTED_DATE') setFieldErrors({ postedDate: err.message });
       else setServerError(err);
       setSaving(false);
       return; // 행사가 안 만들어졌으면 세션도 만들지 않음
@@ -190,6 +203,22 @@ export default function EventFormModal({ event, onClose, onSaved }) {
               onChange={(v) => setForm((f) => ({ ...f, endsAt: v }))}
             />
           </Field>
+
+          {/* 게시 예약: 정한 시각이 되면 서버가 자동으로 "작성 중 → 모집 중"으로 공개 (1분 간격 확인) */}
+          {canSchedule && (
+            <Field label="게시 예약 (선택)" error={fieldErrors.postedDate}>
+              <DateTimeField
+                id="ev-posted"
+                value={form.postedDate}
+                min={nowKstInput()} // 지난 시각은 고를 수 없음
+                max={form.endsAt || undefined} // 행사가 끝나기 전까지만
+                onChange={(v) => setForm((f) => ({ ...f, postedDate: v }))}
+              />
+              <span className="text-[11px] text-(--ems-muted)">
+                비워 두면 직접 [공개]를 눌러야 합니다. 정하면 그 시각에 자동으로 "모집 중"이 됩니다.
+              </span>
+            </Field>
+          )}
 
           <div className="grid gap-5 sm:grid-cols-2">
             <Field label="참가 정원 *" error={fieldErrors.capacity}>
@@ -272,7 +301,7 @@ export default function EventFormModal({ event, onClose, onSaved }) {
           )}
 
           <p className="rounded-[8px] bg-(--ems-green-soft) px-4 py-2.5 text-xs font-semibold text-(--ems-green)">
-            {isEdit ? '행사 기간을 줄일 때는 세션이 기간 안에 있어야 합니다.' : '세션은 지금 함께 추가하거나, 등록 후 세션 관리에서 추가할 수 있습니다. 새 행사는 "작성 중"으로 시작합니다.'}
+            {isEdit ? '행사 기간을 줄일 때는 세션이 기간 안에 있어야 합니다.' : '세션은 지금 함께 추가하거나, 등록 후 세션 관리에서 추가할 수 있습니다. 새 행사는 "작성 중"으로 시작되어 [공개]를 눌러야 참가 신청이 가능합니다.'}
           </p>
         </div>
 

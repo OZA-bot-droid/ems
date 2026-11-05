@@ -99,6 +99,10 @@ public class EventService {
                 request.endsAt(),
                 request.meetingUrl(),
                 createdBy);
+        if (request.postedDate() != null) {   // 게시 예약 (선택)
+            validatePostedDate(request.postedDate(), request.endsAt());
+            event.changePostedDate(request.postedDate());
+        }
         return EventResponse.from(eventRepository.save(event));
     }
 
@@ -106,6 +110,7 @@ public class EventService {
     public EventResponse updateEvent(Long eventId, Long requesterId, EventUpdateRequest request) {
         Event event = findEvent(eventId);
         requireOwner(event, requesterId); // 행사를 만든 관리자만 수정·공개·마감
+        boolean wasDraft = event.getStatus() == EventStatus.DRAFT;
         if (event.isClosed()) {           // 마감된 행사는 내용·상태 모두 잠금 (삭제는 별도 규칙)
             throw new BusinessException(
                     HttpStatus.CONFLICT, "EVENT_CLOSED", "마감된 행사는 수정할 수 없습니다.");
@@ -125,6 +130,14 @@ public class EventService {
                     "행사 상태는 DRAFT → OPEN → CLOSED 순서로만 바꿀 수 있습니다. (현재: "
                             + event.getStatus() + ", 요청: " + request.status() + ")");
         }
+        // 게시 예약은 작성 중(DRAFT)일 때만 바꿀 수 있다 (이미 공개된 행사의 게시일은 기록이므로 잠금)
+        if (request.postedDate() != null) {
+            if (event.getStatus() != EventStatus.DRAFT) {
+                throw new BusinessException(
+                        HttpStatus.CONFLICT, "EVENT_ALREADY_POSTED", "이미 공개된 행사는 게시일을 바꿀 수 없습니다.");
+            }
+            validatePostedDate(request.postedDate(), endsAt);
+        }
         // 행사 일정을 줄였을 때 이미 등록된 세션이 행사 밖으로 벗어나면 막는다
         if (sessionRepository.existsOutsidePeriod(eventId, startsAt, endsAt)) {
             throw new BusinessException(
@@ -140,7 +153,23 @@ public class EventService {
                 request.endsAt(),
                 request.meetingUrl(),
                 request.status());
+        if (request.postedDate() != null) {
+            event.changePostedDate(request.postedDate());
+        }
+        // 관리자가 직접 공개(DRAFT → OPEN)하면 게시일 = 지금 (예약해 둔 시각보다 먼저 공개한 경우 포함)
+        if (wasDraft && event.getStatus() == EventStatus.OPEN) {
+            event.changePostedDate(Instant.now(clock));
+        }
         return EventResponse.from(event); // 트랜잭션이 끝나면 변경 내용이 자동 저장됨
+    }
+
+    /**
+     * 게시 예약 자동 공개: 게시일(postedDate)이 지난 DRAFT 행사를 OPEN으로 (EventAutoCloseScheduler가 1분마다 부름)
+     * @return 이번에 공개된 행사 수
+     */
+    @Transactional
+    public int openScheduledEvents() {
+        return eventRepository.openScheduledEvents(EventStatus.DRAFT, EventStatus.OPEN, Instant.now(clock));
     }
 
     /** 자동 마감 대상: 작성 중(DRAFT)이든 공개(OPEN)든 끝나면 마감 */
@@ -192,6 +221,18 @@ public class EventService {
         if (!endsAt.isAfter(startsAt)) {
             throw new BusinessException(
                     HttpStatus.BAD_REQUEST, "INVALID_PERIOD", "종료 시각은 시작 시각보다 뒤여야 합니다.");
+        }
+    }
+
+    /** 게시 예약 시각은 지금 이후, 행사 종료 전이어야 한다 */
+    private void validatePostedDate(Instant postedDate, Instant endsAt) {
+        if (!postedDate.isAfter(Instant.now(clock))) {
+            throw new BusinessException(
+                    HttpStatus.BAD_REQUEST, "INVALID_POSTED_DATE", "게시일은 현재 시간 이후로 설정하세요.");
+        }
+        if (!postedDate.isBefore(endsAt)) {
+            throw new BusinessException(
+                    HttpStatus.BAD_REQUEST, "INVALID_POSTED_DATE", "게시일은 행사 종료 일시보다 앞이어야 합니다.");
         }
     }
 

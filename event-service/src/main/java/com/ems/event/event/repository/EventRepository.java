@@ -52,4 +52,15 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     int closeEndedEvents(@Param("targets") Collection<EventStatus> targets,
                          @Param("closed") EventStatus closed,
                          @Param("now") Instant now);
+
+    /**
+     * 게시 예약 자동 공개: 작성 중(DRAFT)이고 게시일(postedDate)이 지난 행사를 OPEN으로 바꾼다.
+     * 이미 끝난 행사(endsAt 지남)는 공개하지 않음 → 자동 마감 쪽에서 CLOSED 처리
+     */
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("update Event e set e.status = :open "
+            + "where e.status = :draft and e.postedDate is not null and e.postedDate <= :now and e.endsAt > :now")
+    int openScheduledEvents(@Param("draft") EventStatus draft,
+                            @Param("open") EventStatus open,
+                            @Param("now") Instant now);
 }

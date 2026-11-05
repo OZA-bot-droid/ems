@@ -55,6 +55,10 @@ public class Event {
     @Column(name = "meeting_url", length = 500)
     private String meetingUrl;
 
+//    게시일 (timestamptz, 기존 행사는 비어 있을 수 있음)
+    @Column(name = "posted_date")
+    private Instant postedDate;
+
     protected Event() {
         // JPA용
     }
@@ -83,6 +87,15 @@ public class Event {
         if (status != null) this.status = status;
     }
 
+    /**
+     * 게시일 바꾸기
+     * - 작성 중(DRAFT): 게시 예약 시각 (이 시각이 되면 스케줄러가 OPEN으로 공개)
+     * - 공개(OPEN) 순간: 실제 공개된 시각으로 기록
+     */
+    public void changePostedDate(Instant postedDate) {
+        this.postedDate = postedDate;
+    }
+
     /** 마감된 행사인가? 마감되면 행사·세션을 더 이상 바꿀 수 없다 */
     public boolean isClosed() {
         return status == EventStatus.CLOSED;
@@ -102,4 +115,5 @@ public class Event {
     public EventStatus getStatus() { return status; }
     public Long getCreatedBy() { return createdBy; }
     public String getMeetingUrl() { return meetingUrl; }
+    public Instant getPostedDate() { return postedDate; }
 }

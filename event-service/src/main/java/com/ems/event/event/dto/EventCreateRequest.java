@@ -13,6 +13,12 @@ public record EventCreateRequest(
         @NotNull @Min(1) Integer capacity,
         @NotNull Instant startsAt,
         @NotNull Instant endsAt,
-        @Size(max = 500) String meetingUrl
+        @Size(max = 500) String meetingUrl,
+        Instant postedDate // 게시 예약 시각 (선택). 이 시각이 되면 DRAFT → OPEN 자동 공개
 ) {
+    /** 게시 예약 없이 만들 때 (기존 코드·테스트 호환용) */
+    public EventCreateRequest(String title, String description, Integer capacity,
+                              Instant startsAt, Instant endsAt, String meetingUrl) {
+        this(title, description, capacity, startsAt, endsAt, meetingUrl, null);
+    }
 }
