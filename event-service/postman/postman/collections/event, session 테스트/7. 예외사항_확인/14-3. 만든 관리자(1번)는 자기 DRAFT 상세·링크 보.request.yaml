@@ -2,9 +2,6 @@ $kind: http-request
 name: 14-3. 만든 관리자(1번)는 자기 DRAFT 상세·링크 보임 → 200
 url: "{{baseUrl}}/events/{{exEventId}}"
 method: GET
-headers:
-  X-Member-Id: "{{adminId}}"
-  X-User-Role: ADMIN
 scripts:
   - type: afterResponse
     code: |-

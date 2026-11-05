@@ -1,0 +1,3 @@
+$kind: collection
+description: Gateway(8080) 경유. 관리자1 → {{accessToken}}(컬렉션 기본 인증), 관리자2 → {{admin2Token}}, 사용자1 → {{userToken}}. 회원가입은 처음만 201, 이후엔 409가 정상.
+order: 1000

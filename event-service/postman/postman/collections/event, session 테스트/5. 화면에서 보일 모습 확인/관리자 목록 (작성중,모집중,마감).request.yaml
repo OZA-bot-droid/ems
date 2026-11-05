@@ -1,9 +1,6 @@
 $kind: http-request
 url: "{{baseUrl}}/events?page=0&size=10"
 method: GET
-headers:
-  X-Member-Id: "{{adminId}}"
-  X-User-Role: ADMIN
 queryParams:
   page: "0"
   size: "10"

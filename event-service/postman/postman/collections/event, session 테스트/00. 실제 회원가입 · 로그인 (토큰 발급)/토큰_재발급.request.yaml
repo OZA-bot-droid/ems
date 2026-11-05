@@ -1,0 +1,28 @@
+$kind: http-request
+url: "{{baseUrl}}/members/reissue"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "clientId": "b38defd4-1a08-4070-907e-2a3a2826fca0"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      // 관리자1 로그인 때 받은 refreshToken 쿠키 + 같은 clientId로 accessToken 재발급
+      const json = pm.response.text() ? pm.response.json() : {};
+
+      if (pm.response.code === 200 && json.data?.accessToken) {
+          pm.collectionVariables.set(
+              "accessToken",
+              json.data.accessToken
+          );
+          pm.variables.set("accessToken", json.data.accessToken);
+
+          console.log("accessToken 저장 완료");
+      }
+    language: text/javascript
+order: 4500

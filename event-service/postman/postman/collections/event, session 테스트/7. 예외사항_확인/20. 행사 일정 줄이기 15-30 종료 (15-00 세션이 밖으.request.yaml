@@ -4,8 +4,6 @@ url: "{{baseUrl}}/events/{{exEventId}}"
 method: PATCH
 headers:
   Content-Type: application/json
-  X-Member-Id: "{{adminId}}"
-  X-User-Role: ADMIN
 body:
   type: json
   content: |-

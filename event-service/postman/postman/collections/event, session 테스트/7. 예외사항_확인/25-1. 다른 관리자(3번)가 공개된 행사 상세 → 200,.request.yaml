@@ -2,9 +2,10 @@ $kind: http-request
 name: 25-1. 다른 관리자(3번)가 공개된 행사 상세 → 200, 회의 링크 숨김
 url: "{{baseUrl}}/events/{{exEventId}}"
 method: GET
-headers:
-  X-Member-Id: "3"
-  X-User-Role: ADMIN
+auth:
+  type: bearer
+  credentials:
+    token: "{{admin2Token}}"
 scripts:
   - type: afterResponse
     code: |-

@@ -3,8 +3,6 @@ url: "{{baseUrl}}/events/{{eventA}}/sessions"
 method: POST
 headers:
   Content-Type: application/json
-  X-Member-Id: "{{adminId}}"
-  X-User-Role: ADMIN
 body:
   type: json
   content: |-
@@ -18,5 +16,6 @@ scripts:
     code: |-
       pm.test('201 응답', () => pm.response.to.have.status(201));
       pm.collectionVariables.set('sessionA1', pm.response.json().data.id); // 6번 삭제에서 사용
+      pm.variables.set('sessionA1', pm.collectionVariables.get('sessionA1'));
     language: text/javascript
 order: 2000

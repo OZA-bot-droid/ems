@@ -1,9 +1,6 @@
 $kind: http-request
 url: "{{baseUrl}}/events/{{exEventId}}"
 method: GET
-headers:
-  X-Member-Id: "{{adminId}}"
-  X-User-Role: ADMIN
 scripts:
   - type: afterResponse
     code: |-

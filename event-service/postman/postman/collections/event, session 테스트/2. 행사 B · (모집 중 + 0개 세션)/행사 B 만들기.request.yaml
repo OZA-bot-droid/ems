@@ -3,8 +3,6 @@ url: "{{baseUrl}}/events"
 method: POST
 headers:
   Content-Type: application/json
-  X-Member-Id: "{{adminId}}"
-  X-User-Role: ADMIN
 body:
   type: json
   content: |-
@@ -21,5 +19,6 @@ scripts:
     code: |-
       pm.test('201 응답', () => pm.response.to.have.status(201));
       pm.collectionVariables.set('eventB', pm.response.json().data.id);
+      pm.variables.set('eventB', pm.collectionVariables.get('eventB'));
     language: text/javascript
 order: 1000

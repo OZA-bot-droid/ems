@@ -4,14 +4,16 @@ url: "{{baseUrl}}/events/{{exEventId}}/sessions/{{exSessionB}}"
 method: PATCH
 headers:
   Content-Type: application/json
-  X-Member-Id: "3"
-  X-User-Role: ADMIN
 body:
   type: json
   content: |-
     {
       "title": "예외 세션 B (제목 수정)"
     }
+auth:
+  type: bearer
+  credentials:
+    token: "{{admin2Token}}"
 scripts:
   - type: afterResponse
     code: |-
