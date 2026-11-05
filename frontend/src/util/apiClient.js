@@ -2,13 +2,10 @@ import axios from 'axios';
 
 const configuredApiUrl = (import.meta.env.VITE_API_URL ?? '').replace(/\/+$/, '');
 
-// 개발 중에는 Vite proxy가 API 요청을 Gateway로 전달합니다.
-// 배포에서는 VITE_API_URL에 설정한 서버 주소를 사용합니다.
-export const API_BASE_URL = import.meta.env.DEV
-  ? '/api'
-  : configuredApiUrl
-    ? `${configuredApiUrl}/api`
-    : '/api';
+// 팀 공지 기준: 서버 주소는 .env 의 VITE_API_URL 에서 읽고, axios가 그 주소(Gateway)로 직접 요청합니다.
+//   - 로컬: .env.development → http://localhost:8080 → http://localhost:8080/api/...
+//   - 배포: .env.production 에서 비워 두면 같은 주소의 /api (nginx가 Gateway로 넘김)
+export const API_BASE_URL = configuredApiUrl ? `${configuredApiUrl}/api` : '/api';
 
 export const apiUrl = (path) => `${API_BASE_URL}${path.startsWith('/') ? path : `/${path}`}`;
 

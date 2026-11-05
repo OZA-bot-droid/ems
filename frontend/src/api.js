@@ -1,7 +1,7 @@
 // 백엔드에 요청을 보내는 공통 함수 모음 (주문서 양식)
 // 요청은 util/apiClient.js 의 axios(apiClient)로 보냅니다. 로그인 토큰도 apiClient가 함께 붙여 줍니다.
-//   - 로컬(npm run dev): /api 로 요청 → Vite proxy가 .env.development 의 VITE_API_URL(Gateway)로 넘김
-//   - 배포(npm run build): VITE_API_URL 이 있으면 그 주소, 없으면 같은 주소의 /api (nginx가 Gateway로 넘김)
+//   - 로컬(npm run dev): .env.development 의 VITE_API_URL(Gateway, http://localhost:8080)로 직접 요청
+//   - 배포(npm run build): .env.production 의 VITE_API_URL, 비어 있으면 같은 주소의 /api (nginx가 Gateway로 넘김)
 // Gateway가 /api 를 떼서 각 서비스로 보냅니다.
 import { apiClient } from './util/apiClient.js';
 
