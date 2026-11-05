@@ -1,17 +1,11 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-<<<<<<< HEAD
-import RegistrationPage from './pages/user/RegistrationPage.jsx';
-import './style.css';
-import { http } from './api.js';
-=======
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './page/AuthContext.jsx';
 import AuthLogin from './page/AuthLogin.jsx';
 import Login from './page/Login.jsx';
 import LoginSuccess from './page/LoginSuccess.jsx';
 import Signup from './page/Signup.jsx';
->>>>>>> origin/feature/Event-Service
 import EventDiscoveryPage from './pages/user/EventDiscoveryPage.jsx';
 import RegistrationPage from './pages/user/RegistrationPage.jsx';
 import AdminEventPage from './pages/admin/AdminEventPage.jsx';
@@ -28,11 +22,7 @@ function BootstrapPage() {
     Promise.all(
       ['members', 'events', 'interactions'].map(async (service) => {
         try {
-<<<<<<< HEAD
-          const response = await http.get('/' + service + '/ping');
-=======
           const response = await apiClient.get('/' + service + '/ping');
->>>>>>> origin/feature/Event-Service
           return [service, response.data];
         } catch (error) {
           const message = error.response ? 'HTTP ' + error.response.status : error.message;
