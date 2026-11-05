@@ -52,19 +52,21 @@ public class AuthService {
     public void replaceRefreshToken(Member member, String refreshToken, UUID clientId) {
 
         // 동일 회원의 로그인 요청을 직렬화하기 위한 행 잠금
-        Member lockedMember = memberRepository.findByIdForUpdate(member.getId())
+        memberRepository.findByIdForUpdate(member.getId())
                 .orElseThrow(() -> new MemberNotFoundException("존재하지 않는 회원입니다."));
 
         String tokenHash = hashRefreshToken(refreshToken);
         Optional<RefreshToken> existingToken = refreshTokenRepository.findByMemberAndClientId(member, clientId);
 
         if(existingToken.isPresent()) {
+            RefreshToken token = existingToken.get();
+            saveRefreshTokenHistory(token);
             existingToken.get().rotate(
                     tokenHash,
                     Instant.now().plusSeconds(refreshTokenExpiration)
             );
         } else {
-            // 처음 로그인하는 클라이언트라면 INSERT
+            // 처음 로그인하는 클라이언트라면 INSERT(새로운 세션 생성)
             refreshTokenRepository.save(
                     RefreshToken.toBuilder(
                             member,
@@ -123,9 +125,7 @@ public class AuthService {
         Member member = memberRepository
                 .findByIdForUpdate(memberId)
                 .orElseThrow(() ->
-                        new InvalidRefreshTokenException(
-                                "유효하지 않은 Refresh Token입니다."
-                        )
+                        new InvalidRefreshTokenException("유효하지 않은 Refresh Token입니다.")
                 );
 
         // 활성화된 refresh token 조회
@@ -183,14 +183,7 @@ public class AuthService {
 
         // 회원 존재 확인과 함께 JWT sub가 DB에 저장된 Refresh Token 소유자의 회원 ID와 일치하는지도 검사
         // 폐기할 기존의 refresh token을 history에 기록
-        refreshTokenHistoryRepository.save(
-                RefreshTokenHistory.builder()
-                        .member(member)
-                        .sessionId(refreshEntity.getSessionId())
-                        .tokenHash(tokenHash)
-                        .revokedAt(now)
-                        .build()
-        );
+        saveRefreshTokenHistory(refreshEntity);
 
         // 새로운 accessToken과 refreshToken 발급
         Role role = member.getRole();
@@ -209,6 +202,18 @@ public class AuthService {
         RefreshToken refreshTokenEntity = refreshTokenRepository.findByClientIdAndTokenHash(dto.clientId(), hashRefreshToken(refreshToken))
                 .orElseThrow(() -> new InvalidRefreshTokenException("클라이언트의 정보가 일치하지 않습니다."));
 
+        saveRefreshTokenHistory(refreshTokenEntity);
         refreshTokenRepository.delete(refreshTokenEntity);
+    }
+
+    private void saveRefreshTokenHistory(RefreshToken refreshToken) {
+        refreshTokenHistoryRepository.save(
+                RefreshTokenHistory.builder()
+                        .member(refreshToken.getMember())
+                        .sessionId(refreshToken.getSessionId())
+                        .tokenHash(refreshToken.getTokenHash())
+                        .revokedAt(Instant.now())
+                        .build()
+        );
     }
 }
