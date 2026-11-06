@@ -1,0 +1,20 @@
+$kind: http-request
+url: "{{baseUrl}}/events/{{eventD}}/sessions"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "title": "마감 후 세션",
+      "startsAt": "2027-11-12T10:00:00Z",
+      "endsAt": "2027-11-12T11:00:00Z"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('409 응답', () => pm.response.to.have.status(409));
+      pm.test('code = EVENT_CLOSED', () => pm.expect(pm.response.json().code).to.eql('EVENT_CLOSED'));
+    language: text/javascript
+order: 42000

@@ -1,0 +1,21 @@
+$kind: http-request
+name: 4. 세션 시간 겹침 (행사 A 세션 2와) → 409 SESSION_TIME_CONFLICT
+url: "{{baseUrl}}/events/{{eventA}}/sessions"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "title": "test",
+      "startsAt": "2027-11-01T03:00:00Z",
+      "endsAt": "2027-11-01T03:30:00Z"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('409 응답', () => pm.response.to.have.status(409));
+      pm.test('code = SESSION_TIME_CONFLICT', () => pm.expect(pm.response.json().code).to.eql('SESSION_TIME_CONFLICT'));
+    language: text/javascript
+order: 4000

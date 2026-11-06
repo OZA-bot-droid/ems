@@ -1,0 +1,22 @@
+$kind: http-request
+url: "{{baseUrl}}/events"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "title": "예외 테스트용 행사",
+      "description": "예외 확인 전용",
+      "capacity": 0,
+      "startsAt": "2027-12-01T05:00:00Z",
+      "endsAt": "2027-12-01T08:00:00Z"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('400 응답', () => pm.response.to.have.status(400));
+      pm.test('code = VALIDATION_ERROR', () => pm.expect(pm.response.json().code).to.eql('VALIDATION_ERROR'));
+    language: text/javascript
+order: 7000

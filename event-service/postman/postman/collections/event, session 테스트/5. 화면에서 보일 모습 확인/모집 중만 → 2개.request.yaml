@@ -1,0 +1,16 @@
+$kind: http-request
+url: "{{baseUrl}}/events?status=OPEN"
+method: GET
+queryParams:
+  status: OPEN
+auth:
+  type: bearer
+  credentials:
+    token: "{{userToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('200 응답', () => pm.response.to.have.status(200));
+      pm.test('2개', () => pm.expect(pm.response.json().data.totalElements).to.eql(2));
+    language: text/javascript
+order: 3000

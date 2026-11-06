@@ -1,0 +1,24 @@
+$kind: http-request
+url: "{{baseUrl}}/events"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "title": "10.27 test",
+      "description": "test를 위한 세미나",
+      "capacity": 79,
+      "startsAt": "2027-11-01T01:00:00Z",
+      "endsAt": "2027-11-01T09:00:00Z",
+      "meetingUrl": "https://meet.example.com/test"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('201 응답', () => pm.response.to.have.status(201));
+      pm.collectionVariables.set('eventA', pm.response.json().data.id);
+      pm.variables.set('eventA', pm.collectionVariables.get('eventA'));
+    language: text/javascript
+order: 1000

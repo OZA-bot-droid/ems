@@ -1,0 +1,21 @@
+$kind: http-request
+name: 3. 행사 기간 밖 세션 (행사 A 18시 이후) → 400 SESSION_OUT_OF_EVENT
+url: "{{baseUrl}}/events/{{eventA}}/sessions"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "title": "test",
+      "startsAt": "2027-11-01T10:00:00Z",
+      "endsAt": "2027-11-01T11:00:00Z"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('400 응답', () => pm.response.to.have.status(400));
+      pm.test('code = SESSION_OUT_OF_EVENT', () => pm.expect(pm.response.json().code).to.eql('SESSION_OUT_OF_EVENT'));
+    language: text/javascript
+order: 3000

@@ -1,0 +1,16 @@
+$kind: http-request
+url: "{{baseUrl}}/events/{{eventB}}"
+method: PATCH
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "status": "OPEN"
+    }
+scripts:
+  - type: afterResponse
+    code: pm.test('200 응답', () => pm.response.to.have.status(200));
+    language: text/javascript
+order: 2000

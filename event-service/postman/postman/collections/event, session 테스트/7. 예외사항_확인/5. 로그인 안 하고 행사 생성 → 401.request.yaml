@@ -1,0 +1,24 @@
+$kind: http-request
+url: "{{baseUrl}}/events"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "title": "예외 테스트용 행사",
+      "description": "예외 확인 전용",
+      "capacity": 30,
+      "startsAt": "2027-12-01T05:00:00Z",
+      "endsAt": "2027-12-01T08:00:00Z"
+    }
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('401 응답', () => pm.response.to.have.status(401));
+      pm.test('code = UNAUTHORIZED', () => pm.expect(pm.response.json().code).to.eql('UNAUTHORIZED'));
+    language: text/javascript
+order: 5000

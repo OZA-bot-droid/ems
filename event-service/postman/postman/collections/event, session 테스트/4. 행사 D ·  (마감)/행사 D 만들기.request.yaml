@@ -1,0 +1,23 @@
+$kind: http-request
+url: "{{baseUrl}}/events"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "title": "개발자 커뮤니티 밋업",
+      "description": "주니어 개발자들이 프로젝트 경험을 나누는 밋업입니다.",
+      "capacity": 40,
+      "startsAt": "2027-11-12T10:00:00Z",
+      "endsAt": "2027-11-12T12:00:00Z"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('201 응답', () => pm.response.to.have.status(201));
+      pm.collectionVariables.set('eventD', pm.response.json().data.id);
+      pm.variables.set('eventD', pm.collectionVariables.get('eventD'));
+    language: text/javascript
+order: 1000
