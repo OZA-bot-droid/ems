@@ -2,13 +2,15 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './auth/AuthContext';
+import AuthGuard from './auth/AuthGuard';
+import Main from './page/main';
+import Signup from './page/Signup';
 import Login from './page/Login';
 import AuthLogin from './page/OAuthCallback';
 import MyPage from './page/MyPage';
-import Signup from './page/Signup';
 import PasswordRequest from './page/PasswordRequest';
 import PasswordReset from './page/PasswordReset';
-import AuthGuard from './auth/AuthGuard';
+import PasswordChange from './page/PasswordChange';
 
 function App() {
   return (
@@ -16,6 +18,8 @@ function App() {
       <AuthProvider>
         <Routes>
           <Route>
+            <Route path="/" element={<Main />} />
+
             <Route element={<AuthGuard />}>
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
@@ -26,6 +30,7 @@ function App() {
 
             <Route element={<AuthGuard loginRequired />}>
               <Route path="/mypage" element={<MyPage />} />
+              <Route path="/password/change" element={<PasswordChange />} />
             </Route>
           </Route>
         </Routes>

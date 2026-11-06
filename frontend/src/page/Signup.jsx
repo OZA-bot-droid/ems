@@ -75,6 +75,7 @@ function SignupForm() {
         data: { ...member, role: role },
       });
 
+      console.log(res.data);
       if (res.status === 201) {
         alert(res.data.message);
         navigate('/login');
@@ -89,174 +90,169 @@ function SignupForm() {
   };
 
   return (
-    <div className="signup-scroll max-h-[720px] w-[620px] overflow-y-auto">
-      <div className="w-full px-8">
-        <form onSubmit={handleSubmit}>
-          <h2 className="text-[26px] font-bold tracking-[-0.02em] text-[#142238]">
-            새로운 계정을 만들어보세요
-          </h2>
-          <p className="mt-2 text-[14px] leading-6 text-[#7a879a]">
-            필수 정보를 입력하여 EMS에 가입하세요.
-          </p>
+    <div className="w-[600px] px-8">
+      <form onSubmit={handleSubmit}>
+        <h2 className="text-[26px] font-bold tracking-[-0.02em] text-[#142238]">
+          새로운 계정을 만들어보세요
+        </h2>
+        <p className="mt-2 text-[14px] leading-6 text-[#7a879a]">
+          필수 정보를 입력하여 EMS에 가입하세요.
+        </p>
 
-          <div className="mt-7">
-            <label htmlFor="signup-name" className="block text-[13px] font-semibold text-[#142238]">
-              이름
-            </label>
-            <input
-              id="signup-name"
-              type="text"
-              name="name"
-              onChange={(event) =>
-                setMember((m) => ({ ...m, [event.target.name]: event.target.value }))
-              }
-              placeholder="홍길동"
-              autoComplete="name"
-              className="mt-2 h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none transition placeholder:text-[#a0a9b8] focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15"
-            />
-          </div>
-
-          <div className="mt-4">
-            <label
-              htmlFor="signup-email"
-              className="block text-[13px] font-semibold text-[#142238]"
-            >
-              이메일
-            </label>
-            <input
-              id="signup-email"
-              type="email"
-              name="email"
-              onChange={(event) =>
-                setMember((m) => ({ ...m, [event.target.name]: event.target.value }))
-              }
-              placeholder="name@example.com"
-              autoComplete="email"
-              className="mt-2 h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none transition placeholder:text-[#a0a9b8] focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15"
-            />
-          </div>
-
-          <div className="mt-4">
-            <label
-              htmlFor="signup-password"
-              className="block text-[13px] font-semibold text-[#142238]"
-            >
-              비밀번호
-            </label>
-            <input
-              id="signup-password"
-              type="password"
-              name="password"
-              onChange={(event) =>
-                setMember((m) => ({ ...m, [event.target.name]: event.target.value }))
-              }
-              placeholder="••••••••"
-              autoComplete="new-password"
-              className="mt-2 h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none transition placeholder:text-[#a0a9b8] focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15"
-            />
-          </div>
-
-          <div className="mt-4">
-            <label
-              htmlFor="signup-password-confirm"
-              className="block text-[13px] font-semibold text-[#142238]"
-            >
-              비밀번호 확인
-            </label>
-            <input
-              id="signup-password-confirm"
-              type="password"
-              value={passwordConfirm}
-              onChange={(event) => setPasswordConfirm(event.target.value)}
-              placeholder="••••••••"
-              autoComplete="new-password"
-              className="mt-2 h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none transition placeholder:text-[#a0a9b8] focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15"
-            />
-          </div>
-
-          <div className="my-4">
-            <p className="mb-2 text-center text-xs text-gray-500">회원 유형</p>
-
-            <div className="flex items-center justify-center gap-6">
-              <button
-                type="button"
-                onClick={() => setRole('USER')}
-                className={`
-                  rounded-full px-5 py-2 transition-all duration-200
-                  ${
-                    role === 'USER'
-                      ? 'bg-[#169b62] text-white font-bold'
-                      : 'bg-transparent text-[#9aa5b4] font-medium'
-                  }
-                `}
-              >
-                참여자
-              </button>
-              <button
-                type="button"
-                onClick={() => setRole('ADMIN')}
-                className={`
-                  rounded-full px-5 py-2 transition-all duration-200
-                  ${
-                    role === 'ADMIN'
-                      ? 'bg-[#169b62] text-white font-bold'
-                      : 'bg-transparent text-[#9aa5b4] font-medium'
-                  }
-                `}
-              >
-                주최자
-              </button>
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            className="mt-7 flex h-[44px] w-full items-center justify-center rounded-[10px] bg-[#169b62] px-4 text-[13px] font-semibold text-white transition-colors hover:bg-[#128653] focus:outline-none focus:ring-2 focus:ring-[#169b62]/30"
-          >
-            회원가입
-          </button>
-
-          {errorMessage && (
-            <p className="mt-3 text-center text-[12px] text-red-500">{errorMessage}</p>
-          )}
-
-          <button
-            type="button"
-            onClick={() => navigate('/login')}
-            className="mt-4 block w-full text-center text-[13px] font-medium text-[#169b62] hover:underline"
-          >
-            이미 계정이 있으신가요?&nbsp;&nbsp; 로그인
-          </button>
-        </form>
-
-        {/* 소셜 로그인 영역 */}
-        <div className="pb-4">
-          <div className="my-4 flex items-center gap-3">
-            <div className="h-px flex-1 bg-gray-200" />
-            <span className="text-xs text-gray-400">또는</span>
-            <div className="h-px flex-1 bg-gray-200" />
-          </div>
-
-          {/* Google */}
-          <button
-            type="button"
-            onClick={googleSignup}
-            className="mt-[22px] flex h-[42px] w-full items-center justify-center gap-[12px] rounded-[10px] border border-[#d9dee7] bg-white"
-          >
-            <span className="text-[16px] font-bold text-[#4285f4]">G</span>
-            <span className="text-[13px] font-semibold text-[#142238]">Google로 회원가입</span>
-          </button>
-
-          {/* Naver */}
-          <button
-            type="button"
-            onClick={naverSignup}
-            className="mt-[10px] flex h-[42px] w-full items-center justify-center gap-[12px] rounded-[10px] bg-[#03c75a] text-white"
-          >
-            <span className="text-[16px] font-bold">N</span>
-            <span className="text-[13px] font-semibold">Naver로 회원가입</span>
-          </button>
+        <div className="mt-7">
+          <label htmlFor="signup-name" className="block text-[13px] font-semibold text-[#142238]">
+            이름
+          </label>
+          <input
+            id="signup-name"
+            type="text"
+            name="name"
+            onChange={(event) =>
+              setMember((m) => ({ ...m, [event.target.name]: event.target.value }))
+            }
+            placeholder="홍길동"
+            autoComplete="name"
+            className="mt-2 h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none transition placeholder:text-[#a0a9b8] focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15"
+          />
         </div>
+
+        <div className="mt-4">
+          <label htmlFor="signup-email" className="block text-[13px] font-semibold text-[#142238]">
+            이메일
+          </label>
+          <input
+            id="signup-email"
+            type="email"
+            name="email"
+            onChange={(event) =>
+              setMember((m) => ({ ...m, [event.target.name]: event.target.value }))
+            }
+            placeholder="name@example.com"
+            autoComplete="email"
+            className="mt-2 h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none transition placeholder:text-[#a0a9b8] focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15"
+          />
+        </div>
+
+        <div className="mt-4">
+          <label
+            htmlFor="signup-password"
+            className="block text-[13px] font-semibold text-[#142238]"
+          >
+            비밀번호
+          </label>
+          <input
+            id="signup-password"
+            type="password"
+            name="password"
+            onChange={(event) =>
+              setMember((m) => ({ ...m, [event.target.name]: event.target.value }))
+            }
+            placeholder="••••••••"
+            autoComplete="new-password"
+            className="mt-2 h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none transition placeholder:text-[#a0a9b8] focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15"
+          />
+        </div>
+
+        <div className="mt-4">
+          <label
+            htmlFor="signup-password-confirm"
+            className="block text-[13px] font-semibold text-[#142238]"
+          >
+            비밀번호 확인
+          </label>
+          <input
+            id="signup-password-confirm"
+            type="password"
+            value={passwordConfirm}
+            onChange={(event) => setPasswordConfirm(event.target.value)}
+            placeholder="••••••••"
+            autoComplete="new-password"
+            className="mt-2 h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none transition placeholder:text-[#a0a9b8] focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15"
+          />
+        </div>
+
+        <div className="my-4">
+          <p className="mb-2 text-center text-xs text-gray-500">회원 유형</p>
+
+          <div className="flex items-center justify-center gap-6">
+            <button
+              type="button"
+              onClick={() => setRole('USER')}
+              className={`
+                rounded-full px-5 py-2 transition-all duration-200
+                ${
+                  role === 'USER'
+                    ? 'bg-[#169b62] text-white font-bold'
+                    : 'bg-transparent text-[#9aa5b4] font-medium'
+                }
+              `}
+            >
+              참여자
+            </button>
+            <button
+              type="button"
+              onClick={() => setRole('ADMIN')}
+              className={`
+                rounded-full px-5 py-2 transition-all duration-200
+                ${
+                  role === 'ADMIN'
+                    ? 'bg-[#169b62] text-white font-bold'
+                    : 'bg-transparent text-[#9aa5b4] font-medium'
+                }
+              `}
+            >
+              주최자
+            </button>
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          className="mt-7 flex h-[44px] w-full items-center justify-center rounded-[10px] bg-[#169b62] px-4 text-[13px] font-semibold text-white transition-colors hover:bg-[#128653] focus:outline-none focus:ring-2 focus:ring-[#169b62]/30"
+        >
+          회원가입
+        </button>
+
+        {errorMessage && (
+          <p className="mt-3 text-center text-[12px] text-red-500">{errorMessage}</p>
+        )}
+
+        <button
+          type="button"
+          onClick={() => navigate('/login')}
+          className="mt-4 block w-full text-center text-[13px] font-medium text-[#169b62] hover:underline"
+        >
+          이미 계정이 있으신가요?&nbsp;&nbsp; 로그인
+        </button>
+      </form>
+
+      {/* 소셜 로그인 영역 */}
+      <div className="pb-4">
+        <div className="my-4 flex items-center gap-3">
+          <div className="h-px flex-1 bg-gray-200" />
+          <span className="text-xs text-gray-400">또는</span>
+          <div className="h-px flex-1 bg-gray-200" />
+        </div>
+
+        {/* Google */}
+        <button
+          type="button"
+          onClick={googleSignup}
+          className="mt-[22px] flex h-[42px] w-full items-center justify-center gap-[12px] rounded-[10px] border border-[#d9dee7] bg-white"
+        >
+          <span className="text-[16px] font-bold text-[#4285f4]">G</span>
+          <span className="text-[13px] font-semibold text-[#142238]">Google로 회원가입</span>
+        </button>
+
+        {/* Naver */}
+        <button
+          type="button"
+          onClick={naverSignup}
+          className="mt-[10px] flex h-[42px] w-full items-center justify-center gap-[12px] rounded-[10px] bg-[#03c75a] text-white"
+        >
+          <span className="text-[16px] font-bold">N</span>
+          <span className="text-[13px] font-semibold">Naver로 회원가입</span>
+        </button>
       </div>
     </div>
   );
@@ -264,11 +260,11 @@ function SignupForm() {
 
 const Signup = () => {
   return (
-    <main className="min-h-screen bg-[#f7f9fc] lg:flex lg:items-center lg:justify-center">
-      <div className="min-h-screen w-full overflow-hidden bg-[#f7f9fc] lg:min-h-0 lg:h-[790px] lg:w-[1100px] lg:flex">
+    <main className="min-h-screen bg-[#f7f9fc]">
+      <div className="min-h-screen w-full bg-[#f7f9fc] lg:flex">
         <NoLoginHeaders />
 
-        <section className="flex flex-1 items-center justify-center py-10">
+        <section className="min-w-0 flex-1 px-6 py-10 sm:px-10 lg:px-12 lg:py-16 flex justify-center">
           <SignupForm />
         </section>
       </div>

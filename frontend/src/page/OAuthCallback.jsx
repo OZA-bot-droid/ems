@@ -41,7 +41,7 @@ const OAuthCallback = () => {
         } else {
           setAccessToken(accessToken);
           localStorage.setItem('isLoginSession', 'true');
-          navigate('/mypage', { replace: true });
+          navigate('/main', { replace: true });
         }
       })
       .catch((error) => {
