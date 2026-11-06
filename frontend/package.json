@@ -1,14 +1,17 @@
 {
   "name": "ems-frontend",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "sync:repo": "node scripts/import-from-ems-repo.mjs --apply",
+    "sync:preview": "node scripts/import-from-ems-repo.mjs --dry-run",
+    "sync:validate": "node scripts/validate-integration.mjs"
   },
   "dependencies": {
     "@tailwindcss/vite": "4.1.5",
@@ -16,10 +19,13 @@
     "vite": "6.3.4",
     "@vitejs/plugin-react": "4.4.1",
     "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "axios": "^1.7.9",
+    "react-router-dom": "^7.9.5"
   },
   "devDependencies": {
-    "prettier": "3.6.2"
+    "prettier": "3.6.2",
+    "sass": "^1.93.0"
   },
   "engines": {
     "node": ">=22.0.0 <23.0.0",

@@ -1,0 +1,9 @@
+@use './variables' as *;
+:root { font-family: var(--ems-font-family); color: $text; background: var(--ems-background); }
+* { box-sizing: border-box; }
+html, body, #root { min-width: 320px; min-height: 100%; margin: 0; }
+body { min-height: 100vh; background: var(--ems-background); }
+a { color: $brand; text-decoration: none; }
+button, input, select { font: inherit; }
+button { cursor: pointer; }
+pre { overflow-x:auto; }

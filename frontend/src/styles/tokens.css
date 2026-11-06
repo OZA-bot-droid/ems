@@ -1,0 +1,34 @@
+:root {
+  /* Event UI compatibility names; all components reference this source. */
+  --ems-bg: var(--ems-background);
+  --ems-surface: #fff;
+  --ems-row: #f6f8fb;
+  --ems-ink: var(--ems-text);
+  --ems-muted: #7a879a;
+  --ems-line: var(--ems-border);
+  --ems-green: var(--ems-primary);
+  --ems-green-dark: #11804f;
+  --ems-green-soft: #eaf6f0;
+  --ems-blue-soft: #eaf2fe;
+  --ems-font: var(--ems-font-family);
+
+  --ems-primary: #169b62;
+  --ems-sidebar: #17253c;
+  --ems-background: #f7f9fc;
+  --ems-text: #142238;
+  --ems-border: #e7ecf2;
+  --ems-font-family: Pretendard, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ems-radius-card: 16px;
+  --ems-spacing-unit: 4px;
+}
+
+/* Tailwind CSS 4 mappings: source values remain the --ems-* variables above. */
+@theme inline {
+  --color-ems-primary: var(--ems-primary);
+  --color-ems-sidebar: var(--ems-sidebar);
+  --color-ems-background: var(--ems-background);
+  --color-ems-text: var(--ems-text);
+  --color-ems-border: var(--ems-border);
+  --font-ems: var(--ems-font-family);
+  --radius-ems-card: var(--ems-radius-card);
+}
