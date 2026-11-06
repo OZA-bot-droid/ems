@@ -39,11 +39,12 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
 
     /** 마감된 행사에 남아 있는 승인 대기 신청을 일괄 거절하고 처리 시각을 기록합니다. */
     @Modifying(flushAutomatically = true, clearAutomatically = true)
-    @Query("update Registration r set r.status = :rejected, r.updatedAt = :now, r.decidedAt = :now "
+    @Query("update Registration r set r.status = :rejected, r.rejectionReason = :reason, r.updatedAt = :now, r.decidedAt = :now "
             + "where r.status = :pending and r.eventId in "
             + "(select e.id from Event e where e.status = :closed)")
     int rejectPendingForClosedEvents(@Param("pending") RegistrationStatus pending,
                                     @Param("rejected") RegistrationStatus rejected,
+                                    @Param("reason") String reason,
                                     @Param("closed") EventStatus closed,
                                     @Param("now") java.time.Instant now);
 

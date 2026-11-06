@@ -83,6 +83,10 @@ $ems-divider: #e7ecf2;
   color: $ems-green;
   font-weight: 600;
 }
+.registration-filters button.rejected-filter.selected {
+  background: #fff0f0;
+  color: #a23b45;
+}
 .registration-filters button.pending-filter.selected {
   background: #fff4e8;
   color: #986123;
@@ -255,6 +259,9 @@ $ems-divider: #e7ecf2;
 .registration-dialog dd {
   margin: 0;
   overflow-wrap: anywhere;
+}
+.registration-reason-content {
+  white-space: pre-wrap;
 }
 .registration-dialog-note {
   margin: 14px 0 0;

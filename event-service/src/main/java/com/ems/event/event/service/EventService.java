@@ -194,7 +194,7 @@ public class EventService {
     /** 마감된 모든 행사에 남아 있는 PENDING 신청을 REJECTED로 처리합니다. */
     private void rejectPendingRegistrationsForClosedEvents() {
         registrationRepository.rejectPendingForClosedEvents(
-                RegistrationStatus.PENDING, RegistrationStatus.REJECTED, EventStatus.CLOSED, Instant.now(clock));
+                RegistrationStatus.PENDING, RegistrationStatus.REJECTED, "마감됨", EventStatus.CLOSED, Instant.now(clock));
     }
 
     @Transactional

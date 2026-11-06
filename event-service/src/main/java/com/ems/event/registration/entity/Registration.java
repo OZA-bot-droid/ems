@@ -49,6 +49,10 @@ public class Registration {
     @Column(name = "decided_at")
     private Instant decidedAt;
 
+    /** 거절된 신청을 회원에게 설명할 사유입니다. */
+    @Column(name = "rejection_reason", columnDefinition = "TEXT")
+    private String rejectionReason;
+
     protected Registration() { }
 
     public Registration(Long userId, Long eventId) {
@@ -78,6 +82,7 @@ public class Registration {
     public Instant getRequestedAt() { return requestedAt; }
     public Instant getUpdatedAt() { return updatedAt; }
     public Instant getDecidedAt() { return decidedAt; }
+    public String getRejectionReason() { return rejectionReason; }
 
     /** 승인 대기 중인 신청만 승인하고 처리 시각을 기록합니다. */
     public void approve() {
@@ -88,8 +93,14 @@ public class Registration {
 
     /** 승인 대기 중인 신청만 거절하고 처리 시각을 기록합니다. */
     public void reject() {
+        reject(null);
+    }
+
+    /** 승인 대기 중인 신청을 사유와 함께 거절합니다. */
+    public void reject(String reason) {
         requirePending();
         this.status = RegistrationStatus.REJECTED;
+        this.rejectionReason = reason;
         this.decidedAt = Instant.now();
     }
 

@@ -75,7 +75,8 @@ public class RegistrationService {
                         registration.getStatus(),
                         registration.getRequestedAt(),
                         registration.getUpdatedAt(),
-                        registration.getDecidedAt()));
+                        registration.getDecidedAt(),
+                        registration.getRejectionReason()));
     }
 
     /** 행사별 잠금으로 승인 요청을 직렬화하고 정원 안에서만 승인합니다. */
@@ -105,13 +106,13 @@ public class RegistrationService {
 
     /** 신청을 찾아 승인 대기 상태인지 확인한 뒤 거절합니다. */
     @Transactional
-    public Registration reject(Long registrationId, Long reviewerId) {
+    public Registration reject(Long registrationId, Long reviewerId, String reason) {
         Registration registration = findRegistration(registrationId);
         Event event = eventRepository.findById(registration.getEventId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "행사 정보를 찾을 수 없습니다."));
         requireEventOwner(event, reviewerId);
-        transition(registration::reject);
+        transition(() -> registration.reject(reason));
         return registration;
     }
 
@@ -172,7 +173,7 @@ public class RegistrationService {
     /** 관리자가 확인할 신청 목록 행입니다. */
     public record AdminRegistration(
             Long id, Long eventId, String eventTitle, Long userId, RegistrationStatus status,
-            Instant requestedAt, Instant updatedAt, Instant decidedAt) { }
+            Instant requestedAt, Instant updatedAt, Instant decidedAt, String rejectionReason) { }
 
     /** 행사별 신청 상태 건수 응답입니다. */
     public record EventRegistrationSummary(

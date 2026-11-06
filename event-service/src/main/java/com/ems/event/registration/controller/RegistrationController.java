@@ -1,6 +1,9 @@
 package com.ems.event.registration.controller;
 
 import com.ems.event.common.dto.ApiSuccessResponse;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import com.ems.event.registration.entity.Registration;
 import com.ems.event.registration.entity.RegistrationStatus;
 import com.ems.event.common.security.AdminChecker;
@@ -87,9 +90,11 @@ public class RegistrationController {
             @PathVariable Long registrationId,
             @RequestHeader(value = "X-Member-Id", required = false) Long memberId,
             @RequestHeader(value = "X-User-Role", required = false) String role,
+            @Valid @RequestBody RejectRequest request,
             HttpServletRequest httpRequest) {
         adminChecker.requireAdmin(memberId, role);
-        return ApiSuccessResponse.ok(RegistrationResponse.from(registrationService.reject(registrationId, memberId)),
+        return ApiSuccessResponse.ok(RegistrationResponse.from(
+                        registrationService.reject(registrationId, memberId, request.reason())),
                 "참가 신청이 거절되었습니다.", httpRequest);
     }
 
@@ -123,14 +128,18 @@ public class RegistrationController {
         }
     }
 
+    /** 거절 요청 본문입니다. */
+    private record RejectRequest(@NotBlank @Size(max = 1000) String reason) { }
+
     /** 프런트엔드에 전달할 신청 정보입니다. */
     private record RegistrationResponse(
             Long id, Long eventId, Long userId, String status,
-            Instant requestedAt, Instant updatedAt, Instant decidedAt) {
+            Instant requestedAt, Instant updatedAt, Instant decidedAt, String rejectionReason) {
         private static RegistrationResponse from(Registration registration) {
             return new RegistrationResponse(registration.getId(), registration.getEventId(),
                     registration.getUserId(), registration.getStatus().name(),
-                    registration.getRequestedAt(), registration.getUpdatedAt(), registration.getDecidedAt());
+                    registration.getRequestedAt(), registration.getUpdatedAt(), registration.getDecidedAt(),
+                    registration.getRejectionReason());
         }
     }
 }

@@ -80,8 +80,8 @@ export const registrationApi = {
   },
   approve: (registrationId) =>
     request(`/events/registrations/${registrationId}/approve`, { method: 'PATCH' }),
-  reject: (registrationId) =>
-    request(`/events/registrations/${registrationId}/reject`, { method: 'PATCH' }),
+  reject: (registrationId, reason) =>
+    request(`/events/registrations/${registrationId}/reject`, { method: 'PATCH', body: { reason } }),
   cancel: async (registrationId) =>
     unwrapSuccessData(await request(`/events/registrations/${registrationId}/cancel`, { method: 'PATCH' })),
   // 관리자: 행사별 신청 현황 (대기·승인·거절·취소 건수)
