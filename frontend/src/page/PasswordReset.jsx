@@ -35,34 +35,29 @@ const PasswordReset = () => {
 
     setLoading(true);
     try {
-      const res = await apiReq('http://localhost:8080/api/members/password/reset', {
+      const res = await apiReq('/api/members/password/reset', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json;charset=utf-8',
         },
-        body: JSON.stringify({
-          token,
-          newPassword,
-        }),
+        data: { token, newPassword },
       });
 
-      if (!res.ok) {
-        if (data.code === 'INVALID_PASSWORD_RESET_TOKEN') {
-          setMessage(data.message);
+      if (res.status < 200 || res.status >= 300) {
+        if (res.data?.code === 'INVALID_PASSWORD_RESET_TOKEN') {
+          setMessage(res.data.message);
         } else {
           setMessage('비밀번호 변경에 실패했습니다.');
         }
         return;
       } else {
-        const data = await res.json();
-        console.log(data);
+        console.log(res.data);
+        // 현재 페이지의 방문 기록을 '/login' 페이지로 교체한다.
+        navigate('/login', { replace: true });
       }
-
-      // 현재 페이지의 방문 기록을 '/' 페이지로 교체한다.
-      navigate('/', { replace: true });
     } catch (err) {
+      console.error(err);
       setMessage('서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.');
-      console.log(err);
     } finally {
       setLoading(false);
     }
@@ -166,7 +161,7 @@ const PasswordReset = () => {
 
             <button
               type="button"
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/login')}
               className="mt-7 w-full text-[13px] font-semibold text-[#169b62] hover:underline"
             >
               로그인으로 돌아가기

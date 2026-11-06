@@ -13,29 +13,28 @@ const PasswordRequest = () => {
     event.preventDefault();
 
     if (loading) return;
-
     setLoading(true);
     setMessage('');
 
     try {
-      const res = await apiReq('http://localhost:8080/api/members/password/reset-request', {
+      const res = await apiReq('/api/members/password/reset-request', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json;charset=utf-8',
         },
-        body: JSON.stringify({ email }),
+        data: { email },
       });
 
-      if (!res.ok) {
+      if (res.status < 200 || res.status >= 300) {
         throw new Error('비밀번호 재설정 요청에 실패했습니다.');
       } else {
         setMessage(
           '계정에 해당하는 이메일이 있다면 재설정 안내가 발송됩니다. 메일함을 확인해주세요.',
         );
-        const data = await res.json();
-        console.log(data);
+        console.log(res.data);
       }
-    } catch {
+    } catch (err) {
+      console.error(err);
       setMessage('요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.');
     } finally {
       setLoading(false);
@@ -117,7 +116,7 @@ const PasswordRequest = () => {
 
             <button
               type="button"
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/login')}
               className="mt-7 w-full text-[13px] font-semibold text-[#169b62] hover:underline"
             >
               로그인으로 돌아가기

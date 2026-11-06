@@ -18,23 +18,21 @@ const OAuthCallback = () => {
 
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
-
     if (!code) {
+      navigate('/?error=login_failed', { replace: true });
       return;
     }
 
-    apiReq(`/api/members/oauth2/exchange?code=${code}`, {
+    apiReq(`/api/members/oauth2/exchange?code=${encodeURIComponent(code)}`, {
       method: 'POST',
-      credentials: 'include',
+      withCredentials: true,
     })
       .then(async (res) => {
-        const response = await res.json();
-        console.log(response);
-
-        if (!res.ok) {
-          throw new Error(response.message || '소셜 로그인 토큰 교환 실패');
+        console.log(res);
+        if (res.status < 200 || res.status >= 300) {
+          throw new Error(res.data?.message || '소셜 로그인 토큰 교환 실패');
         } else {
-          return response.data.accessToken;
+          return res.data.data.accessToken;
         }
       })
       .then((accessToken) => {
@@ -43,11 +41,12 @@ const OAuthCallback = () => {
         } else {
           setAccessToken(accessToken);
           localStorage.setItem('isLoginSession', 'true');
-          navigate('/mypage');
+          navigate('/mypage', { replace: true });
         }
       })
       .catch((error) => {
         console.error(error);
+        navigate('/?error=login_failed', { replace: true });
       });
   }, [setAccessToken, navigate]);
 

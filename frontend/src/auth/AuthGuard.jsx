@@ -16,7 +16,7 @@ const AuthGuard = ({ loginRequired = false }) => {
 
   // 이미 로그인 했다면 My Page로 이동
   if (loginRequired && !accessToken) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/login" replace />;
   }
   if (!loginRequired && accessToken) {
     // 수정 예정

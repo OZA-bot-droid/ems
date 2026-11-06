@@ -17,7 +17,7 @@ function App() {
         <Routes>
           <Route>
             <Route element={<AuthGuard />}>
-              <Route path="/" element={<Login />} />
+              <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/oauth-success" element={<AuthLogin />} />
               <Route path="/password/request" element={<PasswordRequest />} />

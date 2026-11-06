@@ -3,7 +3,7 @@ import { useAuth } from '../auth/AuthContext';
 import { useApiUtil } from '../hook/apiUtil';
 
 const MyPage = () => {
-  const { logout } = useAuth();
+  const { logout, authLoading, accessToken } = useAuth();
   const apiReq = useApiUtil();
   const [member, setMember] = useState({
     email: '',
@@ -11,25 +11,29 @@ const MyPage = () => {
   });
 
   useEffect(() => {
+    // 재발급이 완료되기 전까지 대기
+    if (authLoading || !accessToken) {
+      return;
+    }
+
     const myInfo = async () => {
       try {
         const res = await apiReq('/api/members/me', {
           method: 'GET',
         });
 
-        if (res.ok) {
-          const data = await res.json();
-          console.log(data);
-          setMember((m) => ({ ...m, ...data.data }));
-        } else {
+        if (res.status >= 200 && res.status < 300) {
           console.log(res);
+          setMember((m) => ({ ...m, ...res.data.data }));
+        } else {
+          throw new Error(res);
         }
       } catch (err) {
         console.log(err);
       }
     };
     myInfo();
-  }, [authLoading]);
+  }, [authLoading, accessToken, apiReq]);
 
   return (
     <main className="min-h-screen bg-[#f7f9fc] lg:flex lg:items-center lg:justify-center">

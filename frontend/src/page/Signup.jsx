@@ -72,18 +72,19 @@ function SignupForm() {
         headers: {
           'Content-type': 'application/json;charset=utf-8',
         },
-        body: JSON.stringify({ ...member, role: role }),
+        data: { ...member, role: role },
       });
 
-      const data = await res.json();
-      if (res.ok) {
-        alert(data.message);
-        navigate('/');
+      if (res.status === 201) {
+        alert(res.data.message);
+        navigate('/login');
       } else {
-        alert(data.message + ' 회원가입 실패');
+        alert(res.data.message + ' 회원가입 실패');
+        return;
       }
-    } catch {
-      alert('통신 에러2');
+    } catch (err) {
+      console.error(err);
+      alert('통신 에러');
     }
   };
 
@@ -221,7 +222,7 @@ function SignupForm() {
 
           <button
             type="button"
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/login')}
             className="mt-4 block w-full text-center text-[13px] font-medium text-[#169b62] hover:underline"
           >
             이미 계정이 있으신가요?&nbsp;&nbsp; 로그인
@@ -267,7 +268,7 @@ const Signup = () => {
       <div className="min-h-screen w-full overflow-hidden bg-[#f7f9fc] lg:min-h-0 lg:h-[790px] lg:w-[1100px] lg:flex">
         <NoLoginHeaders />
 
-        <section className="flex flex-1 items-center justify-end py-10">
+        <section className="flex flex-1 items-center justify-center py-10">
           <SignupForm />
         </section>
       </div>

@@ -44,6 +44,7 @@ export function AuthProvider({ children }) {
           localStorage.removeItem('isLoginSession');
         }
 
+        console.error('Refresh Token 재발급 실패:', res.status, res.data);
         throw new Error(`토큰 재발급 실패: ${res.status}`);
       } finally {
         refreshPromiseRef.current = null;
@@ -73,7 +74,7 @@ export function AuthProvider({ children }) {
       if (res.status >= 200 && res.status < 300) {
         setAccessToken(null);
         localStorage.removeItem('isLoginSession');
-        navigate('/', { replace: true });
+        navigate('/login', { replace: true });
       } else {
         console.log('실패 : ', res.data);
       }

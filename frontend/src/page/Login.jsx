@@ -31,22 +31,21 @@ function LoginForm() {
     try {
       const res = await apiReq(`/api/members/login`, {
         method: 'POST',
-        credentials: 'include',
+        withCredentials: true,
         headers: {
           'Content-type': 'application/json;charset=utf-8',
         },
-        body: JSON.stringify({ email: email, password: password, clientId: clientId }),
+        data: { email, password, clientId },
       });
 
-      const response = await res.json();
-      if (res.ok) {
+      if (res.status >= 200 && res.status < 300) {
         alert('로그인 성공');
-        setAccessToken(response.data.accessToken);
+        setAccessToken(res.data.data.accessToken);
         localStorage.setItem('isLoginSession', 'true');
         navigate('/mypage');
       } else {
         alert('로그인 실패');
-        console.log(response);
+        console.log(res.data);
       }
     } catch (err) {
       alert('로그인 실패');
