@@ -203,4 +203,15 @@ public class MemberController {
                 HttpStatus.OK
         );
     }
+
+    @PostMapping("/password/change")
+    public ResponseEntity<?> changePassword(JwtAuthenticationToken authentication,
+                                            @Valid @RequestBody PasswordChangeDTO dto) {
+        memberService.changePassword(authentication.getToken().getSubject(), dto);
+
+        return new ResponseEntity<>(
+                new MessageResponseDTO<>(null, SuccessCode.PASSWORD_RESET_SUCCESS),
+                HttpStatus.OK
+        );
+    }
 }

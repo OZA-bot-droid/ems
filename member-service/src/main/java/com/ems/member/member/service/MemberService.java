@@ -4,11 +4,9 @@ import com.ems.member.common.exception.InvalidCredentialsException;
 import com.ems.member.common.exception.MemberNotFoundException;
 import com.ems.member.common.exception.MemberEmailDuplicatedException;
 import com.ems.member.member.domain.Member;
-import com.ems.member.member.dto.LoginResponseDTO;
-import com.ems.member.member.dto.MemberInformationDTO;
-import com.ems.member.member.dto.MemberLoginDTO;
-import com.ems.member.member.dto.MemberRegisterDTO;
+import com.ems.member.member.dto.*;
 import com.ems.member.member.repository.MemberRepository;
+import com.ems.member.member.repository.RefreshTokenRepository;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,15 +23,17 @@ public class MemberService {
     private final JwtTokenService jwtTokenService;
     private final PasswordEncoder passwordEncoder;
     private final AuthService authService;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     public MemberService(MemberRepository memberRepository,
                          JwtTokenService jwtTokenService,
                          PasswordEncoder passwordEncoder,
-                         AuthService authService) {
+                         AuthService authService, RefreshTokenRepository refreshTokenRepository) {
         this.memberRepository = memberRepository;
         this.jwtTokenService = jwtTokenService;
         this.passwordEncoder = passwordEncoder;
         this.authService = authService;
+        this.refreshTokenRepository = refreshTokenRepository;
     }
 
     // 회원가입
@@ -109,6 +109,31 @@ public class MemberService {
         Member member = memberRepository.findById(Long.parseLong(memberId))
                 .orElseThrow(() -> new MemberNotFoundException("회원을 찾을 수 없습니다."));
 
-        return new MemberInformationDTO(member.getEmail(), member.getName());
+        return new MemberInformationDTO(member.getEmail(), member.getName(), member.getRole());
+    }
+
+    public void changePassword(String memberId, PasswordChangeDTO dto) {
+
+        Member member = memberRepository.findById(Long.parseLong(memberId))
+                .orElseThrow(() -> new MemberNotFoundException("존재하지 않는 회원입니다."));
+
+        // 자체 로그인 회원만 비밀번호 변경
+        if(!"LOCAL".equalsIgnoreCase(member.getProvider())) {
+            throw new InvalidCredentialsException("비밀번호 변경에 실패했습니다.");
+        }
+
+        // 현재 비밀번호 검증
+        // 기존 비밀번호와 새로운 비밀번호가 동일한지 확인
+        // 일치 여부를 알려주는 oracle 역할을 할 수 있으니 주의
+        if(!passwordEncoder.matches(dto.currentPassword(), member.getPasswordHash())
+                || passwordEncoder.matches(dto.newPassword(), member.getPasswordHash())) {
+            throw new InvalidCredentialsException("비밀번호 변경에 실패했습니다.");
+        }
+
+        // 새로운 비밀번호 저장
+        member.changePassword(passwordEncoder.encode(dto.newPassword()));
+
+        // 모든 기기의 refresh token 폐기
+        refreshTokenRepository.deleteByMember(member);
     }
 }

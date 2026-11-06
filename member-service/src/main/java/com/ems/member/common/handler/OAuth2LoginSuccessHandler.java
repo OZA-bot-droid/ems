@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
@@ -39,17 +40,20 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private final JwtTokenService jwtTokenService;
     private final AuthService authService;
     private final HandlerExceptionResolver handlerExceptionResolver;
+    private final String frontendUrl;
 
     public OAuth2LoginSuccessHandler(SocialLoginService socialLoginService,
                                      JwtTokenService jwtTokenService,
                                      AuthService authService,
                                      // HandlerExceptionResolver 관련 Resolver들이 여러 개가 있으니 Spring은 이것들을 묶어서 사용하는 대표 Resolver를 handlerExceptionResolver로 등록됨
                                      // handlerExceptionResolver : Spring MVC가 정상적으로 사용하는 전체 예외 처리 체인
-                                     @Qualifier("handlerExceptionResolver") HandlerExceptionResolver handlerExceptionResolver) {
+                                     @Qualifier("handlerExceptionResolver") HandlerExceptionResolver handlerExceptionResolver,
+                                     @Value("${password-reset.frontend-url}") String frontendUrl) {
         this.socialLoginService = socialLoginService;
         this.jwtTokenService = jwtTokenService;
         this.authService = authService;
         this.handlerExceptionResolver = handlerExceptionResolver;
+        this.frontendUrl = frontendUrl;
     }
 
     // 인증이 성공했을 때 Spring Security가 자동으로 호출
@@ -124,11 +128,11 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         } catch (InvalidCredentialsException e) {
 
             String message = URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
-            response.sendRedirect("http://localhost:5173/login?error=" + message);
+            response.sendRedirect(frontendUrl + "/login?error=" + message);
         } catch (MemberEmailDuplicatedException e) {
 
             String message = URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
-            response.sendRedirect("http://localhost:5173/signup?error=" + message);
+            response.sendRedirect(frontendUrl + "/signup?error=" + message);
         } catch(Exception e) {
             handlerExceptionResolver.resolveException(
                     request,
@@ -162,6 +166,6 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         // Access Token/Refresh Token 자체를 URL에 직접 넣지 않고, 짧게 유효한 일회성 코드만 프론트에 넘긴 다음 그 코드로 서버에서 토큰을 교환하는 구조를 만들기 위함
         // 클라이언트에게 다른 URL로 다시 이동하라고 응답하는 메서드
         UUID loginCode = socialLoginService.saveLoginCode(accessToken, refreshToken);
-        response.sendRedirect("http://localhost:5173/oauth-success?code=" + loginCode);
+        response.sendRedirect(frontendUrl + "/oauth-success?code=" + loginCode);
     }
 }
