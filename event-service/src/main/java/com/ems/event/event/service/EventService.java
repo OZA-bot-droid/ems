@@ -8,6 +8,7 @@ import com.ems.event.event.repository.EventRepository;
 import com.ems.event.event.dto.EventCreateRequest;
 import com.ems.event.event.dto.EventResponse;
 import com.ems.event.event.dto.EventUpdateRequest;
+import com.ems.event.registration.entity.RegistrationStatus;
 import com.ems.event.registration.repository.RegistrationRepository;
 import com.ems.event.session.repository.SessionRepository;
 import java.time.Clock;
@@ -153,6 +154,9 @@ public class EventService {
                 request.endsAt(),
                 request.meetingUrl(),
                 request.status());
+        if (event.isClosed()) {
+            rejectPendingRegistrationsForClosedEvents();
+        }
         if (request.postedDate() != null) {
             event.changePostedDate(request.postedDate());
         }
@@ -182,7 +186,15 @@ public class EventService {
      */
     @Transactional
     public int closeEndedEvents() {
-        return eventRepository.closeEndedEvents(AUTO_CLOSE_TARGETS, EventStatus.CLOSED, Instant.now(clock));
+        int closed = eventRepository.closeEndedEvents(AUTO_CLOSE_TARGETS, EventStatus.CLOSED, Instant.now(clock));
+        rejectPendingRegistrationsForClosedEvents();
+        return closed;
+    }
+
+    /** 마감된 모든 행사에 남아 있는 PENDING 신청을 REJECTED로 처리합니다. */
+    private void rejectPendingRegistrationsForClosedEvents() {
+        registrationRepository.rejectPendingForClosedEvents(
+                RegistrationStatus.PENDING, RegistrationStatus.REJECTED, EventStatus.CLOSED, Instant.now(clock));
     }
 
     @Transactional

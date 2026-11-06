@@ -1,5 +1,6 @@
 package com.ems.event.registration.repository;
 
+import com.ems.event.event.entity.EventStatus;
 import com.ems.event.registration.entity.Registration;
 import com.ems.event.registration.entity.RegistrationStatus;
 import jakarta.persistence.LockModeType;
@@ -9,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -34,6 +36,16 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
 
     /** 사용자의 신청 내역을 최근 신청 순으로 페이지 단위 조회합니다. */
     Page<Registration> findAllByUserIdOrderByRequestedAtDesc(Long userId, Pageable pageable);
+
+    /** 마감된 행사에 남아 있는 승인 대기 신청을 일괄 거절하고 처리 시각을 기록합니다. */
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("update Registration r set r.status = :rejected, r.updatedAt = :now, r.decidedAt = :now "
+            + "where r.status = :pending and r.eventId in "
+            + "(select e.id from Event e where e.status = :closed)")
+    int rejectPendingForClosedEvents(@Param("pending") RegistrationStatus pending,
+                                    @Param("rejected") RegistrationStatus rejected,
+                                    @Param("closed") EventStatus closed,
+                                    @Param("now") java.time.Instant now);
 
     /** 행사에 신청 내역이 하나라도 있는지 확인합니다. (행사 삭제 전 확인용, 이도관 추가) */
     boolean existsByEventId(Long eventId);

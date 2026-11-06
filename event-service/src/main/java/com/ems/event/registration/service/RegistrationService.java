@@ -88,6 +88,9 @@ public class RegistrationService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "행사 정보를 찾을 수 없습니다."));
         requireEventOwner(event, approverId);
+        if (event.isClosed()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "마감된 행사 신청은 승인할 수 없습니다.");
+        }
         Registration registration = registrationRepository.findByIdForUpdate(registrationId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "신청 정보를 찾을 수 없습니다."));
