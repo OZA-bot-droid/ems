@@ -1,0 +1,169 @@
+// 파일 기능: 사이드바 배치와 메뉴 선택 상태를 꾸밉니다.
+
+@use '../../styles/tokens' as t;
+.sidebar {
+  position: relative;
+  width: 214px;
+  flex: 0 0 214px;
+  min-height: 100vh;
+  padding-bottom: t.$space-6;
+  padding-top: t.$space-6;
+  background: t.$sidebar;
+  color: t.$sidebar-text;
+}
+.brand {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: t.$space-3;
+  padding-left: t.$space-6;
+  height: 40px;
+  color: t.$surface;
+  font-size: 24px;
+}
+.brandAccent {
+  width: 8px;
+  height: 28px;
+  border-radius: 4px;
+  background: t.$primary;
+}
+.brandCaption {
+  margin: 0 0 0 t.$space-6;
+  font-size: 10px;
+  font-weight: 600;
+}
+.sidebarHeading {
+  margin: 52px 0 t.$space-5 t.$space-6;
+  color: t.$sidebar-muted;
+  font-size: 11px;
+  font-weight: 600;
+}
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: t.$space-3;
+  padding: 0 t.$space-3;
+}
+.navItem {
+  color: inherit;
+  text-decoration: none;
+  min-height: 44px;
+  padding: t.$space-3;
+  border-radius: t.$radius-control;
+  display: flex;
+  align-items: center;
+  gap: t.$space-5;
+  font-size: 14px;
+  font-weight: 600;
+  & > span:first-child {
+    font-size: 22px;
+    line-height: 12px;
+  }
+}
+.active {
+  background: t.$surface-active;
+  color: t.$surface;
+}
+.demoSwitcher {
+  margin: t.$space-8 t.$space-3 0;
+  padding: t.$space-4 t.$space-2 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+.demoHeading {
+  margin: 0 0 t.$space-3;
+  color: t.$sidebar-muted;
+  font-size: 11px;
+  font-weight: 700;
+}
+.currentUser {
+  margin-bottom: t.$space-3;
+  color: t.$sidebar-text;
+  font-size: 12px;
+  line-height: 1.6;
+  strong {
+    color: t.$surface;
+  }
+  span {
+    display: block;
+    color: t.$sidebar-muted;
+    font-size: 11px;
+  }
+}
+.demoButtons {
+  display: flex;
+  flex-direction: column;
+  gap: t.$space-2;
+}
+.demoButton {
+  display: flex;
+  width: 100%;
+  min-height: 36px;
+  align-items: center;
+  justify-content: space-between;
+  gap: t.$space-2;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: t.$radius-control;
+  padding: t.$space-2 t.$space-3;
+  background: transparent;
+  color: t.$sidebar-text;
+  font-size: 12px;
+  cursor: pointer;
+  &:hover {
+    background: t.$surface-active;
+  }
+}
+.selectedDemoButton {
+  background: t.$surface-active;
+  border-color: t.$primary;
+  color: t.$surface;
+  font-weight: 700;
+}
+.demoRole {
+  color: t.$sidebar-muted;
+  font-size: 10px;
+}
+.sidebarFoot {
+  margin: t.$space-6 t.$space-5 0;
+  font-size: 11px;
+  color: t.$sidebar-muted;
+}
+@media (max-width: 760px) {
+  .sidebar {
+    width: 64px;
+    flex-basis: 64px;
+    overflow: hidden;
+  }
+  .brand {
+    padding-left: t.$space-4;
+  }
+  .brand strong,
+  .brandCaption,
+  .sidebarHeading,
+  .sidebarFoot,
+  .navText {
+    display: none;
+  }
+  .nav {
+    margin-top: 64px;
+    padding: 0 t.$space-2;
+  }
+  .navItem {
+    padding: t.$space-3 t.$space-4;
+  }
+  .demoSwitcher {
+    margin: t.$space-6 0 0;
+    padding: t.$space-3 t.$space-2 0;
+  }
+  .demoHeading,
+  .currentUser,
+  .demoRole {
+    display: none;
+  }
+  .demoButton {
+    justify-content: center;
+    min-height: 34px;
+    padding: t.$space-2 0;
+    font-size: 10px;
+    white-space: nowrap;
+  }
+}

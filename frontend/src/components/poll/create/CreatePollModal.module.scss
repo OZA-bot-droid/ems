@@ -1,0 +1,226 @@
+// 파일 기능: 투표 생성 모달의 레이아웃과 입력 스타일을 정의합니다.
+
+@use '../../../styles/tokens' as t;
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: t.$space-4;
+  background: rgb(16 26 42 / 57%);
+}
+.modal {
+  width: min(660px, 100%);
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  border-radius: t.$radius-card;
+  background: t.$surface;
+  color: t.$text;
+  box-shadow: 0 24px 80px rgb(16 26 42 / 24%);
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin: 0 28px;
+  padding: 22px 0 24px;
+  border-bottom: 1px solid t.$border;
+  h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.5;
+  }
+  p {
+    margin: t.$space-1 0 0;
+    font-size: 13px;
+    color: t.$text-muted;
+  }
+}
+.close {
+  width: 32px;
+  height: 40px;
+  flex: none;
+  border: 0;
+  background: transparent;
+  font-size: 25px;
+  color: t.$text-muted;
+  cursor: pointer;
+}
+.form {
+  padding: t.$space-4 28px 0;
+  display: flex;
+  flex-direction: column;
+  gap: t.$space-5;
+}
+.twoColumns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: t.$space-2;
+  font-size: 12px;
+  font-weight: 600;
+  color: t.$text;
+  input,
+  select {
+    width: 100%;
+    min-width: 0;
+    height: 43px;
+    padding: 0 13px;
+    background: t.$background;
+    border: 1px solid t.$border;
+    border-radius: t.$radius-control;
+    color: t.$text;
+    font: inherit;
+    font-weight: 400;
+    font-size: 13px;
+    &:focus-visible {
+      outline: 2px solid t.$primary;
+      outline-offset: 1px;
+    }
+    &:disabled {
+      opacity: 0.65;
+    }
+  }
+}
+.choicesHeading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: t.$space-3;
+  font-size: 13px;
+  span {
+    font-size: 12px;
+    color: t.$text-muted;
+    font-weight: 400;
+    text-align: right;
+  }
+}
+.choices {
+  display: flex;
+  flex-direction: column;
+  gap: t.$space-3;
+}
+.choice {
+  display: flex;
+  align-items: center;
+  gap: t.$space-3;
+  input {
+    min-width: 0;
+    flex: 1;
+    height: 43px;
+    padding: 0 13px;
+    background: t.$background;
+    color: t.$text;
+    border: 1px solid t.$border;
+    border-radius: t.$radius-control;
+    font: inherit;
+    font-size: 13px;
+    &:focus-visible {
+      outline: 2px solid t.$primary;
+      outline-offset: 1px;
+    }
+  }
+  button {
+    width: 42px;
+    height: 43px;
+    border: 0;
+    background: transparent;
+    font-size: 20px;
+    color: t.$text-muted;
+    cursor: pointer;
+    &:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+  }
+}
+.addChoice {
+  min-height: 35px;
+  background: t.$surface-success;
+  color: t.$primary;
+  border: 0;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: t.$space-3;
+  font-size: 13px;
+  font-weight: 600;
+  input {
+    accent-color: t.$primary;
+    width: 19px;
+    height: 19px;
+  }
+}
+.error {
+  margin: 0;
+  color: #b42318;
+  font-size: 12px;
+  font-weight: 600;
+}
+.footer {
+  border-top: 1px solid t.$border;
+  margin-top: t.$space-1;
+  padding: t.$space-4 0 t.$space-5;
+  p {
+    margin: t.$space-3 0 0;
+    color: t.$text-muted;
+    font-size: 11px;
+    line-height: 1.5;
+  }
+}
+.footerButtons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: t.$space-4;
+}
+.cancel,
+.create {
+  min-height: 48px;
+  border-radius: t.$radius-control;
+  border: 0;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.cancel {
+  background: t.$background;
+  color: t.$text;
+}
+.create {
+  background: t.$primary;
+  color: t.$surface;
+  &:hover {
+    background: t.$primary-hover;
+  }
+}
+@media (max-width: 560px) {
+  .header {
+    margin: 0 t.$space-5;
+  }
+  .form {
+    padding-left: t.$space-5;
+    padding-right: t.$space-5;
+  }
+  .twoColumns {
+    grid-template-columns: 1fr;
+    gap: t.$space-4;
+  }
+  .choicesHeading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: t.$space-1;
+  }
+}

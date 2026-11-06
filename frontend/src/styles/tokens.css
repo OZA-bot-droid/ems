@@ -1,0 +1,33 @@
+:root {
+  --ems-primary: #169b62;
+  --ems-primary-hover: #118451;
+  --ems-sidebar: #17253c;
+  --ems-background: #f7f9fc;
+  --ems-text: #142238;
+  --ems-border: #e7ecf2;
+  --ems-surface: #ffffff;
+  --ems-surface-muted: #f6f8fb;
+  --ems-surface-success: #eaf6f0;
+  --ems-surface-active: #29423f;
+  --ems-text-muted: #7a879a;
+  --ems-sidebar-text: #adbacc;
+  --ems-sidebar-muted: #8fa2b7;
+  --ems-success-text: #167448;
+  --ems-radius-card: 16px;
+  --ems-radius-control: 10px;
+  --ems-space-1: 4px;
+  --ems-space-2: 8px;
+  --ems-space-3: 12px;
+  --ems-space-4: 16px;
+  --ems-space-5: 20px;
+  --ems-space-6: 24px;
+  --ems-space-8: 32px;
+  --ems-font: Pretendard, Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+@theme inline {
+  --color-ems-primary: var(--ems-primary);
+  --color-ems-text: var(--ems-text);
+  --color-ems-border: var(--ems-border);
+  --color-ems-background: var(--ems-background);
+  --font-ems: var(--ems-font);
+}

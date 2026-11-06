@@ -38,7 +38,7 @@ public class PollManagementDTO {
                 .status(poll.getStatus())
                 .showLiveResults(poll.isShowLiveResults())
                 .startsAt(poll.getStartsAt()).endsAt(poll.getEndsAt())
-                .canActivate(poll.canActivate(now))
+                .canActivate(poll.canForceActivate(now))
                 .canClose(poll.canClose())
                 .build();
     }

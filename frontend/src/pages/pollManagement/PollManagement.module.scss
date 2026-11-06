@@ -1,0 +1,266 @@
+// 파일 기능: 투표 관리 화면의 테이블·버튼·페이지네이션 스타일을 정의합니다.
+
+@use '../../styles/tokens' as t;
+.layout {
+  min-height: 100vh;
+  display: flex;
+  background: t.$background;
+}
+.main {
+  flex: 1;
+  max-width: 1480px;
+  min-width: 0;
+  padding: 36px 36px 28px;
+}
+.pageHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 44px;
+  h1 {
+    font-size: 28px;
+    letter-spacing: -0.03em;
+    font-weight: 700;
+    margin: 0;
+    color: t.$text;
+  }
+  p {
+    margin: 4px 0 0;
+    color: t.$text-muted;
+    font-size: 13px;
+  }
+}
+.badge {
+  display: inline-flex;
+  background: t.$surface-success;
+  color: t.$primary;
+  border-radius: 999px;
+  padding: 8px 15px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.panel {
+  min-height: 560px;
+  background: t.$surface;
+  border: 1px solid t.$border;
+  border-radius: t.$radius-card;
+  padding: 24px;
+  box-shadow: 0 10px 32px rgb(22 36 54 / 3%);
+}
+.panelHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 28px;
+  h2 {
+    font-size: 19px;
+    font-weight: 700;
+    margin: 0;
+    color: t.$text;
+  }
+  p {
+    font-size: 13px;
+    margin: 5px 0 0;
+    color: t.$text-muted;
+  }
+}
+.createButton {
+  background: t.$primary;
+  color: white;
+  border: 0;
+  border-radius: t.$radius-control;
+  padding: 11px 18px;
+  font-size: 13px;
+  font-weight: 700;
+  min-height: 42px;
+  &:hover {
+    background: t.$primary-hover;
+  }
+}
+.message {
+  padding: 28px 12px;
+  text-align: center;
+  color: t.$text-muted;
+  font-size: 14px;
+  p {
+    margin: 0 0 12px;
+  }
+}
+.retry {
+  background: t.$surface-success;
+  color: t.$primary;
+  border: 0;
+  border-radius: 8px;
+  padding: 9px 15px;
+}
+.tableScroll {
+  overflow-x: auto;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  min-width: 620px;
+  th {
+    background: t.$background;
+    color: t.$text-muted;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 14px 16px;
+  }
+  td {
+    border-bottom: 1px solid t.$border;
+    padding: 19px 16px;
+    font-size: 13px;
+    color: t.$text;
+  }
+}
+.titleCell {
+  strong {
+    display: block;
+    font-size: 14px;
+  }
+  // span {
+  //   display: block;
+  //   font-size: 11px;
+  //   margin-top: 5px;
+  //   color: t.$text-muted;
+  // }
+}
+.status {
+  display: inline-flex;
+  padding: 6px 11px;
+  border-radius: 999px;
+  background: t.$background;
+  color: t.$text-muted;
+  font-size: 12px;
+  white-space: nowrap;
+  font-weight: 700;
+}
+.active {
+  background: t.$surface-success;
+  color: t.$primary;
+}
+.scheduled {
+  background: #eef3fc;
+  color: #3462a3;
+}
+.closed {
+  background: #eef0f3;
+  color: #677385;
+}
+.footnote {
+  color: t.$text-muted;
+  font-size: 11px;
+  margin-top: 20px;
+}
+@media (max-width: 760px) {
+  .main {
+    padding: 28px 16px;
+  }
+  .pageHeader {
+    margin-bottom: 28px;
+  }
+  .panel {
+    padding: 16px;
+  }
+  .panelHeading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+.statusActions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.activateButton,
+.closeButton {
+  min-height: 32px;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid t.$border;
+  cursor: pointer;
+  white-space: nowrap;
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+.activateButton {
+  background: t.$surface-success;
+  color: t.$primary;
+}
+.closeButton {
+  background: #fff1f0;
+  color: #b42318;
+}
+.actionError {
+  color: #b42318;
+  background: #fff1f0;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  font-size: 13px;
+}
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.pageInfo {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.pageButtons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  span {
+    padding: 0 6px;
+    color: #64748b;
+    user-select: none;
+  }
+
+  button {
+    min-width: 36px;
+    height: 36px;
+    padding: 0 10px;
+    border: 1px solid #dbe2ea;
+    border-radius: 8px;
+    background: #fff;
+    color: #334155;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      background: #f1f5f9;
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.pageButtons .activePage {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+
+  &:hover {
+    background: #1d4ed8;
+  }
+}

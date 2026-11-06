@@ -25,10 +25,15 @@ import com.ems.interaction.poll.domain.Status;
 
 //    데모용 유저, 이벤트, 세션, 허가 데이터
 import com.ems.interaction.mock.DemoData;
+
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import com.ems.interaction.poll.event.PollStatusChangedEvent;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 @Service
 @Transactional
@@ -39,7 +44,7 @@ public class PollService {
     private final PollOptionRepository pollOptionRepository;
     private final ApplicationEventPublisher eventPublisher;
 
-//    데모용 유저, 이벤트, 세션, 허가 데이터
+    //    데모용 유저, 이벤트, 세션, 허가 데이터
     private final DemoData demoData;
 
     // 투표 생성
@@ -104,7 +109,7 @@ public class PollService {
     // 투표 상세 조회
     public PollResponseDTO getPoll(Long pollId) {
 
-        Poll poll = pollRepository.findById(pollId).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "POLL_NOT_FOUND", "투표를 찾을 수 없습니다."));
+        Poll poll = pollRepository.findById(pollId).orElseThrow(() -> new ApiException(ErrorCode.POLL_NOT_FOUND));
 
         List<PollOption> options = pollOptionRepository.findByPollIdOrderByDisplayOrderAsc(pollId);
 
@@ -112,36 +117,39 @@ public class PollService {
     }
 
 
-    // 관리자가 생성한 투표 목록 조회(최신순)
-    public List<PollManagementDTO> getMyCreatedPolls(Long userId) {
+//    // 관리자가 생성한 투표 목록 조회(최신순)
+//    public List<PollManagementDTO> getMyCreatedPolls(Long userId) {
+//
+//        Instant now = Instant.now();
+//
+//        return pollRepository.findByUserIdOrderByIdDesc(userId).stream().map(poll -> PollManagementDTO.from(poll, now)).toList();
+//    }
+
+    // 관리자가 생성한 투표 목록 페이지 조회
+    public Page<PollManagementDTO> getMyCreatedPolls(Long userId, int page, int size) {
+        // 페이지 번호와 크기 검증
+        if (page < 0 || size < 1 || size > 100) {
+            throw new ApiException(ErrorCode.INVALID_REQUEST);
+        }
+
+        // Pageable 생성
+        Pageable pageable = PageRequest.of(page, size);
+
+        // 해당 관리자의 투표만 페이지 조회
+        Page<Poll> polls = pollRepository.findByUserIdOrderByIdDesc(userId, pageable);
 
         Instant now = Instant.now();
 
-        return pollRepository.findByUserIdOrderByIdDesc(userId)
-                .stream()
-                .map(poll -> PollManagementDTO.from(poll, now))
-                .toList();
+        // Page<Poll> -> Page<PollManagementDTO>
+        return polls.map(poll -> PollManagementDTO.from(poll, now));
     }
 
     // 유저가 참여 중인 세션의 활성화 상태인 투표 목록 전달
-    public List<PollResponseDTO> getActivePolls(Long userId){
+    public List<PollResponseDTO> getActivePolls(Long userId) {
 
-        // 1. 데모 회원 존재 여부 확인
-        if (userId == null || !demoData.members.containsKey(userId)) {
-            throw new ApiException(
-                    HttpStatus.NOT_FOUND,
-                    "USER_NOT_FOUND",
-                    "존재하지 않는 사용자입니다."
-            );
-        }
 
         // 2. 사용자가 참가 승인받은 세션 조회
-        List<Long> sessionIds = demoData.registrations.stream()
-                .filter(reg -> reg.userId().equals(userId))
-                .filter(reg -> "APPROVED".equals(reg.status()))
-                .map(DemoData.DemoRegistration::sessionId)
-                .distinct()
-                .toList();
+        List<Long> sessionIds = demoData.registrations.stream().filter(reg -> reg.userId().equals(userId)).filter(reg -> "APPROVED".equals(reg.status())).map(DemoData.DemoRegistration::sessionId).distinct().toList();
 
         // 3. 승인된 세션이 없으면 빈 목록 반환
         if (sessionIds.isEmpty()) {
@@ -149,74 +157,92 @@ public class PollService {
         }
 
         // 4. 해당 세션에 속한 ACTIVE 투표 조회
-        List<Poll> polls = pollRepository.findBySessionIdInAndStatus(
-                sessionIds,
-                Status.ACTIVE
-        );
+        List<Poll> polls = pollRepository.findBySessionIdInAndStatus(sessionIds, Status.ACTIVE);
 
         if (polls.isEmpty()) {
             return List.of();
         }
 
         // 5. 조회한 투표의 ID 목록
-        List<Long> pollIds = polls.stream()
-                .map(Poll::getId)
-                .toList();
+        List<Long> pollIds = polls.stream().map(Poll::getId).toList();
 
         // 6. 투표 선택지 일괄 조회
-        List<PollOption> options = pollOptionRepository
-                .findByPollIdInOrderByPollIdAscDisplayOrderAsc(pollIds);
+        List<PollOption> options = pollOptionRepository.findByPollIdInOrderByPollIdAscDisplayOrderAsc(pollIds);
 
         // 7. 투표 ID를 기준으로 선택지 그룹화
-        Map<Long, List<PollOption>> optionsByPollId =
-                options.stream()
-                        .collect(Collectors.groupingBy(
-                                PollOption::getPollId
-                        ));
+        Map<Long, List<PollOption>> optionsByPollId = options.stream().collect(Collectors.groupingBy(PollOption::getPollId));
 
         // 8. Poll + PollOption -> PollResponseDTO 변환
         return polls.stream().map(poll -> PollResponseDTO.from(poll, optionsByPollId.getOrDefault(poll.getId(), List.of()))).toList();
     }
 
 
-    // 투표 활성화: 예정 상태에서만, 실제 투표 가능 시간에만 전환
-    public Long setPollActive(Long userId, Long pollId) {
-        Poll poll = pollRepository.findById(pollId)
-                .orElseThrow(() -> new ApiException(ErrorCode.POLL_NOT_FOUND));
+//    // 투표 활성화: 예정 상태에서만, 실제 투표 가능 시간에만 전환
+//    public Long setPollActive(Long userId, Long pollId) {
+//        Poll poll = pollRepository.findById(pollId)
+//                .orElseThrow(() -> new ApiException(ErrorCode.POLL_NOT_FOUND));
+//
+//        if (!Objects.equals(poll.getUserId(), userId)) {
+//            throw new ApiException(ErrorCode.EVENT_OWNER_REQUIRED);
+//        }
+//
+//        // 투표 상태 전이 충돌 에러
+//        if (poll.getStatus() != Status.SCHEDULED) {
+//            throw new ApiException(HttpStatus.CONFLICT, "INVALID_STATUS_CHANGE", "예정 상태의 투표만 활성화할 수 있습니다.");
+//        }
+//
+//        // 투표 상태 전이 충돌
+//        // 기존의 투표 조회 및 생성자 검증 이후
+//        if (!poll.canActivate(Instant.now())) {
+//            throw new ApiException(HttpStatus.CONFLICT, "INVALID_STATUS_CHANGE", "현재 활성화할 수 없는 투표입니다.");
+//        }
+//
+//        poll.activate();
+//
+//        //WebSocket 알림 연동 추가
+//        eventPublisher.publishEvent(
+//                new PollStatusChangedEvent(
+//                        poll.getId(),
+//                        poll.getSessionId(),
+//                        Status.ACTIVE
+//                )
+//        );
+//
+//        return pollId;
+//    }
 
+    // 관리자가 투표를 수동으로 즉시 활성화
+    public Long setPollActive(Long userId, Long pollId) {
+
+        // 1. 투표 조회
+        Poll poll = pollRepository.findById(pollId).orElseThrow(() -> new ApiException(ErrorCode.POLL_NOT_FOUND));
+
+        // 2. 투표 생성자 검사
         if (!Objects.equals(poll.getUserId(), userId)) {
             throw new ApiException(ErrorCode.EVENT_OWNER_REQUIRED);
         }
 
-        // 투표 상태 전이 충돌 에러
-        if (poll.getStatus() != Status.SCHEDULED) {
-            throw new ApiException(HttpStatus.CONFLICT, "INVALID_STATUS_CHANGE", "예정 상태의 투표만 활성화할 수 있습니다.");
+        // 3. 서버의 현재 시각
+        Instant now = Instant.now();
+
+        // 4. 수동 활성화 가능 여부 확인
+        if (!poll.canForceActivate(now)) {
+            throw new ApiException(HttpStatus.CONFLICT, "INVALID_STATUS_CHANGE", "예정 상태이며 종료 시간이 지나지 않은 투표만 활성화할 수 있습니다.");
         }
 
-        // 투표 상태 전이 충돌
-        // 기존의 투표 조회 및 생성자 검증 이후
-        if (!poll.canActivate(Instant.now())) {
-            throw new ApiException(HttpStatus.CONFLICT, "INVALID_STATUS_CHANGE", "현재 활성화할 수 없는 투표입니다.");
-        }
+        // 5. 시작 시각을 현재 시각으로 변경하고 ACTIVE 전환
+        poll.forceActivate(now);
 
-        poll.activate();
+        // 6. 기존 WebSocket 상태 변경 알림
+        eventPublisher.publishEvent(new PollStatusChangedEvent(poll.getId(), poll.getSessionId(), Status.ACTIVE));
 
-        //WebSocket 알림 연동 추가
-        eventPublisher.publishEvent(
-                new PollStatusChangedEvent(
-                        poll.getId(),
-                        poll.getSessionId(),
-                        Status.ACTIVE
-                )
-        );
-
-        return pollId;
+        return poll.getId();
     }
+
 
     // 투표 비활성화(종료): 종료 후 재활성화는 허용하지 않음
     public Long setPollClose(Long userId, Long pollId) {
-        Poll poll = pollRepository.findById(pollId)
-                .orElseThrow(() -> new ApiException(ErrorCode.POLL_NOT_FOUND));
+        Poll poll = pollRepository.findById(pollId).orElseThrow(() -> new ApiException(ErrorCode.POLL_NOT_FOUND));
 
         if (!Objects.equals(poll.getUserId(), userId)) {
             throw new ApiException(ErrorCode.EVENT_OWNER_REQUIRED);
@@ -230,13 +256,7 @@ public class PollService {
         poll.close();
 
         //WebSocket 알림 연동 추가
-        eventPublisher.publishEvent(
-                new PollStatusChangedEvent(
-                        poll.getId(),
-                        poll.getSessionId(),
-                        Status.CLOSED
-                )
-        );
+        eventPublisher.publishEvent(new PollStatusChangedEvent(poll.getId(), poll.getSessionId(), Status.CLOSED));
 
         return pollId;
     }

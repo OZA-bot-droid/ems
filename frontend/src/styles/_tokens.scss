@@ -1,0 +1,26 @@
+// 파일 기능: 컴포넌트에서 공유하는 색상·간격·크기 토큰을 정의합니다.
+
+$primary: var(--ems-primary);
+$primary-hover: var(--ems-primary-hover);
+$sidebar: var(--ems-sidebar);
+$background: var(--ems-background);
+$text: var(--ems-text);
+$border: var(--ems-border);
+$surface: var(--ems-surface);
+$surface-muted: var(--ems-surface-muted);
+$surface-success: var(--ems-surface-success);
+$surface-active: var(--ems-surface-active);
+$text-muted: var(--ems-text-muted);
+$sidebar-text: var(--ems-sidebar-text);
+$sidebar-muted: var(--ems-sidebar-muted);
+$success-text: var(--ems-success-text);
+$radius-card: var(--ems-radius-card);
+$radius-control: var(--ems-radius-control);
+$space-1: var(--ems-space-1);
+$space-2: var(--ems-space-2);
+$space-3: var(--ems-space-3);
+$space-4: var(--ems-space-4);
+$space-5: var(--ems-space-5);
+$space-6: var(--ems-space-6);
+$space-8: var(--ems-space-8);
+$font: var(--ems-font);

@@ -2,8 +2,10 @@ package com.ems.interaction.poll.domain;
 
 
 import com.ems.interaction.common.domain.BaseEntity;
+import com.ems.interaction.common.exception.ApiException;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.http.HttpStatus;
 
 import java.time.Instant;
 
@@ -67,20 +69,31 @@ public class Poll extends BaseEntity {
     public boolean canVote() {
         Instant now = Instant.now();
 
-        return status == Status.ACTIVE
-                && !now.isBefore(startsAt)
-                && now.isBefore(endsAt);
+        return status == Status.ACTIVE && !now.isBefore(startsAt) && now.isBefore(endsAt);
     }
 
     // 투표 활성화 가능 여부
     public boolean canActivate(Instant now) {
-        return status == Status.SCHEDULED
-                && !now.isBefore(startsAt)
-                && now.isBefore(endsAt);
+        return status == Status.SCHEDULED && !now.isBefore(startsAt) && now.isBefore(endsAt);
     }
 
     // 투표 비활성화(종료) 가능 여부
     public boolean canClose() {
         return status == Status.ACTIVE;
+    }
+
+    // 관리자가 수동으로 활성화할 수 있는지 확인
+    public boolean canForceActivate(Instant now) {
+        return status == Status.SCHEDULED && now.isBefore(endsAt);
+    }
+
+    // 관리자 수동 활성화: 시작 시각을 현재 서버 시각으로 변경
+    public void forceActivate(Instant now) {
+        if (!canForceActivate(now)) {
+            throw new ApiException(HttpStatus.CONFLICT, "INVALID_STATUS_CHANGE", "현재 활성화할 수 없는 투표입니다.");
+        }
+
+        this.startsAt = now;
+        this.status = Status.ACTIVE;
     }
 }

@@ -1,0 +1,139 @@
+// 파일 기능: 투표 카드의 배치와 상태별 스타일을 정의합니다.
+
+@use '../../../styles/tokens' as t;
+.voteCard {
+  width: 100%;
+  min-width: 0;
+  padding: t.$space-6;
+  border-radius: t.$radius-card;
+  background: t.$surface;
+  border: 1px solid t.$border;
+  h3 {
+    font-size: 24px;
+    line-height: 1.5;
+    margin: 0 0 28px;
+    font-weight: 700;
+  }
+}
+.cardHead {
+  display: flex;
+  justify-content: space-between;
+  gap: t.$space-4;
+  align-items: center;
+  margin-bottom: t.$space-8;
+  h2 {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    font-weight: 600;
+    color: t.$primary;
+  }
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 96px;
+  border-radius: 999px;
+  padding: 8px 12px;
+  flex-shrink: 0;
+  background: t.$surface-success;
+  color: t.$primary;
+  font-size: 12px;
+  font-weight: 600;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: t.$space-4;
+  margin-top: t.$space-8;
+}
+.submit,
+.outline,
+.resetButton,
+.createButton {
+  padding: 12px 16px;
+  min-height: 44px;
+  border-radius: t.$radius-control;
+  font-size: 13px;
+  font-weight: 600;
+}
+.submit {
+  min-width: 170px;
+  background: t.$primary;
+  color: t.$surface;
+  border: 1px solid t.$primary;
+  &:hover:not(:disabled) {
+    background: t.$primary-hover;
+  }
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+.outline {
+  min-width: 194px;
+  color: t.$text;
+  background: t.$surface;
+  border: 1px solid t.$border;
+  &:hover {
+    background: t.$surface-muted;
+  }
+}
+.resetButton {
+  border: 1px solid t.$border;
+  background: t.$surface-muted;
+  color: t.$text-muted;
+  &:hover {
+    background: t.$surface-success;
+    color: t.$primary;
+    border-color: t.$primary;
+  }
+  &:focus-visible {
+    outline: 2px solid t.$primary;
+    outline-offset: 2px;
+  }
+}
+.createButton {
+  border: 1px solid t.$primary;
+  background: t.$primary;
+  color: t.$surface;
+  &:hover { background: t.$primary-hover; }
+  &:focus-visible { outline: 2px solid t.$primary; outline-offset: 2px; }
+}
+.notice {
+  margin: t.$space-4 0 0;
+  color: t.$success-text;
+  font-size: 13px;
+  font-weight: 600;
+}
+.guidance {
+  margin: t.$space-3 0 0;
+  color: t.$text-muted;
+  font-size: 12px;
+}
+.demoWarning {
+  margin: t.$space-4 0 0;
+  padding-top: t.$space-3;
+  border-top: 1px solid t.$border;
+  color: t.$text-muted;
+  font-size: 12px;
+  line-height: 1.7;
+}
+@media (max-width: 760px) {
+  .voteCard {
+    padding: t.$space-5;
+    h3 {
+      font-size: 21px;
+    }
+  }
+  .cardHead {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+}
+@media (max-width: 480px) {
+  .actions > button {
+    flex: 1 1 100%;
+  }
+}

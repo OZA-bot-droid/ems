@@ -1,0 +1,80 @@
+// 파일 기능: 실시간 투표 화면의 레이아웃과 반응형 스타일을 정의합니다.
+
+@use '../../styles/tokens' as t;
+.layout {
+  min-height: 100vh;
+  display: flex;
+  background: t.$background;
+}
+.main {
+  flex: 1;
+  max-width: 1480px;
+  min-width: 0;
+  padding: 36px 36px 28px;
+}
+.pollLayout {
+  display: grid;
+  grid-template-columns: 310px minmax(0, 1fr);
+  align-items: start;
+  gap: t.$space-6;
+}
+.pageHeader {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: t.$space-6;
+  margin-bottom: 48px;
+  h1 {
+    font-size: 27px;
+    margin: 0;
+    letter-spacing: -0.03em;
+    font-weight: 700;
+  }
+  p {
+    margin: 0;
+    font-size: 13px;
+    color: t.$text-muted;
+  }
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 96px;
+  border-radius: 999px;
+  padding: 8px 12px;
+  flex-shrink: 0;
+  background: t.$surface-success;
+  color: t.$primary;
+  font-size: 12px;
+  font-weight: 600;
+}
+.footer {
+  margin-top: 40px;
+  color: t.$text-muted;
+  font-size: 11px;
+}
+@media (max-width: 1180px) {
+  .pollLayout {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 760px) {
+  .main {
+    padding: 28px t.$space-4;
+  }
+  .pageHeader {
+    margin-bottom: t.$space-8;
+    h1 {
+      font-size: 23px;
+    }
+  }
+}
+@media (max-width: 480px) {
+  .pageHeader {
+    h1 {
+      font-size: 20px;
+    }
+  }
+}

@@ -2,6 +2,7 @@ package com.ems.interaction.poll.controller;
 
 import com.ems.interaction.common.exception.ApiException;
 import com.ems.interaction.common.exception.ErrorCode;
+import com.ems.interaction.common.response.PageResponse;
 import com.ems.interaction.poll.dto.PollManagementDTO;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,6 +25,7 @@ import java.util.Map;
 
 import jakarta.servlet.http.HttpServletRequest;
 import com.ems.interaction.common.response.ApiResponseBuilder;
+import org.springframework.data.domain.Page;
 
 
 @RestController
@@ -36,10 +38,7 @@ public class PollController {
 
     // 투표 생성
     @PostMapping("/polls")
-    public ResponseEntity<?> createPoll(@Valid @RequestBody PollSaveDTO dto,
-                                        @RequestHeader("X-Member-Id") Long userId,
-                                        @RequestHeader("X-User-Role") String role,
-                                        HttpServletRequest request) {
+    public ResponseEntity<?> createPoll(@Valid @RequestBody PollSaveDTO dto, @RequestHeader("X-Member-Id") Long userId, @RequestHeader("X-User-Role") String role, HttpServletRequest request) {
         checkAdmin(role);
 
         PollResponseDTO response = pollService.createPoll(dto, userId);
@@ -58,26 +57,31 @@ public class PollController {
         return apiResponseBuilder.ok(response, "투표 조회 성공", request);
     }
 
+//
+//    // 관리자가 생성한 투표 조회
+//    @GetMapping("/polls/mycreated")
+//    public ResponseEntity<?> getMyCreatedPolls(@RequestHeader("X-Member-Id") Long userId, @RequestHeader("X-User-Role") String role, HttpServletRequest request) {
+//        checkAdmin(role);
+//
+//        List<PollManagementDTO> response = pollService.getMyCreatedPolls(userId);
+//
+//        return apiResponseBuilder.ok(response, "관리자 투표 목록 조회 성공", request);
+//    }
 
-    // 관리자가 생성한 투표 조회
+    // 관리자가 생성한 투표 목록 페이지 조회
     @GetMapping("/polls/mycreated")
-    public ResponseEntity<?> getMyCreatedPolls(@RequestHeader("X-Member-Id") Long userId,
-                                               @RequestHeader("X-User-Role") String role,
-                                               HttpServletRequest request) {
+    public ResponseEntity<?> getMyCreatedPolls(@RequestHeader("X-Member-Id") Long userId, @RequestHeader("X-User-Role") String role,
+                                               @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size, HttpServletRequest request) {
         checkAdmin(role);
-        System.out.println("관리자가 생성한 투표 조회  X-Member-Id : "+userId+", X-User-Role : "+role);
 
+        Page<PollManagementDTO> response = pollService.getMyCreatedPolls(userId, page, size);
 
-        List<PollManagementDTO> response = pollService.getMyCreatedPolls(userId);
-
-        return apiResponseBuilder.ok(response, "관리자 투표 목록 조회 성공", request);
+        return apiResponseBuilder.ok(PageResponse.from(response), "관리자 투표 목록 조회 성공", request);
     }
 
     // 유저가 참여 중인 세션의 활성화 상태인 투표 목록 전달
     @GetMapping("/polls/getpolls")
-    public ResponseEntity<?> getActivePolls(@RequestHeader("X-Member-Id") Long userId,
-                                            @RequestHeader("X-User-Role") String role,
-                                            HttpServletRequest request) {
+    public ResponseEntity<?> getActivePolls(@RequestHeader("X-Member-Id") Long userId, @RequestHeader("X-User-Role") String role, HttpServletRequest request) {
 
         List<PollResponseDTO> response = pollService.getActivePolls(userId);
 
@@ -87,10 +91,7 @@ public class PollController {
 
     // 투표 활성화
     @PatchMapping("/polls/{pollId}/activate")
-    public ResponseEntity<?> pollActive(@PathVariable Long pollId,
-                                        @RequestHeader("X-Member-Id") Long userId,
-                                        @RequestHeader("X-User-Role") String role,
-                                        HttpServletRequest request) {
+    public ResponseEntity<?> pollActive(@PathVariable Long pollId, @RequestHeader("X-Member-Id") Long userId, @RequestHeader("X-User-Role") String role, HttpServletRequest request) {
         checkAdmin(role);
 
         Long pollIdResult = pollService.setPollActive(userId, pollId);
@@ -100,10 +101,7 @@ public class PollController {
 
     // 투표 종료
     @PatchMapping("/polls/{pollId}/close")
-    public ResponseEntity<?> pollClose(@PathVariable Long pollId,
-                                       @RequestHeader("X-Member-Id") Long userId,
-                                       @RequestHeader("X-User-Role") String role,
-                                       HttpServletRequest request) {
+    public ResponseEntity<?> pollClose(@PathVariable Long pollId, @RequestHeader("X-Member-Id") Long userId, @RequestHeader("X-User-Role") String role, HttpServletRequest request) {
         checkAdmin(role);
 
         Long pollIdResult = pollService.setPollClose(userId, pollId);

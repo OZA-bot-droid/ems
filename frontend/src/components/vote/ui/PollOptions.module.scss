@@ -1,0 +1,39 @@
+// 파일 기능: 투표 선택지의 배치와 선택 상태 스타일을 정의합니다.
+
+@use '../../../styles/tokens' as t;
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: t.$space-3;
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+.option {
+  min-height: 60px;
+  display: flex;
+  gap: t.$space-4;
+  align-items: center;
+  padding: t.$space-4 t.$space-5;
+  background: t.$surface-muted;
+  border-radius: t.$radius-control;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  input {
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    accent-color: t.$primary;
+  }
+  &:focus-within {
+    outline: 2px solid t.$primary;
+    outline-offset: 2px;
+  }
+  &:has(input:disabled) {
+    cursor: default;
+  }
+}
+.selected {
+  background: t.$surface-success;
+}

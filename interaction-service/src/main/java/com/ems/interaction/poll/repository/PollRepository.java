@@ -13,6 +13,8 @@ import org.springframework.data.repository.query.Param;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface PollRepository extends JpaRepository<Poll, Long> {
 
@@ -36,6 +38,10 @@ public interface PollRepository extends JpaRepository<Poll, Long> {
 
     // 여러 세션에 속한 ACTIVE 투표 조회
     List<Poll> findBySessionIdInAndStatus(Collection<Long> sessionIds, Status status);
+
+
+    // 관리자가 생성한 투표 목록 페이지 조회 (ID 내림차순)
+    Page<Poll> findByUserIdOrderByIdDesc(Long userId, Pageable pageable);
 
 
     // SCHEDULED → ACTIVE
