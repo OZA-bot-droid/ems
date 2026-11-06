@@ -1,9 +1,11 @@
+import axios from 'axios';
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
+  const API_URL = import.meta.env.VITE_API_URL;
   const [accessToken, setAccessToken] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const refreshPromiseRef = useRef(null);
@@ -24,25 +26,25 @@ export function AuthProvider({ children }) {
 
     refreshPromiseRef.current = (async () => {
       try {
-        const res = await fetch(`http://localhost:8080/api/members/reissue`, {
+        const res = await axios(`${API_URL}/api/members/reissue`, {
           method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-type': 'application/json;charset=utf-8',
-          },
-          body: JSON.stringify({ clientId }),
+          withCredentials: true,
+          data: { clientId },
+          validateStatus: () => true,
         });
 
-        if (!res.ok) {
-          const errorResponse = await res.json();
+        if (res.status >= 200 && res.status < 300) {
+          const newAccessToken = res.data.data.accessToken;
+          setAccessToken(newAccessToken);
+          return newAccessToken;
+        }
+
+        if (res.status === 401 || res.status === 403) {
           setAccessToken(null);
           localStorage.removeItem('isLoginSession');
-          throw errorResponse;
-        } else {
-          const data = await res.text();
-          setAccessToken(data);
-          return data;
         }
+
+        throw new Error(`토큰 재발급 실패: ${res.status}`);
       } finally {
         refreshPromiseRef.current = null;
       }
@@ -55,32 +57,28 @@ export function AuthProvider({ children }) {
   const logout = async () => {
     const clientId = localStorage.getItem('clientId');
 
-    try {
-      if (clientId) {
-        const res = await fetch('http://localhost:8080/api/members/logout', {
-          method: 'DELETE',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            clientId,
-          }),
-        });
+    if (!clientId) {
+      console.log('클라이언트 정보가 없습니다.');
+      return;
+    }
 
-        if (res.ok) {
-          navigate('/');
-        } else {
-          const data = await res.json();
-          console.log(data);
-        }
+    try {
+      const res = await axios(`${API_URL}/api/members/logout`, {
+        method: 'DELETE',
+        withCredentials: true,
+        data: { clientId },
+        validateStatus: () => true,
+      });
+
+      if (res.status >= 200 && res.status < 300) {
+        setAccessToken(null);
+        localStorage.removeItem('isLoginSession');
+        navigate('/', { replace: true });
+      } else {
+        console.log('실패 : ', res.data);
       }
-    } catch {
-      alert('에러 발생');
-    } finally {
-      setAccessToken(null);
-      localStorage.removeItem('isLoginSession');
-      navigate("/");
+    } catch (err) {
+      console.log('오류 발생 : ', err);
     }
   };
 

@@ -1,38 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getClientId } from '../util/getClientId';
-
-function BrandPanel() {
-  return (
-    <aside className="bg-[#17253c] px-8 py-10 text-white sm:px-12 lg:h-full lg:w-[420px] lg:shrink-0 lg:px-14 lg:py-0">
-      <div className="lg:pt-[65px]">
-        <div className="flex items-center gap-3">
-          <span className="h-[39px] w-3 rounded-[5px] bg-[#169b62]" />
-          <h1 className="text-[36px] font-bold leading-none tracking-[-0.02em]">EMS</h1>
-        </div>
-        <p className="mt-5 text-[13px] font-semibold text-[#afc2d2]">CLOUD NATIVE EVENT PLATFORM</p>
-      </div>
-
-      <div className="mt-28 lg:mt-[132px]">
-        <h2 className="text-[29px] font-bold leading-[1.03] tracking-[-0.02em]">
-          함께 만드는
-          <br />더 나은 행사 경험
-        </h2>
-        <p className="mt-12 text-[16px] leading-[1.15] text-[#bbc8d6]">
-          행사 탐색부터 실시간 참여까지
-          <br />
-          통합 이벤트 관리 플랫폼
-        </p>
-      </div>
-    </aside>
-  );
-}
+import NoLoginHeaders from '../common/NoLoginHeaders';
+import { useApiUtil } from '../hook/apiUtil';
 
 function SignupForm() {
   const navigate = useNavigate();
   const clientId = getClientId();
+  const apiReq = useApiUtil();
   const [sp] = useSearchParams();
   const errorMessage = sp.get('error');
+
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [role, setRole] = useState('');
   const [member, setMember] = useState({
@@ -89,7 +67,7 @@ function SignupForm() {
     }
 
     try {
-      const res = await fetch(`http://localhost:8080/api/members/register`, {
+      const res = await apiReq(`/api/members/register`, {
         method: 'POST',
         headers: {
           'Content-type': 'application/json;charset=utf-8',
@@ -97,13 +75,12 @@ function SignupForm() {
         body: JSON.stringify({ ...member, role: role }),
       });
 
+      const data = await res.json();
       if (res.ok) {
-        alert('회원가입 성공');
+        alert(data.message);
         navigate('/');
       } else {
-        alert('통신 에러1');
-        const data = await res.json();
-        console.log(data);
+        alert(data.message + ' 회원가입 실패');
       }
     } catch {
       alert('통신 에러2');
@@ -288,7 +265,7 @@ const Signup = () => {
   return (
     <main className="min-h-screen bg-[#f7f9fc] lg:flex lg:items-center lg:justify-center">
       <div className="min-h-screen w-full overflow-hidden bg-[#f7f9fc] lg:min-h-0 lg:h-[790px] lg:w-[1100px] lg:flex">
-        <BrandPanel />
+        <NoLoginHeaders />
 
         <section className="flex flex-1 items-center justify-end py-10">
           <SignupForm />
