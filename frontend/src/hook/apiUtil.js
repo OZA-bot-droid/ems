@@ -29,7 +29,7 @@ export function useApiUtil() {
       let newAccessToken;
       try {
         // 진행 중인 재발급 요청 기다림
-        newAccessToken = await refreshAccessToken();
+        newAccessToken = await refreshAccessToken(accessToken);
       } catch (err) {
         console.error(err);
         return res;

@@ -138,3 +138,75 @@ button {
 .signup-scroll::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+
+
+/* 팀원 카드 캐러셀 */
+.team-carousel {
+  width: 100%;
+  max-width: 1050px;
+  margin: 0 auto;
+  overflow: hidden;
+
+  cursor: grab;
+  user-select: none;
+  touch-action: pan-y;
+
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 8%,
+    black 92%,
+    transparent
+  );
+}
+
+.team-carousel:active {
+  cursor: grabbing;
+}
+
+.team-carousel-track {
+  display: flex;
+  width: max-content;
+  animation: team-scroll 30s linear infinite;
+}
+
+.team-carousel-group {
+  display: flex;
+  flex-shrink: 0;
+  gap: 16px;
+  padding-right: 16px;
+}
+
+@keyframes team-scroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* 마우스를 올리면 일시 정지
+.team-carousel:hover .team-carousel-track {
+  animation-play-state: paused;
+}
+*/
+
+/* 애니메이션 감소 설정을 사용하는 경우 */
+@media (prefers-reduced-motion: reduce) {
+  .team-carousel-track {
+    animation: none;
+  }
+
+  .team-carousel {
+    overflow-x: auto;
+    mask-image: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}

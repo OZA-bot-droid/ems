@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './auth/AuthContext';
 import AuthGuard from './auth/AuthGuard';
-import Main from './page/main';
+import Home from './page/Home';
 import Signup from './page/Signup';
 import Login from './page/Login';
 import AuthLogin from './page/OAuthCallback';
@@ -18,7 +18,7 @@ function App() {
       <AuthProvider>
         <Routes>
           <Route>
-            <Route path="/" element={<Main />} />
+            <Route path="/" element={<Home />} />
 
             <Route element={<AuthGuard />}>
               <Route path="/login" element={<Login />} />

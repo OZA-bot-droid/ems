@@ -5,13 +5,13 @@ import { useNavigate } from 'react-router-dom';
 import LoginHeader from '../common/LoginHeader';
 
 const MyPage = () => {
-  const { logout, authLoading, accessToken } = useAuth();
+  const { authLoading, accessToken } = useAuth();
   const navigate = useNavigate();
   const apiReq = useApiUtil();
-  const [member, setMember] = useState({
-    email: '',
-    name: '',
-  });
+  const [member, setMember] = useState({});
+  const [isEditing, setIsEditing] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     // 재발급이 완료되기 전까지 대기
@@ -37,6 +37,36 @@ const MyPage = () => {
     };
     myInfo();
   }, [authLoading, accessToken, apiReq]);
+
+  const updateName = async () => {
+    const name = newName.trim();
+
+    if (!name || name.length > 50 || saving) return;
+
+    setSaving(true);
+
+    try {
+      const res = await apiReq('/api/members/me', {
+        method: 'PATCH',
+        data: { name },
+      });
+
+      if (res.status >= 200 && res.status < 300) {
+        setMember((prev) => ({
+          ...prev,
+          ...res.data.data,
+        }));
+        setIsEditing(false);
+      } else {
+        alert('이름 수정에 실패했습니다.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('서버 연결 중 오류가 발생했습니다.');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <main className="min-h-screen bg-[#f7f9fc]">
@@ -66,16 +96,64 @@ const MyPage = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-[12px] text-[#7a879a]">이름</p>
-                    <p className="mt-1 text-[14px] font-medium text-[#142238]">{member.name}</p>
+
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={newName}
+                        maxLength={50}
+                        onChange={(e) => setNewName(e.target.value)}
+                        className="mt-1 h-9 rounded-lg border border-[#d9dee7] px-3 text-[13px] outline-none focus:border-[#169b62]"
+                      />
+                    ) : (
+                      <p className="mt-1 text-[14px] font-medium text-[#142238]">
+                        {member.name}
+                      </p>
+                    )}
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => navigate('/password/change')}
-                    style={{ fontSize: '12px' }}
-                    className="rounded-[10px] bg-[#169b62] px-3 py-2 text-xs font-semibold text-white hover:bg-[#128653]"
-                  >
-                    비밀번호 변경
-                  </button>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {isEditing ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={updateName}
+                          disabled={saving || !newName.trim()}
+                          className="rounded-[10px] bg-[#169b62] px-3 py-2 text-xs font-semibold text-white disabled:opacity-50"
+                        >
+                          {saving ? '저장 중...' : '저장'}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setIsEditing(false)}
+                          disabled={saving}
+                          className="rounded-[10px] border border-[#d9dee7] px-3 py-2 text-xs font-semibold text-[#142238]"
+                        >
+                          취소
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setNewName(member.name ?? '');
+                          setIsEditing(true);
+                        }}
+                        className="rounded-[10px] border border-[#d9dee7] px-3 py-2 text-xs font-semibold text-[#142238] hover:bg-[#f7f9fc]"
+                      >
+                        정보 수정
+                      </button>
+                    )}
+                    {member.status && (
+                      <button
+                        type="button"
+                        onClick={() => navigate('/password/change')}
+                        className="rounded-[10px] bg-[#169b62] px-3 py-2 text-xs font-semibold text-white hover:bg-[#128653]"
+                      >
+                        비밀번호 변경
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 <div>

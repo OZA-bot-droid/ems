@@ -12,17 +12,19 @@ function LoginForm() {
   const [password, setPassword] = React.useState('');
   const apiReq = useApiUtil();
 
-  const [sp] = useSearchParams();
-  const errorMessage = sp.get('error');
+  const API_URL = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
   const clientId = getClientId();
 
+  const [sp] = useSearchParams();
+  const errorMessage = sp.get('error') === 'oauth_failed'? '소셜 로그인에 실패했습니다. 다시 시도해주세요' : errorCode;
+
   const googleLogin = () => {
-    window.location.href = `http://localhost:8080/api/members/google?clientId=${clientId}`;
+    window.location.href = `${API_URL}/api/members/google?clientId=${clientId}`;
   };
 
   const naverLogin = () => {
-    window.location.href = `http://localhost:8080/api/members/naver?clientId=${clientId}`;
+    window.location.href = `${API_URL}/api/members/naver?clientId=${clientId}`;
   };
 
   const handleSubmit = async (event) => {
@@ -38,6 +40,7 @@ function LoginForm() {
         data: { email, password, clientId },
       });
 
+      console.log(res.data);
       if (res.status >= 200 && res.status < 300) {
         alert('로그인 성공');
         setAccessToken(res.data.data.accessToken);
@@ -45,7 +48,6 @@ function LoginForm() {
         navigate('/main');
       } else {
         alert('로그인 실패');
-        console.log(res.data);
       }
     } catch (err) {
       alert('로그인 실패');

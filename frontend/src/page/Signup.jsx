@@ -5,12 +5,18 @@ import NoLoginHeaders from '../common/NoLoginHeaders';
 import { useApiUtil } from '../hook/apiUtil';
 
 function SignupForm() {
+  const API_URL = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
   const clientId = getClientId();
   const apiReq = useApiUtil();
   const [sp] = useSearchParams();
   const errorMessage = sp.get('error');
 
+  const [verificationCode, setVerificationCode] = useState('');
+  const [codeSent, setCodeSent] = useState(false);
+  const [verifiedEmail, setVerifiedEmail] = useState('');
+  const [sending, setSending] = useState(false);
+  const [verifying, setVerifying] = useState(false);
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [role, setRole] = useState('');
   const [member, setMember] = useState({
@@ -22,7 +28,7 @@ function SignupForm() {
   // google 회원가입
   const googleSignup = () => {
     if (role !== '') {
-      window.location.href = `http://localhost:8080/api/members/google?clientId=${clientId}&role=${role}`;
+      window.location.href = `${API_URL}/api/members/google?clientId=${clientId}&role=${role}`;
     } else {
       alert('회원 유형을 선택 후 회원가입을 진행해주세요.');
     }
@@ -31,15 +37,92 @@ function SignupForm() {
   // naver 회원가입
   const naverSignup = () => {
     if (role !== '') {
-      window.location.href = `http://localhost:8080/api/members/naver?clientId=${clientId}&role=${role}`;
+      window.location.href = `${API_URL}/api/members/naver?clientId=${clientId}&role=${role}`;
     } else {
       alert('회원 유형을 선택 후 회원가입을 진행해주세요.');
+    }
+  };
+
+  // 이메일 인증 요청 함수 추가
+  const sendVerificationCode = async () => {
+    const email = member.email.trim().toLowerCase();
+
+    if (!/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(email)) {
+      alert('올바른 이메일을 입력해주세요.');
+      return;
+    }
+
+    if (sending || verifying) return;
+
+    setSending(true);
+
+    try {
+      const res = await apiReq('/api/members/email/send', {
+        method: 'POST',
+        data: { email },
+      });
+
+      if (res.status === 200) {
+        setCodeSent(true);
+        setVerifiedEmail('');
+        setVerificationCode('');
+        alert('인증번호가 발송되었습니다. 이메일을 확인해주세요.');
+      } else {
+        alert(res.data?.message || '인증번호 발송에 실패했습니다.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('서버 연결 중 오류가 발생했습니다.');
+    } finally {
+      setSending(false);
+    }
+  };
+
+  // 인증 확인 함수
+  const verifyEmailCode = async () => {
+    const email = member.email.trim().toLowerCase();
+
+    if (!codeSent || verifiedEmail || verifying || sending) return;
+
+    if (!/^\d{6}$/.test(verificationCode)) {
+      alert('인증번호 6자리를 입력해주세요.');
+      return;
+    }
+
+    setVerifying(true);
+
+    try {
+      const res = await apiReq('/api/members/email/verify', {
+        method: 'POST',
+        data: {
+          email,
+          code: verificationCode,
+        },
+      });
+
+      if (res.status === 200) {
+        setVerifiedEmail(email);
+        alert('이메일 인증이 완료되었습니다.');
+      } else {
+        alert(res.data?.message || '인증번호가 올바르지 않습니다.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('서버 연결 중 오류가 발생했습니다.');
+    } finally {
+      setVerifying(false);
     }
   };
 
   // 자체 회원가입
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    if (!verifiedEmail || verifiedEmail !== member.email.trim().toLowerCase()) {
+      alert('이메일 인증을 완료해주세요.');
+      return;
+    }
+    if (sending || verifying) return;
 
     if (member.password !== passwordConfirm) {
       alert('비밀번호와 비밀번호 확인을 동일하게 입력해 주세요.');
@@ -120,17 +203,90 @@ function SignupForm() {
           <label htmlFor="signup-email" className="block text-[13px] font-semibold text-[#142238]">
             이메일
           </label>
-          <input
-            id="signup-email"
-            type="email"
-            name="email"
-            onChange={(event) =>
-              setMember((m) => ({ ...m, [event.target.name]: event.target.value }))
-            }
-            placeholder="name@example.com"
-            autoComplete="email"
-            className="mt-2 h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none transition placeholder:text-[#a0a9b8] focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15"
-          />
+          <div className="mt-2 flex gap-2">
+            <input
+              id="signup-email"
+              type="email"
+              name="email"
+              value={member.email}
+              onChange={(event) => {
+                setMember((m) => ({
+                  ...m,
+                  email: event.target.value,
+                }));
+                setCodeSent(false);
+                setVerifiedEmail('');
+                setVerificationCode('');
+              }}
+              disabled={sending || verifying}
+              placeholder="name@example.com"
+              autoComplete="email"
+              className="h-[44px] min-w-0 flex-1 rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none transition placeholder:text-[#a0a9b8] focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15"
+            />
+
+            <button
+              type="button"
+              onClick={sendVerificationCode}
+              disabled={sending || verifying || Boolean(verifiedEmail)}
+              className="h-[44px] shrink-0 rounded-[10px] bg-[#169b62] px-4 text-[12px] font-semibold text-white hover:bg-[#128653] disabled:opacity-50"
+            >
+              {sending
+                ? '발송 중...'
+                : codeSent
+                  ? '재발송'
+                  : '인증번호 발송'}
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-3">
+          {codeSent && !verifiedEmail && (
+            <div className="mt-3">
+              <label
+                htmlFor="signup-verification-code"
+                className="block text-[13px] font-semibold text-[#142238]"
+              >
+                이메일 인증번호
+              </label>
+
+              <div className="mt-2 flex gap-2">
+                <input
+                  id="signup-verification-code"
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={6}
+                  value={verificationCode}
+                  onChange={(e) =>
+                    setVerificationCode(
+                      e.target.value.replace(/\D/g, '')
+                    )
+                  }
+                  placeholder="6자리 인증번호"
+                  className="h-[44px] min-w-0 flex-1 rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] outline-none focus:border-[#169b62]"
+                />
+
+                <button
+                  type="button"
+                  onClick={verifyEmailCode}
+                  disabled={verifying || sending || verificationCode.length !== 6}
+                  className="rounded-[10px] border border-[#169b62] px-4 text-[12px] font-semibold text-[#169b62] hover:bg-[#e6f5ee] disabled:opacity-50"
+                >
+                  {verifying ? '확인 중...' : '인증 확인'}
+                </button>
+              </div>
+
+              <p className="mt-2 text-[12px] text-[#7a879a]">
+                이메일로 발송된 6자리 인증번호를 입력해주세요.
+              </p>
+            </div>
+          )}
+
+          {verifiedEmail && (
+            <p className="mt-3 text-[12px] font-semibold text-[#169b62]">
+              ✓ 이메일 인증이 완료되었습니다.
+            </p>
+          )}
         </div>
 
         <div className="mt-4">
@@ -208,7 +364,8 @@ function SignupForm() {
 
         <button
           type="submit"
-          className="mt-7 flex h-[44px] w-full items-center justify-center rounded-[10px] bg-[#169b62] px-4 text-[13px] font-semibold text-white transition-colors hover:bg-[#128653] focus:outline-none focus:ring-2 focus:ring-[#169b62]/30"
+          disabled={!verifiedEmail || sending || verifying}
+          className="mt-7 flex h-[44px] w-full items-center justify-center rounded-[10px] bg-[#169b62] px-4 text-[13px] font-semibold text-white transition-colors hover:bg-[#128653] focus:outline-none focus:ring-2 focus:ring-[#169b62]/30 disabled:cursor-not-allowed disabled:opacity-50"
         >
           회원가입
         </button>
