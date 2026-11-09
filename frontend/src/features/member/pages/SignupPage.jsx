@@ -78,110 +78,109 @@ function SignupForm() {
   };
 
   return (
-    <div className={cx('signup-scroll max-h-[720px] w-[620px] overflow-y-auto')}>
-      <div className={cx('w-full px-8')}>
-        <form onSubmit={handleSubmit}>
-          <h2 className={cx('text-[26px] font-bold tracking-[-0.02em] text-[#142238]')}>
-            새로운 계정을 만들어보세요
-          </h2>
-          <p className={cx('mt-2 text-[14px] leading-6 text-[#7a879a]')}>
-            필수 정보를 입력하여 EMS에 가입하세요.
-          </p>
+    <div className={cx('w-[600px] px-8')}>
+      <form onSubmit={handleSubmit}>
+        <h2 className={cx('text-[26px] font-bold tracking-[-0.02em] text-[#142238]')}>
+          새로운 계정을 만들어보세요
+        </h2>
+        <p className={cx('mt-2 text-[14px] leading-6 text-[#7a879a]')}>
+          필수 정보를 입력하여 EMS에 가입하세요.
+        </p>
 
-          <div className={cx('mt-7')}>
-            <label
-              htmlFor="signup-name"
-              className={cx('block text-[13px] font-semibold text-[#142238]')}
-            >
-              이름
-            </label>
-            <input
-              id="signup-name"
-              type="text"
-              name="name"
-              onChange={(event) =>
-                setMember((m) => ({ ...m, [event.target.name]: event.target.value }))
-              }
-              placeholder="홍길동"
-              autoComplete="name"
-              className={cx(
-                'mt-2 h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none transition placeholder:text-[#a0a9b8] focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15',
-              )}
-            />
-          </div>
+        <div className={cx('mt-7')}>
+          <label
+            htmlFor="signup-name"
+            className={cx('block text-[13px] font-semibold text-[#142238]')}
+          >
+            이름
+          </label>
+          <input
+            id="signup-name"
+            type="text"
+            name="name"
+            onChange={(event) =>
+              setMember((m) => ({ ...m, [event.target.name]: event.target.value }))
+            }
+            placeholder="홍길동"
+            autoComplete="name"
+            className={cx(
+              'mt-2 h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none transition placeholder:text-[#a0a9b8] focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15',
+            )}
+          />
+        </div>
 
-          <div className={cx('mt-4')}>
-            <label
-              htmlFor="signup-email"
-              className={cx('block text-[13px] font-semibold text-[#142238]')}
-            >
-              이메일
-            </label>
-            <input
-              id="signup-email"
-              type="email"
-              name="email"
-              onChange={(event) =>
-                setMember((m) => ({ ...m, [event.target.name]: event.target.value }))
-              }
-              placeholder="name@example.com"
-              autoComplete="email"
-              className={cx(
-                'mt-2 h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none transition placeholder:text-[#a0a9b8] focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15',
-              )}
-            />
-          </div>
+        <div className={cx('mt-4')}>
+          <label
+            htmlFor="signup-email"
+            className={cx('block text-[13px] font-semibold text-[#142238]')}
+          >
+            이메일
+          </label>
+          <input
+            id="signup-email"
+            type="email"
+            name="email"
+            onChange={(event) =>
+              setMember((m) => ({ ...m, [event.target.name]: event.target.value }))
+            }
+            placeholder="name@example.com"
+            autoComplete="email"
+            className={cx(
+              'mt-2 h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none transition placeholder:text-[#a0a9b8] focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15',
+            )}
+          />
+        </div>
 
-          <div className={cx('mt-4')}>
-            <label
-              htmlFor="signup-password"
-              className={cx('block text-[13px] font-semibold text-[#142238]')}
-            >
-              비밀번호
-            </label>
-            <input
-              id="signup-password"
-              type="password"
-              name="password"
-              onChange={(event) =>
-                setMember((m) => ({ ...m, [event.target.name]: event.target.value }))
-              }
-              placeholder="••••••••"
-              autoComplete="new-password"
-              className={cx(
-                'mt-2 h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none transition placeholder:text-[#a0a9b8] focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15',
-              )}
-            />
-          </div>
+        <div className={cx('mt-4')}>
+          <label
+            htmlFor="signup-password"
+            className={cx('block text-[13px] font-semibold text-[#142238]')}
+          >
+            비밀번호
+          </label>
+          <input
+            id="signup-password"
+            type="password"
+            name="password"
+            onChange={(event) =>
+              setMember((m) => ({ ...m, [event.target.name]: event.target.value }))
+            }
+            placeholder="••••••••"
+            autoComplete="new-password"
+            className={cx(
+              'mt-2 h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none transition placeholder:text-[#a0a9b8] focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15',
+            )}
+          />
+        </div>
 
-          <div className={cx('mt-4')}>
-            <label
-              htmlFor="signup-password-confirm"
-              className={cx('block text-[13px] font-semibold text-[#142238]')}
-            >
-              비밀번호 확인
-            </label>
-            <input
-              id="signup-password-confirm"
-              type="password"
-              value={passwordConfirm}
-              onChange={(event) => setPasswordConfirm(event.target.value)}
-              placeholder="••••••••"
-              autoComplete="new-password"
-              className={cx(
-                'mt-2 h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none transition placeholder:text-[#a0a9b8] focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15',
-              )}
-            />
-          </div>
+        <div className={cx('mt-4')}>
+          <label
+            htmlFor="signup-password-confirm"
+            className={cx('block text-[13px] font-semibold text-[#142238]')}
+          >
+            비밀번호 확인
+          </label>
+          <input
+            id="signup-password-confirm"
+            type="password"
+            value={passwordConfirm}
+            onChange={(event) => setPasswordConfirm(event.target.value)}
+            placeholder="••••••••"
+            autoComplete="new-password"
+            className={cx(
+              'mt-2 h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none transition placeholder:text-[#a0a9b8] focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15',
+            )}
+          />
+        </div>
 
-          <div className={cx('my-4')}>
-            <p className={cx('mb-2 text-center text-xs text-gray-500')}>회원 유형</p>
+        <div className={cx('my-4')}>
+          <p className={cx('mb-2 text-center text-xs text-gray-500')}>회원 유형</p>
 
-            <div className={cx('flex items-center justify-center gap-6')}>
-              <button
-                type="button"
-                onClick={() => setRole('USER')}
-                className={cx(`
+          <div className={cx('flex items-center justify-center gap-6')}>
+            <button
+              type="button"
+              onClick={() => setRole('USER')}
+              className={cx(`
                   rounded-full px-5 py-2 transition-all duration-200
                   ${
                     role === 'USER'
@@ -189,13 +188,13 @@ function SignupForm() {
                       : 'bg-transparent text-[#9aa5b4] font-medium'
                   }
                 `)}
-              >
-                참여자
-              </button>
-              <button
-                type="button"
-                onClick={() => setRole('ADMIN')}
-                className={cx(`
+            >
+              참여자
+            </button>
+            <button
+              type="button"
+              onClick={() => setRole('ADMIN')}
+              className={cx(`
                   rounded-full px-5 py-2 transition-all duration-200
                   ${
                     role === 'ADMIN'
@@ -203,70 +202,67 @@ function SignupForm() {
                       : 'bg-transparent text-[#9aa5b4] font-medium'
                   }
                 `)}
-              >
-                주최자
-              </button>
-            </div>
+            >
+              주최자
+            </button>
           </div>
-
-          <button
-            type="submit"
-            className={cx(
-              'mt-7 flex h-[44px] w-full items-center justify-center rounded-[10px] bg-[#169b62] px-4 text-[13px] font-semibold text-white transition-colors hover:bg-[#128653] focus:outline-none focus:ring-2 focus:ring-[#169b62]/30',
-            )}
-          >
-            회원가입
-          </button>
-
-          {errorMessage && (
-            <p className={cx('mt-3 text-center text-[12px] text-red-500')}>{errorMessage}</p>
-          )}
-
-          <button
-            type="button"
-            onClick={() => navigate('/login')}
-            className={cx(
-              'mt-4 block w-full text-center text-[13px] font-medium text-[#169b62] hover:underline',
-            )}
-          >
-            이미 계정이 있으신가요?&nbsp;&nbsp; 로그인
-          </button>
-        </form>
-
-        {/* 소셜 로그인 영역 */}
-        <div className={cx('pb-4')}>
-          <div className={cx('my-4 flex items-center gap-3')}>
-            <div className={cx('h-px flex-1 bg-gray-200')} />
-            <span className={cx('text-xs text-gray-400')}>또는</span>
-            <div className={cx('h-px flex-1 bg-gray-200')} />
-          </div>
-
-          {/* Google */}
-          <button
-            type="button"
-            onClick={googleSignup}
-            className={cx(
-              'mt-[22px] flex h-[42px] w-full items-center justify-center gap-[12px] rounded-[10px] border border-[#d9dee7] bg-white',
-            )}
-          >
-            <span className={cx('text-[16px] font-bold text-[#4285f4]')}>G</span>
-            <span className={cx('text-[13px] font-semibold text-[#142238]')}>
-              Google로 회원가입
-            </span>
-          </button>
-
-          {/* Naver */}
-          <button
-            type="button"
-            onClick={naverSignup}
-            className={cx(
-              'mt-[10px] flex h-[42px] w-full items-center justify-center gap-[12px] rounded-[10px] bg-[#03c75a] text-white',
-            )}
-          >
-            <span className={cx('text-[16px] font-bold')}>N</span>
-            <span className={cx('text-[13px] font-semibold')}>Naver로 회원가입</span>
-          </button>
         </div>
+
+        <button
+          type="submit"
+          className={cx(
+            'mt-7 flex h-[44px] w-full items-center justify-center rounded-[10px] bg-[#169b62] px-4 text-[13px] font-semibold text-white transition-colors hover:bg-[#128653] focus:outline-none focus:ring-2 focus:ring-[#169b62]/30',
+          )}
+        >
+          회원가입
+        </button>
+
+        {errorMessage && (
+          <p className={cx('mt-3 text-center text-[12px] text-red-500')}>{errorMessage}</p>
+        )}
+
+        <button
+          type="button"
+          onClick={() => navigate('/login')}
+          className={cx(
+            'mt-4 block w-full text-center text-[13px] font-medium text-[#169b62] hover:underline',
+          )}
+        >
+          이미 계정이 있으신가요?&nbsp;&nbsp; 로그인
+        </button>
+      </form>
+
+      {/* 소셜 로그인 영역 */}
+      <div className={cx('pb-4')}>
+        <div className={cx('my-4 flex items-center gap-3')}>
+          <div className={cx('h-px flex-1 bg-gray-200')} />
+          <span className={cx('text-xs text-gray-400')}>또는</span>
+          <div className={cx('h-px flex-1 bg-gray-200')} />
+        </div>
+
+        {/* Google */}
+        <button
+          type="button"
+          onClick={googleSignup}
+          className={cx(
+            'mt-[22px] flex h-[42px] w-full items-center justify-center gap-[12px] rounded-[10px] border border-[#d9dee7] bg-white',
+          )}
+        >
+          <span className={cx('text-[16px] font-bold text-[#4285f4]')}>G</span>
+          <span className={cx('text-[13px] font-semibold text-[#142238]')}>Google로 회원가입</span>
+        </button>
+
+        {/* Naver */}
+        <button
+          type="button"
+          onClick={naverSignup}
+          className={cx(
+            'mt-[10px] flex h-[42px] w-full items-center justify-center gap-[12px] rounded-[10px] bg-[#03c75a] text-white',
+          )}
+        >
+          <span className={cx('text-[16px] font-bold')}>N</span>
+          <span className={cx('text-[13px] font-semibold')}>Naver로 회원가입</span>
+        </button>
       </div>
     </div>
   );
@@ -274,15 +270,13 @@ function SignupForm() {
 
 const Signup = () => {
   return (
-    <main className={cx('min-h-screen bg-[#f7f9fc] lg:flex lg:items-center lg:justify-center')}>
-      <div
-        className={cx(
-          'min-h-screen w-full overflow-hidden bg-[#f7f9fc] lg:min-h-0 lg:h-[790px] lg:w-[1100px] lg:flex',
-        )}
-      >
+    <main className={cx('min-h-screen bg-[#f7f9fc]')}>
+      <div className={cx('min-h-screen w-full bg-[#f7f9fc] lg:flex')}>
         <NoLoginHeaders />
 
-        <section className={cx('flex flex-1 items-center justify-end py-10')}>
+        <section
+          className={cx('min-w-0 flex-1 px-6 py-10 sm:px-10 lg:px-12 lg:py-16 flex justify-center')}
+        >
           <SignupForm />
         </section>
       </div>

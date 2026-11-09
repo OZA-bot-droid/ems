@@ -1,12 +1,11 @@
 import { mapClassNames } from '../../../styles/classNames.js';
 import module0 from '../../../styles/member.module.scss';
-const cx = value => mapClassNames(value, module0);
+const cx = (value) => mapClassNames(value, module0);
 import React from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getClientId } from '../utils/getClientId.js';
 import { useAuth } from '../hooks/useAuth.js';
 import NoLoginHeaders from '../components/NoLoginHeaders.jsx';
-
 
 function LoginForm() {
   const { login } = useAuth();
@@ -39,107 +38,128 @@ function LoginForm() {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className={cx("mx-auto w-full max-w-[510px] lg:mx-0 lg:ml-[72px] lg:pt-[82px]")}
-    >
-      <h2 className={cx("text-[26px] font-bold leading-normal tracking-[-0.02em] text-[#142238]")}>
-        다시 만나 반갑습니다
-      </h2>
-      <p className={cx("mt-3 text-[14px] text-[#7a879a]")}>계정 정보를 입력하여 로그인하세요.</p>
+    <div className={cx('flex justify-center')}>
+      <form onSubmit={handleSubmit} className={cx('w-[600px]')}>
+        <h2
+          className={cx('text-[26px] font-bold leading-normal tracking-[-0.02em] text-[#142238]')}
+        >
+          다시 만나 반갑습니다
+        </h2>
+        <p className={cx('mt-3 text-[14px] text-[#7a879a]')}>계정 정보를 입력하여 로그인하세요.</p>
 
-      <div className={cx("mt-[31px]")}>
-        <label htmlFor="login-email" className={cx("block text-[13px] font-semibold text-[#142238]")}>
-          이메일
-        </label>
-        <input
-          id="login-email"
-          type="email"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          placeholder="name@example.com"
-          autoComplete="email"
-          className={cx("mt-[9px] h-[42px] w-full rounded-[9px] border-0 bg-white px-[17px] text-[12px] text-[#142238] outline-none placeholder:text-[#7a879a] focus:ring-2 focus:ring-[#169b62]/25")}
-        />
-      </div>
+        <div className={cx('mt-[31px]')}>
+          <label
+            htmlFor="login-email"
+            className={cx('block text-[13px] font-semibold text-[#142238]')}
+          >
+            이메일
+          </label>
+          <input
+            id="login-email"
+            type="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            placeholder="name@example.com"
+            autoComplete="email"
+            className={cx(
+              'mt-[9px] h-[42px] w-full rounded-[9px] border-0 bg-white px-[17px] text-[12px] text-[#142238] outline-none placeholder:text-[#7a879a] focus:ring-2 focus:ring-[#169b62]/25',
+            )}
+          />
+        </div>
 
-      <div className={cx("mt-[10px]")}>
-        <label htmlFor="login-password" className={cx("block text-[13px] font-semibold text-[#142238]")}>
-          비밀번호
-        </label>
-        <input
-          id="login-password"
-          type="password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          placeholder="••••••••"
-          autoComplete="current-password"
-          className={cx("mt-[9px] h-[42px] w-full rounded-[9px] border-0 bg-white px-[17px] text-[12px] text-[#142238] outline-none placeholder:text-[#7a879a] focus:ring-2 focus:ring-[#169b62]/25")}
-        />
-      </div>
+        <div className={cx('mt-[10px]')}>
+          <label
+            htmlFor="login-password"
+            className={cx('block text-[13px] font-semibold text-[#142238]')}
+          >
+            비밀번호
+          </label>
+          <input
+            id="login-password"
+            type="password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            placeholder="••••••••"
+            autoComplete="current-password"
+            className={cx(
+              'mt-[9px] h-[42px] w-full rounded-[9px] border-0 bg-white px-[17px] text-[12px] text-[#142238] outline-none placeholder:text-[#7a879a] focus:ring-2 focus:ring-[#169b62]/25',
+            )}
+          />
+        </div>
 
-      <button
-        type="submit"
-        className={cx("mt-[53px] text-center h-[42px] w-full rounded-[10px] bg-[#169b62] px-4 text-[13px] font-semibold text-white transition-colors hover:bg-[#128653] focus:outline-none focus:ring-2 focus:ring-[#169b62]/30")}
-      >
-        로그인
-      </button>
+        <button
+          type="submit"
+          className={cx(
+            'mt-[53px] text-center h-[42px] w-full rounded-[10px] bg-[#169b62] px-4 text-[13px] font-semibold text-white transition-colors hover:bg-[#128653] focus:outline-none focus:ring-2 focus:ring-[#169b62]/30',
+          )}
+        >
+          로그인
+        </button>
 
-      {errorMessage && <p className={cx("mt-[10px]")}>{errorMessage}</p>}
+        {errorMessage && <p className={cx('mt-[10px]')}>{errorMessage}</p>}
 
-      <button
-        type="button"
-        onClick={() => navigate('/password/request')}
-        className={cx("mt-[22px] text-[14px] font-semibold text-[#169b62] hover:underline")}
-      >
-        비밀번호를 잊어 버리셨나요?&nbsp;&nbsp; 비밀번호 재발급
-      </button>
+        <button
+          type="button"
+          onClick={() => navigate('/password/request')}
+          className={cx('block mt-[22px] text-[14px] font-semibold text-[#169b62] hover:underline')}
+        >
+          비밀번호를 잊어 버리셨나요?&nbsp;&nbsp; 비밀번호 재발급
+        </button>
 
-      <button
-        type="button"
-        onClick={() => navigate('/signup')}
-        className={cx("mt-[22px] text-[14px] font-semibold text-[#169b62] hover:underline")}
-      >
-        계정이 없으신가요?&nbsp;&nbsp; 회원가입
-      </button>
+        <button
+          type="button"
+          onClick={() => navigate('/signup')}
+          className={cx('block mt-[22px] text-[14px] font-semibold text-[#169b62] hover:underline')}
+        >
+          계정이 없으신가요?&nbsp;&nbsp; 회원가입
+        </button>
 
-      {/* 소셜 로그인 */}
-      <div className={cx("mt-[28px] flex items-center gap-[18px]")}>
-        <div className={cx("h-px flex-1 bg-[#d9dee7]")} />
-        <span className={cx("text-[12px] text-[#7a879a]")}>또는</span>
-        <div className={cx("h-px flex-1 bg-[#d9dee7]")} />
-      </div>
+        {/* 소셜 로그인 */}
+        <div className={cx('mt-[28px] flex items-center gap-[18px]')}>
+          <div className={cx('h-px flex-1 bg-[#d9dee7]')} />
+          <span className={cx('text-[12px] text-[#7a879a]')}>또는</span>
+          <div className={cx('h-px flex-1 bg-[#d9dee7]')} />
+        </div>
 
-      {/* Google 로그인 */}
-      <button
-        type="button"
-        onClick={googleLogin}
-        className={cx("mt-[20px] flex h-[42px] w-full items-center justify-center gap-[18px] rounded-[10px] border border-[#d9dee7] bg-white text-[13px] font-semibold text-[#142238]")}
-      >
-        <span className={cx("text-[16px] font-bold text-[#4285f4]")}>G</span>
-        Google로 로그인
-      </button>
+        {/* Google 로그인 */}
+        <button
+          type="button"
+          onClick={googleLogin}
+          className={cx(
+            'mt-[20px] flex h-[42px] w-full items-center justify-center gap-[18px] rounded-[10px] border border-[#d9dee7] bg-white text-[13px] font-semibold text-[#142238]',
+          )}
+        >
+          <span className={cx('text-[16px] font-bold text-[#4285f4]')}>G</span>
+          Google로 로그인
+        </button>
 
-      {/* Naver 로그인 */}
-      <button
-        type="button"
-        onClick={naverLogin}
-        className={cx("mt-[10px] flex h-[42px] w-full items-center justify-center gap-[18px] rounded-[10px] bg-[#03c75a] text-[13px] font-semibold text-white")}
-      >
-        <span className={cx("text-[16px] font-bold")}>N</span>
-        Naver로 로그인
-      </button>
-    </form>
+        {/* Naver 로그인 */}
+        <button
+          type="button"
+          onClick={naverLogin}
+          className={cx(
+            'mt-[10px] flex h-[42px] w-full items-center justify-center gap-[18px] rounded-[10px] bg-[#03c75a] text-[13px] font-semibold text-white',
+          )}
+        >
+          <span className={cx('text-[16px] font-bold')}>N</span>
+          Naver로 로그인
+        </button>
+      </form>
+    </div>
   );
 }
 
 const Login = () => {
   return (
-    <main className={cx("min-h-screen bg-[#f7f9fc] lg:flex lg:items-center lg:justify-center")}>
-      <div className={cx("min-h-screen w-full overflow-hidden bg-[#f7f9fc] lg:min-h-0 lg:h-[790px] lg:w-[1100px] lg:flex")}>
+    <main className={cx('min-h-screen bg-[#f7f9fc]')}>
+      <div className={cx('min-h-screen w-full bg-[#f7f9fc] lg:flex')}>
         <NoLoginHeaders />
 
-        <section className={cx("flex-1 px-8 py-14 sm:px-12 lg:px-0 lg:py-0")}>
+        <section
+          className={cx(
+            'flex min-w-0 flex-1 flex-col justify-center px-6 py-10 sm:px-10 lg:px-12 lg:py-16',
+          )}
+        >
           <LoginForm />
         </section>
       </div>

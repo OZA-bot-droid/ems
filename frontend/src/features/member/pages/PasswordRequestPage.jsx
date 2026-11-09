@@ -43,8 +43,8 @@ const PasswordRequest = () => {
   };
 
   return (
-    <main className="min-h-screen bg-[#f7f9fc] lg:flex lg:items-center lg:justify-center">
-      <div className="border min-h-screen w-full bg-[#f7f9fc] lg:flex lg:min-h-0 lg:h-[790px] lg:w-[1100px]">
+    <main className="min-h-screen bg-[#f7f9fc]">
+      <div className="min-h-screen w-full bg-[#f7f9fc] lg:flex">
         {/* header 영역 */}
         <aside className="bg-[#17253c] px-8 py-10 text-white sm:px-12 lg:w-[420px] lg:shrink-0 lg:px-14">
           <div className="lg:pt-[65px]">
@@ -72,7 +72,7 @@ const PasswordRequest = () => {
         </aside>
 
         {/* main 영역 */}
-        <section className="flex flex-1 items-center px-8 py-14 sm:px-12 lg:px-[72px] lg:py-0">
+        <section className="flex flex-1 items-center justify-center px-8 py-14 sm:px-12 lg:px-[72px] lg:py-0">
           <form onSubmit={passwordResetRequest} className="w-full max-w-[510px]">
             <h2 className="text-[26px] font-bold text-[#142238]">비밀번호 찾기</h2>
             <p className="mt-3 text-[14px] leading-6 text-[#7a879a]">
@@ -117,7 +117,7 @@ const PasswordRequest = () => {
 
             <button
               type="button"
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/login')}
               className="mt-7 w-full text-[13px] font-semibold text-[#169b62] hover:underline"
             >
               로그인으로 돌아가기
