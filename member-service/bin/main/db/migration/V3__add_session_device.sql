@@ -1,1 +1,0 @@
-ALTER TABLE refresh_token ADD COLUMN session_id VARCHAR(36) NOT NULL UNIQUE, ADD COLUMN client_id VARCHAR(100);
