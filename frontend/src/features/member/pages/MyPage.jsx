@@ -17,7 +17,7 @@ const MyPage = () => {
           method: 'GET',
         });
 
-        if ((res.status >= 200 && res.status < 300)) {
+        if (res.status >= 200 && res.status < 300) {
           const data = res.data;
           console.log(data);
           setMember((m) => ({ ...m, ...data.data }));
@@ -32,8 +32,8 @@ const MyPage = () => {
   }, [authLoading]);
 
   return (
-    <main className="min-h-screen bg-[#f7f9fc] lg:flex lg:items-center lg:justify-center">
-      <div className="min-h-screen w-full bg-[#f7f9fc] lg:flex lg:min-h-0 lg:h-[790px] lg:w-[1100px]">
+    <main className="min-h-screen bg-[#f7f9fc]">
+      <div className="min-h-screen w-full bg-[#f7f9fc] lg:flex">
         {/* header 영역 */}
         <aside className="flex flex-col justify-between bg-[#17253c] px-5 py-7 text-white lg:w-[214px] lg:shrink-0">
           <div>
@@ -88,104 +88,106 @@ const MyPage = () => {
         </aside>
 
         {/* My Page 영역 */}
-        <section className="min-w-0 flex-1 px-6 py-10 sm:px-10 lg:overflow-y-auto lg:px-12 lg:py-[65px]">
-          <div className="mb-8">
-            <h2 className="text-[28px] font-bold text-[#142238]">마이페이지</h2>
-            <p className="mt-3 text-[13px] text-[#7a879a]">내 정보와 활동 내역을 확인하세요.</p>
-          </div>
-
-          {/* Member Service */}
-          <section className="rounded-[14px] border border-[#e5e9f0] bg-white p-6">
-            <div className="flex items-center justify-between">
-              <h3 className="text-[17px] font-bold text-[#142238]">내 프로필</h3>
-              <span className="rounded-full bg-[#e6f5ee] px-3 py-1 text-[11px] font-semibold text-[#169b62]">
-                MEMBER
-              </span>
+        <section className="min-w-0 flex-1 px-6 py-10 sm:px-10 lg:px-12 lg:py-[65px] flex justify-center">
+          <div className="w-full max-w-[900px]">
+            <div className="mb-8">
+              <h2 className="text-[28px] font-bold text-[#142238]">마이페이지</h2>
+              <p className="mt-3 text-[13px] text-[#7a879a]">내 정보와 활동 내역을 확인하세요.</p>
             </div>
 
-            <p className="mt-2 text-[12px] text-[#7a879a]">기본 회원 정보</p>
-
-            <div className="mt-5 space-y-4 border-t border-[#e5e9f0] pt-5">
-              <div>
-                <p className="text-[12px] text-[#7a879a]">이름</p>
-                <p className="mt-1 text-[14px] font-medium text-[#142238]">{member.name}</p>
+            {/* Member Service */}
+            <section className="rounded-[14px] border border-[#e5e9f0] bg-white p-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-[17px] font-bold text-[#142238]">내 프로필</h3>
+                <span className="rounded-full bg-[#e6f5ee] px-3 py-1 text-[11px] font-semibold text-[#169b62]">
+                  MEMBER
+                </span>
               </div>
 
-              <div>
-                <p className="text-[12px] text-[#7a879a]">이메일</p>
-                <p className="mt-1 text-[14px] font-medium text-[#142238]">{member.email}</p>
-              </div>
-            </div>
-          </section>
+              <p className="mt-2 text-[12px] text-[#7a879a]">기본 회원 정보</p>
 
-          {/* 다른 서비스가 사용할 공간 */}
-          <div className="mt-5 grid gap-5 sm:grid-cols-2">
-            {/* Event Service */}
-            <section className="rounded-[14px] border border-[#e5e9f0] bg-white p-5">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[#e6f5ee]">
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.7"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-5 w-5 text-[#169b62]"
-                    aria-hidden="true"
-                  >
-                    <rect x="3" y="5" width="18" height="16" rx="2" />
-                    <path d="M7 3v4M17 3v4M3 10h18" />
-                  </svg>
+              <div className="mt-5 space-y-4 border-t border-[#e5e9f0] pt-5">
+                <div>
+                  <p className="text-[12px] text-[#7a879a]">이름</p>
+                  <p className="mt-1 text-[14px] font-medium text-[#142238]">{member.name}</p>
                 </div>
 
                 <div>
-                  <h3 className="text-[15px] font-bold text-[#142238]">나의 행사</h3>
-                  <p className="mt-1 text-[11px] text-[#7a879a]">Event Service</p>
+                  <p className="text-[12px] text-[#7a879a]">이메일</p>
+                  <p className="mt-1 text-[14px] font-medium text-[#142238]">{member.email}</p>
                 </div>
-              </div>
-
-              <div className="mt-5 flex min-h-[120px] items-center justify-center rounded-[10px] border border-dashed border-[#d9dee7] bg-[#f7f9fc] p-4">
-                <p className="text-center text-[12px] leading-6 text-[#7a879a]">
-                  행사 신청 및 주최 행사
-                  <br />
-                  연동 예정
-                </p>
               </div>
             </section>
 
-            {/* Interaction Service */}
-            <section className="rounded-[14px] border border-[#e5e9f0] bg-white p-5">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[#e6f5ee]">
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.7"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-5 w-5 text-[#169b62]"
-                    aria-hidden="true"
-                  >
-                    <path d="M5 20V11M10 20V5M15 20v-8M20 20V8" />
-                  </svg>
+            {/* 다른 서비스가 사용할 공간 */}
+            <div className="mt-5 grid gap-5 sm:grid-cols-2">
+              {/* Event Service */}
+              <section className="rounded-[14px] border border-[#e5e9f0] bg-white p-5">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[#e6f5ee]">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.7"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="h-5 w-5 text-[#169b62]"
+                      aria-hidden="true"
+                    >
+                      <rect x="3" y="5" width="18" height="16" rx="2" />
+                      <path d="M7 3v4M17 3v4M3 10h18" />
+                    </svg>
+                  </div>
+
+                  <div>
+                    <h3 className="text-[15px] font-bold text-[#142238]">나의 행사</h3>
+                    <p className="mt-1 text-[11px] text-[#7a879a]">Event Service</p>
+                  </div>
                 </div>
 
-                <div>
-                  <h3 className="text-[15px] font-bold text-[#142238]">나의 참여 활동</h3>
-                  <p className="mt-1 text-[11px] text-[#7a879a]">Interaction Service</p>
+                <div className="mt-5 flex min-h-[120px] items-center justify-center rounded-[10px] border border-dashed border-[#d9dee7] bg-[#f7f9fc] p-4">
+                  <p className="text-center text-[12px] leading-6 text-[#7a879a]">
+                    행사 신청 및 주최 행사
+                    <br />
+                    연동 예정
+                  </p>
                 </div>
-              </div>
+              </section>
 
-              <div className="mt-5 flex min-h-[120px] items-center justify-center rounded-[10px] border border-dashed border-[#d9dee7] bg-[#f7f9fc] p-4">
-                <p className="text-center text-[12px] leading-6 text-[#7a879a]">
-                  투표 및 참여 내역
-                  <br />
-                  연동 예정
-                </p>
-              </div>
-            </section>
+              {/* Interaction Service */}
+              <section className="rounded-[14px] border border-[#e5e9f0] bg-white p-5">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[#e6f5ee]">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.7"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="h-5 w-5 text-[#169b62]"
+                      aria-hidden="true"
+                    >
+                      <path d="M5 20V11M10 20V5M15 20v-8M20 20V8" />
+                    </svg>
+                  </div>
+
+                  <div>
+                    <h3 className="text-[15px] font-bold text-[#142238]">나의 참여 활동</h3>
+                    <p className="mt-1 text-[11px] text-[#7a879a]">Interaction Service</p>
+                  </div>
+                </div>
+
+                <div className="mt-5 flex min-h-[120px] items-center justify-center rounded-[10px] border border-dashed border-[#d9dee7] bg-[#f7f9fc] p-4">
+                  <p className="text-center text-[12px] leading-6 text-[#7a879a]">
+                    투표 및 참여 내역
+                    <br />
+                    연동 예정
+                  </p>
+                </div>
+              </section>
+            </div>
           </div>
         </section>
       </div>
