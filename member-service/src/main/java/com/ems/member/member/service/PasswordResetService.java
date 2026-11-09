@@ -26,19 +26,17 @@ public class PasswordResetService {
 
     private final MemberRepository memberRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
-    private final long passwordResetTokenExpiration;
     private final MailService mailService;
     private final PasswordEncoder passwordEncoder;
     private final RefreshTokenRepository refreshTokenRepository;
+    @Value("${password-reset.token-expiration}") private long passwordResetTokenExpiration;
 
     public PasswordResetService(MemberRepository memberRepository,
                                 PasswordResetTokenRepository passwordResetTokenRepository,
-                                @Value("${password-reset.token-expiration}") long passwordResetTokenExpiration,
                                 MailService mailService,
                                 PasswordEncoder passwordEncoder, RefreshTokenRepository refreshTokenRepository) {
         this.memberRepository = memberRepository;
         this.passwordResetTokenRepository = passwordResetTokenRepository;
-        this.passwordResetTokenExpiration = passwordResetTokenExpiration;
         this.mailService = mailService;
         this.passwordEncoder = passwordEncoder;
         this.refreshTokenRepository = refreshTokenRepository;

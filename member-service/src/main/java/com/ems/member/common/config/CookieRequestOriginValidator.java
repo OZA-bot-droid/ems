@@ -15,7 +15,7 @@ public class CookieRequestOriginValidator {
     private final Set<String> allowedOrigins;
 
     public CookieRequestOriginValidator(@Value("${password-reset.frontend-url}") String frontendUrl,
-                                        @Value("${oauth.gateway-base-url}") String gatewayUrl) {
+                                        @Value("${app.cookie-secure}") String gatewayUrl) {
         this.allowedOrigins = Set.of(
                 toOrigin(frontendUrl),
                 toOrigin(gatewayUrl)

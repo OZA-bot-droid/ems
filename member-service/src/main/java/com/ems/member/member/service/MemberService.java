@@ -28,8 +28,7 @@ public class MemberService {
     private final AuthService authService;
     private final RefreshTokenRepository refreshTokenRepository;
     private final EmailVerificationService emailVerificationService;
-    @Value("${app.cookie-secure:false}")
-    private boolean cookieSecure;
+    @Value("${app.cookie-secure:false}") private boolean cookieSecure;
 
     public MemberService(MemberRepository memberRepository,
                          JwtTokenService jwtTokenService,
@@ -120,7 +119,7 @@ public class MemberService {
         Member member = memberRepository.findById(Long.parseLong(memberId))
                 .orElseThrow(() -> new MemberNotFoundException("회원을 찾을 수 없습니다."));
 
-        return new MemberInformationDTO(member.getEmail(), member.getName());
+        return new MemberInformationDTO(member);
     }
 
     public void changePassword(String memberId, PasswordChangeDTO dto) {

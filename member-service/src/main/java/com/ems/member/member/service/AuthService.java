@@ -33,18 +33,16 @@ public class AuthService {
 
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtTokenService jwtTokenService;
-    private final long refreshTokenExpiration;
     private final MemberRepository memberRepository;
     private final RefreshTokenHistoryRepository refreshTokenHistoryRepository;
+    @Value("${jwt.refresh-token-expiration}") private long refreshTokenExpiration;
 
     public AuthService(RefreshTokenRepository refreshTokenRepository,
                        JwtTokenService jwtTokenService,
-                       @Value("${jwt.refresh-token-expiration}") long refreshTokenExpiration,
                        MemberRepository memberRepository,
                        RefreshTokenHistoryRepository refreshTokenHistoryRepository) {
         this.refreshTokenRepository = refreshTokenRepository;
         this.jwtTokenService = jwtTokenService;
-        this.refreshTokenExpiration = refreshTokenExpiration;
         this.memberRepository = memberRepository;
         this.refreshTokenHistoryRepository = refreshTokenHistoryRepository;
     }

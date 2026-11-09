@@ -38,7 +38,13 @@ public class MemberController {
     private final ClientIpResolver clientIpResolver;
 
     public MemberController(MemberService memberService,
-                            AuthService authService, SocialLoginService socialLoginService, PasswordResetService passwordResetService, RateLimiter rateLimiter, EmailVerificationService emailVerificationService, CookieRequestOriginValidator originValidator, ClientIpResolver clientIpResolver) {
+                            AuthService authService,
+                            SocialLoginService socialLoginService,
+                            PasswordResetService passwordResetService,
+                            RateLimiter rateLimiter,
+                            EmailVerificationService emailVerificationService,
+                            CookieRequestOriginValidator originValidator,
+                            ClientIpResolver clientIpResolver) {
         this.memberService = memberService;
         this.authService = authService;
         this.socialLoginService = socialLoginService;
@@ -139,9 +145,10 @@ public class MemberController {
 
     // 로그아웃
     @DeleteMapping("/logout")
-    public ResponseEntity<?> logout(@RequestBody ClientDTO dto, @CookieValue("refreshToken") String refreshToken,
+    public ResponseEntity<?> logout(@RequestBody ClientDTO dto,
+                                    @CookieValue("refreshToken") String refreshToken,
                                     HttpServletRequest request) {
-        originValidator.validate(request);) {
+        originValidator.validate(request);
 
         if(refreshToken != null) {
             authService.logout(dto, refreshToken);
@@ -165,33 +172,31 @@ public class MemberController {
                 );
     }
 
-        // 회원 정보
-        @GetMapping("/me")
-        public ResponseEntity<?> me(JwtAuthenticationToken authentication) {
+    // 회원 정보
+    @GetMapping("/me")
+    public ResponseEntity<?> myPage(JwtAuthenticationToken authentication) {
 
-            return ResponseEntity.ok(
-                    new MessageResponseDTO<>(
-                            memberService.myPage(authentication.getToken().getSubject()),
-                            SuccessCode.REQUEST_SUCCESS
-                    )
-            );
-        }
+        return ResponseEntity.ok(
+                new MessageResponseDTO<>(
+                        memberService.myPage(authentication.getToken().getSubject()),
+                        SuccessCode.REQUEST_SUCCESS
+                )
+        );
+    }
 
-        @PatchMapping("/me")
-        public ResponseEntity<?> updateMemberName(JwtAuthenticationToken authentication,
-                @Valid
-                @RequestBody
-                        MemberUpdateDTO dto) {
-            return ResponseEntity.ok(
-                    new MessageResponseDTO<>(
-                            memberService.updateMember(
-                                    authentication.getToken().getSubject(),
-                                    dto
-                            ),
-                            SuccessCode.REQUEST_SUCCESS
-                    )
-            );
-        }
+    @PatchMapping("/me")
+    public ResponseEntity<?> updateMemberName(JwtAuthenticationToken authentication,
+                                              @Valid @RequestBody MemberUpdateDTO dto) {
+        return ResponseEntity.ok(
+                new MessageResponseDTO<>(
+                        memberService.updateMember(
+                                authentication.getToken().getSubject(),
+                                dto
+                        ),
+                        SuccessCode.REQUEST_SUCCESS
+                )
+        );
+    }
 
 
     // google -----------------------------------------------------
@@ -258,20 +263,27 @@ public class MemberController {
 
         // 회원이 없는 이메일이어도 똑같이 200 응답
         // 이메일 존재 여부 노출x
-        return new ResponseEntity<>(
-                new MessageResponseDTO<>(null, SuccessCode.REQUEST_SUCCESS),
-                HttpStatus.OK
+        return ResponseEntity.ok(
+                new MessageResponseDTO<>(null, SuccessCode.REQUEST_SUCCESS)
         );
     }
 
     @PostMapping("/password/reset")
     public ResponseEntity<?> resetPassword(@Valid @RequestBody PasswordResetDTO dto) {
 
-        System.out.println(dto);
         passwordResetService.resetPassword(dto.token(), dto.newPassword());
-        return new ResponseEntity<>(
-                new MessageResponseDTO<>(null, SuccessCode.REQUEST_SUCCESS),
-                HttpStatus.OK
+        return ResponseEntity.ok(
+                new MessageResponseDTO<>(null, SuccessCode.REQUEST_SUCCESS)
+        );
+    }
+
+    @PostMapping("/password/change")
+    public ResponseEntity<?> changePassword(JwtAuthenticationToken authentication,
+                                            @Valid @RequestBody PasswordChangeDTO dto) {
+        memberService.changePassword(authentication.getToken().getSubject(), dto);
+
+        return ResponseEntity.ok(
+                new MessageResponseDTO<>(null, SuccessCode.PASSWORD_RESET_SUCCESS)
         );
     }
 }

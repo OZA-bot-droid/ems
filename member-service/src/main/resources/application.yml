@@ -93,3 +93,5 @@ password-reset:
 app:
   public-base-url: ${APP_PUBLIC_URL:http://localhost:8088}
   cookie-secure: ${COOKIE_SECURE:false}
+oauth:
+  gateway-base-url: ${GATEWAY_URL:http://localhost:8080}
