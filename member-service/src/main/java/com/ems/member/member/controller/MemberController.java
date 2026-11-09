@@ -1,12 +1,12 @@
 package com.ems.member.member.controller;
 
+import com.ems.member.common.config.ClientIpResolver;
+import com.ems.member.common.config.CookieRequestOriginValidator;
 import com.ems.member.common.domain.SuccessCode;
+import com.ems.member.common.exception.InvalidCredentialsException;
 import com.ems.member.member.domain.Role;
 import com.ems.member.member.dto.*;
-import com.ems.member.member.service.AuthService;
-import com.ems.member.member.service.MemberService;
-import com.ems.member.member.service.PasswordResetService;
-import com.ems.member.member.service.SocialLoginService;
+import com.ems.member.member.service.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -16,12 +16,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/members")
@@ -35,13 +32,21 @@ public class MemberController {
     private final AuthService authService;
     private final SocialLoginService socialLoginService;
     private final PasswordResetService passwordResetService;
+    private final RateLimiter rateLimiter;
+    private final EmailVerificationService emailVerificationService;
+    private final CookieRequestOriginValidator originValidator;
+    private final ClientIpResolver clientIpResolver;
 
     public MemberController(MemberService memberService,
-                            AuthService authService, SocialLoginService socialLoginService, PasswordResetService passwordResetService) {
+                            AuthService authService, SocialLoginService socialLoginService, PasswordResetService passwordResetService, RateLimiter rateLimiter, EmailVerificationService emailVerificationService, CookieRequestOriginValidator originValidator, ClientIpResolver clientIpResolver) {
         this.memberService = memberService;
         this.authService = authService;
         this.socialLoginService = socialLoginService;
         this.passwordResetService = passwordResetService;
+        this.rateLimiter = rateLimiter;
+        this.emailVerificationService = emailVerificationService;
+        this.originValidator = originValidator;
+        this.clientIpResolver = clientIpResolver;
     }
 
     // 회원가입
@@ -56,27 +61,70 @@ public class MemberController {
         );
     }
 
+    // 회원가입 이메일 확인 메일 보내기
+    @PostMapping("/email/send")
+    public ResponseEntity<?> sendEmailCode(@Valid @RequestBody EmailDTO dto,
+                                           HttpServletRequest request) {
+
+        String ip = clientIpResolver.resolve(request);
+
+        // IP별 이메일 발송 횟수 제한
+        rateLimiter.checkEmailSendIp(ip);
+
+        // 이메일별 발송 횟수 및 60초 재전송 제한
+        emailVerificationService.sendCode(dto.email());
+
+        return ResponseEntity.ok(
+                new MessageResponseDTO<>(null, SuccessCode.REQUEST_SUCCESS)
+        );
+    }
+
+    // 회원가입 이메일 인증코드 확인
+    @PostMapping("/email/verify")
+    public ResponseEntity<?> verifyEmailCode(@Valid @RequestBody EmailVerificationConfirmDTO dto) {
+
+        emailVerificationService.verifyCode(dto);
+        return ResponseEntity.ok(
+                new MessageResponseDTO<>(null, SuccessCode.REQUEST_SUCCESS)
+        );
+    }
+
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody MemberLoginDTO dto) {
+    public ResponseEntity<?> login(@Valid @RequestBody MemberLoginDTO dto,
+                                   HttpServletRequest request) {
 
-        LoginResponseDTO responseDTO = memberService.login(dto);
-        return new ResponseEntity<>(
-                new MessageResponseDTO<>(
-                        new AccessTokenResponseDTO(responseDTO.accessToken()),
-                        SuccessCode.LOGIN_SUCCESS
-                ),
-                memberService.createRefreshTokenCookie(
-                        responseDTO.refreshToken()
-                ),
-                HttpStatus.OK
-        );
+        String ip = clientIpResolver.resolve(request);
+
+        // 로그인 시도 제한 확인
+        rateLimiter.check(dto.email(), ip);
+
+        try {
+            LoginResponseDTO responseDTO = memberService.login(dto);
+            rateLimiter.recordSuccess(dto.email(), ip);
+            return new ResponseEntity<>(
+                    new MessageResponseDTO<>(
+                            new AccessTokenResponseDTO(responseDTO.accessToken()),
+                            SuccessCode.LOGIN_SUCCESS
+                    ),
+                    memberService.createRefreshTokenCookie(
+                            responseDTO.refreshToken()
+                    ),
+                    HttpStatus.OK
+            );
+        } catch (InvalidCredentialsException e) {
+            rateLimiter.recordFailure(dto.email(), ip);
+            throw e;
+        }
     }
 
     // 새로운 access token 생성
     // @CookieValue : 해당 api에 온 정보 중에 특정 cookie의 값을 가져오는 어노테이션
     @PostMapping("/reissue")
-    public ResponseEntity<?> reissue(@RequestBody ClientDTO dto, @CookieValue("refreshToken") String refreshToken) {
+    public ResponseEntity<?> reissue(@RequestBody ClientDTO dto,
+                                     @CookieValue("refreshToken") String refreshToken,
+                                     HttpServletRequest request) {
+        originValidator.validate(request);
 
         LoginResponseDTO responseDTO = authService.reissue(dto, refreshToken);
         return new ResponseEntity<>(
@@ -91,7 +139,9 @@ public class MemberController {
 
     // 로그아웃
     @DeleteMapping("/logout")
-    public ResponseEntity<?> logout(@RequestBody ClientDTO dto, @CookieValue("refreshToken") String refreshToken) {
+    public ResponseEntity<?> logout(@RequestBody ClientDTO dto, @CookieValue("refreshToken") String refreshToken,
+                                    HttpServletRequest request) {
+        originValidator.validate(request);) {
 
         if(refreshToken != null) {
             authService.logout(dto, refreshToken);
@@ -115,17 +165,33 @@ public class MemberController {
                 );
     }
 
-    // 회원 정보
-    @GetMapping("/me")
-    public ResponseEntity<?> me(JwtAuthenticationToken authentication) {
+        // 회원 정보
+        @GetMapping("/me")
+        public ResponseEntity<?> me(JwtAuthenticationToken authentication) {
 
-        return ResponseEntity.ok(
-                new MessageResponseDTO<>(
-                        memberService.myPage(authentication.getToken().getSubject()),
-                        SuccessCode.REQUEST_SUCCESS
-                )
-        );
-    }
+            return ResponseEntity.ok(
+                    new MessageResponseDTO<>(
+                            memberService.myPage(authentication.getToken().getSubject()),
+                            SuccessCode.REQUEST_SUCCESS
+                    )
+            );
+        }
+
+        @PatchMapping("/me")
+        public ResponseEntity<?> updateMemberName(JwtAuthenticationToken authentication,
+                @Valid
+                @RequestBody
+                        MemberUpdateDTO dto) {
+            return ResponseEntity.ok(
+                    new MessageResponseDTO<>(
+                            memberService.updateMember(
+                                    authentication.getToken().getSubject(),
+                                    dto
+                            ),
+                            SuccessCode.REQUEST_SUCCESS
+                    )
+            );
+        }
 
 
     // google -----------------------------------------------------
@@ -186,7 +252,7 @@ public class MemberController {
 
     // password 재설정 이메일 전송 -----------------------------------------------------
     @PostMapping("/password/reset-request")
-    public ResponseEntity<?> requestPasswordReset(@Valid @RequestBody PasswordResetRequestDTO dto) {
+    public ResponseEntity<?> requestPasswordReset(@Valid @RequestBody EmailDTO dto) {
 
         passwordResetService.requestResetToken(dto.email());
 

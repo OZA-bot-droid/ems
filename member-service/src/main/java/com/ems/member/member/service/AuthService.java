@@ -13,6 +13,7 @@ import com.ems.member.member.repository.MemberRepository;
 import com.ems.member.member.repository.RefreshTokenHistoryRepository;
 import com.ems.member.member.repository.RefreshTokenRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,13 +53,15 @@ public class AuthService {
     public void replaceRefreshToken(Member member, String refreshToken, UUID clientId) {
 
         // 동일 회원의 로그인 요청을 직렬화하기 위한 행 잠금
-        Member lockedMember = memberRepository.findByIdForUpdate(member.getId())
+        memberRepository.findByIdForUpdate(member.getId())
                 .orElseThrow(() -> new MemberNotFoundException("존재하지 않는 회원입니다."));
 
         String tokenHash = hashRefreshToken(refreshToken);
         Optional<RefreshToken> existingToken = refreshTokenRepository.findByMemberAndClientId(member, clientId);
 
         if(existingToken.isPresent()) {
+            RefreshToken token = existingToken.get();
+            saveRefreshTokenHistory(token);
             existingToken.get().rotate(
                     tokenHash,
                     Instant.now().plusSeconds(refreshTokenExpiration)
@@ -74,17 +77,6 @@ public class AuthService {
                     )
             );
         }
-    }
-
-    public void replaceRefreshToken(Member member, String refreshToken, UUID clientId, UUID sessionId) {
-
-        // 기본 세션 종료
-        refreshTokenRepository.deleteByMemberAndClientId(member, clientId);
-
-        // 새 세션 생성
-        refreshTokenRepository.save(
-                RefreshToken.toBuilder(member, hashRefreshToken(refreshToken), clientId, refreshTokenExpiration, sessionId)
-        );
     }
 
     public String hashRefreshToken(String refreshToken) {
@@ -120,19 +112,14 @@ public class AuthService {
         Long memberId = jwtTokenService.validateRefreshToken(refreshToken);
 
         // 3. 해당 회원 행 잠금
-        Member member = memberRepository
-                .findByIdForUpdate(memberId)
-                .orElseThrow(() ->
-                        new InvalidRefreshTokenException(
-                                "유효하지 않은 Refresh Token입니다."
-                        )
-                );
-
-        // 활성화된 refresh token 조회
-        Optional<RefreshToken> optionalEntity = refreshTokenRepository.findByTokenHash(hashRefreshToken(refreshToken));
+        Member member = memberRepository.findByIdForUpdate(memberId)
+                .orElseThrow(() -> new InvalidRefreshTokenException("유효하지 않은 Refresh Token입니다."));
 
         // 요청 Refresh Token hash
         String tokenHash = hashRefreshToken(refreshToken);
+
+        // 활성화된 refresh token 조회
+        Optional<RefreshToken> optionalEntity = refreshTokenRepository.findByTokenHash(tokenHash);
 
         // 활성화된 refresh token이 없을 경우
         if(optionalEntity.isEmpty()) {
@@ -175,22 +162,9 @@ public class AuthService {
 
 
 
-        // 회원 존재 여부 확인
-        Optional<Member> optionalMember = memberRepository.findById(refreshEntity.getMember().getId());
-        if(optionalMember.isEmpty()) {
-            throw new MemberNotFoundException("존재하지 않는 회원 입니다.");
-        }
-
         // 회원 존재 확인과 함께 JWT sub가 DB에 저장된 Refresh Token 소유자의 회원 ID와 일치하는지도 검사
         // 폐기할 기존의 refresh token을 history에 기록
-        refreshTokenHistoryRepository.save(
-                RefreshTokenHistory.builder()
-                        .member(member)
-                        .sessionId(refreshEntity.getSessionId())
-                        .tokenHash(tokenHash)
-                        .revokedAt(now)
-                        .build()
-        );
+        saveRefreshTokenHistory(refreshEntity);
 
         // 새로운 accessToken과 refreshToken 발급
         Role role = member.getRole();
@@ -210,5 +184,27 @@ public class AuthService {
                 .orElseThrow(() -> new InvalidRefreshTokenException("클라이언트의 정보가 일치하지 않습니다."));
 
         refreshTokenRepository.delete(refreshTokenEntity);
+    }
+
+    private void saveRefreshTokenHistory(RefreshToken refreshToken) {
+        refreshTokenHistoryRepository.save(
+                RefreshTokenHistory.builder()
+                        .member(refreshToken.getMember())
+                        .sessionId(refreshToken.getSessionId())
+                        .tokenHash(refreshToken.getTokenHash())
+                        .revokedAt(Instant.now())
+                        .build()
+        );
+    }
+
+    @Scheduled(cron = "0 0 3 * * *", zone = "Asia/Seoul")
+    public void cleanupRefreshTokenHistory() {
+
+        // Refresh Token의 최대 유효기간 7일 + 여유 1일
+        Instant cutoff = Instant.now()
+                .minusSeconds(refreshTokenExpiration)
+                .minusSeconds(86400);
+
+        refreshTokenHistoryRepository.deleteByRevokedAtBefore(cutoff);
     }
 }
