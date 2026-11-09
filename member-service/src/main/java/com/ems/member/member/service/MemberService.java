@@ -25,6 +25,8 @@ public class MemberService {
     private final JwtTokenService jwtTokenService;
     private final PasswordEncoder passwordEncoder;
     private final AuthService authService;
+    @org.springframework.beans.factory.annotation.Value("${app.cookie-secure:false}")
+    private boolean cookieSecure;
 
     public MemberService(MemberRepository memberRepository,
                          JwtTokenService jwtTokenService,
@@ -89,7 +91,7 @@ public class MemberService {
                 .path("/api/members")
                 // 로컬 개발은 HTTP라서 false
                 // 실제 HTTPS 배포에서는 반드시 true로 변경
-                .secure(false)
+                .secure(cookieSecure)
                 // Refresh Token 수명과 맞춤: 7일
                 .maxAge(60 * 60 * 24 * 7)
                 // CSRF 공격 완화

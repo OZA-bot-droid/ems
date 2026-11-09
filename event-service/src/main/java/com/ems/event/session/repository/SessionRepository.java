@@ -40,6 +40,19 @@ public interface SessionRepository extends JpaRepository<Session, Long> {
                                    @Param("startsAt") Instant startsAt,
                                    @Param("endsAt") Instant endsAt);
 
+
+    @Query("""
+        select s.id from Session s
+        where s.event.createdBy = :memberId
+           or s.event.id in (
+             select r.eventId from Registration r
+             where r.userId = :memberId and r.status = :approved
+           )
+        """)
+    List<Long> findAccessibleSessionIds(
+        @Param("memberId") Long memberId,
+        @Param("approved") com.ems.event.registration.entity.RegistrationStatus approved);
+
     /** 행사 기간 밖으로 벗어나는 세션이 있는가? (행사 일정을 수정할 때) */
     @Query("""
             select case when count(s) > 0 then true else false end from Session s
@@ -50,3 +63,4 @@ public interface SessionRepository extends JpaRepository<Session, Long> {
                                 @Param("eventStartsAt") Instant eventStartsAt,
                                 @Param("eventEndsAt") Instant eventEndsAt);
 }
+

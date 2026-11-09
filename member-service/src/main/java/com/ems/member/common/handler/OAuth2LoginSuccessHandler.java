@@ -27,6 +27,8 @@ import java.util.UUID;
 
 @Component
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
+    @org.springframework.beans.factory.annotation.Value("${password-reset.frontend-url}")
+    private String frontendUrl;
     // AuthenticationSuccessHandler : 인증 성공 직후 실행되는 후처리 담당 인터페이스
     // Google 소셜 로그인 성공
     // => Spring Security가 Authentication 생성
@@ -124,11 +126,11 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         } catch (InvalidCredentialsException e) {
 
             String message = URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
-            response.sendRedirect("http://localhost:5173/?error=" + message);
+            response.sendRedirect(frontendUrl + "/login?error=" + message);
         } catch (MemberEmailDuplicatedException e) {
 
             String message = URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
-            response.sendRedirect("http://localhost:5173/signup?error=" + message);
+            response.sendRedirect(frontendUrl + "/signup?error=" + message);
         } catch(Exception e) {
             handlerExceptionResolver.resolveException(
                     request,
@@ -163,6 +165,6 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         // Access Token/Refresh Token 자체를 URL에 직접 넣지 않고, 짧게 유효한 일회성 코드만 프론트에 넘긴 다음 그 코드로 서버에서 토큰을 교환하는 구조를 만들기 위함
         // 클라이언트에게 다른 URL로 다시 이동하라고 응답하는 메서드
-        response.sendRedirect("http://localhost:5173/oauth-success?code=" + loginCode);
+        response.sendRedirect(frontendUrl + "/oauth-success?code=" + loginCode);
     }
 }

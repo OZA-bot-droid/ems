@@ -26,6 +26,10 @@ import java.util.Map;
 @RestController
 @RequestMapping("/members")
 public class MemberController {
+    @org.springframework.beans.factory.annotation.Value("${app.public-base-url}")
+    private String publicBaseUrl;
+    @org.springframework.beans.factory.annotation.Value("${app.cookie-secure:false}")
+    private boolean cookieSecure;
 
     private final MemberService memberService;
     private final AuthService authService;
@@ -95,7 +99,7 @@ public class MemberController {
 
         ResponseCookie deleteCookie = ResponseCookie.from("refreshToken", "")
                 .httpOnly(true)
-                .secure(false)
+                .secure(cookieSecure)
                 .sameSite("Lax")
                 .path("/api/members")   // cookie에서 path가 다를 경우 다른 cookie로 보고 원래 있던 cookie 삭제x
                 .maxAge(0)  // cookie 삭제를 의미
@@ -141,7 +145,7 @@ public class MemberController {
         }
 
         // Spring Security의 기본 Google 로그인 시작 URL
-        response.sendRedirect("http://localhost:8080/api/oauth2/authorization/google");
+        response.sendRedirect(publicBaseUrl + "/api/oauth2/authorization/google");
     }
 
     // naver ---------------------------------------------------
@@ -161,7 +165,7 @@ public class MemberController {
         }
 
         // Spring Security의 기본 Google 로그인 시작 URL
-        response.sendRedirect("http://localhost:8080/api/oauth2/authorization/naver");
+        response.sendRedirect(publicBaseUrl + "/api/oauth2/authorization/naver");
     }
 
     // 소셜 로그인 token exchange ---------------------------------------------------

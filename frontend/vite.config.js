@@ -2,8 +2,13 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
-// API 주소는 .env.development 의 VITE_API_URL 로 지정 (팀 공지: proxy 없이 axios가 Gateway로 직접 요청)
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  server: { host: '0.0.0.0' },
+  server: {
+    host: '0.0.0.0',
+    proxy: {
+      '/api': { target: process.env.VITE_GATEWAY_PROXY_TARGET || 'http://localhost:8088', changeOrigin: true, ws: true },
+      '/ws': { target: process.env.VITE_GATEWAY_WS_TARGET || 'ws://localhost:8088', ws: true },
+    },
+  },
 });

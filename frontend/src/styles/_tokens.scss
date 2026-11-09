@@ -1,0 +1,10 @@
+// Sass aliases intentionally reference the runtime CSS token source.
+// Do not duplicate literal colors, radii, or font values here.
+$ems-primary: var(--ems-primary);
+$ems-sidebar: var(--ems-sidebar);
+$ems-background: var(--ems-background);
+$ems-text: var(--ems-text);
+$ems-border: var(--ems-border);
+$ems-font: var(--ems-font-family);
+$ems-card-radius: var(--ems-radius-card);
+$ems-spacing-unit: var(--ems-spacing-unit);

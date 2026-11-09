@@ -1,0 +1,311 @@
+// 화면에서 반복해서 쓰는 색상 토큰
+$ems-ink: #142238;
+$ems-muted: #7a879a;
+$ems-green: #169b62;
+$ems-green-soft: #eaf6f0;
+$ems-surface: #ffffff;
+$ems-row: #f6f8fb;
+$ems-divider: #e7ecf2;
+
+// 페이지 제목과 사용자 역할 배지
+.registration-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 48px;
+}
+.registration-heading h1 {
+  margin: 0;
+  font-size: 27px;
+  line-height: 1.65;
+  font-weight: 700;
+}
+.registration-heading p {
+  margin: 1px 0 0;
+  color: $ems-muted;
+  font-size: 13px;
+}
+.registration-role {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 95px;
+  height: 29px;
+  padding: 0 12px;
+  border-radius: 14px;
+  background: $ems-green-soft;
+  color: $ems-green;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+// 신청 목록 카드, 상태 필터, 행
+.registration-card {
+  min-height: 526px;
+  padding: 26px 22px 25px;
+  border-radius: 14px;
+  background: $ems-surface;
+}
+.registration-card-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 27px;
+}
+.registration-card-heading h2 {
+  flex: 1 1 auto;
+  margin: 0;
+  font-size: 19px;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.registration-filters {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 5px;
+}
+.registration-filters button {
+  min-height: 29px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 14px;
+  background: $ems-row;
+  color: $ems-muted;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+.registration-filters button.selected {
+  background: $ems-green-soft;
+  color: $ems-green;
+  font-weight: 600;
+}
+.registration-filters button.pending-filter.selected {
+  background: #fff4e8;
+  color: #986123;
+  box-shadow: inset 0 0 0 1px #d9b47f;
+  font-weight: 600;
+}
+.registration-row {
+  min-height: 52px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  border-radius: 9px;
+}
+.registration-row.striped {
+  background: $ems-row;
+}
+.registration-event {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.registration-event strong {
+  overflow: hidden;
+  color: $ems-ink;
+  font-size: 12px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.registration-event time {
+  color: $ems-muted;
+  font-size: 10px;
+  white-space: nowrap;
+}
+.registration-status {
+  flex: 0 0 auto;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 600;
+}
+.registration-status.approved {
+  color: #16804f;
+  background: $ems-green-soft;
+}
+.registration-status.pending {
+  color: #986123;
+  background: #fff4e8;
+}
+.registration-status.rejected {
+  color: #a23b45;
+  background: #fff0f0;
+}
+.registration-status.cancelled {
+  color: #68758a;
+  background: #edf0f4;
+}
+.registration-actions {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  white-space: nowrap;
+}
+.registration-actions button,
+.registration-dialog-close {
+  border: 0;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+.registration-link {
+  color: $ems-green;
+  font-size: 11px;
+}
+.registration-cancel {
+  color: $ems-muted;
+  font-size: 11px;
+}
+.registration-cancel:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+// 로딩, 오류, 안내 문구
+.registration-message {
+  margin: 31px 0;
+  color: $ems-muted;
+  font-size: 13px;
+}
+.registration-error {
+  margin: 24px 0;
+  padding: 16px;
+  border-radius: 9px;
+  background: #fff4e8;
+  color: #7b4f1e;
+  font-size: 13px;
+}
+.registration-error p {
+  margin: 6px 0 0;
+  overflow-wrap: anywhere;
+}
+.registration-action-error {
+  margin: 12px 0;
+  color: #b42332;
+  font-size: 13px;
+}
+.registration-security-note {
+  margin: 76px 0 0;
+  color: $ems-muted;
+  font-size: 13px;
+}
+.registration-footer {
+  margin-top: 75px;
+  color: $ems-muted;
+  font-size: 11px;
+}
+
+// 상세 보기 팝업
+.registration-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgb(15 23 42 / 44%);
+}
+.registration-dialog {
+  position: relative;
+  width: min(100%, 440px);
+  padding: 28px;
+  border-radius: 14px;
+  background: $ems-surface;
+  box-shadow: 0 18px 60px rgb(15 23 42 / 20%);
+}
+.registration-dialog-close {
+  position: absolute;
+  top: 13px;
+  right: 17px;
+  color: $ems-muted;
+  font-size: 24px;
+}
+.registration-dialog-eyebrow {
+  margin: 0 0 8px;
+  color: $ems-green;
+  font-size: 12px;
+  font-weight: 700;
+}
+.registration-dialog h2 {
+  margin: 0 24px 20px 0;
+  font-size: 20px;
+}
+.registration-dialog dl {
+  margin: 0;
+}
+.registration-dialog dl div {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 12px;
+  padding: 11px 0;
+  border-top: 1px solid $ems-divider;
+  font-size: 13px;
+}
+.registration-dialog dt {
+  color: $ems-muted;
+}
+.registration-dialog dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.registration-dialog-note {
+  margin: 14px 0 0;
+  color: $ems-muted;
+  font-size: 12px;
+}
+
+// 좁은 화면에서 신청 페이지 콘텐츠를 조정합니다. 공통 헤더는 ../../component/header.scss에서 조정합니다.
+@media (max-width: 760px) {
+  .registration-heading {
+    margin-bottom: 30px;
+  }
+  .registration-heading h1 {
+    font-size: 22px;
+  }
+  .registration-role {
+    min-width: auto;
+  }
+  .registration-card {
+    min-height: 500px;
+    padding: 20px 15px;
+  }
+  .registration-card-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    margin-bottom: 21px;
+  }
+  .registration-filters {
+    justify-content: flex-start;
+  }
+  .registration-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 9px;
+    padding: 12px;
+  }
+  .registration-event {
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+  .registration-event strong {
+    flex-basis: 100%;
+  }
+  .registration-actions {
+    align-self: flex-end;
+  }
+  .registration-security-note {
+    margin-top: 45px;
+    line-height: 1.6;
+  }
+  .registration-footer {
+    margin-top: 30px;
+  }
+}

@@ -1,0 +1,5 @@
+@use './tokens' as tokens;
+
+$brand: tokens.$ems-primary;
+$text: tokens.$ems-text;
+$border: tokens.$ems-border;

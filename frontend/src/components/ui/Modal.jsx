@@ -1,0 +1,1 @@
+export default function Modal({ open, title, children, onClose }) { if (!open) return null; return <div className="modal-backdrop" role="presentation" onClick={onClose}><section role="dialog" aria-modal="true" aria-label={title} className="panel" onClick={(e) => e.stopPropagation()}><button onClick={onClose} aria-label="닫기">×</button><h2>{title}</h2>{children}</section></div>; }

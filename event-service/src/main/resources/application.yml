@@ -47,3 +47,6 @@ management:
     web:
       exposure:
         include: health,info
+
+ems:
+  internal-token: ${EMS_INTERNAL_TOKEN}

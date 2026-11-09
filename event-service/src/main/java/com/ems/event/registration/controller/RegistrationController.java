@@ -118,7 +118,7 @@ public class RegistrationController {
             @RequestHeader(value = "X-User-Role", required = false) String role,
             HttpServletRequest httpRequest) {
         adminChecker.requireAdmin(memberId, role);
-        return ApiSuccessResponse.ok(registrationService.summarize(eventId), "신청 현황 조회 성공", httpRequest);
+        return ApiSuccessResponse.ok(registrationService.summarize(eventId, memberId), "신청 현황 조회 성공", httpRequest);
     }
 
     /** Gateway가 전달한 Member Service의 BIGINT 회원 ID가 있어야 합니다. */
@@ -143,3 +143,5 @@ public class RegistrationController {
         }
     }
 }
+
+
