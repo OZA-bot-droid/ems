@@ -113,13 +113,13 @@ const MyPage = () => {
                       { label: '행사 관리', to: '/admin/events' },
                       { label: '세션 관리', to: '/admin/sessions' },
                       { label: '참가 승인', to: '/admin/approvals' },
-                      { label: '투표 관리', to: '/admin/polls' },
+                      { label: '투표 관리', to: null },
                     ]
                   : [
                       { label: '행사 찾기', to: '/events' },
                       { label: '신청 내역', to: '/registrations' },
                       { label: '세미나 참여', to: null },
-                      { label: '실시간 투표', to: '/polls' },
+                      { label: '실시간 투표', to: null },
                     ]
                 ).map(({ label, to }) => (
                   <li
