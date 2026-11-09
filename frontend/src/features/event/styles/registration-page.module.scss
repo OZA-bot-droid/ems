@@ -257,9 +257,10 @@ $ems-divider: #e7ecf2;
   overflow-wrap: anywhere;
 }
 .registration-dialog-note {
-  margin: 14px 0 0;
-  color: $ems-muted;
-  font-size: 12px;
+  margin: 0;
+  color: $ems-ink;
+  font-size: 13px;
+  white-space: pre-wrap;
 }
 
 // 좁은 화면에서 신청 페이지 콘텐츠를 조정합니다. 공통 헤더는 ../../component/header.scss에서 조정합니다.

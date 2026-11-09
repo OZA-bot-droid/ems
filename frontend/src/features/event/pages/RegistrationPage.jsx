@@ -14,7 +14,7 @@ import Header from '../../../components/layout/LegacyHeader.jsx';
 const STATUS = {
   PENDING: { label: '승인 대기', tone: 'pending' },
   APPROVED: { label: '승인 완료', tone: 'approved' },
-  REJECTED: { label: '거절', tone: 'rejected' },
+  REJECTED: { label: '승인 거부', tone: 'rejected' },
   CANCELLED: { label: '취소됨', tone: 'cancelled' },
 };
 
@@ -22,7 +22,7 @@ const FILTER_OPTIONS = [
   ['ALL', '전체'],
   ['PENDING', '승인 대기'],
   ['APPROVED', '승인 완료'],
-  ['REJECTED', '거절'],
+  ['REJECTED', '승인 거부'],
   ['CANCELLED', '취소됨'],
 ];
 
@@ -36,6 +36,7 @@ function RegistrationPage() {
   const [actionError, setActionError] = useState('');
   const [cancellingId, setCancellingId] = useState(null);
   const [detail, setDetail] = useState(null);
+  const [reasonDetail, setReasonDetail] = useState(null);
 
   // 진입 시 내 신청 내역과 행사명을 불러옵니다.
   useEffect(() => {
@@ -181,7 +182,7 @@ function RegistrationPage() {
                       {row.status === 'REJECTED' && (
                         <button
                           className={cx("registration-link")}
-                          onClick={() => setDetail(row)}
+                          onClick={() => setReasonDetail(row)}
                           type="button"
                         >
                           사유 확인
@@ -251,11 +252,66 @@ function RegistrationPage() {
                 </dd>
               </div>
             </dl>
-            {detail.status === 'REJECTED' && (
-              <p className={cx("registration-dialog-note")}>
-                현재 API 응답에는 거절 사유가 포함되지 않습니다.
-              </p>
-            )}
+          </section>
+        </div>
+      )}
+
+      {/* 승인 거부 사유 팝업 */}
+      {reasonDetail && (
+        <div
+          className={cx("registration-dialog-backdrop")}
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setReasonDetail(null);
+          }}
+        >
+          <section
+            className={cx("registration-dialog")}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="registration-reason-title"
+          >
+            <button
+              className={cx("registration-dialog-close")}
+              onClick={() => setReasonDetail(null)}
+              type="button"
+              aria-label="닫기"
+            >
+              ×
+            </button>
+            <p className={cx("registration-dialog-eyebrow")}>신청 처리 결과</p>
+            <h2 id="registration-reason-title">승인 거부 사유</h2>
+            <dl>
+              <div>
+                <dt>행사명</dt>
+                <dd>{events[reasonDetail.eventId]?.title || `행사 #${reasonDetail.eventId}`}</dd>
+              </div>
+              <div>
+                <dt>상태</dt>
+                <dd>{STATUS[reasonDetail.status]?.label || reasonDetail.status}</dd>
+              </div>
+              <div>
+                <dt>거부 사유</dt>
+                <dd className={cx("registration-dialog-note")}>
+                  {reasonDetail.rejectionReason?.trim() || '등록된 거부 사유가 없습니다.'}
+                </dd>
+              </div>
+              <div>
+                <dt>신청 일시</dt>
+                <dd>
+                  {reasonDetail.requestedAt
+                    ? new Date(reasonDetail.requestedAt).toLocaleString('ko-KR')
+                    : '정보 없음'}
+                </dd>
+              </div>
+              <div>
+                <dt>결정 일시</dt>
+                <dd>
+                  {reasonDetail.decidedAt
+                    ? new Date(reasonDetail.decidedAt).toLocaleString('ko-KR')
+                    : '정보 없음'}
+                </dd>
+              </div>
+            </dl>
           </section>
         </div>
       )}
