@@ -71,7 +71,7 @@ public class MemberController {
     @PostMapping("/email/send")
     public ResponseEntity<?> sendEmailCode(@Valid @RequestBody EmailDTO dto,
                                            HttpServletRequest request) {
-
+        System.out.println(dto);
         String ip = clientIpResolver.resolve(request);
 
         // IP별 이메일 발송 횟수 제한

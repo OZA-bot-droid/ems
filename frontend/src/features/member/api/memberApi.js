@@ -35,7 +35,7 @@ export const memberApi = {
       tokenStore.clear();
     }
   },
-  emailCode: async (email, code) => {
-    unwrap(await api.)
-  },
+  emailSend: async (email) => unwrap(await publicApi.post('/members/email/send'), email),
+  emailCode: async (email, code) =>
+    unwrap(await publicApi.post('/members/email/verify'), { email, code }),
 };
