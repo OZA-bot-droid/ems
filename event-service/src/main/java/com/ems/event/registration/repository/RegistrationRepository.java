@@ -15,29 +15,29 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-/** 참가 신청 데이터를 조회하고 저장하는 Spring Data 저장소입니다. */
+// 참가 신청 데이터를 조회하고 저장하는 Spring Data 저장소입니다.
 @Repository
 public interface RegistrationRepository extends JpaRepository<Registration, Long> {
-    /** 행사 ID만 먼저 읽어 잠금 순서를 행사 → 신청으로 유지합니다. */
+    // 행사 ID만 먼저 읽어 잠금 순서를 행사 → 신청으로 유지합니다.
     @Query("select r.eventId from Registration r where r.id = :registrationId")
     Optional<Long> findEventIdById(@Param("registrationId") Long registrationId);
 
-    /** 행사 잠금을 얻은 뒤 최신 신청 상태를 잠금 조회합니다. */
+    // 행사 잠금을 얻은 뒤 최신 신청 상태를 잠금 조회합니다.
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select r from Registration r where r.id = :registrationId")
     Optional<Registration> findByIdForUpdate(@Param("registrationId") Long registrationId);
 
-    /** 특정 사용자가 특정 행사에 이미 신청했는지 확인합니다. */
+    // 특정 사용자가 특정 행사에 이미 신청했는지 확인합니다.
     Optional<Registration> findByUserIdAndEventId(Long userId, Long eventId);
 
-    /** 주최자 소유 행사들에 대한 특정 상태의 신청을 최근 신청 순으로 조회합니다. */
+    // 주최자 소유 행사들에 대한 특정 상태의 신청을 최근 신청 순으로 조회합니다.
     Page<Registration> findAllByEventIdInAndStatusOrderByRequestedAtDesc(
             Collection<Long> eventIds, RegistrationStatus status, Pageable pageable);
 
-    /** 사용자의 신청 내역을 최근 신청 순으로 페이지 단위 조회합니다. */
+    // 사용자의 신청 내역을 최근 신청 순으로 페이지 단위 조회합니다.
     Page<Registration> findAllByUserIdOrderByRequestedAtDesc(Long userId, Pageable pageable);
 
-    /** 마감된 행사에 남아 있는 승인 대기 신청을 일괄 거절하고 처리 시각을 기록합니다. */
+    // 마감된 행사에 남아 있는 승인 대기 신청을 일괄 거절하고 처리 시각을 기록합니다.
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("update Registration r set r.status = :rejected, r.rejectionReason = :reason, r.updatedAt = :now, r.decidedAt = :now "
             + "where r.status = :pending and r.eventId in "
@@ -48,12 +48,12 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
                                     @Param("closed") EventStatus closed,
                                     @Param("now") java.time.Instant now);
 
-    /** 행사에 신청 내역이 하나라도 있는지 확인합니다. (행사 삭제 전 확인용, 이도관 추가) */
+    // 행사에 신청 내역이 하나라도 있는지 확인합니다. (행사 삭제 전 확인용, 이도관 추가)
     boolean existsByEventId(Long eventId);
 
-    /** 행사와 상태가 일치하는 신청 건수를 셉니다. */
+    // 행사와 상태가 일치하는 신청 건수를 셉니다.
     long countByEventIdAndStatus(Long eventId, RegistrationStatus status);
 
-    /** 특정 회원이 행사 참가 승인을 받았는지 확인합니다. */
+    // 특정 회원이 행사 참가 승인을 받았는지 확인합니다.
     boolean existsByEventIdAndUserIdAndStatus(Long eventId, Long userId, RegistrationStatus status);
 }

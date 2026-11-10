@@ -18,7 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-/** 참가 신청 API입니다. 게이트웨이가 /api를 제거하므로 내부 경로는 /events로 시작합니다. */
+// 참가 신청 API입니다. 게이트웨이가 /api를 제거하므로 내부 경로는 /events로 시작합니다.
 @RestController
 @RequestMapping("/events")
 public class RegistrationController {
@@ -31,7 +31,7 @@ public class RegistrationController {
         this.adminChecker = adminChecker;
     }
 
-    /** 로그인한 사용자의 행사 참가 신청을 생성합니다. */
+    // 로그인한 사용자의 행사 참가 신청을 생성합니다.
     @PostMapping("/{eventId}/registrations")
     public ResponseEntity<ApiSuccessResponse<RegistrationResponse>> apply(
             @PathVariable Long eventId,
@@ -43,7 +43,7 @@ public class RegistrationController {
                 .body(ApiSuccessResponse.created(RegistrationResponse.from(created), "참가 신청이 완료되었습니다.", httpRequest));
     }
 
-    /** 관리자가 본인 주최 행사들의 신청을 상태별로 조회합니다. */
+    // 관리자가 본인 주최 행사들의 신청을 상태별로 조회합니다.
     @GetMapping("/registrations")
     public ApiSuccessResponse<Page<RegistrationService.AdminRegistration>> forAdmin(
             @RequestParam(defaultValue = "PENDING") RegistrationStatus status,
@@ -59,7 +59,7 @@ public class RegistrationController {
         return ApiSuccessResponse.ok(registrations, "참가 신청 목록 조회 성공", httpRequest);
     }
 
-    /** 로그인한 사용자의 신청 목록을 페이지 단위로 반환합니다. */
+    // 로그인한 사용자의 신청 목록을 페이지 단위로 반환합니다.
     @GetMapping("/registrations/me")
     public ApiSuccessResponse<Page<RegistrationResponse>> mine(
             @RequestParam(defaultValue = "0") int page,
@@ -72,7 +72,7 @@ public class RegistrationController {
                 "신청 목록 조회 성공", httpRequest);
     }
 
-    /** 관리자만 신청을 승인할 수 있습니다. */
+    // 관리자만 신청을 승인할 수 있습니다.
     @PatchMapping("/registrations/{registrationId}/approve")
     public ApiSuccessResponse<RegistrationResponse> approve(
             @PathVariable Long registrationId,
@@ -84,7 +84,7 @@ public class RegistrationController {
                 "참가 신청이 승인되었습니다.", httpRequest);
     }
 
-    /** 관리자만 신청을 거절할 수 있습니다. */
+    // 관리자만 신청을 거절할 수 있습니다.
     @PatchMapping("/registrations/{registrationId}/reject")
     public ApiSuccessResponse<RegistrationResponse> reject(
             @PathVariable Long registrationId,
@@ -98,7 +98,7 @@ public class RegistrationController {
                 "참가 신청이 거절되었습니다.", httpRequest);
     }
 
-    /** 신청자 본인 또는 관리자가 신청을 취소합니다. */
+    // 신청자 본인 또는 관리자가 신청을 취소합니다.
     @PatchMapping("/registrations/{registrationId}/cancel")
     public ApiSuccessResponse<RegistrationResponse> cancel(
             @PathVariable Long registrationId,
@@ -110,7 +110,7 @@ public class RegistrationController {
                 registrationId, requesterId, adminChecker.isAdmin(role))), "참가 신청이 취소되었습니다.", httpRequest);
     }
 
-    /** 관리자에게 행사별 신청 상태 건수를 반환합니다. */
+    // 관리자에게 행사별 신청 상태 건수를 반환합니다.
     @GetMapping("/{eventId}/summary")
     public ApiSuccessResponse<RegistrationService.EventRegistrationSummary> summary(
             @PathVariable Long eventId,
@@ -121,17 +121,17 @@ public class RegistrationController {
         return ApiSuccessResponse.ok(registrationService.summarize(eventId, memberId), "신청 현황 조회 성공", httpRequest);
     }
 
-    /** Gateway가 전달한 Member Service의 BIGINT 회원 ID가 있어야 합니다. */
+    // Gateway가 전달한 Member Service의 BIGINT 회원 ID가 있어야 합니다.
     private void requireUser(Long memberId) {
         if (memberId == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
         }
     }
 
-    /** 거절 요청 본문입니다. */
+    // 거절 요청 본문입니다.
     private record RejectRequest(@NotBlank @Size(max = 1000) String reason) { }
 
-    /** 프런트엔드에 전달할 신청 정보입니다. */
+    // 프런트엔드에 전달할 신청 정보입니다.
     private record RegistrationResponse(
             Long id, Long eventId, Long userId, String status,
             Instant requestedAt, Instant updatedAt, Instant decidedAt, String rejectionReason) {

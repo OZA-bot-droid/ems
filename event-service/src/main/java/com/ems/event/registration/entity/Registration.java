@@ -3,7 +3,7 @@ package com.ems.event.registration.entity;
 import jakarta.persistence.*;
 import java.time.Instant;
 
-/** 행사 참가 신청 한 건과 그 상태 변경 이력을 표현합니다. */
+// 행사 참가 신청 한 건과 그 상태 변경 이력을 표현합니다.
 @Entity
 @Table(
         name = "registrations",
@@ -19,37 +19,37 @@ import java.time.Instant;
 )
 public class Registration {
 
-    /** 신청 행 자체를 식별하는 기본 키입니다. */
+    // 신청 행 자체를 식별하는 기본 키입니다.
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /** Member Service에서 발급한 회원 ID입니다. */
+    // Member Service에서 발급한 회원 ID입니다.
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    /** 신청 대상 행사 ID입니다. 행사 테이블과의 FK는 통합 시 연결합니다. */
+    // 신청 대상 행사 ID입니다. 행사 테이블과의 FK는 통합 시 연결합니다.
     @Column(name = "event_id", nullable = false)
     private Long eventId;
 
-    /** enum 이름을 문자열로 저장하며, 새 신청은 승인 대기 상태로 시작합니다. */
+    // enum 이름을 문자열로 저장하며, 새 신청은 승인 대기 상태로 시작합니다.
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private RegistrationStatus status = RegistrationStatus.PENDING;
 
-    /** 신청이 생성된 시각입니다. 한 번 저장한 뒤에는 변경하지 않습니다. */
+    // 신청이 생성된 시각입니다. 한 번 저장한 뒤에는 변경하지 않습니다.
     @Column(name = "requested_at", nullable = false, updatable = false)
     private Instant requestedAt;
 
-    /** 신청 정보가 마지막으로 변경된 시각입니다. */
+    // 신청 정보가 마지막으로 변경된 시각입니다.
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    /** 승인·거절·취소 등 신청 처리가 이루어진 시각입니다. */
+    // 승인·거절·취소 등 신청 처리가 이루어진 시각입니다.
     @Column(name = "decided_at")
     private Instant decidedAt;
 
-    /** 거절된 신청을 회원에게 설명할 사유입니다. */
+    // 거절된 신청을 회원에게 설명할 사유입니다.
     @Column(name = "rejection_reason", columnDefinition = "TEXT")
     private String rejectionReason;
 
@@ -61,7 +61,7 @@ public class Registration {
         this.status = RegistrationStatus.PENDING;
     }
 
-    /** 새 신청을 저장할 때 신청 시각과 변경 시각을 함께 기록합니다. */
+    // 새 신청을 저장할 때 신청 시각과 변경 시각을 함께 기록합니다.
     @PrePersist
     protected void onCreate() {
         Instant now = Instant.now();
@@ -69,7 +69,7 @@ public class Registration {
         this.updatedAt = now;
     }
 
-    /** 엔티티가 수정될 때 변경 시각을 갱신합니다. */
+    // 엔티티가 수정될 때 변경 시각을 갱신합니다.
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = Instant.now();
@@ -84,19 +84,19 @@ public class Registration {
     public Instant getDecidedAt() { return decidedAt; }
     public String getRejectionReason() { return rejectionReason; }
 
-    /** 승인 대기 중인 신청만 승인하고 처리 시각을 기록합니다. */
+    // 승인 대기 중인 신청만 승인하고 처리 시각을 기록합니다.
     public void approve() {
         requirePending();
         this.status = RegistrationStatus.APPROVED;
         this.decidedAt = Instant.now();
     }
 
-    /** 승인 대기 중인 신청만 거절하고 처리 시각을 기록합니다. */
+    // 승인 대기 중인 신청만 거절하고 처리 시각을 기록합니다.
     public void reject() {
         reject(null);
     }
 
-    /** 승인 대기 중인 신청을 사유와 함께 거절합니다. */
+    // 승인 대기 중인 신청을 사유와 함께 거절합니다.
     public void reject(String reason) {
         requirePending();
         this.status = RegistrationStatus.REJECTED;
@@ -104,7 +104,7 @@ public class Registration {
         this.decidedAt = Instant.now();
     }
 
-    /** 승인 대기 또는 승인 완료 상태의 신청을 취소합니다. */
+    // 승인 대기 또는 승인 완료 상태의 신청을 취소합니다.
     public void cancel() {
         if (this.status != RegistrationStatus.PENDING
                 && this.status != RegistrationStatus.APPROVED) {
@@ -114,7 +114,7 @@ public class Registration {
         this.decidedAt = Instant.now();
     }
 
-    /** 승인·거절은 PENDING 상태에서만 가능하도록 검사합니다. */
+    // 승인·거절은 PENDING 상태에서만 가능하도록 검사합니다.
     private void requirePending() {
         if (this.status != RegistrationStatus.PENDING) {
             throw new IllegalStateException("승인 대기 상태에서만 처리할 수 있습니다.");

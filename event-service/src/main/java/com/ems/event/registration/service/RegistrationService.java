@@ -19,7 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** 참가 신청의 중복 검사, 상태 변경, 본인 권한 검사를 처리합니다. */
+// 참가 신청의 중복 검사, 상태 변경, 본인 권한 검사를 처리합니다.
 @Service
 public class RegistrationService {
 
@@ -31,7 +31,7 @@ public class RegistrationService {
         this.eventRepository = eventRepository;
     }
 
-    /** 신청 가능 상태를 확인하고, 중복 및 동시 중복 신청을 막아 새 신청을 저장합니다. */
+    // 신청 가능 상태를 확인하고, 중복 및 동시 중복 신청을 막아 새 신청을 저장합니다.
     @Transactional
     public Registration apply(Long userId, Long eventId) {
         Event event = eventRepository.findById(eventId)
@@ -50,13 +50,13 @@ public class RegistrationService {
         }
     }
 
-    /** 로그인한 사용자의 신청 내역만 최근 신청 순으로 조회합니다. */
+    // 로그인한 사용자의 신청 내역만 최근 신청 순으로 조회합니다.
     @Transactional(readOnly = true)
     public Page<Registration> findMine(Long userId, Pageable pageable) {
         return registrationRepository.findAllByUserIdOrderByRequestedAtDesc(userId, pageable);
     }
 
-    /** 관리자가 주최한 행사의 신청을 상태와 페이지 조건으로 조회합니다. */
+    // 관리자가 주최한 행사의 신청을 상태와 페이지 조건으로 조회합니다.
     @Transactional(readOnly = true)
     public Page<AdminRegistration> findForOwner(Long ownerId, RegistrationStatus status, Pageable pageable) {
         List<Event> ownedEvents = eventRepository.findAllByCreatedBy(ownerId);
@@ -72,7 +72,7 @@ public class RegistrationService {
                         registration.getRejectionReason()));
     }
 
-    /** 행사별 잠금으로 승인 요청을 직렬화하고, 소유자 및 정원을 확인합니다. */
+    // 행사별 잠금으로 승인 요청을 직렬화하고, 소유자 및 정원을 확인합니다.
     @Transactional
     public Registration approve(Long registrationId, Long approverId) {
         Long eventId = registrationRepository.findEventIdById(registrationId)
@@ -93,7 +93,7 @@ public class RegistrationService {
         return registration;
     }
 
-    /** 신청을 찾아 승인 대기 상태인지 확인한 뒤 주최자가 거절합니다. */
+    // 신청을 찾아 승인 대기 상태인지 확인한 뒤 주최자가 거절합니다.
     @Transactional
     public Registration reject(Long registrationId, Long reviewerId, String reason) {
         Registration registration = findRegistration(registrationId);
@@ -104,7 +104,7 @@ public class RegistrationService {
         return registration;
     }
 
-    /** 신청자 본인 또는 해당 행사의 주최자만 신청을 취소할 수 있습니다. */
+    // 신청자 본인 또는 해당 행사의 주최자만 신청을 취소할 수 있습니다.
     @Transactional
     public Registration cancel(Long registrationId, Long requesterId, boolean admin) {
         Registration registration = findRegistration(registrationId);
@@ -118,7 +118,7 @@ public class RegistrationService {
         return registration;
     }
 
-    /** 해당 행사 주최자만 행사별 신청 상태 건수를 조회합니다. */
+    // 해당 행사 주최자만 행사별 신청 상태 건수를 조회합니다.
     @Transactional(readOnly = true)
     public EventRegistrationSummary summarize(Long eventId, Long requesterId) {
         Event event = eventRepository.findById(eventId)
@@ -131,7 +131,7 @@ public class RegistrationService {
                 registrationRepository.countByEventIdAndStatus(eventId, RegistrationStatus.CANCELLED));
     }
 
-    /** 특정 회원의 해당 행사 참가 승인 여부를 반환합니다. */
+    // 특정 회원의 해당 행사 참가 승인 여부를 반환합니다.
     @Transactional(readOnly = true)
     public boolean isApproved(Long eventId, Long memberId) {
         return registrationRepository.existsByEventIdAndUserIdAndStatus(eventId, memberId, RegistrationStatus.APPROVED);
@@ -142,7 +142,7 @@ public class RegistrationService {
                 .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "REGISTRATION_NOT_FOUND", "신청 정보를 찾을 수 없습니다."));
     }
 
-    /** 승인·거절·취소는 해당 행사의 주최자만 관리할 수 있습니다. */
+    // 승인·거절·취소는 해당 행사의 주최자만 관리할 수 있습니다.
     private void requireEventOwner(Event event, Long requesterId) {
         if (!Objects.equals(event.getCreatedBy(), requesterId)) {
             throw new BusinessException(HttpStatus.FORBIDDEN, "EVENT_OWNER_REQUIRED", "행사 소유자만 신청을 관리할 수 있습니다.");

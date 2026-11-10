@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Interaction Service 전용 참가 승인 조회 API입니다. */
+// Interaction Service 전용 참가 승인 조회 API입니다.
 @RestController
 @RequestMapping("/internal/events")
 public class InternalRegistrationController {
