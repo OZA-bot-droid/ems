@@ -64,10 +64,10 @@ export default function PollManagePage() {
     setLoading(true);
     setError('');
     try {
-      // Interaction API: 20건 단위 페이지 조회, 값이 있는 필터만 조건에 포함
+      // Interaction API: 10건 단위 페이지 조회, 값이 있는 필터만 조건에 포함
       const data = await pollApi.mine({
         page,
-        size: 20,
+        size: 10,
         ...(eventFilter ? { eventId: eventFilter } : {}),
         ...(sessionFilter ? { sessionId: sessionFilter } : {}),
       });
@@ -129,7 +129,6 @@ export default function PollManagePage() {
   /**
    * create(e): 투표 생성 폼 제출 이벤트 처리.
    * 세션 존재 여부, 투표 시작·종료 시각, 선택지 수를 확인하고 REST API로 생성한다.
-   * @param {React.FormEvent<HTMLFormElement>} e 폼 제출 이벤트
    */
   async function create(e) {
     // 브라우저 기본 폼 제출/페이지 새로고침 방지
@@ -187,8 +186,8 @@ export default function PollManagePage() {
   }
   /**
    * change(id, action): 투표 상태 변경 API 실행 후 목록 재조회.
-   * @param {number|string} id 상태를 변경할 투표 ID
-   * @param {'activate'|'close'} action pollApi에서 실행할 상태 변경 메서드명
+   * id - 상태를 변경할 투표 ID
+   * action - pollApi에서 실행할 상태 변경 메서드명
    */
   async function change(id, action) {
     setBusy(true);
