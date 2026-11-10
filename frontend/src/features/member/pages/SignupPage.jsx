@@ -76,71 +76,17 @@ function SignupForm() {
     try {
       await memberApi.register({ ...member, role });
       alert('회원가입이 완료되었습니다.');
-      navigate('/mypage');
+      navigate('/login');
     } catch (error) {
       alert(error?.message || '회원가입 요청에 실패했습니다.');
     }
   };
 
   // 인증 확인 함수
-  const verifyEmailCode = async () => {
-    const email = member.email.trim().toLowerCase();
-
-    if (!codeSent || verifiedEmail || verifying || sending) return;
-
-    if (!/^\d{6}$/.test(verificationCode)) {
-      alert('인증번호 6자리를 입력해주세요.');
-      return;
-    }
-
-    setVerifying(true);
-
-    try {
-      const data = await memberApi.emailCode('/api/members/email/verify', {
-        email: email,
-        code: verificationCode,
-      });
-
-      setVerifiedEmail(data);
-      alert('이메일 인증이 완료되었습니다.');
-    } catch (err) {
-      console.error(err);
-      alert('서버 연결 중 오류가 발생했습니다.');
-    } finally {
-      setVerifying(false);
-    }
-  };
+  const verifyEmailCode = async () => {};
 
   // 이메일 인증 요청 함수 추가
-  const sendVerificationCode = async () => {
-    const email = member.email.trim().toLowerCase();
-    console.log('이메일 보내기', email);
-
-    if (!/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(email)) {
-      alert('올바른 이메일을 입력해주세요.');
-      return;
-    }
-
-    if (sending || verifying) return;
-
-    setSending(true);
-
-    console.log('axios 시작');
-    try {
-      const data = await memberApi.emailSend({ email: email });
-
-      console.log('axios 성공', data);
-      setCodeSent(true);
-      setVerifiedEmail('');
-      setVerificationCode('');
-      alert(data);
-    } catch (err) {
-      console.error(err);
-      alert('서버 연결 중 오류가 발생했습니다.');
-    } finally {
-      setSending(false);
-    }
-  };
+  const sendVerificationCode = async () => {};
 
   return (
     <div className={cx('w-[600px] px-8')}>

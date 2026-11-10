@@ -26,7 +26,7 @@ export const memberApi = {
   logout: async () => {
     try {
       return unwrap(
-        await api.delete('/members/logout', {
+        await publicApi.delete('/members/logout', {
           data: { clientId: getClientId() },
           skipAuthRefresh: true,
         }),
@@ -35,7 +35,7 @@ export const memberApi = {
       tokenStore.clear();
     }
   },
-  emailSend: async (email) => unwrap(await publicApi.post('/members/email/send'), email),
+  emailSend: async (email) => unwrap(await publicApi.post('/members/email/send', { email })),
   emailCode: async (email, code) =>
-    unwrap(await publicApi.post('/members/email/verify'), { email, code }),
+    unwrap(await publicApi.post('/members/email/verify', { email, code })),
 };
