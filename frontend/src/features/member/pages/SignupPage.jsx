@@ -13,6 +13,11 @@ function SignupForm() {
   const [sp] = useSearchParams();
   const errorMessage = sp.get('error');
 
+  const [verificationCode, setVerificationCode] = useState('');
+  const [codeSent, setCodeSent] = useState(false);
+  const [verifiedEmail, setVerifiedEmail] = useState('');
+  const [sending, setSending] = useState(false);
+  const [verifying, setVerifying] = useState(false);
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [role, setRole] = useState('');
   const [member, setMember] = useState({
@@ -74,6 +79,42 @@ function SignupForm() {
       navigate('/mypage');
     } catch (error) {
       alert(error?.message || '회원가입 요청에 실패했습니다.');
+    }
+  };
+
+  // 인증 확인 함수
+  const verifyEmailCode = async () => {
+    const email = member.email.trim().toLowerCase();
+
+    if (!codeSent || verifiedEmail || verifying || sending) return;
+
+    if (!/^\d{6}$/.test(verificationCode)) {
+      alert('인증번호 6자리를 입력해주세요.');
+      return;
+    }
+
+    setVerifying(true);
+
+    try {
+      const res = await apiReq('/api/members/email/verify', {
+        method: 'POST',
+        data: {
+          email,
+          code: verificationCode,
+        },
+      });
+
+      if (res.status === 200) {
+        setVerifiedEmail(email);
+        alert('이메일 인증이 완료되었습니다.');
+      } else {
+        alert(res.data?.message || '인증번호가 올바르지 않습니다.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('서버 연결 중 오류가 발생했습니다.');
+    } finally {
+      setVerifying(false);
     }
   };
 

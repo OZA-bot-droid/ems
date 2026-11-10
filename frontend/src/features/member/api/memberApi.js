@@ -5,20 +5,37 @@ import { getClientId } from '../utils/getClientId';
 export const memberApi = {
   register: async (data) => unwrap(await publicApi.post('/members/register', data)),
   login: async ({ email, password }) => {
-    const response = await publicApi.post('/members/login', { email, password, clientId: getClientId() });
+    const response = await publicApi.post('/members/login', {
+      email,
+      password,
+      clientId: getClientId(),
+    });
     const token = unwrap(response)?.accessToken;
     if (!token) throw new Error('로그인 응답에 Access Token이 없습니다.');
-    tokenStore.set(token); return token;
+    tokenStore.set(token);
+    return token;
   },
   exchange: async (code) => {
     const response = await publicApi.post('/members/oauth2/exchange', null, { params: { code } });
     const token = unwrap(response)?.accessToken;
     if (!token) throw new Error('소셜 로그인 응답에 Access Token이 없습니다.');
-    tokenStore.set(token); return token;
+    tokenStore.set(token);
+    return token;
   },
   me: async () => unwrap(await api.get('/members/me')),
   logout: async () => {
-    try { return unwrap(await api.delete('/members/logout', { data: { clientId: getClientId() }, skipAuthRefresh: true })); }
-    finally { tokenStore.clear(); }
+    try {
+      return unwrap(
+        await api.delete('/members/logout', {
+          data: { clientId: getClientId() },
+          skipAuthRefresh: true,
+        }),
+      );
+    } finally {
+      tokenStore.clear();
+    }
+  },
+  emailCode: async (email, code) => {
+    unwrap(await api.)
   },
 };
