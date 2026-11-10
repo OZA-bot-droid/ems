@@ -7,9 +7,9 @@ import { useAuth } from '../../member/hooks/useAuth.js';
 import { formatRange, formatTimeRange, instantToKstInput, STATUS_BADGE } from '../utils/format.js';
 import RegistrationApplyModal from './RegistrationApplyModal.jsx';
 
-// 참가 승인 화면 주소. 관리자용 "신청 목록 조회" API가 아직 없어서 화면이 없음 → null이면 버튼 비활성
-// (승인 화면이 생기면 예: (id) => `/admin/approvals?eventId=${id}` 로 바꾸면 바로 연결됨)
-const APPROVAL_HREF = null;
+// 참가 승인 화면 주소 (이도형 님 AdminApprovalPage). 내 행사들의 대기 신청을 승인·거절하는 화면
+// 지금 승인 화면은 행사별로 거르지 않으므로 eventId는 넘기지 않음 (행사별 필터가 생기면 ?eventId=${id} 추가)
+const APPROVAL_HREF = () => '/admin/approvals';
 
 export default function EventDetail({ eventId, onBack }) {
   const { role, memberId } = useAuth();
@@ -206,9 +206,9 @@ export default function EventDetail({ eventId, onBack }) {
                   세션 관리
                 </button>
                 <button
-                  disabled={!APPROVAL_HREF}
-                  title={APPROVAL_HREF ? '신청자를 승인·거절합니다' : '참가 승인 화면 준비 중 (관리자용 신청 목록 API 필요)'}
-                  onClick={() => APPROVAL_HREF && window.location.assign(APPROVAL_HREF(event.id))}
+                  disabled={!isOwner}
+                  title={isOwner ? '신청자를 승인·거절합니다' : '내가 만든 행사만 관리할 수 있습니다'}
+                  onClick={() => window.location.assign(APPROVAL_HREF(event.id))}
                   className="h-[42px] min-w-[150px] rounded-[10px] bg-(--ems-green) px-4 text-[13px] font-semibold text-white hover:bg-(--ems-green-dark) disabled:cursor-not-allowed disabled:bg-slate-300"
                 >
                   참가 승인{summary ? ` · 대기 ${summary.pending}명` : ''}

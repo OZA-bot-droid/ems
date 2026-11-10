@@ -7,6 +7,8 @@ import { eventApi } from '../api/eventApi.js';
 import { useAuth } from '../../member/hooks/useAuth.js';
 import { formatShort, STATUS_BADGE } from '../utils/format.js';
 import EventFormModal from './EventFormModal.jsx';
+import ApprovedListModal from './ApprovedListModal.jsx';
+import EventDetail from './EventDetail.jsx';
 
 // 상태별 다음 단계 (DRAFT → OPEN → CLOSED, 되돌리기 없음)
 const NEXT_STATUS = {
@@ -35,6 +37,8 @@ export default function EventManage({ onManageSessions }) {
   const [modal, setModal] = useState(null); // null=닫힘, {}=새 행사, {event}=수정
   const [confirm, setConfirm] = useState(null); // 확인 중인 것: { id, type: 'delete' | 'status' }
   const [notice, setNotice] = useState(null); // 위쪽 알림 한 줄 { type: 'ok' | 'error', text }
+  const [approvedFor, setApprovedFor] = useState(null); // 승인 명단을 보고 있는 행사 (null = 닫힘)
+  const [detailId, setDetailId] = useState(null); // 상세 창으로 보고 있는 행사 번호 (null = 닫힘)
 
   useEffect(() => {
     let alive = true;
@@ -143,7 +147,15 @@ export default function EventManage({ onManageSessions }) {
               return (
                 <li className={cx("event-manage-row")} key={event.id}>
                   <div className={cx("event-manage-name")}>
-                    <strong title={event.title}>{event.title}</strong>
+                    {/* 제목을 누르면 행사 상세를 창(모달)으로 띄움 → 행사 관리 화면에 그대로 머무름 */}
+                    <button
+                      className={cx("event-manage-title-link")}
+                      onClick={() => setDetailId(event.id)}
+                      title={`${event.title} 상세 보기`}
+                      type="button"
+                    >
+                      <strong>{event.title}</strong>
+                    </button>
                     <span>
                       {formatShort(event.startsAt)} · 정원 {event.capacity}명
                       {/* 작성 중 + 게시 예약이 있으면 언제 자동 공개되는지 안내 */}
@@ -193,6 +205,10 @@ export default function EventManage({ onManageSessions }) {
                       <button onClick={() => openSessions(event.id)} type="button">
                         {event.status === 'CLOSED' ? '세션 보기' : '세션 관리'}
                       </button>
+                      {/* 공개된 적 있는 행사(모집 중·마감)만 신청이 있으므로, 작성 중일 때는 숨김 */}
+                      {event.status !== 'DRAFT' && (
+                        <button onClick={() => setApprovedFor(event)} type="button">승인 명단</button>
+                      )}
                       <details className={cx("event-manage-more")}>
                         <summary aria-label={`${event.title} 기타 관리 메뉴`}>···</summary>
                         <div>
@@ -239,6 +255,26 @@ export default function EventManage({ onManageSessions }) {
 
 
       </section>
+
+      {approvedFor && <ApprovedListModal event={approvedFor} onClose={() => setApprovedFor(null)} />}
+
+      {/* 행사 상세 창: 사용자 화면과 같은 EventDetail을 그대로 띄움 ([← 목록으로]·바깥 클릭 = 닫기) */}
+      {detailId && (
+        <div
+          className={cx("fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-[rgba(20,34,56,0.45)] px-4 py-10")}
+          onClick={() => setDetailId(null)}
+        >
+          <div
+            aria-label="행사 상세"
+            aria-modal="true"
+            className={cx("w-full max-w-[860px] rounded-[18px] bg-(--ems-bg) p-6")}
+            onClick={(e) => e.stopPropagation()} // 안쪽 클릭은 닫히지 않게
+            role="dialog"
+          >
+            <EventDetail eventId={detailId} key={detailId} onBack={() => setDetailId(null)} />
+          </div>
+        </div>
+      )}
 
       {modal && (
         <EventFormModal

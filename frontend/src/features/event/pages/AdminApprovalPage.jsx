@@ -122,15 +122,7 @@ export default function AdminApprovalPage() {
                 ))}
               </ul>
             )}
-
-            <p className={cx("admin-approval-policy")}>
-              정원 초과·중복 승인 및 비인가 변경은 Event Service에서 검증합니다.
-            </p>
           </section>
-
-          <p className={cx("admin-approval-footer")}>
-            신청자 이름은 Member Service의 신청자 정보 API 연결 후 표시됩니다.
-          </p>
         </section>
       </main>
     </div>
