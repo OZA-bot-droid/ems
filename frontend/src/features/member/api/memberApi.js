@@ -36,6 +36,6 @@ export const memberApi = {
     }
   },
   emailSend: async (email) => unwrap(await publicApi.post('/members/email/send', { email })),
-  emailCode: async (email, code) =>
-    unwrap(await publicApi.post('/members/email/verify', { email, code })),
+  emailVerify: async (data) =>
+    unwrap(await publicApi.post('/members/email/verify', data)),
 };

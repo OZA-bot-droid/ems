@@ -48,6 +48,11 @@ function SignupForm() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    if (!verifiedEmail || verifiedEmail !== member.email.trim().toLowerCase()) {
+      alert('이메일 인증을 완료해주세요.');
+      return;
+    }
+    if (sending || verifying) return;
     if (member.password !== passwordConfirm) {
       alert('비밀번호와 비밀번호 확인을 동일하게 입력해 주세요.');
       return;
@@ -83,10 +88,58 @@ function SignupForm() {
   };
 
   // 인증 확인 함수
-  const verifyEmailCode = async () => {};
+  const verifyEmailCode = async () => {
+    const email = member.email.trim().toLowerCase();
+
+    if (!codeSent || verifiedEmail || verifying || sending) return;
+
+    if (!/^\d{6}$/.test(verificationCode)) {
+      alert('인증번호 6자리를 입력해주세요.');
+      return;
+    }
+
+    setVerifying(true);
+
+    try {
+      const res = await memberApi.emailVerify({email, code: verificationCode});
+
+      setVerifiedEmail(email);
+      alert(res);
+    } catch (err) {
+      console.error(err);
+      alert('서버 연결 중 오류가 발생했습니다.');
+    } finally {
+      setVerifying(false);
+    }
+  };
 
   // 이메일 인증 요청 함수 추가
-  const sendVerificationCode = async () => {};
+  const sendVerificationCode = async () => {
+    const email = member.email.trim().toLowerCase();
+
+    if (!/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(email)) {
+      alert('올바른 이메일을 입력해주세요.');
+      return;
+    }
+
+    if (sending || verifying) return;
+
+    setSending(true);
+
+    try {
+      const res = await memberApi.emailSend(email);
+
+      setCodeSent(true);
+      setVerifiedEmail('');
+      setVerificationCode('');
+      alert(res);
+    } catch (err) {
+      console.error(err);
+      alert('서버 연결 중 오류가 발생했습니다.');
+    } finally {
+      setSending(false);
+    }
+  };
 
   return (
     <div className={cx('w-[600px] px-8')}>

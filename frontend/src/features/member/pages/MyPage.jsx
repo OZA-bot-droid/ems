@@ -1,90 +1,89 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../hooks/useAuth.js';
 import { useApiUtil } from '../hooks/useApiUtil.js';
+import { useNavigate } from 'react-router-dom';
+import { memberApi } from '../api/memberApi.js';
 
 const MyPage = () => {
-  const { logout, authLoading } = useAuth();
+  const { authLoading, accessToken } = useAuth();
+  const navigate = useNavigate();
   const apiReq = useApiUtil();
-  const [member, setMember] = useState({
-    email: '',
-    name: '',
-  });
+  const [member, setMember] = useState({});
+  const [isEditing, setIsEditing] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const myInfo = async () => {
       try {
-        const res = await apiReq('/api/members/me', {
-          method: 'GET',
-        });
+        const res = await memberApi.me();
 
-        if (res.status >= 200 && res.status < 300) {
-          const data = res.data;
-          console.log(data);
-          setMember((m) => ({ ...m, ...data.data }));
-        } else {
-          console.log(res);
-        }
+        console.log(res);
+        setMember((m) => ({ ...m, ...res }));
       } catch (err) {
-        console.log(err);
+        console.error(err);
       }
     };
     myInfo();
-  }, [authLoading]);
+  }, []);
+
+  const updateName = async () => {
+    const name = newName.trim();
+
+    if (!name || name.length > 50 || saving) return;
+
+    setSaving(true);
+
+    try {
+      const res = await apiReq('/api/members/me', {
+        method: 'PATCH',
+        data: { name },
+      });
+
+      if (res.status >= 200 && res.status < 300) {
+        setMember((prev) => ({
+          ...prev,
+          ...res.data.data,
+        }));
+        setIsEditing(false);
+      } else {
+        alert('이름 수정에 실패했습니다.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('서버 연결 중 오류가 발생했습니다.');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <main className="min-h-screen bg-[#f7f9fc]">
       <div className="min-h-screen w-full bg-[#f7f9fc] lg:flex">
-        {/* header 영역 */}
-        <aside className="flex flex-col justify-between bg-[#17253c] px-5 py-7 text-white lg:w-[214px] lg:shrink-0">
-          <div>
-            {/* EMS 로고 */}
-            <div>
-              <div className="flex items-center gap-3">
-                <span className="h-[27px] w-[7px] rounded-[3px] bg-[#169b62]" />
-
-                <h1 className="text-[23px] font-bold leading-none tracking-tight">EMS</h1>
-              </div>
-
-              <p className="mt-3 text-[10px] font-medium text-[#afc2d2]">EVENT PLATFORM</p>
+        {/* 왼쪽 브랜드 영역 */}
+        <aside className="bg-[#17253c] px-8 py-10 text-white sm:px-12 lg:w-[420px] lg:shrink-0 lg:px-14">
+          <div className="lg:pt-[65px]">
+            <div className="flex items-center gap-3">
+              <span className="h-[39px] w-3 rounded-[5px] bg-[#169b62]" />
+              <h1 className="text-[36px] font-bold">EMS</h1>
             </div>
-
-            {/* 워크스페이스 메뉴 */}
-            <nav aria-label="워크스페이스 메뉴" className="mt-14">
-              <p className="mb-5 text-[11px] font-semibold text-[#8fa2bb]">MY WORKSPACE</p>
-
-              <ul className="space-y-2">
-                <li className="flex items-center gap-4 rounded-[7px] px-2 py-3 text-[13px] font-medium text-[#b1bfd2]">
-                  <span
-                    className="h-[4px] w-[4px] shrink-0 rounded-full border border-[#b1bfd2]"
-                    aria-hidden="true"
-                  />
-                  <button>마이페이지</button>
-                </li>
-                {['행사 찾기', '신청 내역', '세미나 참여', '실시간 투표'].map((menu) => (
-                  <li
-                    key={menu}
-                    className="flex items-center gap-4 rounded-[7px] px-2 py-3 text-[13px] font-medium text-[#b1bfd2]"
-                  >
-                    <span
-                      className="h-[4px] w-[4px] shrink-0 rounded-full border border-[#b1bfd2]"
-                      aria-hidden="true"
-                    />
-                    <span>{menu}</span>
-                  </li>
-                ))}
-                <li className="flex items-center gap-4 rounded-[7px] px-2 py-3 text-[13px] font-medium text-[#b1bfd2]">
-                  <span
-                    className="h-[4px] w-[4px] shrink-0 rounded-full border border-[#b1bfd2]"
-                    aria-hidden="true"
-                  />
-                  <button onClick={logout}>로그아웃</button>
-                </li>
-              </ul>
-            </nav>
+            <p className="mt-5 text-[13px] font-semibold text-[#afc2d2]">
+              CLOUD NATIVE EVENT PLATFORM
+            </p>
           </div>
 
-          {/* 사이드바 하단 */}
-          <div className="mt-14 text-[11px] text-[#8295ae] lg:mt-0">시안 / API 연결 전</div>
+          <div className="mt-20 lg:mt-[132px]">
+            <h2 className="text-[29px] font-bold leading-tight">
+              새로운 비밀번호로
+              <br />
+              다시 시작하세요
+            </h2>
+            <p className="mt-10 text-[16px] leading-relaxed text-[#bbc8d6]">
+              안전한 계정 관리를 위해
+              <br />
+              새로운 비밀번호를 설정해주세요.
+            </p>
+          </div>
         </aside>
 
         {/* My Page 영역 */}
@@ -100,16 +99,73 @@ const MyPage = () => {
               <div className="flex items-center justify-between">
                 <h3 className="text-[17px] font-bold text-[#142238]">내 프로필</h3>
                 <span className="rounded-full bg-[#e6f5ee] px-3 py-1 text-[11px] font-semibold text-[#169b62]">
-                  MEMBER
+                  {member.role}
                 </span>
               </div>
-
               <p className="mt-2 text-[12px] text-[#7a879a]">기본 회원 정보</p>
 
               <div className="mt-5 space-y-4 border-t border-[#e5e9f0] pt-5">
-                <div>
-                  <p className="text-[12px] text-[#7a879a]">이름</p>
-                  <p className="mt-1 text-[14px] font-medium text-[#142238]">{member.name}</p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[12px] text-[#7a879a]">이름</p>
+
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={newName}
+                        maxLength={50}
+                        onChange={(e) => setNewName(e.target.value)}
+                        className="mt-1 h-9 rounded-lg border border-[#d9dee7] px-3 text-[13px] outline-none focus:border-[#169b62]"
+                      />
+                    ) : (
+                      <p className="mt-1 text-[14px] font-medium text-[#142238]">
+                        {member.name}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {isEditing ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={updateName}
+                          disabled={saving || !newName.trim()}
+                          className="rounded-[10px] bg-[#169b62] px-3 py-2 text-xs font-semibold text-white disabled:opacity-50"
+                        >
+                          {saving ? '저장 중...' : '저장'}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setIsEditing(false)}
+                          disabled={saving}
+                          className="rounded-[10px] border border-[#d9dee7] px-3 py-2 text-xs font-semibold text-[#142238]"
+                        >
+                          취소
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setNewName(member.name ?? '');
+                          setIsEditing(true);
+                        }}
+                        className="rounded-[10px] border border-[#d9dee7] px-3 py-2 text-xs font-semibold text-[#142238] hover:bg-[#f7f9fc]"
+                      >
+                        정보 수정
+                      </button>
+                    )}
+                    {member.status && (
+                      <button
+                        type="button"
+                        onClick={() => navigate('/password/change')}
+                        className="rounded-[10px] bg-[#169b62] px-3 py-2 text-xs font-semibold text-white hover:bg-[#128653]"
+                      >
+                        비밀번호 변경
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 <div>
