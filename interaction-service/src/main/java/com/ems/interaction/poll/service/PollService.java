@@ -1,16 +1,19 @@
 package com.ems.interaction.poll.service;
 
 import com.ems.interaction.common.exception.ErrorCode;
+import com.ems.interaction.mock.DemoData;
 import com.ems.interaction.poll.dto.PollManagementDTO;
 import com.ems.interaction.common.exception.ApiException;
 import com.ems.interaction.poll.domain.Poll;
 import com.ems.interaction.poll.domain.PollOption;
 import com.ems.interaction.poll.dto.PollSaveDTO;
 import com.ems.interaction.poll.dto.PollResponseDTO;
+import com.ems.interaction.poll.dto.UserPollDTO;
 import com.ems.interaction.poll.repository.PollRepository;
 import com.ems.interaction.poll.repository.PollOptionRepository;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -186,6 +189,36 @@ public class PollService {
 
         // 8. Poll + PollOption -> PollResponseDTO 변환
         return polls.stream().map(poll -> PollResponseDTO.from(poll, optionsByPollId.getOrDefault(poll.getId(), List.of()))).toList();
+    }
+
+    //11/10 추가
+    // 참가 승인된 행사·세션의 전체 투표 목록 페이지 조회
+    public Page<UserPollDTO> getUserPolls(Long userId, int page, int size) {
+
+        // 1. 사용자 확인
+        if (userId == null) {
+            throw new ApiException(ErrorCode.UNAUTHORIZED);
+        }
+
+        // 2. 페이지 파라미터 검증
+        if (page < 0 || size < 1 || size > 100) {
+            throw new ApiException(ErrorCode.INVALID_REQUEST);
+        }
+
+        // 3. 현재 사용자가 참가 승인받은 세션 조회
+        List<Long> sessionIds = eventClient.accessibleSessions(userId);
+
+
+        // 4. 최신 투표부터 조회
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
+
+        // 5. 승인된 세션이 없다면 빈 페이지 반환
+        if (sessionIds.isEmpty()) {
+            return Page.empty(pageable);
+        }
+
+        // 6. DB 페이지 조회 및 목록 DTO 변환
+        return pollRepository.findByEventIdIn(sessionIds, pageable).map(UserPollDTO::from);
     }
 
 

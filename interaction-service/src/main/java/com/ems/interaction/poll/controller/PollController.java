@@ -4,6 +4,7 @@ import com.ems.interaction.common.exception.ApiException;
 import com.ems.interaction.common.exception.ErrorCode;
 import com.ems.interaction.common.response.PageResponse;
 import com.ems.interaction.poll.dto.PollManagementDTO;
+import com.ems.interaction.poll.dto.UserPollDTO;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -110,6 +111,19 @@ public class PollController {
 
         return apiResponseBuilder.ok(Map.of("pollId", pollIdResult), "투표 종료 성공", request);
     }
+
+
+    // 참가 승인된 세션의 전체 투표 목록 페이지 조회
+    @GetMapping("/polls/users")
+    public ResponseEntity<?> getUserPolls(@RequestHeader("X-Member-Id") Long userId,
+                                          @RequestParam(defaultValue = "0") int page,
+                                          @RequestParam(defaultValue = "10") int size, HttpServletRequest request) {
+
+        Page<UserPollDTO> response = pollService.getUserPolls(userId, page, size);
+
+        return apiResponseBuilder.ok(PageResponse.from(response), "참가 승인된 세션의 투표 목록 조회 성공", request);
+    }
+
 
     //관리자 권한 체크
     private void checkAdmin(String role) {

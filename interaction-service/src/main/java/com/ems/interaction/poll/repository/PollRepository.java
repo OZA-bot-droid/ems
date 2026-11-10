@@ -49,6 +49,11 @@ public interface PollRepository extends JpaRepository<Poll, Long> {
     Page<Poll> findByUserIdAndEventIdAndSessionIdOrderByIdDesc(
             Long userId, Long eventId, Long sessionId, Pageable pageable);
 
+    //11/10 추가
+    // 일반 사용자용 전체 투표 목록 조회
+    Page<Poll> findByEventIdIn(Collection<Long> sessionIds, Pageable pageable);
+
+
     // SCHEDULED → ACTIVE
     // 시작 시간이 된 투표를 ACTIVE로 변경
     @Modifying
