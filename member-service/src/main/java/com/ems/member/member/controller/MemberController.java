@@ -145,11 +145,11 @@ public class MemberController {
     // 로그아웃
     @DeleteMapping("/logout")
     public ResponseEntity<?> logout(@RequestBody ClientDTO dto,
-                                    @CookieValue("refreshToken") String refreshToken,
+                                    @CookieValue(value = "refreshToken", required = false) String refreshToken,
                                     HttpServletRequest request) {
         originValidator.validate(request);
 
-        if(refreshToken != null) {
+        if(refreshToken != null && !refreshToken.isBlank()) {
             authService.logout(dto, refreshToken);
         }
 
