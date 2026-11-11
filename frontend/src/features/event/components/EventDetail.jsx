@@ -6,6 +6,7 @@ import { registrationApi } from '../api/registrationApi.js';
 import { useAuth } from '../../member/hooks/useAuth.js';
 import { formatRange, formatTimeRange, instantToKstInput, STATUS_BADGE } from '../utils/format.js';
 import RegistrationApplyModal from './RegistrationApplyModal.jsx';
+import LoginRequiredModal from './LoginRequiredModal.jsx';
 
 // 참가 승인 화면 주소 (이도형 님 AdminApprovalPage). 내 행사들의 대기 신청을 승인·거절하는 화면
 // 지금 승인 화면은 행사별로 거르지 않으므로 eventId는 넘기지 않음 (행사별 필터가 생기면 ?eventId=${id} 추가)
@@ -22,6 +23,8 @@ export default function EventDetail({ eventId, onBack }) {
   const [showApplyModal, setShowApplyModal] = useState(false);
   const [applyError, setApplyError] = useState('');
   const isAdmin = role === 'ADMIN';
+  const isLoggedIn = Boolean(role); // 로그인하지 않으면 role이 없음 (EventDiscoveryPage도 같은 기준)
+  const [showLoginModal, setShowLoginModal] = useState(false); // 비로그인이 [참가 신청하기]를 눌렀을 때 뜨는 확인 창
   const [summary, setSummary] = useState(null); // 관리자: 신청 현황 (실패하면 그냥 안 보여줌)
 
   useEffect(() => {
@@ -124,7 +127,6 @@ export default function EventDetail({ eventId, onBack }) {
       <article className="flex flex-col gap-8 rounded-[14px] bg-(--ems-surface) p-5">
         {/* 머리: Event hero */}
         <header className="flex flex-col gap-3 rounded-[12px] bg-(--ems-green-soft) px-6 py-6">
-          <p className="text-sm font-bold text-(--ems-green)">EMS 2026 · EVENT</p>
           <h2 className="text-[26px] font-bold text-(--ems-ink)">{event.title}</h2>
           <span className={`w-fit rounded-full px-3 py-1 text-xs font-semibold ${badge.className}`}>
             {badge.label}
@@ -193,7 +195,7 @@ export default function EventDetail({ eventId, onBack }) {
             )}
           </section>
 
-          {/* 관리자: [세션 관리] [참가 승인] / 일반 사용자: [참가 신청하기] */}
+          {/* 관리자: [세션 관리] [참가 승인] / 그 외: [참가 신청하기] (비로그인은 누르면 로그인 안내 창) */}
           {isAdmin ? (
             <div className="flex flex-col items-end gap-2">
               <div className="flex flex-wrap justify-end gap-2">
@@ -230,6 +232,7 @@ export default function EventDetail({ eventId, onBack }) {
             <button
               disabled={!canApply || applying}
               onClick={() => {
+                if (!isLoggedIn) return setShowLoginModal(true); // 비로그인: 신청 창 대신 로그인 안내
                 setApplyError('');
                 setShowApplyModal(true);
               }}
@@ -241,6 +244,13 @@ export default function EventDetail({ eventId, onBack }) {
           )}
         </div>
       </article>
+
+      {showLoginModal && (
+        <LoginRequiredModal
+          onClose={() => setShowLoginModal(false)}
+          onConfirm={() => window.location.assign('/login')}
+        />
+      )}
 
       {!isAdmin && showApplyModal && (
         <RegistrationApplyModal
