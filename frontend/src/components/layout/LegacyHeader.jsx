@@ -1,8 +1,9 @@
 import { mapClassNames } from '../../styles/classNames.js';
 import module0 from './header.module.scss';
-const cx = value => mapClassNames(value, module0);
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../features/member/hooks/useAuth.js';
+
+const cx = (value) => mapClassNames(value, module0);
 
 const MENUS = {
   COMMON: {
@@ -20,7 +21,7 @@ const MENUS = {
       { id: 'events', label: '행사 찾기', href: '/events' },
       { id: 'registrations', label: '신청 내역', href: '/registrations' },
       { id: 'seminars', label: '세미나 참여', href: '#' },
-      { id: 'votes', label: '실시간 투표', href: '#' },
+      { id: 'votes', label: '실시간 투표', href: '/polls/vote' },
     ],
   },
   // href: null = 아직 백엔드 API가 없어 화면을 연결하지 않은 메뉴 (보이기만 하고 누를 수 없음)
@@ -54,21 +55,21 @@ function RoleHeader({ role, activePage }) {
   };
 
   return (
-    <header className={cx("app-sidebar-header")} data-role={role}>
-      <a className={cx("registration-brand")} href="/" aria-label="EMS 홈">
+    <header className={cx('app-sidebar-header')} data-role={role}>
+      <a className={cx('registration-brand')} href="/" aria-label="EMS 홈">
         <span />
         EMS
       </a>
-      <p className={cx("registration-platform")}>EVENT PLATFORM</p>
-      <p className={cx("registration-nav-heading")}>{menu.heading}</p>
-      <nav className={cx("registration-nav")} aria-label={`${role} 주 메뉴`}>
+      <p className={cx('registration-platform')}>EVENT PLATFORM</p>
+      <p className={cx('registration-nav-heading')}>{menu.heading}</p>
+      <nav className={cx('registration-nav')} aria-label={`${role} 주 메뉴`}>
         {menu.items.map(({ id, label, href, action }) =>
           action === 'logout' ? (
-            <button type="button" className={cx("nav-action")} onClick={handleLogout} key={id}>
+            <button type="button" className={cx('nav-action')} onClick={handleLogout} key={id}>
               ◦　 {label}
             </button>
           ) : href === null ? (
-            <span className={cx("is-disabled")} aria-disabled="true" key={id}>
+            <span className={cx('is-disabled')} aria-disabled="true" key={id}>
               ◦　 {label}
             </span>
           ) : (

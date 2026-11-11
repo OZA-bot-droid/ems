@@ -57,9 +57,11 @@ public enum ErrorCode {
     INVALID_STATUS_CHANGE(HttpStatus.CONFLICT, "투표 상태 변경 도중 충돌이 발생했습니다."),
 
     //일반 유저가 관리자 권한 있는 기능 요청시
-    FORBIDDEN(HttpStatus.FORBIDDEN, "권한이 없습니다.");
+    FORBIDDEN(HttpStatus.FORBIDDEN, "권한이 없습니다."),
 
-
+    //11/10 추가
+    //실시간 투표 결과 확인 못하게 막혀 있는 상황에서 일반 유저가 결과 요청시
+    RESULT_NOT_AVAILABLE(HttpStatus.FORBIDDEN, "아직 투표 결과를 확인할 수 없습니다.");
 
     private final HttpStatus status;
     private final String message;
