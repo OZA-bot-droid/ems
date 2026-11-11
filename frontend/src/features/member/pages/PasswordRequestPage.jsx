@@ -19,14 +19,13 @@ const PasswordRequest = () => {
     try {
       const res = await memberApi.passwordResetRequest(email);
 
+      console.log(res.data);
       if (res.status < 200 || res.status >= 300) {
         throw new Error('비밀번호 재설정 요청에 실패했습니다.');
       } else {
         setMessage(
           '계정에 해당하는 이메일이 있다면 재설정 안내가 발송됩니다. 메일함을 확인해주세요.',
         );
-        const data = res.data;
-        console.log(data);
       }
     } catch (err) {
       console.error(err);

@@ -6,6 +6,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getClientId } from '../utils/getClientId.js';
 import NoLoginHeaders from '../components/NoLoginHeaders.jsx';
 import { memberApi } from '../api/memberApi.js';
+import PasswordInput from '../components/PasswordInput.jsx';
 
 function SignupForm() {
   const navigate = useNavigate();
@@ -80,7 +81,7 @@ function SignupForm() {
 
     try {
       const res = await memberApi.register({ ...member, role });
-      alert(res.message + '되었습니다.');
+      alert(res.message);
       navigate('/login');
     } catch (error) {
       alert(error?.message || '회원가입 요청에 실패했습니다.');
@@ -104,7 +105,8 @@ function SignupForm() {
       const res = await memberApi.emailVerify(email, verificationCode);
 
       setVerifiedEmail(email);
-      alert(res);
+      alert(res.message);
+      console.log(res);
     } catch (err) {
       console.error(err);
       alert('서버 연결 중 오류가 발생했습니다.');
@@ -132,7 +134,8 @@ function SignupForm() {
       setCodeSent(true);
       setVerifiedEmail('');
       setVerificationCode('');
-      alert(res);
+      alert(res.message);
+      console.log(res);
     } catch (err) {
       console.error(err);
       alert('서버 연결 중 오류가 발생했습니다.');
@@ -273,17 +276,18 @@ function SignupForm() {
           >
             비밀번호
           </label>
-          <input
+          <PasswordInput
             id="signup-password"
-            type="password"
             name="password"
+            value={member.password}
+            required
             onChange={(event) =>
               setMember((m) => ({ ...m, [event.target.name]: event.target.value }))
             }
             placeholder="••••••••"
             autoComplete="new-password"
             className={cx(
-              'mt-2 h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none transition placeholder:text-[#a0a9b8] focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15',
+              'h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none transition placeholder:text-[#a0a9b8] focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15',
             )}
           />
         </div>
@@ -295,15 +299,15 @@ function SignupForm() {
           >
             비밀번호 확인
           </label>
-          <input
+          <PasswordInput
             id="signup-password-confirm"
-            type="password"
             value={passwordConfirm}
+            required
             onChange={(event) => setPasswordConfirm(event.target.value)}
             placeholder="••••••••"
             autoComplete="new-password"
             className={cx(
-              'mt-2 h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none transition placeholder:text-[#a0a9b8] focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15',
+              'h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none transition placeholder:text-[#a0a9b8] focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15',
             )}
           />
         </div>

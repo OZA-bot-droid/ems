@@ -6,6 +6,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getClientId } from '../utils/getClientId.js';
 import { useAuth } from '../hooks/useAuth.js';
 import NoLoginHeaders from '../components/NoLoginHeaders.jsx';
+import PasswordInput from '../components/PasswordInput.jsx';
 
 function LoginForm() {
   const { login } = useAuth();
@@ -32,7 +33,7 @@ function LoginForm() {
       await login({ email, password });
       navigate('/mypage', { replace: true });
     } catch (err) {
-      alert('로그인 실패');
+      alert(err);
       console.log(err);
     }
   };
@@ -74,16 +75,13 @@ function LoginForm() {
           >
             비밀번호
           </label>
-          <input
+          <PasswordInput
             id="login-password"
-            type="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             placeholder="••••••••"
-            autoComplete="current-password"
-            className={cx(
-              'mt-[9px] h-[42px] w-full rounded-[9px] border-0 bg-white px-[17px] text-[12px] text-[#142238] outline-none placeholder:text-[#7a879a] focus:ring-2 focus:ring-[#169b62]/25',
-            )}
+            autoComplete
+            className="h-[42px] w-full rounded-[9px] border-0 bg-white px-[17px] text-[12px] text-[#142238] outline-none placeholder:text-[#7a879a] focus:ring-2 focus:ring-[#169b62]/25"
           />
         </div>
 

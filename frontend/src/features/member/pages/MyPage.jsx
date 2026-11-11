@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../hooks/useAuth.js';
-import { useApiUtil } from '../hooks/useApiUtil.js';
 import { useNavigate } from 'react-router-dom';
 import { memberApi } from '../api/memberApi.js';
 
 const MyPage = () => {
   const { logout, authLoading, accessToken } = useAuth();
   const navigate = useNavigate();
-  const apiReq = useApiUtil();
   const [member, setMember] = useState({});
   const [isEditing, setIsEditing] = useState(false);
   const [newName, setNewName] = useState('');
@@ -30,7 +28,7 @@ const MyPage = () => {
       }
     };
     myInfo();
-  }, []);
+  }, [authLoading, accessToken]);
 
   const updateName = async () => {
     const name = newName.trim();
@@ -40,15 +38,13 @@ const MyPage = () => {
     setSaving(true);
 
     try {
-      const res = await apiReq('/api/members/me', {
-        method: 'PATCH',
-        data: { name },
-      });
+      const res = await memberApi.updateMe(name);
 
+      console.log(res);
       if (res.status >= 200 && res.status < 300) {
         setMember((prev) => ({
           ...prev,
-          ...res.data.data,
+          ...res.data,
         }));
         setIsEditing(false);
       } else {

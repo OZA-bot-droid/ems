@@ -36,18 +36,13 @@ export const memberApi = {
       tokenStore.clear();
     }
   },
-  emailSend: async (email) => {
-    const res = await publicApi.post('/members/email/send', { email });
-    return res?.data;
-  },
-  emailVerify: async (email, verificationCode) => {
-    const res = await publicApi.post('/members/email/verify', { email, code: verificationCode });
-    return res?.data;
-  },
+  emailSend: async (email) => responseData(await publicApi.post('/members/email/send', { email })),
+  emailVerify: async (email, verificationCode) =>
+    responseData(await publicApi.post('/members/email/verify', { email, code: verificationCode })),
   passwordResetRequest: async (email) =>
     responseData(await publicApi.post('/members/password/reset-request', { email })),
-  passwordReset: async (email, password) =>
-    responseData(await publicApi.post('/members/password/reset', { email, password })),
+  passwordReset: async (token, newPassword) =>
+    responseData(await publicApi.post('/members/password/reset', { token, newPassword })),
   passwordChange: async (currentPassword, newPassword) =>
     responseData(await api.post('/members/password/change', { currentPassword, newPassword })),
   updateMe: async (name) => responseData(await api.patch('/members/me', { name })),
