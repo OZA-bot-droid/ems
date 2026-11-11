@@ -40,7 +40,7 @@ public class PollVoteService {
     private final PollVoteRepository pollVoteRepository;
     private final ApplicationEventPublisher eventPublisher;
 
-    // 임시 권한 데이터
+    // 이벤트 연동
     private final EventAuthorizationClient eventClient;
 
     //투표 진행
@@ -49,7 +49,7 @@ public class PollVoteService {
         // 1. 투표 조회
         Poll poll = pollRepository.findById(pollId).orElseThrow(() -> new ApiException(ErrorCode.POLL_NOT_FOUND));
 
-        // Event enrollment is per event, not per session.
+        // 허가 받은 유저인지 조회
         if (!eventClient.approved(poll.getEventId(), userId)) {
             throw new ApiException(ErrorCode.REGISTRATION_NOT_APPROVED);
         }
@@ -74,9 +74,6 @@ public class PollVoteService {
 
         // 5. DTO → Entity 변환
         PollVote pollVote = dto.toEntity(userId, poll);
-
-//        // 6. 저장
-//        return pollVoteRepository.save(pollVote);
 
         // WebSocket 연동 이후
         // 6. 투표 저장
@@ -115,6 +112,7 @@ public class PollVoteService {
         // 1. 투표 조회
         Poll poll = pollRepository.findById(pollId).orElseThrow(() -> new ApiException(ErrorCode.POLL_NOT_FOUND));
 
+        // 소유자/허가 받은 유저인지 확인
         if (userId == null) throw new ApiException(ErrorCode.UNAUTHORIZED);
         boolean isOwner = eventClient.owner(poll.getEventId(), userId);
         boolean isApproved = isOwner || eventClient.approved(poll.getEventId(), userId);

@@ -58,17 +58,6 @@ public class PollController {
         return apiResponseBuilder.ok(response, "투표 조회 성공", request);
     }
 
-//
-//    // 관리자가 생성한 투표 조회
-//    @GetMapping("/polls/mycreated")
-//    public ResponseEntity<?> getMyCreatedPolls(@RequestHeader("X-Member-Id") Long userId, @RequestHeader("X-User-Role") String role, HttpServletRequest request) {
-//        checkAdmin(role);
-//
-//        List<PollManagementDTO> response = pollService.getMyCreatedPolls(userId);
-//
-//        return apiResponseBuilder.ok(response, "관리자 투표 목록 조회 성공", request);
-//    }
-
     // 관리자가 생성한 투표 목록 페이지 조회
     @GetMapping("/polls/mycreated")
     public ResponseEntity<?> getMyCreatedPolls(@RequestHeader("X-Member-Id") Long userId, @RequestHeader("X-User-Role") String role,

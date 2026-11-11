@@ -53,38 +53,4 @@ public interface PollRepository extends JpaRepository<Poll, Long> {
     // 일반 사용자용 전체 투표 목록 조회
     Page<Poll> findByEventIdIn(Collection<Long> sessionIds, Pageable pageable);
 
-
-    // SCHEDULED → ACTIVE
-    // 시작 시간이 된 투표를 ACTIVE로 변경
-    @Modifying
-    @Query("""
-    UPDATE Poll p
-    SET p.status = :active,
-        p.updatedAt = :now
-    WHERE p.status = :scheduled
-      AND p.startsAt <= :now
-      AND p.endsAt > :now
-    """)
-    int activateScheduledPolls(
-            @Param("scheduled") Status scheduled,
-            @Param("active") Status active,
-            @Param("now") Instant now
-    );
-
-
-    // SCHEDULED 또는 ACTIVE → CLOSED
-    // 종료 시간이 지난 투표를 CLOSED로 변경
-    @Modifying
-    @Query("""
-    UPDATE Poll p
-    SET p.status = :closed,
-        p.updatedAt = :now
-    WHERE p.status IN :statuses
-      AND p.endsAt <= :now
-    """)
-    int closeExpiredPolls(
-            @Param("statuses") Collection<Status> statuses,
-            @Param("closed") Status closed,
-            @Param("now") Instant now
-    );
 }
