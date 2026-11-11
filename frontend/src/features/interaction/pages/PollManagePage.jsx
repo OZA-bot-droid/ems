@@ -54,6 +54,7 @@ export default function PollManagePage() {
           pages={management.pages}
           onPageChange={management.setPage}
           onChangeStatus={management.change}
+          onViewResults={management.goToResults}
         />
         <p className="text-xs text-slate-500">
           서버에서 Event 소유권과 실제 참가 승인 여부를 검증합니다.

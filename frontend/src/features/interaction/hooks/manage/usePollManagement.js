@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { pollApi } from '../../api/pollApi.js';
+import { useNavigate } from 'react-router-dom';
 
 // 관리자 Poll 목록 조회, 필터, 페이징 및 활성화·종료 로직
 export function usePollManagement(eventFilter, sessionFilter, mutationLock) {
@@ -9,6 +10,8 @@ export function usePollManagement(eventFilter, sessionFilter, mutationLock) {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+
+  const navigate = useNavigate();
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -53,5 +56,14 @@ export function usePollManagement(eventFilter, sessionFilter, mutationLock) {
     }
   }
 
-  return { page, setPage, rows, pages, loading, busy, error, refresh, change };
+  // 결과 확인: 선택한 투표의 공통 결과 조회 페이지로 이동
+  function goToResults(pollId) {
+    if (pollId == null) return;
+
+    navigate(`/polls/${encodeURIComponent(pollId)}/results`, {
+      state: { from: '/admin/polls' },
+    });
+  }
+
+  return { page, setPage, rows, pages, loading, busy, error, refresh, change, goToResults };
 }

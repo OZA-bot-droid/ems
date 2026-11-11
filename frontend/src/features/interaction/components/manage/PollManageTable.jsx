@@ -1,5 +1,5 @@
 import PollPagination from './PollPagination.jsx';
-import { panel, btn } from './pollManageStyles.js';
+import { panel, btn, closeBtn } from './pollManageStyles.js';
 
 // 관리자 Poll 목록, 상태 조작 버튼, 페이징을 표시하는 컴포넌트
 export default function PollManageTable({
@@ -12,6 +12,7 @@ export default function PollManageTable({
   pages,
   onPageChange,
   onChangeStatus,
+  onViewResults,
 }) {
   return (
     <section className={panel}>
@@ -29,7 +30,7 @@ export default function PollManageTable({
           <table className="w-full text-left text-sm">
             <thead>
               <tr>
-                {['투표', '행사 / 세션', '시작', '상태', '관리'].map((x) => (
+                {['투표', '행사 / 세션', '시작', '종료', '상태', '관리', '결과 확인'].map((x) => (
                   <th key={x} className="border-b p-3">
                     {x}
                   </th>
@@ -45,6 +46,7 @@ export default function PollManageTable({
                     {p.eventId} / {p.sessionId}
                   </td>
                   <td className="p-3">{new Date(p.startsAt).toLocaleString('ko-KR')}</td>
+                  <td className="p-3">{new Date(p.endsAt).toLocaleString('ko-KR')}</td>
                   <td className="p-3">{p.status}</td>
                   <td className="space-x-2 p-3">
                     <button
@@ -55,10 +57,17 @@ export default function PollManageTable({
                       활성화
                     </button>
                     <button
+                      className={closeBtn}
                       disabled={busy || !p.canClose}
                       onClick={() => onChangeStatus(p.id, 'close')}
                     >
                       종료
+                    </button>
+                  </td>
+                  <td className="space-x-2 p-3">
+                    {/* 투표 결과 조회 */}
+                    <button type="button" className={btn} onClick={() => onViewResults(p.id)}>
+                      결과
                     </button>
                   </td>
                 </tr>
