@@ -2,8 +2,9 @@ import { api, publicApi } from '../../../api/axiosInstance';
 import { tokenStore } from '../../../api/tokenStore';
 import { unwrap } from '../../../api/apiError';
 import { getClientId } from '../utils/getClientId';
+const responseData = (response) => response?.data;
 export const memberApi = {
-  register: async (data) => unwrap(await publicApi.post('/members/register', data)),
+  register: async (data) => responseData(await publicApi.post('/members/register', data)),
   login: async ({ email, password }) => {
     const response = await publicApi.post('/members/login', {
       email,
@@ -35,7 +36,19 @@ export const memberApi = {
       tokenStore.clear();
     }
   },
-  emailSend: async (email) => unwrap(await publicApi.post('/members/email/send', { email })),
-  emailVerify: async (data) =>
-    unwrap(await publicApi.post('/members/email/verify', data)),
+  emailSend: async (email) => {
+    const res = await publicApi.post('/members/email/send', { email });
+    return res?.data;
+  },
+  emailVerify: async (email, verificationCode) => {
+    const res = await publicApi.post('/members/email/verify', { email, code: verificationCode });
+    return res?.data;
+  },
+  passwordResetRequest: async (email) =>
+    responseData(await publicApi.post('/members/password/reset-request', { email })),
+  passwordReset: async (email, password) =>
+    responseData(await publicApi.post('/members/password/reset', { email, password })),
+  passwordChange: async (currentPassword, newPassword) =>
+    responseData(await api.post('/members/password/change', { currentPassword, newPassword })),
+  updateMe: async (name) => responseData(await api.patch('/members/me', { name })),
 };

@@ -1,5 +1,6 @@
 package com.ems.member.common.config;
 
+import com.ems.member.common.exception.InvalidRequestOriginException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -14,16 +15,20 @@ public class CookieRequestOriginValidator {
 
     private final Set<String> allowedOrigins;
 
-    public CookieRequestOriginValidator(@Value("${password-reset.frontend-url}") String frontendUrl,
-                                        @Value("${app.cookie-secure}") String gatewayUrl) {
+    public CookieRequestOriginValidator(@Value("${password-reset.frontend-url}") String frontendUrl) {
         this.allowedOrigins = Set.of(
-                toOrigin(frontendUrl),
-                toOrigin(gatewayUrl)
+                toOrigin(frontendUrl)
         );
     }
 
     private String toOrigin(String url) {
         URI uri = URI.create(url);
+
+        if(uri.getScheme() == null
+                || uri.getHost() == null
+                || !Set.of("http", "https").contains(uri.getScheme())) {
+            throw new IllegalArgumentException("올바르지 않은 Frontend URL 설정입니다.");
+        }
 
         String origin = uri.getScheme() + "://" + uri.getHost();
 
@@ -38,7 +43,7 @@ public class CookieRequestOriginValidator {
         String origin = request.getHeader("Origin");
 
         if (origin == null || !allowedOrigins.contains(origin)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "허용되지 않은 요청 출처입니다.");
+            throw new InvalidRequestOriginException();
         }
     }
 }

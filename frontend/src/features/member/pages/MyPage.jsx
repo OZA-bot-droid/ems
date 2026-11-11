@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { memberApi } from '../api/memberApi.js';
 
 const MyPage = () => {
-  const { authLoading, accessToken } = useAuth();
+  const { logout, authLoading, accessToken } = useAuth();
   const navigate = useNavigate();
   const apiReq = useApiUtil();
   const [member, setMember] = useState({});
@@ -14,6 +14,11 @@ const MyPage = () => {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
+    // 재발급이 완료되기 전까지 대기
+    if (authLoading || !accessToken) {
+      return;
+    }
+
     const myInfo = async () => {
       try {
         const res = await memberApi.me();
@@ -60,30 +65,57 @@ const MyPage = () => {
   return (
     <main className="min-h-screen bg-[#f7f9fc]">
       <div className="min-h-screen w-full bg-[#f7f9fc] lg:flex">
-        {/* 왼쪽 브랜드 영역 */}
-        <aside className="bg-[#17253c] px-8 py-10 text-white sm:px-12 lg:w-[420px] lg:shrink-0 lg:px-14">
-          <div className="lg:pt-[65px]">
-            <div className="flex items-center gap-3">
-              <span className="h-[39px] w-3 rounded-[5px] bg-[#169b62]" />
-              <h1 className="text-[36px] font-bold">EMS</h1>
+        {/* 헤더 영역 */}
+        <aside className="flex flex-col justify-between bg-[#17253c] px-5 py-7 text-white lg:w-[214px] lg:shrink-0">
+          <div>
+            {/* EMS 로고 */}
+            <div>
+              <div className="flex items-center gap-3">
+                <span className="h-[27px] w-[7px] rounded-[3px] bg-[#169b62]" />
+
+                <h1 className="text-[23px] font-bold leading-none tracking-tight">EMS</h1>
+              </div>
+
+              <p className="mt-3 text-[10px] font-medium text-[#afc2d2]">EVENT PLATFORM</p>
             </div>
-            <p className="mt-5 text-[13px] font-semibold text-[#afc2d2]">
-              CLOUD NATIVE EVENT PLATFORM
-            </p>
+
+            {/* 워크스페이스 메뉴 */}
+            <nav aria-label="워크스페이스 메뉴" className="mt-14">
+              <p className="mb-5 text-[11px] font-semibold text-[#8fa2bb]">MY WORKSPACE</p>
+
+              <ul className="space-y-2">
+                <li className="flex items-center gap-4 rounded-[7px] px-2 py-3 text-[13px] font-medium text-[#b1bfd2]">
+                  <span
+                    className="h-[4px] w-[4px] shrink-0 rounded-full border border-[#b1bfd2]"
+                    aria-hidden="true"
+                  />
+                  <button onClick={() => navigate('/mypage')}>마이페이지</button>
+                </li>
+                {['행사 찾기', '신청 내역', '세미나 참여', '실시간 투표'].map((menu) => (
+                  <li
+                    key={menu}
+                    className="flex items-center gap-4 rounded-[7px] px-2 py-3 text-[13px] font-medium text-[#b1bfd2]"
+                  >
+                    <span
+                      className="h-[4px] w-[4px] shrink-0 rounded-full border border-[#b1bfd2]"
+                      aria-hidden="true"
+                    />
+                    <span>{menu}</span>
+                  </li>
+                ))}
+                <li className="flex items-center gap-4 rounded-[7px] px-2 py-3 text-[13px] font-medium text-[#b1bfd2]">
+                  <span
+                    className="h-[4px] w-[4px] shrink-0 rounded-full border border-[#b1bfd2]"
+                    aria-hidden="true"
+                  />
+                  <button onClick={logout}>로그아웃</button>
+                </li>
+              </ul>
+            </nav>
           </div>
 
-          <div className="mt-20 lg:mt-[132px]">
-            <h2 className="text-[29px] font-bold leading-tight">
-              새로운 비밀번호로
-              <br />
-              다시 시작하세요
-            </h2>
-            <p className="mt-10 text-[16px] leading-relaxed text-[#bbc8d6]">
-              안전한 계정 관리를 위해
-              <br />
-              새로운 비밀번호를 설정해주세요.
-            </p>
-          </div>
+          {/* 사이드바 하단 */}
+          <div className="mt-14 text-[11px] text-[#8295ae] lg:mt-0">시안 / API 연결 전</div>
         </aside>
 
         {/* My Page 영역 */}
@@ -118,9 +150,7 @@ const MyPage = () => {
                         className="mt-1 h-9 rounded-lg border border-[#d9dee7] px-3 text-[13px] outline-none focus:border-[#169b62]"
                       />
                     ) : (
-                      <p className="mt-1 text-[14px] font-medium text-[#142238]">
-                        {member.name}
-                      </p>
+                      <p className="mt-1 text-[14px] font-medium text-[#142238]">{member.name}</p>
                     )}
                   </div>
                   <div className="flex flex-wrap items-center gap-2">

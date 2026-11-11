@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useApiUtil } from '../hooks/useApiUtil.js';
+import { memberApi } from '../api/memberApi.js';
 
 const PasswordRequest = () => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
-  const apiReq = useApiUtil();
 
   const passwordResetRequest = async (event) => {
     event.preventDefault();
@@ -18,15 +17,9 @@ const PasswordRequest = () => {
     setMessage('');
 
     try {
-      const res = await apiReq('/api/members/password/reset-request', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json;charset=utf-8',
-        },
-        body: JSON.stringify({ email }),
-      });
+      const res = await memberApi.passwordResetRequest(email);
 
-      if (!(res.status >= 200 && res.status < 300)) {
+      if (res.status < 200 || res.status >= 300) {
         throw new Error('비밀번호 재설정 요청에 실패했습니다.');
       } else {
         setMessage(
@@ -35,7 +28,8 @@ const PasswordRequest = () => {
         const data = res.data;
         console.log(data);
       }
-    } catch {
+    } catch (err) {
+      console.error(err);
       setMessage('요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.');
     } finally {
       setLoading(false);

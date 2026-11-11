@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useApiUtil } from '../hook/apiUtil';
-import { useAuth } from '../auth/AuthContext';
-import LoginHeader from '../common/LoginHeader';
+import { useAuth } from '../hooks/useAuth.js';
+import { memberApi } from '../api/memberApi.js';
 
 const PasswordChange = () => {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -10,9 +9,8 @@ const PasswordChange = () => {
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-  const { setAccessToken } = useAuth();
+  const { setAccessToken, logout } = useAuth();
   const navigate = useNavigate();
-  const apiReq = useApiUtil();
 
   const passwordChangeSuccess = async (event) => {
     event.preventDefault();
@@ -33,21 +31,16 @@ const PasswordChange = () => {
 
     setLoading(true);
     try {
-      const res = await apiReq('/api/members/password/change', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json;charset=utf-8',
-        },
-        data: { currentPassword, newPassword },
-      });
+      const res = await memberApi.passwordChange(currentPassword, newPassword);
 
+      console.log(res);
       if (res.status < 200 || res.status >= 300) {
-        setMessage('비밀번호 변경에 실패했습니다.');
+        setMessage(res.message);
         return;
       } else {
-        console.log(res.data);
         setAccessToken(null);
         localStorage.removeItem('isLoginSession');
+
         // 현재 페이지의 방문 기록을 '/login' 페이지로 교체한다.
         navigate('/login', { replace: true });
       }
@@ -62,7 +55,6 @@ const PasswordChange = () => {
   return (
     <main className="min-h-screen bg-[#f7f9fc]">
       <div className="min-h-screen w-full bg-[#f7f9fc] lg:flex">
-        {/* header 영역 */}
         <aside className="flex flex-col justify-between bg-[#17253c] px-5 py-7 text-white lg:w-[214px] lg:shrink-0">
           <div>
             {/* EMS 로고 */}
@@ -86,7 +78,7 @@ const PasswordChange = () => {
                     className="h-[4px] w-[4px] shrink-0 rounded-full border border-[#b1bfd2]"
                     aria-hidden="true"
                   />
-                  <button>마이페이지</button>
+                  <button onClick={() => navigate('/mypage')}>마이페이지</button>
                 </li>
                 {['행사 찾기', '신청 내역', '세미나 참여', '실시간 투표'].map((menu) => (
                   <li
@@ -199,7 +191,7 @@ const PasswordChange = () => {
 
             <button
               type="button"
-              onClick={() => navigate('/login')}
+              onClick={() => navigate('/mypage')}
               className="mt-7 w-full text-[13px] font-semibold text-[#169b62] hover:underline"
             >
               마이페이지로 돌아가기

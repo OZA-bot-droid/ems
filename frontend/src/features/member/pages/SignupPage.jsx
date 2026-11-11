@@ -79,8 +79,8 @@ function SignupForm() {
     }
 
     try {
-      await memberApi.register({ ...member, role });
-      alert('회원가입이 완료되었습니다.');
+      const res = await memberApi.register({ ...member, role });
+      alert(res.message + '되었습니다.');
       navigate('/login');
     } catch (error) {
       alert(error?.message || '회원가입 요청에 실패했습니다.');
@@ -101,7 +101,7 @@ function SignupForm() {
     setVerifying(true);
 
     try {
-      const res = await memberApi.emailVerify({email, code: verificationCode});
+      const res = await memberApi.emailVerify(email, verificationCode);
 
       setVerifiedEmail(email);
       alert(res);

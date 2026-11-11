@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useApiUtil } from '../hooks/useApiUtil.js';
+import { memberApi } from '../api/memberApi.js';
 
 const PasswordReset = () => {
   const params = new URLSearchParams(window.location.search);
@@ -10,7 +10,6 @@ const PasswordReset = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-  const apiReq = useApiUtil();
 
   const passwordResetSuccess = async (event) => {
     event.preventDefault();
@@ -35,16 +34,7 @@ const PasswordReset = () => {
 
     setLoading(true);
     try {
-      const res = await apiReq('/api/members/password/reset', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json;charset=utf-8',
-        },
-        body: JSON.stringify({
-          token,
-          newPassword,
-        }),
-      });
+      const res = await memberApi.passwordReset(token, newPassword);
 
       if (!(res.status >= 200 && res.status < 300)) {
         if (res.data?.code === 'INVALID_PASSWORD_RESET_TOKEN') {
