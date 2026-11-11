@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { pollApi } from '../api/pollApi.js';
-import { connectPollSocket } from '../websocket/stompClient.js';
+import { pollApi } from '../../api/pollApi.js';
+import { connectPollSocket } from '../../websocket/stompClient.js';
 
 const panel = 'rounded-xl border border-slate-200 bg-white p-5 shadow-sm';
 const action = 'rounded-lg bg-emerald-700 px-4 py-2 text-white disabled:opacity-40';
 
-import { mapClassNames } from '../../../styles/classNames.js';
+import { mapClassNames } from '../../../../styles/classNames.js';
 import module0 from '../../../components/layout/header.module.scss';
 const cx = (value) => mapClassNames(value, module0);
-import Header from '../../../components/layout/LegacyHeader.jsx';
+import Header from '../../../../components/layout/LegacyHeader.jsx';
 
 export default function VotePage() {
   const [polls, setPolls] = useState([]);

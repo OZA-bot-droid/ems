@@ -1,11 +1,11 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { pollApi } from '../api/pollApi.js';
-import { eventApi } from '../../event/api/eventApi.js';
+import { pollApi } from '../../api/pollApi.js';
+import { eventApi } from '../../../event/api/eventApi.js';
 import module0 from '../../../components/layout/header.module.scss';
-import { mapClassNames } from '../../../styles/classNames.js';
+import { mapClassNames } from '../../../../styles/classNames.js';
 const cx = (value) => mapClassNames(value, module0);
-import Header from '../../../components/layout/LegacyHeader.jsx';
+import Header from '../../../../components/layout/LegacyHeader.jsx';
 
 const panel = 'rounded-xl border border-slate-200 bg-white p-5 shadow-sm';
 const field = 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm';
