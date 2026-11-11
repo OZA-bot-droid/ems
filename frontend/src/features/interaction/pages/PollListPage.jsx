@@ -21,7 +21,7 @@ export default function PollListPage() {
         <header>
           <p className="text-sm text-emerald-700">SYNC5 / Interaction</p>
           <h1 className="text-2xl font-bold">투표 목록</h1>
-          <p className="text-sm text-slate-500">참가 승인된 세션의 투표 목록입니다.</p>
+          <p className="text-sm text-slate-500">참가 승인된 행사들의 투표 목록입니다.</p>
         </header>
         <ApprovedPollResultList polls={polls} loading={loading} error={error} reload={reload} />
         <PollListPagination

@@ -45,7 +45,7 @@ export default function ApprovedPollResultList({ polls, loading, error, reload }
             <Link
               className="rounded-lg bg-emerald-700 px-3 py-2 text-sm text-white"
               to={`/polls/${encodeURIComponent(poll.id)}/results`}
-              state={{ from: '/polls' }}
+              state={{ from: '/polls/user' }}
             >
               결과 확인
             </Link>

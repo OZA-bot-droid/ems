@@ -2,8 +2,11 @@ import { Link } from 'react-router-dom';
 
 /** 진입 경로가 관리자 투표 관리인지 구분하되, 조회 권한은 서버가 최종 판단한다. */
 export default function PollResultHeader({ from, pollId, onRefresh, loading }) {
-  const fromManage = from === '/admin/polls' || from === '/polls/manage';
-  const backTo = fromManage ? '/admin/polls' : from === '/polls/vote' ? '/polls/vote' : '/polls';
+  // 관리자 투표 관리 페이지에서 진입했는지 확인
+  const fromManage = from === '/admin/polls';
+
+  // 진입 경로에 따른 돌아가기 주소
+  const backTo = fromManage ? '/admin/polls' : '/polls/user';
 
   return (
     <header className="flex flex-wrap items-center justify-between gap-3">
