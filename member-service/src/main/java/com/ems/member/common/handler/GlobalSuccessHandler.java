@@ -18,7 +18,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 import java.time.Instant;
 
 @RestControllerAdvice
-public class ResponseBodyAdviceImpl implements ResponseBodyAdvice<Object> {
+public class GlobalSuccessHandler implements ResponseBodyAdvice<Object> {
 
     @Override
     public boolean supports(MethodParameter returnType,
@@ -62,8 +62,8 @@ public class ResponseBodyAdviceImpl implements ResponseBodyAdvice<Object> {
 
         // Controller에서 전달한 SuccessCode 확인
         if (body instanceof MessageResponseDTO<?>(Object res, SuccessCode code)) {
-            successCode = code;
             data = res;
+            successCode = code;
         }
 
         return new APISuccessResponse<>(

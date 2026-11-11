@@ -1,40 +1,67 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../hooks/useAuth.js';
-import { useApiUtil } from '../hooks/useApiUtil.js';
+import { useNavigate } from 'react-router-dom';
+import { memberApi } from '../api/memberApi.js';
 
 const MyPage = () => {
-  const { logout, authLoading } = useAuth();
-  const apiReq = useApiUtil();
-  const [member, setMember] = useState({
-    email: '',
-    name: '',
-  });
+  const { logout, authLoading, accessToken } = useAuth();
+  const navigate = useNavigate();
+  const [member, setMember] = useState({});
+  const [isEditing, setIsEditing] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
+    // 재발급이 완료되기 전까지 대기
+    if (authLoading || !accessToken) {
+      return;
+    }
+
     const myInfo = async () => {
       try {
-        const res = await apiReq('/api/members/me', {
-          method: 'GET',
-        });
+        const res = await memberApi.me();
 
-        if (res.status >= 200 && res.status < 300) {
-          const data = res.data;
-          console.log(data);
-          setMember((m) => ({ ...m, ...data.data }));
-        } else {
-          console.log(res);
-        }
+        console.log(res);
+        setMember((m) => ({ ...m, ...res }));
       } catch (err) {
-        console.log(err);
+        console.error(err);
       }
     };
     myInfo();
-  }, [authLoading]);
+  }, [authLoading, accessToken]);
+
+  const updateName = async () => {
+    const name = newName.trim();
+
+    if (!name || name.length > 50 || saving) return;
+
+    setSaving(true);
+
+    try {
+      const res = await memberApi.updateMe(name);
+
+      console.log(res);
+      if (res.status >= 200 && res.status < 300) {
+        setMember((prev) => ({
+          ...prev,
+          ...res.data,
+        }));
+        setIsEditing(false);
+      } else {
+        alert('이름 수정에 실패했습니다.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('서버 연결 중 오류가 발생했습니다.');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <main className="min-h-screen bg-[#f7f9fc]">
       <div className="min-h-screen w-full bg-[#f7f9fc] lg:flex">
-        {/* header 영역 */}
+        {/* 헤더 영역 */}
         <aside className="flex flex-col justify-between bg-[#17253c] px-5 py-7 text-white lg:w-[214px] lg:shrink-0">
           <div>
             {/* EMS 로고 */}
@@ -58,7 +85,7 @@ const MyPage = () => {
                     className="h-[4px] w-[4px] shrink-0 rounded-full border border-[#b1bfd2]"
                     aria-hidden="true"
                   />
-                  <button>마이페이지</button>
+                  <button onClick={() => navigate('/mypage')}>마이페이지</button>
                 </li>
                 {['행사 찾기', '신청 내역', '세미나 참여', '실시간 투표'].map((menu) => (
                   <li
@@ -100,16 +127,71 @@ const MyPage = () => {
               <div className="flex items-center justify-between">
                 <h3 className="text-[17px] font-bold text-[#142238]">내 프로필</h3>
                 <span className="rounded-full bg-[#e6f5ee] px-3 py-1 text-[11px] font-semibold text-[#169b62]">
-                  MEMBER
+                  {member.role}
                 </span>
               </div>
-
               <p className="mt-2 text-[12px] text-[#7a879a]">기본 회원 정보</p>
 
               <div className="mt-5 space-y-4 border-t border-[#e5e9f0] pt-5">
-                <div>
-                  <p className="text-[12px] text-[#7a879a]">이름</p>
-                  <p className="mt-1 text-[14px] font-medium text-[#142238]">{member.name}</p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[12px] text-[#7a879a]">이름</p>
+
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={newName}
+                        maxLength={50}
+                        onChange={(e) => setNewName(e.target.value)}
+                        className="mt-1 h-9 rounded-lg border border-[#d9dee7] px-3 text-[13px] outline-none focus:border-[#169b62]"
+                      />
+                    ) : (
+                      <p className="mt-1 text-[14px] font-medium text-[#142238]">{member.name}</p>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {isEditing ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={updateName}
+                          disabled={saving || !newName.trim()}
+                          className="rounded-[10px] bg-[#169b62] px-3 py-2 text-xs font-semibold text-white disabled:opacity-50"
+                        >
+                          {saving ? '저장 중...' : '저장'}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setIsEditing(false)}
+                          disabled={saving}
+                          className="rounded-[10px] border border-[#d9dee7] px-3 py-2 text-xs font-semibold text-[#142238]"
+                        >
+                          취소
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setNewName(member.name ?? '');
+                          setIsEditing(true);
+                        }}
+                        className="rounded-[10px] border border-[#d9dee7] px-3 py-2 text-xs font-semibold text-[#142238] hover:bg-[#f7f9fc]"
+                      >
+                        정보 수정
+                      </button>
+                    )}
+                    {member.status && (
+                      <button
+                        type="button"
+                        onClick={() => navigate('/password/change')}
+                        className="rounded-[10px] bg-[#169b62] px-3 py-2 text-xs font-semibold text-white hover:bg-[#128653]"
+                      >
+                        비밀번호 변경
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 <div>

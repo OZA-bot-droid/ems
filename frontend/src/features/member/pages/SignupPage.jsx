@@ -6,6 +6,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getClientId } from '../utils/getClientId.js';
 import NoLoginHeaders from '../components/NoLoginHeaders.jsx';
 import { memberApi } from '../api/memberApi.js';
+import PasswordInput from '../components/PasswordInput.jsx';
 
 function SignupForm() {
   const navigate = useNavigate();
@@ -13,6 +14,11 @@ function SignupForm() {
   const [sp] = useSearchParams();
   const errorMessage = sp.get('error');
 
+  const [verificationCode, setVerificationCode] = useState('');
+  const [codeSent, setCodeSent] = useState(false);
+  const [verifiedEmail, setVerifiedEmail] = useState('');
+  const [sending, setSending] = useState(false);
+  const [verifying, setVerifying] = useState(false);
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [role, setRole] = useState('');
   const [member, setMember] = useState({
@@ -43,6 +49,11 @@ function SignupForm() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    if (!verifiedEmail || verifiedEmail !== member.email.trim().toLowerCase()) {
+      alert('이메일 인증을 완료해주세요.');
+      return;
+    }
+    if (sending || verifying) return;
     if (member.password !== passwordConfirm) {
       alert('비밀번호와 비밀번호 확인을 동일하게 입력해 주세요.');
       return;
@@ -69,11 +80,67 @@ function SignupForm() {
     }
 
     try {
-      await memberApi.register({ ...member, role });
-      alert('회원가입이 완료되었습니다.');
-      navigate('/mypage');
+      const res = await memberApi.register({ ...member, role });
+      alert(res.message);
+      navigate('/login');
     } catch (error) {
       alert(error?.message || '회원가입 요청에 실패했습니다.');
+    }
+  };
+
+  // 인증 확인 함수
+  const verifyEmailCode = async () => {
+    const email = member.email.trim().toLowerCase();
+
+    if (!codeSent || verifiedEmail || verifying || sending) return;
+
+    if (!/^\d{6}$/.test(verificationCode)) {
+      alert('인증번호 6자리를 입력해주세요.');
+      return;
+    }
+
+    setVerifying(true);
+
+    try {
+      const res = await memberApi.emailVerify(email, verificationCode);
+
+      setVerifiedEmail(email);
+      alert(res.message);
+      console.log(res);
+    } catch (err) {
+      console.error(err);
+      alert('서버 연결 중 오류가 발생했습니다.');
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  // 이메일 인증 요청 함수 추가
+  const sendVerificationCode = async () => {
+    const email = member.email.trim().toLowerCase();
+
+    if (!/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(email)) {
+      alert('올바른 이메일을 입력해주세요.');
+      return;
+    }
+
+    if (sending || verifying) return;
+
+    setSending(true);
+
+    try {
+      const res = await memberApi.emailSend(email);
+
+      setCodeSent(true);
+      setVerifiedEmail('');
+      setVerificationCode('');
+      alert(res.message);
+      console.log(res);
+    } catch (err) {
+      console.error(err);
+      alert('서버 연결 중 오류가 발생했습니다.');
+    } finally {
+      setSending(false);
     }
   };
 
@@ -116,19 +183,90 @@ function SignupForm() {
           >
             이메일
           </label>
-          <input
-            id="signup-email"
-            type="email"
-            name="email"
-            onChange={(event) =>
-              setMember((m) => ({ ...m, [event.target.name]: event.target.value }))
-            }
-            placeholder="name@example.com"
-            autoComplete="email"
-            className={cx(
-              'mt-2 h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none transition placeholder:text-[#a0a9b8] focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15',
-            )}
-          />
+          <div className={cx('mt-2 flex gap-2')}>
+            <input
+              id="signup-email"
+              type="email"
+              name="email"
+              value={member.email}
+              onChange={(event) => {
+                setMember((m) => ({
+                  ...m,
+                  email: event.target.value,
+                }));
+                setCodeSent(false);
+                setVerifiedEmail('');
+                setVerificationCode('');
+              }}
+              disabled={sending || verifying}
+              placeholder="name@example.com"
+              autoComplete="email"
+              className={cx(
+                'h-[44px] min-w-0 flex-1 rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none transition placeholder:text-[#a0a9b8] focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15',
+              )}
+            />
+
+            <button
+              type="button"
+              onClick={sendVerificationCode}
+              disabled={sending || verifying || Boolean(verifiedEmail)}
+              className={cx(
+                'h-[44px] shrink-0 rounded-[10px] bg-[#169b62] px-4 text-[12px] font-semibold text-white hover:bg-[#128653] disabled:opacity-50',
+              )}
+            >
+              {sending ? '발송 중...' : codeSent ? '재발송' : '인증번호 발송'}
+            </button>
+          </div>
+        </div>
+
+        <div className={cx('mt-3')}>
+          {codeSent && !verifiedEmail && (
+            <div className={cx('mt-3')}>
+              <label
+                htmlFor="signup-verification-code"
+                className={cx('block text-[13px] font-semibold text-[#142238]')}
+              >
+                이메일 인증번호
+              </label>
+
+              <div className={cx('mt-2 flex gap-2')}>
+                <input
+                  id="signup-verification-code"
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={6}
+                  value={verificationCode}
+                  onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ''))}
+                  placeholder="6자리 인증번호"
+                  className={cx(
+                    'h-[44px] min-w-0 flex-1 rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] outline-none focus:border-[#169b62]',
+                  )}
+                />
+
+                <button
+                  type="button"
+                  onClick={verifyEmailCode}
+                  disabled={verifying || sending || verificationCode.length !== 6}
+                  className={cx(
+                    'rounded-[10px] border border-[#169b62] px-4 text-[12px] font-semibold text-[#169b62] hover:bg-[#e6f5ee] disabled:opacity-50',
+                  )}
+                >
+                  {verifying ? '확인 중...' : '인증 확인'}
+                </button>
+              </div>
+
+              <p className={cx('mt-2 text-[12px] text-[#7a879a]')}>
+                이메일로 발송된 6자리 인증번호를 입력해주세요.
+              </p>
+            </div>
+          )}
+
+          {verifiedEmail && (
+            <p className={cx('mt-3 text-[12px] font-semibold text-[#169b62]')}>
+              ✓ 이메일 인증이 완료되었습니다.
+            </p>
+          )}
         </div>
 
         <div className={cx('mt-4')}>
@@ -138,17 +276,18 @@ function SignupForm() {
           >
             비밀번호
           </label>
-          <input
+          <PasswordInput
             id="signup-password"
-            type="password"
             name="password"
+            value={member.password}
+            required
             onChange={(event) =>
               setMember((m) => ({ ...m, [event.target.name]: event.target.value }))
             }
             placeholder="••••••••"
             autoComplete="new-password"
             className={cx(
-              'mt-2 h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none transition placeholder:text-[#a0a9b8] focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15',
+              'h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none transition placeholder:text-[#a0a9b8] focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15',
             )}
           />
         </div>
@@ -160,15 +299,15 @@ function SignupForm() {
           >
             비밀번호 확인
           </label>
-          <input
+          <PasswordInput
             id="signup-password-confirm"
-            type="password"
             value={passwordConfirm}
+            required
             onChange={(event) => setPasswordConfirm(event.target.value)}
             placeholder="••••••••"
             autoComplete="new-password"
             className={cx(
-              'mt-2 h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none transition placeholder:text-[#a0a9b8] focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15',
+              'h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none transition placeholder:text-[#a0a9b8] focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15',
             )}
           />
         </div>

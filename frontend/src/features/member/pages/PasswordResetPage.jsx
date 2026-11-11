@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useApiUtil } from '../hooks/useApiUtil.js';
+import { memberApi } from '../api/memberApi.js';
+import PasswordInput from '../components/PasswordInput.jsx';
 
 const PasswordReset = () => {
   const params = new URLSearchParams(window.location.search);
@@ -10,7 +11,6 @@ const PasswordReset = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-  const apiReq = useApiUtil();
 
   const passwordResetSuccess = async (event) => {
     event.preventDefault();
@@ -35,16 +35,7 @@ const PasswordReset = () => {
 
     setLoading(true);
     try {
-      const res = await apiReq('/api/members/password/reset', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json;charset=utf-8',
-        },
-        body: JSON.stringify({
-          token,
-          newPassword,
-        }),
-      });
+      const res = await memberApi.passwordReset(token, newPassword);
 
       if (!(res.status >= 200 && res.status < 300)) {
         if (res.data?.code === 'INVALID_PASSWORD_RESET_TOKEN') {
@@ -59,7 +50,7 @@ const PasswordReset = () => {
       }
 
       // 현재 페이지의 방문 기록을 '/' 페이지로 교체한다.
-      navigate('/', { replace: true });
+      navigate('/login', { replace: true });
     } catch (err) {
       if (
         err.code === 'INVALID_PASSWORD_RESET_TOKEN' ||
@@ -119,15 +110,14 @@ const PasswordReset = () => {
               >
                 새 비밀번호
               </label>
-              <input
+              <PasswordInput
                 id="new-password"
-                type="password"
                 required
                 autoComplete="new-password"
                 value={newPassword}
                 onChange={(event) => setNewPassword(event.target.value)}
                 placeholder="새 비밀번호를 입력해주세요."
-                className="mt-2 h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15"
+                className="h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15"
               />
               <p className="mt-2 text-[12px] text-[#7a879a]">
                 8~20자, 영문·숫자·특수문자(!@#$%^&*) 포함
@@ -141,15 +131,14 @@ const PasswordReset = () => {
               >
                 새 비밀번호 확인
               </label>
-              <input
+              <PasswordInput
                 id="confirm-password"
-                type="password"
                 required
                 autoComplete="new-password"
                 value={passwordConfirm}
                 onChange={(event) => setPasswordConfirm(event.target.value)}
-                placeholder="새 비밀번호를 다시 입력해주세요."
-                className="mt-2 h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15"
+                placeholder="새 비밀번호를 확인을 입력해주세요."
+                className="h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15"
               />
             </div>
 
