@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -23,11 +24,9 @@ import java.io.IOException;
 @RestController
 @RequestMapping("/members")
 public class MemberController {
-    @org.springframework.beans.factory.annotation.Value("${app.public-base-url}")
-    private String publicBaseUrl;
-    @org.springframework.beans.factory.annotation.Value("${app.cookie-secure:false}")
-    private boolean cookieSecure;
 
+    @Value("${app.public-base-url}") private String publicBaseUrl;
+    @Value("${app.cookie-secure:false}") private boolean cookieSecure;
     private final MemberService memberService;
     private final AuthService authService;
     private final SocialLoginService socialLoginService;
