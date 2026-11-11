@@ -196,7 +196,7 @@ export default function EventDetail({ eventId, onBack }) {
           </section>
 
           {/* 관리자: [세션 관리] [참가 승인] / 그 외: [참가 신청하기] (비로그인은 누르면 로그인 안내 창) */}
-          {isAdmin ? (
+          {isAdmin && isOwner ? (
             <div className="flex flex-col items-end gap-2">
               <div className="flex flex-wrap justify-end gap-2">
                 <button
@@ -229,6 +229,7 @@ export default function EventDetail({ eventId, onBack }) {
                 {applyMessage}
               </p>
             )}
+          {!(isAdmin && !isOwner) && (
             <button
               disabled={!canApply || applying}
               onClick={() => {
@@ -240,6 +241,7 @@ export default function EventDetail({ eventId, onBack }) {
             >
               {canApply ? '참가 신청하기' : event.status === 'CLOSED' ? '신청이 마감되었습니다' : '아직 모집 전입니다'}
             </button>
+          )}
           </div>
           )}
         </div>
