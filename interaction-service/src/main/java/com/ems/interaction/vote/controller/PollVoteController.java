@@ -3,6 +3,7 @@ package com.ems.interaction.vote.controller;
 
 import com.ems.interaction.vote.domain.PollVote;
 import com.ems.interaction.vote.dto.PollResultDTO;
+import com.ems.interaction.vote.dto.PollTotalResultDTO;
 import com.ems.interaction.vote.dto.PollVoteResultDTO;
 import com.ems.interaction.vote.dto.PollVoteSaveDTO;
 import com.ems.interaction.vote.service.PollVoteService;
@@ -56,5 +57,15 @@ public class PollVoteController {
         PollResultDTO response = pollVoteService.getPollResults(pollId, userId);
 
         return apiResponseBuilder.ok(response, "투표 결과 조회 완료", request);
+    }
+
+    // 11/10 추가
+    // 투표 결과 전용 페이지 상세 결과 조회
+    @GetMapping("/polls/{pollId}/total-results")
+    public ResponseEntity<?> getPollTotalResults(@PathVariable Long pollId, @RequestHeader("X-Member-Id") Long userId, HttpServletRequest request) {
+
+        PollTotalResultDTO response = pollVoteService.getPollTotalResults(pollId, userId);
+
+        return apiResponseBuilder.ok(response, "투표 상세 결과 조회 완료", request);
     }
 }

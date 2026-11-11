@@ -24,10 +24,6 @@ public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-//    private String path(HttpServletRequest request) {
-//        String uri = request.getRequestURI();
-//        return uri.startsWith("/api/") ? uri : "/api" + uri;
-//    }
 
     private String traceId() {
         String id = MDC.get("traceId");

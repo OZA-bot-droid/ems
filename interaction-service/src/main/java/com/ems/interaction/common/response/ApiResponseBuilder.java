@@ -32,11 +32,6 @@ public class ApiResponseBuilder {
         return ResponseEntity.created(URI.create(resourcePath)).body(body);
     }
 
-//    private <T> ResponseEntity<ApiSuccessResponse<T>> build(T data, String message, HttpStatus status, HttpServletRequest request) {
-//        ApiSuccessResponse<T> body = ApiSuccessResponse.of(data, message, status.value(), externalPath(request), traceId());
-//
-//        return ResponseEntity.status(status).body(body);
-//    }
 
     private <T> ResponseEntity<ApiSuccessResponse<T>> build(T data, String message, HttpStatus status, HttpServletRequest request) {
         String path = ApiPathUtils.externalPath(request);
@@ -56,10 +51,6 @@ public class ApiResponseBuilder {
         return ResponseEntity.status(status).body(body);
     }
 
-//    private String externalPath(HttpServletRequest request) {
-//        String uri = request.getRequestURI();
-//        return uri.startsWith("/api/") ? uri : "/api" + uri;
-//    }
 
     private String traceId() {
         String id = MDC.get("traceId");

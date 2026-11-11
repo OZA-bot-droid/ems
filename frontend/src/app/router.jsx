@@ -19,7 +19,11 @@ import VotePage from '../features/interaction/pages/VotePage';
 function EventDetailRoute() {
   const { eventId } = useParams();
   const navigate = useNavigate();
-  return <main className="mx-auto max-w-5xl p-6"><EventDetail eventId={eventId} onBack={() => navigate('/events')} /></main>;
+  return (
+    <main className="mx-auto max-w-5xl p-6">
+      <EventDetail eventId={eventId} onBack={() => navigate('/events')} />
+    </main>
+  );
 }
 
 // Actual Event/Member UI is mounted without the scaffold MainLayout to avoid duplicate sidebars.
@@ -32,20 +36,26 @@ export const router = createBrowserRouter([
   { path: '/oauth-success', element: <OAuthCallbackPage /> },
   { path: '/events', element: <EventDiscoveryPage /> },
   { path: '/events/:eventId', element: <EventDetailRoute /> },
-  { element: <ProtectedRoute />, children: [
-    { path: '/registrations', element: <RegistrationPage /> },
-    { path: '/login/success', element: <Navigate to="/mypage" replace /> },
-    { path: '/me', element: <Navigate to="/mypage" replace /> },
-    { path: '/mypage', element: <MyPage /> },
-    { path: '/polls', element: <VotePage /> },
-    { path: '/polls/vote', element: <VotePage /> },
-  ] },
-  { element: <ProtectedRoute role="ADMIN" />, children: [
-    { path: '/admin/events', element: <AdminEventPage /> },
-    { path: '/admin/sessions', element: <AdminSessionPage /> },
-    { path: '/admin/approvals', element: <AdminApprovalPage /> },
-    { path: '/admin/polls', element: <PollManagePage /> },
-  ] },
+  {
+    element: <ProtectedRoute />,
+    children: [
+      { path: '/registrations', element: <RegistrationPage /> },
+      { path: '/login/success', element: <Navigate to="/mypage" replace /> },
+      { path: '/me', element: <Navigate to="/mypage" replace /> },
+      { path: '/mypage', element: <MyPage /> },
+      { path: '/polls', element: <VotePage /> },
+      { path: '/polls/vote', element: <VotePage /> },
+    ],
+  },
+  {
+    element: <ProtectedRoute role="ADMIN" />,
+    children: [
+      { path: '/admin/events', element: <AdminEventPage /> },
+      { path: '/admin/sessions', element: <AdminSessionPage /> },
+      { path: '/admin/approvals', element: <AdminApprovalPage /> },
+      { path: '/admin/polls', element: <PollManagePage /> },
+    ],
+  },
   { path: '/bootstrap', element: <BootstrapPage /> },
   { path: '*', element: <p role="alert">페이지를 찾을 수 없습니다.</p> },
 ]);

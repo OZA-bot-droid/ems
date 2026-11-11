@@ -10,6 +10,7 @@ import com.ems.interaction.poll.repository.PollOptionRepository;
 import com.ems.interaction.poll.repository.PollRepository;
 import com.ems.interaction.vote.domain.PollVote;
 import com.ems.interaction.vote.dto.PollResultDTO;
+import com.ems.interaction.vote.dto.PollTotalResultDTO;
 import com.ems.interaction.vote.dto.PollVoteResultDTO;
 import com.ems.interaction.vote.dto.PollVoteSaveDTO;
 import com.ems.interaction.vote.event.PollVoteUpdatedEvent;
@@ -39,7 +40,7 @@ public class PollVoteService {
     private final PollVoteRepository pollVoteRepository;
     private final ApplicationEventPublisher eventPublisher;
 
-    // 임시 권한 데이터
+    // 이벤트 연동
     private final EventAuthorizationClient eventClient;
 
     //투표 진행
@@ -48,7 +49,7 @@ public class PollVoteService {
         // 1. 투표 조회
         Poll poll = pollRepository.findById(pollId).orElseThrow(() -> new ApiException(ErrorCode.POLL_NOT_FOUND));
 
-        // Event enrollment is per event, not per session.
+        // 허가 받은 유저인지 조회
         if (!eventClient.approved(poll.getEventId(), userId)) {
             throw new ApiException(ErrorCode.REGISTRATION_NOT_APPROVED);
         }
@@ -73,9 +74,6 @@ public class PollVoteService {
 
         // 5. DTO → Entity 변환
         PollVote pollVote = dto.toEntity(userId, poll);
-
-//        // 6. 저장
-//        return pollVoteRepository.save(pollVote);
 
         // WebSocket 연동 이후
         // 6. 투표 저장
@@ -114,6 +112,7 @@ public class PollVoteService {
         // 1. 투표 조회
         Poll poll = pollRepository.findById(pollId).orElseThrow(() -> new ApiException(ErrorCode.POLL_NOT_FOUND));
 
+        // 소유자/허가 받은 유저인지 확인
         if (userId == null) throw new ApiException(ErrorCode.UNAUTHORIZED);
         boolean isOwner = eventClient.owner(poll.getEventId(), userId);
         boolean isApproved = isOwner || eventClient.approved(poll.getEventId(), userId);
@@ -147,5 +146,29 @@ public class PollVoteService {
         // 10. 최종 응답 DTO 생성
         return PollResultDTO.from(pollId, totalVotes, optionResults);
 
+    }
+
+    // 11/10 추가
+    // 결과 전용 페이지의 상세 투표 결과 조회
+    public PollTotalResultDTO getPollTotalResults(Long pollId, Long userId) {
+
+        // 1. 기존 결과 조회 메서드 재사용
+        // 사용자 인증, 생성자 권한, 참가 승인, 결과 공개 여부 검사
+        PollResultDTO result = getPollResults(pollId, userId);
+
+        // 2. 투표 기본 정보 조회
+        Poll poll = pollRepository.findById(pollId).orElseThrow(() -> new ApiException(ErrorCode.POLL_NOT_FOUND));
+
+        // 3. 기존 선택지별 결과를 새 DTO 형식으로 변환
+        List<PollTotalResultDTO.OptionResultDTO> options = result.getOptions().stream().map(
+                        option -> PollTotalResultDTO.OptionResultDTO.builder()
+                                .pollOptionId(option.getPollOptionId())
+                                .content(option.getContent())
+                                .voteCount(option.getVoteCount())
+                                .build())
+                                .toList();
+
+        // 4. 상세 결과 응답 DTO 반환
+        return PollTotalResultDTO.from(poll, result.getTotalVotes(), options);
     }
 }
