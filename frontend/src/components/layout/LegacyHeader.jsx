@@ -31,7 +31,7 @@ const MENUS = {
       { id: 'events', label: '행사 관리', href: '/admin/events' }, // Event Service /events
       { id: 'sessions', label: '세션 관리', href: '/admin/sessions' }, // /events/{id}/sessions
       { id: 'approvals', label: '참가 승인', href: '/admin/approvals' }, // ADMIN / 11 참가 승인
-      { id: 'votes', label: '투표 관리', href: null }, // Interaction Service 미구현
+      { id: 'votes', label: '투표 관리', href: '/admin/polls' }, // Interaction Service 투표 관리 화면
       { id: 'mypage', label: '마이페이지', href: '/mypage' },
       { id: 'logout', label: '로그아웃', action: 'logout' }, // 링크가 아니라 버튼 (로그아웃 후 로그인 화면으로)
     ],
