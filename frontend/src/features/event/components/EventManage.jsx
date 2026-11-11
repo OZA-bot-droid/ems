@@ -19,7 +19,10 @@ const NEXT_STATUS = {
 const NEXT_LABEL = { DRAFT: '모집 중', OPEN: '마감' };
 
 // 정렬 방법: 서버(Spring Pageable)에 ?sort=칸,방향 으로 보냄 → 여러 쪽으로 나뉘어 있어도 전체 기준으로 정렬됨
+// 정렬 기준이 2개면 '|'로 이어 적음 → 보낼 때 나눠서 sort=…&sort=… 로 보냄
+// status는 글자로 저장 → 내림차순이면 OPEN(모집 중) > DRAFT(작성 중) > CLOSED(마감)
 const SORT_OPTIONS = [
+  { value: 'status,desc|startsAt,asc', label: '모집 중 → 작성 중 → 마감' },
   { value: 'startsAt,asc', label: '시작일 빠른 순' },
   { value: 'startsAt,desc', label: '시작일 늦은 순' },
   { value: 'id,desc', label: '최근 등록 순' },
@@ -44,7 +47,7 @@ export default function EventManage({ onManageSessions }) {
     let alive = true;
     setError(null);
     eventApi
-      .mine({ page, size: 10, sort }) // 내가 만든 행사만 (다른 관리자의 행사는 서버에서 제외)
+      .mine({ page, size: 10, sort: sort.split('|') }) // 내가 만든 행사만 (다른 관리자의 행사는 서버에서 제외)
       .then((data) => alive && setResult(data))
       .catch((err) => alive && setError(err));
     return () => {
@@ -285,7 +288,9 @@ export default function EventManage({ onManageSessions }) {
             if (modal.event) return refresh(`"${saved.title}" 행사를 수정했습니다.`);
             // 새 등록: 함께 만든 세션 결과도 한 줄에
             const { created = 0, failed = [] } = sessionResult || {};
-            let message = `"${saved.title}" 행사를 등록했습니다. (작성 중)`;
+            const { published = false, publishError } = sessionResult || {};
+            let message = `"${saved.title}" 행사를 등록했습니다. (${published ? '모집 중' : '작성 중'})`;
+            if (publishError) message += ` 공개하지 못했습니다(${publishError}). 목록에서 [공개]를 눌러 주세요.`;
             if (created > 0) message += ` 세션 ${created}개 추가.`;
             if (failed.length > 0)
               message += ` 세션 ${failed.length}개는 추가하지 못했습니다(${failed

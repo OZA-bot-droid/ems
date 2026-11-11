@@ -386,10 +386,22 @@ class EventServiceTest {
     }
 
     @Test
-    @DisplayName("게시 예약: 게시일이 행사 종료 이후면 400 INVALID_POSTED_DATE")
-    void createEventWithPostedDateAfterEnd() {
+    @DisplayName("게시 예약: 게시일이 행사 시작 이후(진행 중)면 400 INVALID_POSTED_DATE")
+    void createEventWithPostedDateAfterStart() {
         EventCreateRequest request = new EventCreateRequest(
-                "예약 행사", null, 100, at("05:00"), at("08:00"), null, at("09:00"));
+                "예약 행사", null, 100, at("05:00"), at("08:00"), null, at("06:00"));
+
+        assertThatThrownBy(() -> eventService.createEvent(request, 99L))
+                .isInstanceOf(BusinessException.class)
+                .extracting("code").isEqualTo("INVALID_POSTED_DATE");
+        verify(eventRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("게시 예약: 게시일이 행사 시작 시각과 같아도 400 INVALID_POSTED_DATE")
+    void createEventWithPostedDateEqualStart() {
+        EventCreateRequest request = new EventCreateRequest(
+                "예약 행사", null, 100, at("05:00"), at("08:00"), null, at("05:00"));
 
         assertThatThrownBy(() -> eventService.createEvent(request, 99L))
                 .isInstanceOf(BusinessException.class)
