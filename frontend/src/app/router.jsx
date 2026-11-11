@@ -16,6 +16,13 @@ import AdminApprovalPage from '../features/event/pages/AdminApprovalPage';
 import PollManagePage from '../features/interaction/pages/PollManagePage';
 import VotePage from '../features/interaction/pages/VotePage';
 
+// 11/11 - 박천보 추가
+// 유저의 투표 전체 목록
+import PollListPage from '../features/interaction/pages/PollListPage';
+
+// 투표 결과
+import PollResultPage from '../features/interaction/pages/PollResultPage';
+
 function EventDetailRoute() {
   const { eventId } = useParams();
   const navigate = useNavigate();
@@ -45,6 +52,8 @@ export const router = createBrowserRouter([
       { path: '/mypage', element: <MyPage /> },
       { path: '/polls', element: <VotePage /> },
       { path: '/polls/vote', element: <VotePage /> },
+      { path: '/polls/user', element: <PollListPage /> },
+      { path: '/polls/:pollId/results', element: <PollResultPage /> },
     ],
   },
   {

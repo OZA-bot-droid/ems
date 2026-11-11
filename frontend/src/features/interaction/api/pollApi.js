@@ -20,4 +20,8 @@ export const pollApi = {
   activate: (id) => api.patch(`/interactions/polls/${id}/activate`).then(unwrap),
   close: (id) => api.patch(`/interactions/polls/${id}/close`).then(unwrap),
   statusSubscriptions: () => api.get('/interactions/polls/status-subscriptions').then(unwrap),
+
+  // 11/11 추가
+  // 로그인 사용자가 참가 승인받은 세션들의 투표 목록 (페이지 조회)
+  userPolls: (params = {}) => api.get('/interactions/polls/users', { params }).then(unwrap),
 };
