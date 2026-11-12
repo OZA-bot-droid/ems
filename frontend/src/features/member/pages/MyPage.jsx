@@ -5,7 +5,7 @@ import { memberApi } from '../api/memberApi.js';
 import Header from '../../../components/layout/LegacyHeader.jsx';
 
 const MyPage = () => {
-  const { authLoading, accessToken } = useAuth();
+  const { role, authLoading, accessToken } = useAuth();
   const navigate = useNavigate();
   const [member, setMember] = useState({});
   const [isEditing, setIsEditing] = useState(false);
