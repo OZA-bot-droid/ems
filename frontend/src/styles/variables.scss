@@ -1,5 +1,40 @@
+// ========================================
+// EMS Sass Variable Compatibility Layer
+//
+// P1 수정 목적
+// 1. 기존 $brand, $text, $border 유지
+// 2. CSS 토큰 기반의 Sass 변수 제공
+// 3. 기존 SCSS Modules 수정 최소화
+// ========================================
+
 @use './tokens' as tokens;
+
+// ========================================
+// 1. 기존 변수
+//
+// 반드시 유지: scaffold.module.scss 등에서 사용
+// ========================================
 
 $brand: tokens.$ems-primary;
 $text: tokens.$ems-text;
 $border: tokens.$ems-border;
+
+// ========================================
+// 2. 공통 디자인 별칭
+//
+// 신규 SCSS 작성 시 사용할 수 있다.
+// ========================================
+
+$background: tokens.$ems-background;
+$sidebar: tokens.$ems-sidebar;
+
+$surface: tokens.$ems-surface;
+$row: tokens.$ems-row;
+$muted: tokens.$ems-muted;
+
+$brand-dark: tokens.$ems-primary-dark;
+$brand-soft: tokens.$ems-primary-soft;
+
+$font-family: tokens.$ems-font;
+$card-radius: tokens.$ems-card-radius;
+$spacing-unit: tokens.$ems-spacing-unit;

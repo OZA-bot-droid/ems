@@ -72,7 +72,9 @@
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  transition: background 150ms ease, transform 150ms ease;
+  transition:
+    background 150ms ease,
+    transform 150ms ease;
 
   &:hover {
     background: var(--ems-green-dark);
@@ -90,10 +92,13 @@
   gap: 12px;
   margin: 0 0 16px;
   padding: 12px 16px;
-  border: 1px solid #c8e6d5;
+
+  // P2: 성공 알림 토큰 사용
+  border: 1px solid var(--ems-success-border);
   border-radius: 9px;
-  background: #f0faf4;
-  color: #216b46;
+  background: var(--ems-success-bg);
+  color: var(--ems-success-text);
+
   font-size: 13px;
 
   button {
@@ -105,11 +110,11 @@
     cursor: pointer;
   }
 
-  // 실패 알림 (삭제·상태 변경 거절 등)
+  // 기존 실패 알림 상태 유지
   &.is-error {
-    border-color: #f2c8c5;
-    background: #fef3f2;
-    color: #b42318;
+    border-color: var(--ems-error-border);
+    background: var(--ems-error-bg);
+    color: var(--ems-error-text);
   }
 }
 
@@ -204,7 +209,9 @@
     border: 1px solid transparent;
     font-family: inherit;
     cursor: pointer;
-    transition: border-color 150ms ease, filter 150ms ease;
+    transition:
+      border-color 150ms ease,
+      filter 150ms ease;
 
     span {
       margin-left: 2px;

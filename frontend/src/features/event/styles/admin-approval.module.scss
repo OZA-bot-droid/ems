@@ -40,8 +40,10 @@
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  background: #fff4e8;
-  color: #966420;
+  // 관리자 역할 배지
+  // 기존 색상을 그대로 사용하되 디자인 토큰으로 연결
+  background: var(--ems-admin-badge-bg);
+  color: var(--ems-admin-badge-text);
   font-size: 12px;
   font-weight: 600;
   white-space: nowrap;

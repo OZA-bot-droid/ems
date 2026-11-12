@@ -1,11 +1,23 @@
-// 화면에서 반복해서 쓰는 색상 토큰
-$ems-ink: #142238;
-$ems-muted: #7a879a;
-$ems-green: #169b62;
-$ems-green-soft: #eaf6f0;
-$ems-surface: #ffffff;
-$ems-row: #f6f8fb;
-$ems-divider: #e7ecf2;
+// ========================================
+// EMS Registration Styles
+//
+// P2 수정 내용
+// - 중복된 색상 리터럴 제거
+// - 중앙 디자인 토큰 사용
+// - 기존 Sass 변수명 유지
+// - 나머지 SCSS 선택자 수정 불필요
+// ========================================
+
+@use '../../../styles/tokens' as tokens;
+
+// 기존 변수명은 그대로 유지한다.
+$ems-ink: tokens.$ems-text;
+$ems-muted: tokens.$ems-muted;
+$ems-green: tokens.$ems-primary;
+$ems-green-soft: tokens.$ems-primary-soft;
+$ems-surface: tokens.$ems-surface;
+$ems-row: tokens.$ems-row;
+$ems-divider: tokens.$ems-border;
 
 // 페이지 제목과 사용자 역할 배지
 .registration-heading {

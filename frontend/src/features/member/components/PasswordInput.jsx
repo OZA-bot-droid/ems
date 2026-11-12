@@ -33,7 +33,14 @@ const PasswordInput = ({
         aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 보기'}
         aria-pressed={showPassword}
         className={cx(
-          'absolute right-3 top-1/2 -translate-y-1/2 flex h-8 items-center justify-center rounded-md px-2 text-xs font-medium text-[#7a879a] hover:bg-[#f1f4f8] hover:text-[#142238]',
+          // 위치, 크기, 동작은 그대로 유지
+          'absolute right-3 top-1/2 -translate-y-1/2 ' +
+            'flex h-8 items-center justify-center ' +
+            'rounded-md px-2 text-xs font-medium ' +
+            // P2: 색상만 디자인 토큰으로 교체
+            'text-ems-muted ' +
+            'hover:bg-ems-member-icon-hover ' +
+            'hover:text-ems-text',
         )}
       >
         {showPassword ? '숨김' : '보기'}
