@@ -10,6 +10,7 @@ import module0 from '../../../components/layout/header.module.scss';
 import { mapClassNames } from '../../../styles/classNames.js';
 import styles from '../styles/PollManage.module.scss';
 import { usePollManagementRealtime } from '../hooks/manage/usePollManagementRealtime.js';
+import { interactionPanel } from '../styles/interactionStyles.js';
 
 const cx = (value) => mapClassNames(value, module0);
 
