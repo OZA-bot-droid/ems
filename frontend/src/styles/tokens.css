@@ -71,10 +71,6 @@
  * 기존 JSX의 하드코딩 색상을 그대로 보존한다.
  * ======================================== */
 
-  /* 기본 부가 색상 */
-  --ems-muted: #7a879a;
-  --ems-surface: #ffffff;
-
   /* Member 입력 필드 및 버튼 */
   --ems-member-input-border: #e5e9f0;
   --ems-member-divider: #d9dee7;

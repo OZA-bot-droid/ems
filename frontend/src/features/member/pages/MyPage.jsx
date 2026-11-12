@@ -95,13 +95,13 @@ const MyPage = () => {
             <section className="rounded-[14px] border border-ems-member-input-border bg-white p-6">
               <div className="flex items-center justify-between">
                 <h3 className="text-[17px] font-bold text-ems-text">내 프로필</h3>
-                <span className="rounded-full bg-[#e6f5ee] px-3 py-1 text-[11px] font-semibold text-[#169b62]">
+                <span className="rounded-full bg-ems-member-primary-soft px-3 py-1 text-[11px] font-semibold text-ems-primary">
                   {member.role}
                 </span>
               </div>
               <p className="mt-2 text-[12px] text-ems-muted">기본 회원 정보</p>
 
-              <div className="mt-5 space-y-4 border-t border-[#e5e9f0] pt-5">
+              <div className="mt-5 space-y-4 border-t border-ems-member-input-border pt-5">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-[12px] text-ems-muted">닉네임</p>
@@ -194,9 +194,9 @@ const MyPage = () => {
             {/* 다른 서비스가 사용할 공간 */}
             <div className="mt-5 grid gap-5 sm:grid-cols-2">
               {/* Event Service */}
-              <section className="rounded-[14px] border border-[#e5e9f0] bg-white p-5">
+              <section className="rounded-[14px] border border-ems-member-input-border bg-white p-5">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[#e6f5ee]">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-ems-member-primary-soft">
                     <svg
                       viewBox="0 0 24 24"
                       fill="none"
@@ -204,7 +204,7 @@ const MyPage = () => {
                       strokeWidth="1.7"
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      className="h-5 w-5 text-[#169b62]"
+                      className="h-5 w-5 text-ems-primary"
                       aria-hidden="true"
                     >
                       <rect x="3" y="5" width="18" height="16" rx="2" />
@@ -228,9 +228,9 @@ const MyPage = () => {
               </section>
 
               {/* Interaction Service */}
-              <section className="rounded-[14px] border border-[#e5e9f0] bg-white p-5">
+              <section className="rounded-[14px] border border-ems-member-input-border bg-white p-5">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[#e6f5ee]">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-ems-member-primary-soft">
                     <svg
                       viewBox="0 0 24 24"
                       fill="none"
@@ -238,7 +238,7 @@ const MyPage = () => {
                       strokeWidth="1.7"
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      className="h-5 w-5 text-[#169b62]"
+                      className="h-5 w-5 text-ems-primary"
                       aria-hidden="true"
                     >
                       <path d="M5 20V11M10 20V5M15 20v-8M20 20V8" />

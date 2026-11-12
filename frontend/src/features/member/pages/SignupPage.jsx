@@ -290,7 +290,7 @@ function SignupForm() {
                   onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ''))}
                   placeholder="6자리 인증번호"
                   className={cx(
-                    'h-[44px] min-w-0 flex-1 rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] outline-none focus:border-[#169b62]',
+                    'h-[44px] min-w-0 flex-1 rounded-[10px] border border-ems-member-input-border bg-white px-4 text-[13px] outline-none focus:border-[#169b62]',
                   )}
                 />
 
@@ -311,7 +311,7 @@ function SignupForm() {
           )}
 
           {verifiedEmail && (
-            <p className={cx('mt-3 text-[12px] font-semibold text-[#169b62]')}>
+            <p className={cx('mt-3 text-[12px] font-semibold text-ems-primary')}>
               ✓ 이메일 인증이 완료되었습니다.
             </p>
           )}
@@ -368,7 +368,7 @@ function SignupForm() {
                   ${
                     role === 'USER'
                       ? 'bg-ems-primary text-white font-bold'
-                      : 'bg-transparent text-[#9aa5b4] font-medium'
+                      : 'bg-transparent text-ems-member-inactive font-medium'
                   }
                 `)}
             >
@@ -382,7 +382,7 @@ function SignupForm() {
                   ${
                     role === 'ADMIN'
                       ? 'bg-ems-primary text-white font-bold'
-                      : 'bg-transparent text-[#9aa5b4] font-medium'
+                      : 'bg-transparent text-ems-member-inactive font-medium'
                   }
                 `)}
             >
@@ -408,7 +408,7 @@ function SignupForm() {
           type="button"
           onClick={() => navigate('/login')}
           className={cx(
-            'mt-4 block w-full text-center text-[13px] font-medium text-[#169b62] hover:underline',
+            'mt-4 block w-full text-center text-[13px] font-medium text-ems-primary hover:underline',
           )}
         >
           이미 계정이 있으신가요?&nbsp;&nbsp; 로그인

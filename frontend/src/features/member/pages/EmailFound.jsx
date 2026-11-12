@@ -63,7 +63,7 @@ const EmailFound = () => {
                 value={name}
                 onChange={(event) => setName(event.target.value)}
                 placeholder="닉네임을 입력해주세요."
-                className="mt-2 h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-ems-text outline-none placeholder:text-[#9aa5b4] focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15"
+                className="mt-2 h-[44px] w-full rounded-[10px] border border-ems-member-input-border bg-white px-4 text-[13px] text-ems-text outline-none placeholder:text-ems-member-inactive focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15"
               />
             </div>
 
@@ -77,7 +77,7 @@ const EmailFound = () => {
             <button
               type="button"
               onClick={() => navigate('/login')}
-              className="mt-7 w-full text-[13px] font-semibold text-[#169b62] hover:underline"
+              className="mt-7 w-full text-[13px] font-semibold text-ems-primary hover:underline"
             >
               로그인으로 돌아가기
             </button>

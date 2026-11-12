@@ -151,14 +151,14 @@ const Home = () => {
                 <span className="text-[24px]">✦</span>
               </div>
 
-              <div className="mt-6 flex h-[190px] flex-col items-center justify-center rounded-2xl bg-[#e6f5ee]">
+              <div className="mt-6 flex h-[190px] flex-col items-center justify-center rounded-2xl bg-ems-member-primary-soft">
                 <span className="text-[52px]">🎟️</span>
                 <p className="mt-3 text-[18px] font-bold text-ems-text">함께하는 새로운 경험</p>
               </div>
 
               <div className="mt-6 flex items-center justify-between">
                 <p className="text-[13px] text-[#63758a]">탐색 · 신청 · 실시간 참여</p>
-                <span className="text-[20px] text-[#169b62]">↗</span>
+                <span className="text-[20px] text-ems-primary">↗</span>
               </div>
             </div>
           </div>
@@ -169,7 +169,7 @@ const Home = () => {
           <div className="mx-auto max-w-[1200px]">
             {/* 제목 */}
             <div className="mb-10">
-              <p className="text-[13px] font-bold tracking-widest text-[#169b62]">
+              <p className="text-[13px] font-bold tracking-widest text-ems-primary">
                 LIVE & UPCOMING
               </p>
 
@@ -190,7 +190,7 @@ const Home = () => {
                   location: '온라인',
                   participants: 24,
                   capacity: 80,
-                  color: 'bg-[#e6f5ee]',
+                  color: 'bg-ems-member-primary-soft',
                   icon: '💻',
                 },
                 {
@@ -220,7 +220,7 @@ const Home = () => {
               ].map((event) => (
                 <article
                   key={event.id}
-                  className="group flex flex-col overflow-hidden rounded-[20px] border border-[#e5e9f0] bg-white shadow-[0_4px_20px_rgba(20,34,56,0.04)] transition-all duration-300 ease-out hover:-translate-y-1.5 hover:border-[#b9dfca] hover:shadow-[0_16px_40px_rgba(20,34,56,0.1)]"
+                  className="group flex flex-col overflow-hidden rounded-[20px] border border-ems-member-input-border bg-white shadow-[0_4px_20px_rgba(20,34,56,0.04)] transition-all duration-300 ease-out hover:-translate-y-1.5 hover:border-[#b9dfca] hover:shadow-[0_16px_40px_rgba(20,34,56,0.1)]"
                 >
                   {/* 이미지 영역 */}
                   <div
@@ -237,14 +237,14 @@ const Home = () => {
                   {/* 정보 영역 */}
                   <div className="p-6">
                     <div className="flex items-center justify-between gap-3">
-                      <span className="text-[12px] font-semibold text-[#169b62]">
+                      <span className="text-[12px] font-semibold text-ems-primary">
                         {event.category}
                       </span>
 
                       <span
                         className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-semibold ${
                           event.status === '모집 중'
-                            ? 'bg-[#e6f5ee] text-[#169b62]'
+                            ? 'bg-ems-member-primary-soft text-ems-primary'
                             : 'bg-[#fff4df] text-[#ac741c]'
                         }`}
                       >
@@ -266,7 +266,7 @@ const Home = () => {
                       </div>
                     </div>
 
-                    <div className="mt-6 border-t border-[#e5e9f0] pt-5">
+                    <div className="mt-6 border-t border-ems-member-input-border pt-5">
                       <div className="flex items-center justify-between">
                         <span className="text-[12px] text-ems-muted">참가 인원</span>
 
@@ -299,7 +299,7 @@ const Home = () => {
         <section id="features" className="px-6 py-16 sm:py-20">
           <div className="mx-auto max-w-[1200px]">
             <div className="mb-12">
-              <p className="text-[13px] font-bold tracking-widest text-[#169b62]">OUR FEATURES</p>
+              <p className="text-[13px] font-bold tracking-widest text-ems-primary">OUR FEATURES</p>
 
               <h2 className="mt-4 text-[30px] font-bold text-ems-text sm:text-[36px]">
                 이벤트의 모든 순간을 하나로
@@ -318,7 +318,7 @@ const Home = () => {
                   icon: '📅',
                   title: '행사 관리',
                   description: '이벤트와 세션을 구성하고 참가 신청을 관리할 수 있습니다.',
-                  color: 'bg-[#e6f5ee]',
+                  color: 'bg-ems-member-primary-soft',
                 },
                 {
                   number: '02',
@@ -339,7 +339,7 @@ const Home = () => {
               ].map((feature) => (
                 <article
                   key={feature.number}
-                  className="group flex h-full flex-col rounded-[20px] border border-[#e5e9f0] bg-white p-7 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1.5 hover:border-[#b9dfca] hover:shadow-xl hover:shadow-[#142238]/5"
+                  className="group flex h-full flex-col rounded-[20px] border border-ems-member-input-border bg-white p-7 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1.5 hover:border-[#b9dfca] hover:shadow-xl hover:shadow-[#142238]/5"
                 >
                   <div
                     className={`flex h-14 w-14 items-center justify-center rounded-2xl ${feature.color} transition-transform duration-300 group-hover:scale-110`}
@@ -354,7 +354,7 @@ const Home = () => {
                   </p>
 
                   <div className="mt-8 border-t border-[#eef1f5] pt-4">
-                    <span className="text-[12px] font-bold tracking-wider text-[#169b62]">
+                    <span className="text-[12px] font-bold tracking-wider text-ems-primary">
                       {feature.number} / {feature.category}
                     </span>
                   </div>
@@ -368,7 +368,7 @@ const Home = () => {
         <section className="bg-ems-background px-6 py-16 sm:py-20">
           <div className="mx-auto max-w-[1200px]">
             <div className="text-center">
-              <p className="text-[13px] font-bold tracking-widest text-[#169b62]">HOW IT WORKS</p>
+              <p className="text-[13px] font-bold tracking-widest text-ems-primary">HOW IT WORKS</p>
 
               <h2 className="mt-4 text-[30px] font-bold text-ems-text sm:text-[36px]">
                 쉽고 간편한 이벤트 경험
@@ -399,12 +399,12 @@ const Home = () => {
               ].map((item) => (
                 <div key={item.step} className="text-center">
                   <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm">
-                    <span className="text-[14px] font-bold text-[#169b62]">
+                    <span className="text-[14px] font-bold text-ems-primary">
                       {item.step.split(' ')[1]}
                     </span>
                   </div>
 
-                  <p className="mt-6 text-[12px] font-bold tracking-wider text-[#169b62]">
+                  <p className="mt-6 text-[12px] font-bold tracking-wider text-ems-primary">
                     {item.step}
                   </p>
 
@@ -440,7 +440,7 @@ const Home = () => {
         {/* Team Carousel */}
         <section className="overflow-hidden bg-white py-16 sm:py-20">
           <div className="mx-auto max-w-[1200px] px-6 text-center mb-5">
-            <p className="text-[13px] font-bold tracking-widest text-[#169b62]">OUR TEAM</p>
+            <p className="text-[13px] font-bold tracking-widest text-ems-primary">OUR TEAM</p>
 
             <h2 className="mt-4 text-[30px] font-bold text-ems-text">SYNC5를 만드는 사람들</h2>
 
@@ -474,9 +474,9 @@ const Home = () => {
                   ].map((member) => (
                     <article
                       key={member.name}
-                      className="flex h-[170px] w-[190px] shrink-0 flex-col items-center justify-center rounded-2xl border border-[#e5e9f0] bg-ems-background p-4 text-center transition-shadow hover:shadow-lg sm:h-[190px] sm:w-[220px] sm:p-5"
+                      className="flex h-[170px] w-[190px] shrink-0 flex-col items-center justify-center rounded-2xl border border-ems-member-input-border bg-ems-background p-4 text-center transition-shadow hover:shadow-lg sm:h-[190px] sm:w-[220px] sm:p-5"
                     >
-                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#e6f5ee] text-[17px] font-bold text-[#169b62]">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-ems-member-primary-soft text-[17px] font-bold text-ems-primary">
                         {member.initials}
                       </div>
 

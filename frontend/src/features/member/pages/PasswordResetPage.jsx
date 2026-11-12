@@ -88,7 +88,7 @@ const PasswordReset = () => {
                 value={newPassword}
                 onChange={(event) => setNewPassword(event.target.value)}
                 placeholder="새 비밀번호를 입력해주세요."
-                className="h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-ems-text outline-none focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15"
+                className="h-[44px] w-full rounded-[10px] border border-ems-member-input-border bg-white px-4 text-[13px] text-ems-text outline-none focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15"
               />
               <p className="mt-2 text-[12px] text-ems-muted">
                 8~20자, 영문·숫자·특수문자(!@#$%^&*) 포함
@@ -109,7 +109,7 @@ const PasswordReset = () => {
                 value={passwordConfirm}
                 onChange={(event) => setPasswordConfirm(event.target.value)}
                 placeholder="새 비밀번호를 확인을 입력해주세요."
-                className="h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-ems-text outline-none focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15"
+                className="h-[44px] w-full rounded-[10px] border border-ems-member-input-border bg-white px-4 text-[13px] text-ems-text outline-none focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15"
               />
             </div>
 
@@ -134,7 +134,7 @@ const PasswordReset = () => {
             <button
               type="button"
               onClick={() => navigate('/')}
-              className="mt-7 w-full text-[13px] font-semibold text-[#169b62] hover:underline"
+              className="mt-7 w-full text-[13px] font-semibold text-ems-primary hover:underline"
             >
               로그인으로 돌아가기
             </button>

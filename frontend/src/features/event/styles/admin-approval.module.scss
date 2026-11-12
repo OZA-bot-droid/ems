@@ -220,10 +220,10 @@
   gap: 12px;
   margin: -19px 0 14px;
   padding: 9px 12px;
-  border: 1px solid #c8e6d5;
+  border: 1px solid var(--ems-success-border);
   border-radius: 8px;
-  background: #f0faf4;
-  color: #216b46;
+  background: var(--ems-success-bg);
+  color: var(--ems-success-text);
   font-size: 12px;
 
   button {

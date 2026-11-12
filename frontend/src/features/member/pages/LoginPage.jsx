@@ -86,7 +86,7 @@ function LoginForm() {
         <button
           type="submit"
           className={cx(
-            'mt-[53px] text-center h-[42px] w-full rounded-[10px] bg-ems-primary px-4 text-[13px] font-semibold text-white transition-colors hover:bg-ems-member-primary-hover focus:outline-none focus:ring-2 focus:ring-[#169b62]/30',
+            'mt-[53px] text-center h-[42px] w-full rounded-[10px] bg-ems-primary px-4 text-[13px] font-semibold text-white transition-colors hover:bg-ems-member-primary-hover focus:outline-none focus:ring-2 focus:ring-ems-primary/30',
           )}
         >
           로그인
@@ -97,7 +97,9 @@ function LoginForm() {
         <button
           type="button"
           onClick={() => navigate('/email/found')}
-          className={cx('block mt-[22px] text-[14px] font-semibold text-[#169b62] hover:underline')}
+          className={cx(
+            'block mt-[22px] text-[14px] font-semibold text-ems-primary hover:underline',
+          )}
         >
           이메일을 잊어 버리셨나요?&nbsp;&nbsp; 이메일 찾기
         </button>
@@ -105,7 +107,9 @@ function LoginForm() {
         <button
           type="button"
           onClick={() => navigate('/password/request')}
-          className={cx('block mt-[22px] text-[14px] font-semibold text-[#169b62] hover:underline')}
+          className={cx(
+            'block mt-[22px] text-[14px] font-semibold text-ems-primary hover:underline',
+          )}
         >
           비밀번호를 잊어 버리셨나요?&nbsp;&nbsp; 비밀번호 재발급
         </button>
@@ -113,16 +117,18 @@ function LoginForm() {
         <button
           type="button"
           onClick={() => navigate('/signup')}
-          className={cx('block mt-[22px] text-[14px] font-semibold text-[#169b62] hover:underline')}
+          className={cx(
+            'block mt-[22px] text-[14px] font-semibold text-ems-primary hover:underline',
+          )}
         >
           계정이 없으신가요?&nbsp;&nbsp; 회원가입
         </button>
 
         {/* 소셜 로그인 */}
         <div className={cx('mt-[28px] flex items-center gap-[18px]')}>
-          <div className={cx('h-px flex-1 bg-[#d9dee7]')} />
+          <div className={cx('h-px flex-1 bg-ems-member-divider')} />
           <span className={cx('text-[12px] text-ems-muted')}>또는</span>
-          <div className={cx('h-px flex-1 bg-[#d9dee7]')} />
+          <div className={cx('h-px flex-1 bg-ems-member-divider')} />
         </div>
 
         {/* Google 로그인 */}
