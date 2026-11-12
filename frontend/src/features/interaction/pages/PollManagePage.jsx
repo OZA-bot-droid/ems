@@ -21,10 +21,9 @@ export default function PollManagePage() {
   const mutationLock = useRef(false);
 
   const management = usePollManagement(eventFilter, sessionFilter, mutationLock);
-
   const creation = usePollCreate(eventFilter, sessionFilter, management.refresh, mutationLock);
-
   const busy = management.busy || creation.busy;
+  const error = creation.error || management.error;
 
   // 관리자 투표 목록 실시간 상태 변경 감지
   const { socketConnected } = usePollManagementRealtime({
