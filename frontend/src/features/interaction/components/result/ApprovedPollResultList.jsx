@@ -11,7 +11,7 @@ export default function ApprovedPollResultList({ polls, loading, error, reload }
   return (
     <section className={styles.listCard}>
       <div className={styles.listHeader}>
-        <h2 className={styles.listTitle}>투표 목록 ({polls.length})</h2>
+        <h2 className={styles.listTitle}>투표 목록</h2>
 
         <button type="button" className={styles.refreshButton} onClick={reload} disabled={loading}>
           목록 새로고침

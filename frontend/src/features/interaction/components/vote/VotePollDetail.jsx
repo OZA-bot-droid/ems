@@ -20,9 +20,9 @@ export default function VotePollDetail({
       {poll && (
         <>
           <h2 className={styles.detailTitle}>{poll.title}</h2>
-
+          <p className={styles.detailInfo}>{new Date(poll.endsAt).toLocaleString('ko-KR')} 종료</p>
           <p className={styles.detailInfo}>
-            {poll.status} · {new Date(poll.endsAt).toLocaleString('ko-KR')} 종료
+            {canViewResults ? '투표 결과 조회 가능' : '투표 결과 조회 불가능'}
           </p>
 
           {/* 제출한 투표이거나 요청 처리 중이면 선택지 입력을 비활성화한다. */}

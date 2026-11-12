@@ -22,7 +22,7 @@ export default function PollListPage() {
 
       <main className={`${cx('app-main-content')} ${styles.main}`}>
         <div className={styles.pageHeader}>
-          <h1 className={styles.pageTitle}>투표 목록</h1>
+          <h1 className={styles.pageTitle}>전체 투표 목록</h1>
           <p className={styles.pageDescription}>참가 승인된 행사들의 투표 목록입니다.</p>
         </div>
 
