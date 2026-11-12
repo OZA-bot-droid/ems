@@ -8,7 +8,7 @@ const action = 'rounded-lg bg-emerald-700 px-4 py-2 text-white disabled:opacity-
 import { mapClassNames } from '../../../../styles/classNames.js';
 import module0 from '../../../components/layout/header.module.scss';
 const cx = (value) => mapClassNames(value, module0);
-import Header from '../../../../components/layout/LegacyHeader.jsx';
+import Header from '../../../../components/layout/Header.jsx';
 
 export default function VotePage() {
   const [polls, setPolls] = useState([]);

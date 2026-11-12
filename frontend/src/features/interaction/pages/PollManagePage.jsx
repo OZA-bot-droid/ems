@@ -5,7 +5,7 @@ import { usePollCreate } from '../hooks/manage/usePollCreate.js';
 import PollManageHeader from '../components/manage/PollManageHeader.jsx';
 import PollCreateForm from '../components/manage/PollCreateForm.jsx';
 import PollManageTable from '../components/manage/PollManageTable.jsx';
-import Header from '../../../components/layout/LegacyHeader.jsx';
+import Header from '../../../components/layout/Header.jsx';
 import module0 from '../../../components/layout/header.module.scss';
 import { mapClassNames } from '../../../styles/classNames.js';
 

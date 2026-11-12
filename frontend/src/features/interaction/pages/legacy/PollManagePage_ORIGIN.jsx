@@ -12,7 +12,7 @@ import { mapClassNames } from '../../../../styles/classNames.js';
 // SCSS Modules로 변환된 클래스명을 연결하는 보조 함수
 const cx = (value) => mapClassNames(value, module0);
 // 관리자 화면에서 사용하는 기존 공통 헤더 컴포넌트
-import Header from '../../../../components/layout/LegacyHeader.jsx';
+import Header from '../../../../components/layout/Header.jsx';
 
 // Tailwind CSS 공통 스타일 문자열: 패널, 입력 필드, 기본 버튼
 const panel = 'rounded-xl border border-slate-200 bg-white p-5 shadow-sm';

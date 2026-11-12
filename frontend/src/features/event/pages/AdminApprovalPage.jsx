@@ -8,7 +8,7 @@ import module5 from '../styles/session-manage.module.scss';
 const cx = value => mapClassNames(value, module0, module1, module2, module3, module4, module5);
 import { useCallback, useEffect, useState } from 'react';
 import { registrationApi } from '../api/registrationApi.js';
-import Header from '../../../components/layout/LegacyHeader.jsx';
+import Header from '../../../components/layout/Header.jsx';
 
 export default function AdminApprovalPage() {
   const [registrations, setRegistrations] = useState([]);

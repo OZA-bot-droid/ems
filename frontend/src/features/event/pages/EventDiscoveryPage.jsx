@@ -5,7 +5,7 @@ const cx = value => mapClassNames(value, module0);
 import { useState } from 'react';
 import EventList from '../components/EventList.jsx';
 import EventDetail from '../components/EventDetail.jsx';
-import Header from '../../../components/layout/LegacyHeader.jsx';
+import Header from '../../../components/layout/Header.jsx';
 import { useAuth } from '../../member/hooks/useAuth.js';
 
 export default function EventDiscoveryPage() {

@@ -3,7 +3,7 @@
 // 본문의 [세션 관리] 버튼은 /admin/sessions?eventId=… 로 이동합니다.
 import '../Event/event.scss';
 import EventManage from '../Event/EventManage.jsx';
-import Header from '../../component/Header.jsx';
+import Header from '../../components/layout/Header.jsx';
 import './admin-page.scss';
 
 export default function AdminEventPage() {

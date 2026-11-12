@@ -10,7 +10,7 @@ const cx = value => mapClassNames(value, module0, module1, module2, module3, mod
 // 공통 레이아웃(사이드바 Header) + 행사 관리 본문(Event/EventManage)을 붙이는 페이지입니다.
 // 본문의 [세션 관리] 버튼은 /admin/sessions?eventId=… 로 이동합니다.
 import EventManage from '../components/EventManage.jsx';
-import Header from '../../../components/layout/LegacyHeader.jsx';
+import Header from '../../../components/layout/Header.jsx';
 
 export default function AdminEventPage() {
   return (

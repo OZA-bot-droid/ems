@@ -3,7 +3,7 @@ import { useState } from 'react';
 import '../Event/event.scss';
 import EventList from '../Event/EventList.jsx';
 import EventDetail from '../Event/EventDetail.jsx';
-import Header from '../../component/Header.jsx';
+import Header from '../../components/layout/Header.jsx';
 import { useAuth } from '../../page/AuthContext.jsx';
 
 export default function EventDiscoveryPage() {

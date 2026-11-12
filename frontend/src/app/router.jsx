@@ -1,4 +1,7 @@
 import { createBrowserRouter, Navigate, useNavigate, useParams } from 'react-router-dom';
+import { mapClassNames } from '../styles/classNames.js';
+import headerStyles from '../components/layout/header.module.scss';
+import Header from '../components/layout/Header.jsx';
 import ProtectedRoute from '../components/guards/ProtectedRoute';
 import BootstrapPage from './BootstrapPage';
 import LoginPage from '../features/member/pages/LoginPage';
@@ -16,13 +19,18 @@ import AdminApprovalPage from '../features/event/pages/AdminApprovalPage';
 import PollManagePage from '../features/interaction/pages/PollManagePage';
 import VotePage from '../features/interaction/pages/VotePage';
 
+const cx = (value) => mapClassNames(value, headerStyles);
+
 function EventDetailRoute() {
   const { eventId } = useParams();
   const navigate = useNavigate();
   return (
-    <main className="mx-auto max-w-5xl p-6">
+    <div className={cx('app-shell')}>
+      <Header activePage="events" />
+      <main className={cx('app-main-content')}>
       <EventDetail eventId={eventId} onBack={() => navigate('/events')} />
-    </main>
+      </main>
+    </div>
   );
 }
 

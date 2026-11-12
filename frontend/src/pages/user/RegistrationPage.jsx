@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { eventApi, registrationApi } from '../../api.js';
-import Header from '../../component/Header.jsx';
+import Header from '../../components/layout/Header.jsx';
 import './registration-page.scss';
 
 const STATUS = {

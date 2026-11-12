@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { registrationApi } from '../../api.js';
-import Header from '../../component/Header.jsx';
+import Header from '../../components/layout/Header.jsx';
 import '../Event/event.scss';
 import './admin-approval.scss';
 

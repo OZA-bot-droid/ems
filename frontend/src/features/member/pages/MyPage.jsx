@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { mapClassNames } from '../../../styles/classNames.js';
 import headerStyles from '../../../components/layout/header.module.scss';
-import Header from '../../../components/layout/LegacyHeader.jsx';
+import Header from '../../../components/layout/Header.jsx';
 import { useAuth } from '../hooks/useAuth.js';
 import { useApiUtil } from '../hooks/useApiUtil.js';
 import { eventApi } from '../../event/api/eventApi.js';

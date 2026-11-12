@@ -9,7 +9,7 @@ const cx = value => mapClassNames(value, module0, module1, module2, module3, mod
 import { useEffect, useMemo, useState } from 'react';
 import { eventApi } from '../api/eventApi.js';
 import { registrationApi } from '../api/registrationApi.js';
-import Header from '../../../components/layout/LegacyHeader.jsx';
+import Header from '../../../components/layout/Header.jsx';
 
 const STATUS = {
   PENDING: { label: '승인 대기', tone: 'pending' },

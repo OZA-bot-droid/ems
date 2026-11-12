@@ -15,7 +15,7 @@ import { mapClassNames } from '../../../../styles/classNames.js';
 import module0 from '../../../components/layout/header.module.scss';
 // cx(value): SCSS 모듈에 정의된 클래스명을 조회하는 편의 함수.
 const cx = (value) => mapClassNames(value, module0);
-import Header from '../../../../components/layout/LegacyHeader.jsx';
+import Header from '../../../../components/layout/Header.jsx';
 
 /**
  * VotePage: 승인된 사용자의 투표 목록, 참여, 결과 조회 및 실시간 알림을 관리하는 화면.

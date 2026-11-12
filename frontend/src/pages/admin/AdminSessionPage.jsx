@@ -4,7 +4,7 @@
 import '../Event/event.scss';
 import './admin-page.scss';
 import SessionManage from '../Event/SessionManage.jsx';
-import Header from '../../component/Header.jsx';
+import Header from '../../components/layout/Header.jsx';
 
 export default function AdminSessionPage() {
   // ?eventId=7 로 들어오면 그 행사를 먼저 선택 (행사 관리의 [세션 관리] 버튼)
