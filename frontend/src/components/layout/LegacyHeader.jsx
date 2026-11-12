@@ -1,3 +1,4 @@
+import { useAuth } from '../../features/member/hooks/useAuth.js';
 import { mapClassNames } from '../../styles/classNames.js';
 import module0 from './header.module.scss';
 const cx = (value) => mapClassNames(value, module0);
@@ -39,6 +40,7 @@ const MENUS = {
 
 function RoleHeader({ role, activePage }) {
   const menu = MENUS[role];
+  const { accessToken, authLoading, logout } = useAuth();
 
   return (
     <header className={cx('app-sidebar-header')} data-role={role}>
@@ -64,6 +66,11 @@ function RoleHeader({ role, activePage }) {
               ◦　 {label}
             </a>
           ),
+        )}
+        {!authLoading && accessToken && (
+          <a onClick={logout} className="cursor-pointer">
+            ◦　 로그아웃
+          </a>
         )}
       </nav>
     </header>
