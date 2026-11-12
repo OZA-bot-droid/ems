@@ -217,7 +217,7 @@ public class PollService {
         }
 
         // 6. DB 페이지 조회 및 목록 DTO 변환
-        return pollRepository.findByEventIdIn(sessionIds, pageable).map(UserPollDTO::from);
+        return pollRepository.findBySessionIdIn(sessionIds, pageable).map(UserPollDTO::from);
     }
 
     // 관리자가 투표를 수동으로 즉시 활성화
