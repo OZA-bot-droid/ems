@@ -44,11 +44,29 @@ public class SocialLoginService {
                             .provider(dto.provider())
                             .providerId(dto.providerId())
                             .email(dto.email())
-                            .name(dto.name())
+                            .name(generateUniqueName(dto.name()))
                             .role(role)
                             .build()
             );
         }
+    }
+
+    private String generateUniqueName(String providerName) {
+        if (providerName == null || providerName.isBlank()) {
+            providerName = "user";
+        }
+
+        providerName = providerName.trim();
+        if (!memberRepository.existsByName(providerName)) {
+            return providerName;
+        }
+
+        String name;
+        do {
+            name = providerName + "_" + UUID.randomUUID().toString().substring(0, 8);
+        } while (memberRepository.existsByName(name));
+
+        return name;
     }
 
     public Member socialLogin(SocialLoginDTO dto) {

@@ -42,8 +42,11 @@ public record MemberRegisterDTO(@Email(message = "올바른 이메일 형식이 
     }
 
     public MemberRegisterDTO {
-        if(email != null && name != null) {
+        if(email != null) {
             email = email.trim().toLowerCase(Locale.ROOT);
+        }
+
+        if(name != null) {
             name = name.trim();
         }
     }
