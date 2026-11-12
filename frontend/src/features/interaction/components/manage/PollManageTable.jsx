@@ -8,6 +8,8 @@ export default function PollManageTable({
   sessionFilter,
   loading,
   rows,
+  events = [],
+  sessions = [],
   busy,
   page,
   pages,
@@ -43,8 +45,19 @@ export default function PollManageTable({
               {rows.map((p) => (
                 <tr key={p.id} className="border-b">
                   <td className="p-3 font-semibold">{p.title}</td>
-                  <td className="p-3">
+                  {/* <td className="p-3">
                     {p.eventId} / {p.sessionId}
+                  </td> */}
+                  <td className="p-3">
+                    {events.find(
+                      (event) => String(event.id) === String(p.eventId)
+                    )?.title ?? p.eventId}
+                    {' / '}
+                    {sessions.find(
+                      (session) =>
+                        String(session.id) === String(p.sessionId) &&
+                        String(session.eventId) === String(p.eventId)
+                    )?.title ?? p.sessionId}
                   </td>
                   <td className="p-3">{new Date(p.startsAt).toLocaleString('ko-KR')}</td>
                   <td className="p-3">{new Date(p.endsAt).toLocaleString('ko-KR')}</td>
