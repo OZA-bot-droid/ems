@@ -155,4 +155,19 @@ public class MemberService {
         member.changeName(dto.name().trim());
         return new MemberInformationDTO(member);
     }
+
+    public boolean duplicateName(NameDTO dto) {
+
+        return memberRepository.existsByName(dto.name());
+    }
+
+    public String foundEmail(NameDTO dto) {
+        if(!duplicateName(dto)) {
+            throw new MemberNotFoundException("존재하지 않는 회원입니다.");
+        } else {
+            return memberRepository.findByName(dto.name())
+                    .orElseThrow(() -> new MemberNotFoundException("존재하지 않는 회원입니다."))
+                    .getEmail();
+        }
+    }
 }

@@ -24,4 +24,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findByIdForUpdate(
             @Param("memberId") Long memberId
     );
+
+    boolean existsByName(String name);
+
+    Optional<Member> findByName(String name);
 }
