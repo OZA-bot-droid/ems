@@ -37,6 +37,9 @@ const PasswordChange = () => {
       // 비밀번호 재설정 요청
       await memberApi.passwordChange(currentPassword, newPassword);
 
+      setAccessToken(null);
+      localStorage.removeItem('isLoginSession');
+
       // 정상 완료되면 로그인 페이지로 이동
       navigate('/login', {
         replace: true,
