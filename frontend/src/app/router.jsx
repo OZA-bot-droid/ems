@@ -6,6 +6,7 @@ import SignupPage from '../features/member/pages/SignupPage';
 import OAuthCallbackPage from '../features/member/pages/OAuthCallbackPage';
 import PasswordRequestPage from '../features/member/pages/PasswordRequestPage';
 import PasswordResetPage from '../features/member/pages/PasswordResetPage';
+import PasswordChangePage from '../features/member/pages/PasswordChangePage';
 import MyPage from '../features/member/pages/MyPage';
 import EventDiscoveryPage from '../features/event/pages/EventDiscoveryPage';
 import EventDetail from '../features/event/components/EventDetail';
@@ -40,6 +41,7 @@ export const router = createBrowserRouter([
   { path: '/signup', element: <SignupPage /> },
   { path: '/password/request', element: <PasswordRequestPage /> },
   { path: '/password/reset', element: <PasswordResetPage /> },
+  { path: '/password/change', element: <PasswordChangePage /> },
   { path: '/oauth-success', element: <OAuthCallbackPage /> },
   { path: '/events', element: <EventDiscoveryPage /> },
   { path: '/events/:eventId', element: <EventDetailRoute /> },

@@ -17,13 +17,19 @@ public class MailService {
         this.frontendUrl = frontendUrl;
     }
 
-    public void sendPasswordResetEmail(String email, String resetToken) {
-        String resetUrl = frontendUrl + "/password/reset?token=" + resetToken;
+    private void sendEmail(String email, String subject, String text) {
         SimpleMailMessage message = new SimpleMailMessage();
 
         message.setTo(email);
-        message.setSubject("EMS 비밀번호 재설정");
-        message.setText(
+        message.setSubject(subject);
+        message.setText(text);
+        mailSender.send(message);
+    }
+
+    public void sendPasswordResetEmail(String email, String resetToken) {
+        sendEmail(
+                email,
+                "EMS 비밀번호 재설정",
                 """
                 비밀번호 재설정을 요청하셨습니다.
                 
@@ -34,9 +40,24 @@ public class MailService {
                 이 링크는 일정 시간이 지나면 만료됩니다.
                 
                 본인이 요청하지 않았다면 이 메일을 무시해주세요.
-                """.formatted(resetUrl)
+                """.formatted(
+                        frontendUrl + "/password/reset?token=" + resetToken
+                )
         );
+    }
 
-        mailSender.send(message);
+    public void sendVerificationEmail(String email, String code) {
+        sendEmail(
+                email,
+                "EMS 회원가입 이메일 인증",
+                """
+                EMS 회원가입 인증번호는 다음과 같습니다.
+    
+                %s
+    
+                인증번호는 5분 동안 유효합니다.
+                본인이 요청하지 않았다면 이 메일을 무시해주세요.
+                """.formatted(code)
+        );
     }
 }

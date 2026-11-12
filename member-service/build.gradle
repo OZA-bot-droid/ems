@@ -31,6 +31,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
+    // 메모리에 데이터를 보관하면서 만료 시간과 최대 저장 개수를 관리할 수 있는 캐시 라이브러리
+    implementation 'com.github.ben-manes.caffeine:caffeine'
 }
 
 tasks.named('test') { useJUnitPlatform() }
