@@ -1,11 +1,17 @@
-@import 'tailwindcss';
-@import './styles/tokens.css';
+/*
+ * EMS Frontend Style Entry
+ *
+ * P1 수정 내용
+ * - Tailwind CSS 4 로딩
+ * - EMS 디자인 토큰 로딩
+ * - :root 및 body 스타일은 global.scss로 이동
+ *
+ * 주의:
+ * Tailwind와 토큰 import는 유지한다.
+ */
 
-:root {
-  font-family: var(--ems-font-family);
-}
-body {
-  margin: 0;
-  color: var(--ems-text);
-  background: var(--ems-background);
-}
+/* Tailwind CSS 4 */
+@import 'tailwindcss';
+
+/* EMS 디자인 토큰 */
+@import './styles/tokens.css';

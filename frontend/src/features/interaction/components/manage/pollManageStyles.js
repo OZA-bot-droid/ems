@@ -1,10 +1,25 @@
-// 기존 Tailwind 클래스 그대로 유지 (공통 디자인 변경은 팀 리뷰 후 진행)
-export const panel = 'rounded-xl border border-slate-200 bg-white p-5 shadow-sm';
-export const field = 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm';
+/**
+ * Interaction 투표 관리 화면 스타일
+ *
+ * P2 수정:
+ * 공통 Interaction 스타일을 가져온다.
+ *
+ * 기존 export 이름을 유지하므로
+ * PollCreateForm, PollManageTable 등의
+ * import 코드는 변경하지 않아도 된다.
+ */
 
-export const btn =
-  'rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50';
+import {
+  interactionPanel,
+  interactionField,
+  interactionManageButton,
+  interactionDangerButton,
+} from '../../styles/interactionStyles.js';
 
-// 종료 버튼 (빨간색)
-export const closeBtn =
-  'rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50';
+export const panel = interactionPanel;
+
+export const field = interactionField;
+
+export const btn = interactionManageButton;
+
+export const closeBtn = interactionDangerButton;

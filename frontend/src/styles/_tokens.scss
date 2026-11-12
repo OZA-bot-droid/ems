@@ -1,10 +1,49 @@
-// Sass aliases intentionally reference the runtime CSS token source.
-// Do not duplicate literal colors, radii, or font values here.
+// ========================================
+// EMS Sass Design Tokens
+//
+// P1 수정 목적
+// 1. CSS 토큰을 Sass에서 재사용한다.
+// 2. 직접 색상값을 중복 정의하지 않는다.
+// 3. 기존 Sass 변수명을 유지한다.
+//
+// 주의:
+// 이 변수들은 Sass 컴파일 시점의 색상값이
+// 아니라 브라우저에서 평가되는 CSS var()이다.
+// ========================================
+
+// ========================================
+// 1. 기본 색상
+// ========================================
+
 $ems-primary: var(--ems-primary);
 $ems-sidebar: var(--ems-sidebar);
 $ems-background: var(--ems-background);
 $ems-text: var(--ems-text);
 $ems-border: var(--ems-border);
+
+// ========================================
+// 2. 호환용 색상
+//
+// 기존 Event 스타일 토큰과 연결한다.
+// ========================================
+
+$ems-surface: var(--ems-surface);
+$ems-row: var(--ems-row);
+$ems-muted: var(--ems-muted);
+
+$ems-primary-dark: var(--ems-green-dark);
+$ems-primary-soft: var(--ems-green-soft);
+$ems-blue-soft: var(--ems-blue-soft);
+
+// ========================================
+// 3. 폰트
+// ========================================
+
 $ems-font: var(--ems-font-family);
+
+// ========================================
+// 4. 간격 및 모서리
+// ========================================
+
 $ems-card-radius: var(--ems-radius-card);
 $ems-spacing-unit: var(--ems-spacing-unit);

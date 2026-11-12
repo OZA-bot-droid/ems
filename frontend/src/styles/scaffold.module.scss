@@ -1,14 +1,74 @@
 @use './variables' as *;
-.header { display:flex; align-items:center; justify-content:space-between; gap:1rem; background:white; padding:1rem 2rem; border-bottom:1px solid $border; }
-.brand { font-weight:800; font-size:1.15rem; }
-.header nav, .subnav { display:flex; gap:1rem; align-items:center; flex-wrap:wrap; }
-.container { max-width:1120px; margin:2rem auto; padding:0 1rem; }
-.panel { background:white; border:1px solid $border; padding:1.5rem; border-radius: var(--ems-radius-card); margin-bottom:1rem; }
-.panel h1 { font-size:1.5rem; font-weight:700; margin-bottom:1rem; }
-.form { max-width:440px; margin-inline:auto; }
-.form form, .form label { display:flex; flex-direction:column; gap:.5rem; }
-.form form { gap:1rem; }
-.form input,.form select { border:1px solid $border; padding:.6rem; border-radius:7px; }
-.button { border:0; padding:.65rem 1rem; border-radius:8px; background:$brand; color:white; }
-.subnav { margin-bottom:1rem; }
-.modal-backdrop { position:fixed; inset:0; background:#0008; display:grid; place-items:center; }
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: white;
+  padding: 1rem 2rem;
+  border-bottom: 1px solid $border;
+}
+.brand {
+  font-weight: 800;
+  font-size: 1.15rem;
+}
+.header nav,
+.subnav {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.container {
+  max-width: 1120px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+.panel {
+  background: white;
+  border: 1px solid $border;
+  padding: 1.5rem;
+  border-radius: var(--ems-radius-card);
+  margin-bottom: 1rem;
+}
+.panel h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+.form {
+  max-width: 440px;
+  margin-inline: auto;
+}
+.form form,
+.form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.form form {
+  gap: 1rem;
+}
+.form input,
+.form select {
+  border: 1px solid $border;
+  padding: 0.6rem;
+  border-radius: 7px;
+}
+.button {
+  border: 0;
+  padding: 0.65rem 1rem;
+  border-radius: 8px;
+  background: $brand;
+  color: white;
+}
+.subnav {
+  margin-bottom: 1rem;
+}
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: #0008;
+  display: grid;
+  place-items: center;
+}

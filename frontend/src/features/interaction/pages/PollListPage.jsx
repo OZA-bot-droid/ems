@@ -17,7 +17,8 @@ export default function PollListPage() {
   return (
     <div className={cx('app-shell')}>
       <Header role="USER" activePage="votes" />
-      <main className="mx-auto max-w-6xl space-y-5 p-5 text-slate-800">
+      {/* 참가 가능한 투표 목록 전체 너비 적용 */}
+      <main className={cx('app-main-content w-full min-w-0 space-y-5 text-slate-800')}>
         <header>
           <p className="text-sm text-emerald-700">SYNC5 / Interaction</p>
           <h1 className="text-2xl font-bold">투표 목록</h1>

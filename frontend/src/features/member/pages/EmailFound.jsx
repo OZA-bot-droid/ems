@@ -33,15 +33,15 @@ const EmailFound = () => {
   };
 
   return (
-    <main className={cx('min-h-screen bg-[#f7f9fc]')}>
-      <div className={cx('min-h-screen w-full bg-[#f7f9fc] lg:flex')}>
+    <main className={cx('min-h-screen bg-ems-background')}>
+      <div className={cx('min-h-screen w-full bg-ems-background lg:flex')}>
         <NoLoginHeaders />
 
         {/* main 영역 */}
         <section className="flex flex-1 items-center justify-center px-8 py-14 sm:px-12 lg:px-[72px] lg:py-0">
           <form onSubmit={emailFound} className="w-full max-w-[510px]">
-            <h2 className="text-[26px] font-bold text-[#142238]">닉네임 찾기</h2>
-            <p className="mt-3 text-[14px] leading-6 text-[#7a879a]">
+            <h2 className="text-[26px] font-bold text-ems-text">닉네임 찾기</h2>
+            <p className="mt-3 text-[14px] leading-6 text-ems-muted">
               가입한 닉네임을 입력하면
               <br />
               이메일 주소의 일부를 확인할 수 있습니다.
@@ -50,7 +50,7 @@ const EmailFound = () => {
             <div className="mt-9">
               <label
                 htmlFor="request-email"
-                className="block text-[13px] font-semibold text-[#142238]"
+                className="block text-[13px] font-semibold text-ems-text"
               >
                 닉네임
               </label>
@@ -63,13 +63,13 @@ const EmailFound = () => {
                 value={name}
                 onChange={(event) => setName(event.target.value)}
                 placeholder="닉네임을 입력해주세요."
-                className="mt-2 h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none placeholder:text-[#9aa5b4] focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15"
+                className="mt-2 h-[44px] w-full rounded-[10px] border border-ems-member-input-border bg-white px-4 text-[13px] text-ems-text outline-none placeholder:text-ems-member-inactive focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15"
               />
             </div>
 
             <button
               type="submit"
-              className="mt-7 h-[44px] w-full rounded-[10px] bg-[#169b62] text-[13px] font-semibold text-white transition-colors hover:bg-[#128653] disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-7 h-[44px] w-full rounded-[10px] bg-ems-primary text-[13px] font-semibold text-white transition-colors hover:bg-ems-member-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
             >
               확인
             </button>
@@ -77,7 +77,7 @@ const EmailFound = () => {
             <button
               type="button"
               onClick={() => navigate('/login')}
-              className="mt-7 w-full text-[13px] font-semibold text-[#169b62] hover:underline"
+              className="mt-7 w-full text-[13px] font-semibold text-ems-primary hover:underline"
             >
               로그인으로 돌아가기
             </button>
