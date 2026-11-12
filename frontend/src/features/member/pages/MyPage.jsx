@@ -14,22 +14,6 @@ const MyPage = () => {
   const [newName, setNewName] = useState('');
   const [saving, setSaving] = useState(false);
 
-  const [open, setOpen] = useState(false);
-
-  // 삭제 버튼을 누르면 Modal 표시
-  const handleOpen = () => setOpen(true);
-
-  // 취소하거나 닫기 버튼을 누르면 Modal 숨김
-  const handleClose = () => setOpen(false);
-
-  const handleDelete = async () => {
-    // TODO: eventApi.delete(eventId) 연결
-    console.log('행사 삭제 요청');
-
-    // 삭제 완료 후 모달 닫기
-    handleClose();
-  };
-
   useEffect(() => {
     // 재발급이 완료되기 전까지 대기
     if (authLoading || !accessToken) {
@@ -167,27 +151,6 @@ const MyPage = () => {
                         비밀번호 변경
                       </button>
                     )}
-                    {/* <Button></Button>
-                    <>
-                      <Button type="button" onClick={handleOpen}>
-                        행사 삭제
-                      </Button>
-
-                      <Modal open={open} title="행사 삭제 확인" onClose={handleClose}>
-                        <p>정말 이 행사를 삭제하시겠습니까?</p>
-                        <p>삭제한 행사는 복구할 수 없습니다.</p>
-
-                        <div className="modal-actions">
-                          <Button type="button" onClick={handleClose}>
-                            취소
-                          </Button>
-
-                          <Button type="button" onClick={handleDelete}>
-                            삭제
-                          </Button>
-                        </div>
-                      </Modal>
-                    </> */}
                   </div>
                 </div>
 
