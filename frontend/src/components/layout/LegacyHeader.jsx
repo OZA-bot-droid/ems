@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../features/member/hooks/useAuth';
 
 import { mapClassNames } from '../../styles/classNames.js';
@@ -75,10 +75,10 @@ function RoleHeader({ role, activePage }) {
 
   return (
     <header className={cx('app-sidebar-header')} data-role={role}>
-      <a className={cx('registration-brand')} href="/" aria-label="EMS 홈">
+      <Link className={cx('registration-brand')} href="/" aria-label="EMS 홈">
         <span />
         EMS
-      </a>
+      </Link>
 
       <p className={cx('registration-platform')}>EVENT PLATFORM</p>
 
@@ -91,14 +91,14 @@ function RoleHeader({ role, activePage }) {
               ◦　 {label}
             </span>
           ) : (
-            <a
+            <Link
               aria-current={activePage === id ? 'page' : undefined}
               className={cx(activePage === id ? 'is-active' : '')}
-              href={href}
+              to={href}
               key={id}
             >
               ◦　 {label}
-            </a>
+            </Link>
           ),
         )}
       </nav>
