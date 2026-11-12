@@ -33,8 +33,8 @@ function LoginForm() {
       await login({ email, password });
       navigate('/mypage', { replace: true });
     } catch (err) {
-      alert(err);
-      console.log(err);
+      alert(err.response?.data?.message || '로그인 실패');
+      console.error(err);
     }
   };
 

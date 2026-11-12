@@ -92,7 +92,8 @@ function SignupForm() {
       alert(res.message);
       navigate('/login');
     } catch (error) {
-      alert(error?.message || '회원가입 요청에 실패했습니다.');
+      alert(error.response?.data?.message || '회원가입 요청에 실패했습니다.');
+      console.log(error);
     }
   };
 
@@ -123,7 +124,7 @@ function SignupForm() {
     }
   };
 
-  // 이메일 인증 요청 함수 추가
+  // 이메일 인증 요청 함수
   const sendVerificationCode = async () => {
     const email = member.email.trim().toLowerCase();
 
@@ -146,7 +147,7 @@ function SignupForm() {
       console.log(res);
     } catch (err) {
       console.error(err);
-      alert('서버 연결 중 오류가 발생했습니다.');
+      alert(err.response?.data?.message || '요청을 처리하지 못했습니다.');
     } finally {
       setSending(false);
     }
@@ -157,15 +158,16 @@ function SignupForm() {
     try {
       const res = await memberApi.nameDuplicateCheck(member.name);
 
-      if (!res.data) {
-        alert('중복 확인 완료');
-        setNameDuplicate((prev) => !prev);
+      if (res.data === false) {
+        alert('사용 가능한 닉네임입니다.');
+        setNameDuplicate(false);
       } else {
-        alert('닉네임이 중복되었습니다.');
+        setNameDuplicate(true);
+        alert('이미 사용 중인 닉네임입니다.');
       }
     } catch (err) {
       console.log(err);
-      alert('서버 에러');
+      alert(err.response?.data?.message);
     }
   };
 
@@ -191,9 +193,10 @@ function SignupForm() {
               id="signup-name"
               type="text"
               name="name"
-              onChange={(event) =>
-                setMember((m) => ({ ...m, [event.target.name]: event.target.value }))
-              }
+              onChange={(event) => {
+                setMember((m) => ({ ...m, [event.target.name]: event.target.value }));
+                setNameDuplicate(true);
+              }}
               placeholder="홍길동"
               autoComplete="name"
               className={cx(

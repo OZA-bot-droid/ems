@@ -29,7 +29,9 @@ const PasswordRequest = () => {
       }
     } catch (err) {
       console.error(err);
-      setMessage('요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.');
+      setMessage(
+        err.response?.data?.message || '요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.',
+      );
     } finally {
       setLoading(false);
     }

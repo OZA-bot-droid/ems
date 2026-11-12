@@ -48,7 +48,7 @@ const PasswordChange = () => {
       }
     } catch (err) {
       console.error(err);
-      setMessage('서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.');
+      setMessage(err.message || '비밀번호 변경에 실패했습니다.');
     } finally {
       setLoading(false);
     }

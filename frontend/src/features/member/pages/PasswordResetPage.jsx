@@ -52,15 +52,8 @@ const PasswordReset = () => {
       // 현재 페이지의 방문 기록을 '/' 페이지로 교체한다.
       navigate('/login', { replace: true });
     } catch (err) {
-      if (
-        err.code === 'INVALID_PASSWORD_RESET_TOKEN' ||
-        err.response?.data?.code === 'INVALID_PASSWORD_RESET_TOKEN'
-      ) {
-        setMessage(err.message || '유효하지 않은 재설정 링크입니다.');
-      } else {
-        setMessage('서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.');
-      }
-      console.log(err);
+      console.error(err);
+      setMessage(err.response?.data?.message || '비밀번호 변경에 실패했습니다.');
     } finally {
       setLoading(false);
     }

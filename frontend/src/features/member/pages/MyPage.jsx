@@ -26,6 +26,7 @@ const MyPage = () => {
         setMember((m) => ({ ...m, ...res }));
       } catch (err) {
         console.error(err);
+        alert(err.message || '회원 정보를 불러오지 못했습니다.');
       }
     };
     myInfo();
@@ -53,7 +54,7 @@ const MyPage = () => {
       }
     } catch (err) {
       console.error(err);
-      alert('서버 연결 중 오류가 발생했습니다.');
+      alert(err.message || '닉네임 수정에 실패했습니다.');
     } finally {
       setSaving(false);
     }
