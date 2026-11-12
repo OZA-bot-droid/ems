@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from './member/hooks/useAuth.js';
 import { eventApi } from './event/api/eventApi.js';
 import { formatShort, STATUS_BADGE } from './event/utils/format.js';
+import logo from '../components/img/SYNC5trans.png'
 import './home.css';
 
 const Home = () => {
@@ -104,13 +105,13 @@ const Home = () => {
   };
 
   return (
-    <>
-      <header className="w-full bg-ems-sidebar text-white">
+    <div className="ems-home">
+      <header className="home-topbar w-full bg-ems-sidebar text-white">
         <div className="mx-auto flex max-w-[1200px] flex-wrap items-center justify-between gap-y-3 px-6 py-4 lg:h-[88px] lg:flex-nowrap lg:py-0">
           {/* 로고 */}
           <Link to="/" className="shrink-0">
             <img
-              src="/sync5-logo.png"
+              src={logo}
               alt="SYNC5"
               className="h-[48px] w-auto object-contain lg:h-[64px]"
             />
@@ -173,7 +174,7 @@ const Home = () => {
         </div>
       </header>
 
-      <main className="bg-white">
+      <main className="home-main bg-white">
         {/* Hero */}
         <section className="relative overflow-hidden bg-(--ems-green-soft) px-6 py-20 sm:py-28">
           <div className="pointer-events-none absolute -right-24 -top-32 h-[450px] w-[450px] rounded-full bg-ems-primary/10 blur-3xl" />
@@ -262,7 +263,7 @@ const Home = () => {
                   const participants = Math.max(0, Number(event.participants ?? event.registeredCount ?? 0) || 0);
                   return (
                     <Link to={`/events/${encodeURIComponent(event.id)}`} key={event.id}
-                      className="group flex flex-col overflow-hidden rounded-[20px] border border-ems-member-input-border bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-ems-primary">
+                      className="home-event-card group flex flex-col overflow-hidden rounded-[20px] border border-ems-member-input-border bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-ems-primary">
                       <div className={`relative flex h-[175px] items-center justify-center ${index % 2 === 0 ? 'bg-ems-member-primary-soft' : 'bg-(--ems-blue-soft)'}`}>
                         <span className="text-[58px]" aria-hidden="true">{['📅', '🎟️', '💻'][index % 3]}</span>
                       </div>
@@ -323,7 +324,7 @@ const Home = () => {
                   icon: '📡',
                   title: '실시간 참여',
                   description: '실시간 투표와 참여 기능을 통해 더욱 생생하게 소통하세요.',
-                  color: 'bg-[#e8eef9]',
+                  color: 'bg-(--ems-blue-soft)',
                 },
                 {
                   number: '03',
@@ -433,7 +434,7 @@ const Home = () => {
                 ? '마이페이지로 이동'
                 : authLoading
                   ? '이벤트 둘러보기'
-                  : '무료로 시작하기'}
+                  : '시작하기'}
             </Link>
           </div>
         </section>
@@ -496,12 +497,12 @@ const Home = () => {
       </main>
 
       {/* Footer */}
-      <footer className="bg-ems-sidebar px-6 py-14 text-white">
+      <footer className="home-footer bg-ems-sidebar px-6 py-14 text-white">
         <div className="mx-auto max-w-[1200px]">
           <div className="grid gap-10 md:grid-cols-[1fr_auto] md:gap-20">
             {/* 브랜드 소개 */}
             <div>
-              <Link to="/" className="inline-block text-[28px] font-extrabold tracking-tight">
+              <Link to="/" className="home-footer-brand inline-block text-[28px] font-extrabold tracking-tight">
                 SYNC<span className="text-ems-primary">5</span>
               </Link>
 
@@ -556,7 +557,7 @@ const Home = () => {
           </div>
         </div>
       </footer>
-    </>
+    </div>
   );
 };
 
