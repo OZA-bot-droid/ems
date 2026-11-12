@@ -1,5 +1,6 @@
 import PollPagination from './PollPagination.jsx';
 import { panel, btn, closeBtn } from './pollManageStyles.js';
+import styles from '../../styles/PollManage.module.scss';
 
 // 관리자 Poll 목록, 상태 조작 버튼, 페이징을 표시하는 컴포넌트
 export default function PollManageTable({
@@ -26,8 +27,8 @@ export default function PollManageTable({
       ) : rows.length === 0 ? (
         <p>표시할 투표가 없습니다.</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+        <div className={styles.tableWrapper}>
+          <table className={styles.pollTable}>
             <thead>
               <tr>
                 {['투표', '행사 / 세션', '시작', '종료', '상태', '관리', '결과 확인'].map((x) => (
@@ -47,27 +48,49 @@ export default function PollManageTable({
                   </td>
                   <td className="p-3">{new Date(p.startsAt).toLocaleString('ko-KR')}</td>
                   <td className="p-3">{new Date(p.endsAt).toLocaleString('ko-KR')}</td>
-                  <td className="p-3">{p.status}</td>
-                  <td className="space-x-2 p-3">
-                    <button
-                      className={btn}
-                      disabled={busy || !p.canActivate}
-                      onClick={() => onChangeStatus(p.id, 'activate')}
+                  <td>
+                    <span
+                      className={`${styles.statusBadge} ${
+                        p.status === 'ACTIVE'
+                          ? styles.statusActive
+                          : p.status === 'CLOSED'
+                            ? styles.statusClosed
+                            : styles.statusScheduled
+                      }`}
                     >
-                      활성화
-                    </button>
-                    <button
-                      className={closeBtn}
-                      disabled={busy || !p.canClose}
-                      onClick={() => onChangeStatus(p.id, 'close')}
-                    >
-                      종료
-                    </button>
+                      {p.status === 'ACTIVE' ? '진행 중' : p.status === 'CLOSED' ? '종료' : '예정'}
+                    </span>
                   </td>
-                  <td className="space-x-2 p-3">
-                    {/* 투표 결과 조회 */}
-                    <button type="button" className={btn} onClick={() => onViewResults(p.id)}>
-                      결과
+
+                  <td>
+                    <div className={styles.actionGroup}>
+                      <button
+                        type="button"
+                        className={`${styles.actionButton} ${styles.activateButton}`}
+                        disabled={busy || !p.canActivate}
+                        onClick={() => onChangeStatus(p.id, 'activate')}
+                      >
+                        시작
+                      </button>
+
+                      <button
+                        type="button"
+                        className={`${styles.actionButton} ${styles.closeButton}`}
+                        disabled={busy || !p.canClose}
+                        onClick={() => onChangeStatus(p.id, 'close')}
+                      >
+                        종료
+                      </button>
+                    </div>
+                  </td>
+
+                  <td>
+                    <button
+                      type="button"
+                      className={styles.resultButton}
+                      onClick={() => onViewResults(p.id)}
+                    >
+                      확인
                     </button>
                   </td>
                 </tr>
@@ -76,6 +99,7 @@ export default function PollManageTable({
           </table>
         </div>
       )}
+
       <PollPagination page={page} pages={pages} onPageChange={onPageChange} />
     </section>
   );

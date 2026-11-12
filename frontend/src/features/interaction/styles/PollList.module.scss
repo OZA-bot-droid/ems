@@ -1,0 +1,295 @@
+/* 일반 사용자 투표 목록 페이지 - interaction/styles/PollList.module.scss */
+
+/* ======================================
+   페이지 레이아웃
+====================================== */
+
+/* 페이지의 main 요소에 적용: 사이드바를 제외한 콘텐츠 영역을 채운다. */
+.main {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 28px 32px 40px;
+  color: #17243c;
+}
+
+.pageHeader {
+  margin-bottom: 36px;
+}
+
+.pageTitle {
+  margin: 0;
+  color: #17243c;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.pageDescription {
+  margin-top: 8px;
+  color: #8190a9;
+  font-size: 13px;
+}
+
+/* ======================================
+   투표 목록 카드
+====================================== */
+
+/* 참가 신청 및 내역 화면처럼 넓고 높이가 있는 흰색 목록 카드 */
+.listCard {
+  width: 100%;
+  min-height: 475px;
+  box-sizing: border-box;
+  padding: 20px;
+  background: #fff;
+  border-radius: 14px;
+}
+
+.listHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.listTitle {
+  margin: 0;
+  color: #17243c;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+/* ======================================
+   투표 항목
+====================================== */
+
+.pollItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  min-width: 0;
+  padding: 16px;
+  margin-bottom: 10px;
+
+  background: #f4f6fa;
+  border-radius: 9px;
+}
+
+.pollTitle {
+  margin: 0;
+  color: #17243c;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.pollInfo {
+  margin-top: 6px;
+  color: #8190a9;
+  font-size: 12px;
+}
+
+/* ======================================
+   새로고침 / 결과 확인 버튼
+====================================== */
+
+.refreshButton {
+  padding: 9px 14px;
+  background: #fff;
+  border: 1px solid #d8dfe8;
+  border-radius: 8px;
+  color: #17243c;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: #f4f6fa;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+.resultButton {
+  display: inline-block;
+  flex-shrink: 0;
+  padding: 9px 14px;
+  background: #047857;
+  border-radius: 8px;
+
+  color: #fff;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+
+  &:hover {
+    background: #065f46;
+  }
+}
+
+.disabledButton {
+  flex-shrink: 0;
+  padding: 9px 14px;
+  border: 0;
+  border-radius: 8px;
+
+  background: #d9dee7;
+  color: #788397;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: not-allowed;
+}
+
+/* ======================================
+   빈 목록 안내
+====================================== */
+
+.emptyMessage {
+  padding: 16px 0;
+  color: #8290a6;
+  font-size: 13px;
+}
+
+/* 투표가 0개일 때 카드 안쪽 중앙에 빈 상태 안내 표시 */
+.emptyState {
+  display: flex;
+  min-height: 350px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.emptyTitle {
+  margin: 0;
+  color: #465873;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.emptyDescription {
+  margin: 0;
+  color: #8190a9;
+  font-size: 14px;
+}
+
+/* ======================================
+   페이징네이션
+====================================== */
+
+/* 페이지 이동 버튼 전체 영역 */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 28px;
+  padding: 20px 0 8px;
+}
+
+/* 처음 / 이전 / 페이지 번호 / 다음 / 마지막 버튼 */
+.pageButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 38px;
+  height: 38px;
+  padding: 0 10px;
+
+  border: 1px solid #d8dfe8;
+  border-radius: 8px;
+  background: #fff;
+
+  color: #17243c;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+
+  transition: background-color 0.15s ease;
+
+  /* 현재 페이지가 아닌 버튼에만 hover 적용 */
+  &:hover:not(:disabled):not(.activePage) {
+    background: #f4f6fa;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #047857;
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+/* 현재 선택한 페이지 강조 */
+.activePage {
+  background: #047857;
+  border-color: #047857;
+  color: #fff;
+
+  &:hover:not(:disabled) {
+    background: #065f46;
+  }
+}
+
+/* 전체 투표 수 및 페이지 정보 */
+.pageInfo {
+  flex-basis: 100%;
+  margin-top: 4px;
+
+  color: #8190a9;
+  font-size: 12px;
+  text-align: center;
+}
+
+/* ======================================
+   반응형 레이아웃
+====================================== */
+
+@media (max-width: 768px) {
+  .main {
+    padding: 20px 16px;
+  }
+
+  .pollItem {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .listCard {
+    min-height: 350px;
+  }
+
+  .emptyState {
+    min-height: 260px;
+  }
+
+  .pagination {
+    gap: 5px;
+    margin-top: 20px;
+    padding-top: 16px;
+  }
+
+  .pageButton {
+    min-width: 34px;
+    height: 34px;
+    padding: 0 8px;
+  }
+
+  .pageInfo {
+    font-size: 11px;
+  }
+}

@@ -13,24 +13,39 @@ export function usePollManagement(eventFilter, sessionFilter, mutationLock) {
 
   const navigate = useNavigate();
 
-  const refresh = useCallback(async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const data = await pollApi.mine({
-        page,
-        size: 10,
-        ...(eventFilter ? { eventId: eventFilter } : {}),
-        ...(sessionFilter ? { sessionId: sessionFilter } : {}),
-      });
-      setRows(data.content || []);
-      setPages(data.totalPages || 0);
-    } catch (e) {
-      setError(e.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [page, eventFilter, sessionFilter]);
+  const refresh = useCallback(
+    async ({ silent = false } = {}) => {
+      // 최초 조회와 페이지 이동 시에만 로딩 표시
+      if (!silent) {
+        setLoading(true);
+        setError('');
+      }
+
+      try {
+        const data = await pollApi.mine({
+          page,
+          size: 10,
+          ...(eventFilter ? { eventId: eventFilter } : {}),
+          ...(sessionFilter ? { sessionId: sessionFilter } : {}),
+        });
+
+        setRows(data.content || []);
+        setPages(data.totalPages || 0);
+      } catch (e) {
+        if (!silent) {
+          setError(e.message);
+        } else {
+          // 자동 갱신 실패 시 기존 화면 유지
+          console.error('투표 목록 자동 갱신 실패:', e);
+        }
+      } finally {
+        if (!silent) {
+          setLoading(false);
+        }
+      }
+    },
+    [page, eventFilter, sessionFilter],
+  );
 
   useEffect(() => {
     void refresh();

@@ -11,7 +11,6 @@ export default function PollResultHeader({ from, pollId, onRefresh, loading }) {
   return (
     <header className="flex flex-wrap items-center justify-between gap-3">
       <div>
-        <p className="text-sm text-emerald-700">SYNC5 / Interaction</p>
         <h1 className="text-2xl font-bold">투표 결과</h1>
         <p className="text-sm text-slate-500">
           투표 ID: {pollId} · {fromManage ? '관리자 관리 화면에서 진입' : '투표 목록에서 진입'}

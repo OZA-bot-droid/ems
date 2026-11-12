@@ -1,30 +1,50 @@
 import { useLocation, useParams } from 'react-router-dom';
+import { useAuth } from '../../member/hooks/useAuth.js';
 import Header from '../../../components/layout/LegacyHeader.jsx';
-import module0 from '../../../components/layout/header.module.scss';
 import { mapClassNames } from '../../../styles/classNames.js';
+import module0 from '../../../components/layout/header.module.scss';
+
 import PollResultHeader from '../components/result/PollResultHeader.jsx';
 import PollResultDetail from '../components/result/PollResultDetail.jsx';
 import { usePollTotalResults } from '../hooks/result/usePollTotalResults.js';
 
+import styles from '../styles/PollResult.module.scss';
+
 const cx = (value) => mapClassNames(value, module0);
 
-/**
- * 관리자와 일반 사용자가 공유하는 결과 페이지.
- * /polls/:pollId/results 진입. location.state.from은 뒤로가기 UI 용도일 뿐 권한 근거가 아니다.
- */
+/** 관리자와 일반 사용자가 공통으로 사용하는 투표 결과 페이지 */
 export default function PollResultPage() {
   const { pollId } = useParams();
   const location = useLocation();
+
+  // 현재 로그인 사용자의 역할 확인
+  const { role } = useAuth();
+
+  // 결과 페이지에 진입한 경로 확인
   const from = location.state?.from;
-  const isAdminEntry = from === '/admin/polls' || from === '/polls/manage';
-  const { results, loading, error, reload } = usePollTotalResults(pollId);
+
+  // 전체 투표 결과 및 사용자 본인 투표 기록 조회
+  const { results, myOptionId, loading, error, reload } = usePollTotalResults(pollId, role);
 
   return (
     <div className={cx('app-shell')}>
-      <Header role={isAdminEntry ? 'ADMIN' : 'USER'} activePage="votes" />
-      <main className="mx-auto max-w-6xl space-y-5 p-5 text-slate-800">
-        <PollResultHeader from={from} pollId={pollId} onRefresh={reload} loading={loading} />
-        <PollResultDetail results={results} loading={loading} error={error} />
+      <Header />
+
+      <main className={`${cx('app-main-content')} ${styles.main}`}>
+        {/* 결과 페이지 제목 및 새로고침 버튼 */}
+        <div className={styles.pageHeader}>
+          <PollResultHeader from={from} pollId={pollId} onRefresh={reload} loading={loading} />
+        </div>
+
+        {/* 투표 결과 표시 */}
+        <div className={styles.resultCard}>
+          <PollResultDetail
+            results={results}
+            myOptionId={myOptionId}
+            loading={loading}
+            error={error}
+          />
+        </div>
       </main>
     </div>
   );

@@ -1,0 +1,173 @@
+/* ======================================
+   투표 결과 페이지 메인 영역
+====================================== */
+
+.main {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+  padding: 28px 32px 40px;
+  color: #17243c;
+}
+
+/* ======================================
+   결과 페이지 제목 및 버튼 영역
+====================================== */
+
+.pageHeader {
+  width: 100%;
+}
+
+/* ======================================
+   투표 결과 카드
+====================================== */
+
+.resultCard {
+  width: 100%;
+  min-height: 475px;
+  box-sizing: border-box;
+
+  padding: 24px;
+  background: #ffffff;
+  border-radius: 14px;
+
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.04);
+}
+
+/* ======================================
+   투표 결과 선택지
+====================================== */
+
+/* 선택지별 결과 영역 */
+.resultOption {
+  padding: 14px 16px;
+  margin-bottom: 12px;
+
+  border: 1px solid #d8dfe8;
+  border-radius: 9px;
+  background: #f4f6fa;
+}
+
+/* 최다 득표 선택지 강조 */
+.winnerOption {
+  background: #ecfdf5;
+  border-color: #10b981;
+}
+
+/* 선택지 이름과 득표수 양쪽 정렬 */
+.resultInfo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  width: 100%;
+  min-width: 0;
+}
+
+/* 선택지 이름 */
+.resultLabel {
+  min-width: 0;
+  color: #17243c;
+  font-size: 14px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+/* 오른쪽 득표수·득표율 */
+.resultCount {
+  margin-left: auto;
+  flex-shrink: 0;
+
+  color: #17243c;
+  font-size: 13px;
+  white-space: nowrap;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 현재 로그인 사용자가 투표한 선택지 표시 */
+.myVoteBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-left: 8px;
+  padding: 4px 9px;
+
+  border: 1px solid #0d9488;
+  border-radius: 20px;
+
+  background: #ffffff;
+  color: #0f766e;
+
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* ======================================
+   득표율 막대
+====================================== */
+
+/* 득표율 막대 배경 */
+.resultBar {
+  width: 100%;
+  height: 8px;
+  margin-top: 10px;
+
+  border-radius: 20px;
+  background: #e2e8f0;
+  overflow: hidden;
+}
+
+/* 실제 득표율 막대 */
+.resultBarFill {
+  height: 100%;
+  border-radius: 20px;
+  background: #059669;
+}
+
+/* ======================================
+   반응형 레이아웃
+====================================== */
+
+/* 좁은 화면 대응 */
+@media (max-width: 768px) {
+  .main {
+    padding: 20px 16px;
+    gap: 16px;
+  }
+
+  .resultCard {
+    min-height: 350px;
+    padding: 16px;
+  }
+
+  .resultOption {
+    padding: 12px;
+  }
+
+  .resultInfo {
+    align-items: flex-start;
+  }
+
+  .resultLabel {
+    flex: 1;
+  }
+
+  .resultCount {
+    font-size: 12px;
+  }
+
+  .myVoteBadge {
+    padding: 3px 7px;
+    font-size: 10px;
+  }
+}
