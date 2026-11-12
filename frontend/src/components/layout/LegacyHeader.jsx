@@ -30,6 +30,7 @@ const MENUS = {
   ADMIN: {
     heading: 'ADMIN WORKSPACE',
     items: [
+      { id: 'dashboard', label: '운영 대시보드', href: null }, // 대시보드 화면 연결 전까지 비활성 표시
       { id: 'event-list', label: '행사 목록', href: '/events' }, // 사용자와 같은 행사 목록 (관리자는 상단에 [행사 관리] 탭도 보임)
       { id: 'events', label: '행사 관리', href: '/admin/events' }, // Event Service /events
       { id: 'sessions', label: '세션 관리', href: '/admin/sessions' }, // /events/{id}/sessions
