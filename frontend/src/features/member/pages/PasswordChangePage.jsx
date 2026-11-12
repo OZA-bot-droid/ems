@@ -35,7 +35,7 @@ const PasswordChange = () => {
 
     try {
       // 비밀번호 재설정 요청
-      await memberApi.passwordReset(currentPassword, newPassword);
+      await memberApi.passwordChange(currentPassword, newPassword);
 
       // 정상 완료되면 로그인 페이지로 이동
       navigate('/login', {
@@ -45,9 +45,11 @@ const PasswordChange = () => {
         },
       });
     } catch (err) {
+      console.error(err);
+
       // 서버에서 전달한 실제 오류 메시지 표시
-      if (err.code === 'INVALID_PASSWORD_RESET_TOKEN') {
-        setMessage('재설정 링크가 만료되었거나 유효하지 않습니다.');
+      if (err.code === 'INVALID_CREDENTIALS') {
+        setMessage('현재 비밀번호를 확인해주세요.');
       } else {
         setMessage(err.message || '비밀번호 재설정에 실패했습니다.');
       }
