@@ -101,7 +101,7 @@ public class EventService {
                 request.meetingUrl(),
                 createdBy);
         if (request.postedDate() != null) {   // 게시 예약 (선택)
-            validatePostedDate(request.postedDate(), request.endsAt());
+            validatePostedDate(request.postedDate(), request.startsAt());
             event.changePostedDate(request.postedDate());
         }
         return EventResponse.from(eventRepository.save(event));
@@ -137,7 +137,11 @@ public class EventService {
                 throw new BusinessException(
                         HttpStatus.CONFLICT, "EVENT_ALREADY_POSTED", "이미 공개된 행사는 게시일을 바꿀 수 없습니다.");
             }
-            validatePostedDate(request.postedDate(), endsAt);
+            validatePostedDate(request.postedDate(), startsAt);
+        } else if (wasDraft && event.getPostedDate() != null && !event.getPostedDate().isBefore(startsAt)) {
+            // 게시일은 그대로 두고 시작 일시만 앞당겨서 "시작 후 게시"가 되는 경우도 막음
+            throw new BusinessException(
+                    HttpStatus.BAD_REQUEST, "INVALID_POSTED_DATE", "게시일은 행사 시작 일시보다 앞이어야 합니다.");
         }
         // 행사 일정을 줄였을 때 이미 등록된 세션이 행사 밖으로 벗어나면 막는다
         if (sessionRepository.existsOutsidePeriod(eventId, startsAt, endsAt)) {
@@ -236,15 +240,15 @@ public class EventService {
         }
     }
 
-    /** 게시 예약 시각은 지금 이후, 행사 종료 전이어야 한다 */
-    private void validatePostedDate(Instant postedDate, Instant endsAt) {
+    /** 게시일 규칙: 지금보다 뒤 + 행사 시작보다 앞 (시작 전에 공개되어야 참가 신청을 받을 수 있음) */
+    private void validatePostedDate(Instant postedDate, Instant startsAt) {
         if (!postedDate.isAfter(Instant.now(clock))) {
             throw new BusinessException(
                     HttpStatus.BAD_REQUEST, "INVALID_POSTED_DATE", "게시일은 현재 시간 이후로 설정하세요.");
         }
-        if (!postedDate.isBefore(endsAt)) {
+        if (!postedDate.isBefore(startsAt)) {
             throw new BusinessException(
-                    HttpStatus.BAD_REQUEST, "INVALID_POSTED_DATE", "게시일은 행사 종료 일시보다 앞이어야 합니다.");
+                    HttpStatus.BAD_REQUEST, "INVALID_POSTED_DATE", "게시일은 행사 시작 일시보다 앞이어야 합니다.");
         }
     }
 

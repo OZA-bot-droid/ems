@@ -20,7 +20,14 @@ public class SecurityConfig {
     @Bean
     public SecurityWebFilterChain filterChain(ServerHttpSecurity http, GatewayErrorWriter errors) {
         CorsConfiguration cors = new CorsConfiguration();
-        cors.setAllowedOrigins(List.of("http://localhost:5173", "http://127.0.0.1:5173"));
+        cors.setAllowedOrigins(
+    List.of(
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:8088",
+        "http://127.0.0.1:8088"
+    )
+);
         cors.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         cors.setAllowedHeaders(List.of("*"));
         cors.setAllowCredentials(true);
