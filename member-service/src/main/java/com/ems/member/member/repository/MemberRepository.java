@@ -19,8 +19,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Optional<Member> findByProviderAndProviderId(String provider, String providerId);
 
-    boolean existsByProviderAndProviderId(String provider, String providerId);
-
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT m FROM Member m WHERE m.id = :memberId")
     Optional<Member> findByIdForUpdate(
