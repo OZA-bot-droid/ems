@@ -60,10 +60,12 @@ export default function EventFormModal({ event, onClose, onSaved }) {
     if (form.startsAt && form.endsAt && form.endsAt <= form.startsAt)
       errors.endsAt = '종료 일시는 시작 일시보다 뒤여야 합니다.';
     if (!form.capacity || Number(form.capacity) < 1) errors.capacity = '참가 정원은 1명 이상이어야 합니다.';
-    if (canSchedule && form.postedDate && postedChanged) {
-      if (form.postedDate <= nowKstInput()) errors.postedDate = '게시일은 현재 시간 이후로 설정하세요.';
-      else if (form.endsAt && form.postedDate >= form.endsAt)
-        errors.postedDate = '게시일은 행사 종료 일시보다 앞이어야 합니다.';
+    if (canSchedule && form.postedDate) {
+      if (postedChanged && form.postedDate <= nowKstInput())
+        errors.postedDate = '게시일은 현재 시간 이후로 설정하세요.';
+      // 게시일을 안 바꾸고 시작 일시만 앞당긴 경우도 검사 (서버와 같은 규칙)
+      else if (form.startsAt && form.postedDate >= form.startsAt)
+        errors.postedDate = '게시일은 행사 시작 일시보다 앞이어야 합니다.';
     }
     if (form.meetingUrl.length > 500) errors.meetingUrl = '500자까지 입력할 수 있습니다.';
     return errors;
@@ -99,7 +101,8 @@ export default function EventFormModal({ event, onClose, onSaved }) {
     return errors;
   }
 
-  async function submit(e) {
+  // publishNow = true 이면 [바로 공개]: 등록 → 세션 추가 → 상태를 OPEN으로 (새 등록일 때만)
+  async function submit(e, publishNow = false) {
     e.preventDefault(); // 폼 기본 동작(새로고침) 막기
     setServerError(null);
     const errors = validate();
@@ -120,7 +123,8 @@ export default function EventFormModal({ event, onClose, onSaved }) {
       meetingUrl: form.meetingUrl.trim() || empty,
     };
     // 게시 예약: 값을 넣었고(수정이면 바꿨을 때만) 작성 중일 때만 보냄
-    if (canSchedule && form.postedDate && postedChanged) body.postedDate = kstToInstant(form.postedDate);
+    // 바로 공개할 때는 게시 예약이 필요 없으므로 보내지 않음
+    if (canSchedule && form.postedDate && postedChanged && !publishNow) body.postedDate = kstToInstant(form.postedDate);
 
     setSaving(true);
     let saved;
@@ -149,6 +153,15 @@ export default function EventFormModal({ event, onClose, onSaved }) {
         result.created++;
       } catch (err) {
         result.failed.push({ title: s.title.trim(), message: err.message });
+      }
+    }
+    // [바로 공개]: 세션까지 만든 뒤 상태를 DRAFT → OPEN 으로 (행사 관리의 [공개] 버튼과 같은 요청)
+    if (publishNow) {
+      try {
+        saved = await eventApi.update(saved.id, { status: 'OPEN' });
+        result.published = true;
+      } catch (err) {
+        result.publishError = err.message; // 공개만 실패: 행사는 "작성 중"으로 남음
       }
     }
     setSaving(false);
@@ -215,7 +228,9 @@ export default function EventFormModal({ event, onClose, onSaved }) {
                 id="ev-posted"
                 value={form.postedDate}
                 min={nowKstInput()} // 지난 시각은 고를 수 없음
-                max={form.endsAt || undefined} // 행사가 끝나기 전까지만
+                max={form.startsAt || undefined} // 행사가 시작하기 전까지만
+                // max는 "같은 시각까지" 고를 수 있어서, 시작 시각과 같은 시각도 막음 (게시일 < 시작)
+                isBlocked={(v) => Boolean(form.startsAt) && v >= form.startsAt}
                 onChange={(v) => setForm((f) => ({ ...f, postedDate: v }))}
               />
               <span className={cx("text-[11px] text-(--ems-muted)")}>
@@ -305,7 +320,7 @@ export default function EventFormModal({ event, onClose, onSaved }) {
           )}
 
           <p className={cx("rounded-[8px] bg-(--ems-green-soft) px-4 py-2.5 text-xs font-semibold text-(--ems-green)")}>
-            {isEdit ? '행사 기간을 줄일 때는 세션이 기간 안에 있어야 합니다.' : '세션은 지금 함께 추가하거나, 등록 후 세션 관리에서 추가할 수 있습니다. 새 행사는 "작성 중"으로 시작되어 [공개]를 눌러야 참가 신청이 가능합니다.'}
+            {isEdit ? '행사 기간을 줄일 때는 세션이 기간 안에 있어야 합니다.' : '세션은 지금 함께 추가하거나, 등록 후 세션 관리에서 추가할 수 있습니다. 새 행사는 "작성 중"으로 시작되어 [공개]를 눌러야 참가 신청이 가능합니다. [등록 후 바로 공개]를 누르면 바로 "모집 중"이 됩니다.'}
           </p>
         </div>
 
@@ -314,6 +329,17 @@ export default function EventFormModal({ event, onClose, onSaved }) {
           <button type="button" onClick={onClose} className={cx("h-[43px] flex-1 rounded-[9px] bg-(--ems-bg) text-[13px] font-semibold text-(--ems-ink)")}>
             취소
           </button>
+          {/* 새 등록일 때만: 작성 중을 건너뛰고 바로 "모집 중"으로 */}
+          {!isEdit && (
+            <button
+              type="button"
+              disabled={saving}
+              onClick={(e) => submit(e, true)}
+              className={cx("h-[43px] flex-1 rounded-[9px] border border-(--ems-green) bg-(--ems-surface) text-[13px] font-semibold text-(--ems-green) hover:bg-(--ems-green-soft) disabled:opacity-60")}
+            >
+              {saving ? '저장 중…' : '등록 후 바로 공개'}
+            </button>
+          )}
           <button type="submit" disabled={saving} className={cx("h-[43px] flex-1 rounded-[9px] bg-(--ems-green) text-[13px] font-semibold text-white hover:bg-(--ems-green-dark) disabled:opacity-60")}>
             {saving
               ? '저장 중…'

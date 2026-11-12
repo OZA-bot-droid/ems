@@ -6,10 +6,11 @@ import { registrationApi } from '../api/registrationApi.js';
 import { useAuth } from '../../member/hooks/useAuth.js';
 import { formatRange, formatTimeRange, instantToKstInput, STATUS_BADGE } from '../utils/format.js';
 import RegistrationApplyModal from './RegistrationApplyModal.jsx';
+import LoginRequiredModal from './LoginRequiredModal.jsx';
 
-// 참가 승인 화면 주소. 관리자용 "신청 목록 조회" API가 아직 없어서 화면이 없음 → null이면 버튼 비활성
-// (승인 화면이 생기면 예: (id) => `/admin/approvals?eventId=${id}` 로 바꾸면 바로 연결됨)
-const APPROVAL_HREF = null;
+// 참가 승인 화면 주소 (이도형 님 AdminApprovalPage). 내 행사들의 대기 신청을 승인·거절하는 화면
+// 지금 승인 화면은 행사별로 거르지 않으므로 eventId는 넘기지 않음 (행사별 필터가 생기면 ?eventId=${id} 추가)
+const APPROVAL_HREF = () => '/admin/approvals';
 
 export default function EventDetail({ eventId, onBack }) {
   const { role, memberId } = useAuth();
@@ -22,6 +23,8 @@ export default function EventDetail({ eventId, onBack }) {
   const [showApplyModal, setShowApplyModal] = useState(false);
   const [applyError, setApplyError] = useState('');
   const isAdmin = role === 'ADMIN';
+  const isLoggedIn = Boolean(role); // 로그인하지 않으면 role이 없음 (EventDiscoveryPage도 같은 기준)
+  const [showLoginModal, setShowLoginModal] = useState(false); // 비로그인이 [참가 신청하기]를 눌렀을 때 뜨는 확인 창
   const [summary, setSummary] = useState(null); // 관리자: 신청 현황 (실패하면 그냥 안 보여줌)
 
   useEffect(() => {
@@ -124,7 +127,6 @@ export default function EventDetail({ eventId, onBack }) {
       <article className="flex flex-col gap-8 rounded-[14px] bg-(--ems-surface) p-5">
         {/* 머리: Event hero */}
         <header className="flex flex-col gap-3 rounded-[12px] bg-(--ems-green-soft) px-6 py-6">
-          <p className="text-sm font-bold text-(--ems-green)">EMS 2026 · EVENT</p>
           <h2 className="text-[26px] font-bold text-(--ems-ink)">{event.title}</h2>
           <span className={`w-fit rounded-full px-3 py-1 text-xs font-semibold ${badge.className}`}>
             {badge.label}
@@ -193,8 +195,8 @@ export default function EventDetail({ eventId, onBack }) {
             )}
           </section>
 
-          {/* 관리자: [세션 관리] [참가 승인] / 일반 사용자: [참가 신청하기] */}
-          {isAdmin ? (
+          {/* 관리자: [세션 관리] [참가 승인] / 그 외: [참가 신청하기] (비로그인은 누르면 로그인 안내 창) */}
+          {isAdmin && isOwner ? (
             <div className="flex flex-col items-end gap-2">
               <div className="flex flex-wrap justify-end gap-2">
                 <button
@@ -206,9 +208,9 @@ export default function EventDetail({ eventId, onBack }) {
                   세션 관리
                 </button>
                 <button
-                  disabled={!APPROVAL_HREF}
-                  title={APPROVAL_HREF ? '신청자를 승인·거절합니다' : '참가 승인 화면 준비 중 (관리자용 신청 목록 API 필요)'}
-                  onClick={() => APPROVAL_HREF && window.location.assign(APPROVAL_HREF(event.id))}
+                  disabled={!isOwner}
+                  title={isOwner ? '신청자를 승인·거절합니다' : '내가 만든 행사만 관리할 수 있습니다'}
+                  onClick={() => window.location.assign(APPROVAL_HREF(event.id))}
                   className="h-[42px] min-w-[150px] rounded-[10px] bg-(--ems-green) px-4 text-[13px] font-semibold text-white hover:bg-(--ems-green-dark) disabled:cursor-not-allowed disabled:bg-slate-300"
                 >
                   참가 승인{summary ? ` · 대기 ${summary.pending}명` : ''}
@@ -227,9 +229,11 @@ export default function EventDetail({ eventId, onBack }) {
                 {applyMessage}
               </p>
             )}
+          {!(isAdmin && !isOwner) && (
             <button
               disabled={!canApply || applying}
               onClick={() => {
+                if (!isLoggedIn) return setShowLoginModal(true); // 비로그인: 신청 창 대신 로그인 안내
                 setApplyError('');
                 setShowApplyModal(true);
               }}
@@ -237,10 +241,18 @@ export default function EventDetail({ eventId, onBack }) {
             >
               {canApply ? '참가 신청하기' : event.status === 'CLOSED' ? '신청이 마감되었습니다' : '아직 모집 전입니다'}
             </button>
+          )}
           </div>
           )}
         </div>
       </article>
+
+      {showLoginModal && (
+        <LoginRequiredModal
+          onClose={() => setShowLoginModal(false)}
+          onConfirm={() => window.location.assign('/login')}
+        />
+      )}
 
       {!isAdmin && showApplyModal && (
         <RegistrationApplyModal

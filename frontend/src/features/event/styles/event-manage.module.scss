@@ -159,7 +159,28 @@
   min-width: 0;
   gap: 4px;
 
+  // 제목 버튼: 평소엔 글자처럼, 마우스를 올리면 밑줄로 "누를 수 있음"을 알려 줌
+  .event-manage-title-link {
+    display: block;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+
+    &:hover strong,
+    &:focus-visible strong {
+      color: var(--ems-green);
+      text-decoration: underline;
+    }
+  }
+
   strong {
+    display: block;
     overflow: hidden;
     color: var(--ems-ink);
     font-size: 14px;

@@ -6,6 +6,9 @@ import { formatShort, STATUS_BADGE } from '../utils/format.js';
 import { useAuth } from '../../member/hooks/useAuth.js';
 
 const PAGE_SIZE = 8;
+// 정렬: 모집 중(OPEN) → 마감(CLOSED), 같은 상태 안에서는 시작일이 빠른 순
+// status는 DB에 글자로 저장 → 내림차순이면 OPEN > DRAFT > CLOSED (관리자 본인의 작성 중 행사는 가운데)
+const LIST_SORT = ['status,desc', 'startsAt,asc'];
 
 export default function EventList({ onSelect }) {
   const { role } = useAuth();
@@ -25,7 +28,7 @@ export default function EventList({ onSelect }) {
     setLoading(true);
     setError(null);
     eventApi
-      .list({ status, page, size: PAGE_SIZE })
+      .list({ status, page, size: PAGE_SIZE, sort: LIST_SORT })
       .then((data) => !ignore && setResult(data))
       .catch((e) => !ignore && setError(e))
       .finally(() => !ignore && setLoading(false));
@@ -69,7 +72,6 @@ export default function EventList({ onSelect }) {
           <option value="">전체 행사</option>
           <option value="OPEN">모집 중</option>
           <option value="CLOSED">마감</option>
-          {isAdmin && <option value="DRAFT">작성 중</option>}
         </select>
       </div>
 
