@@ -119,7 +119,7 @@ function SignupForm() {
       console.log(res);
     } catch (err) {
       console.error(err);
-      alert('서버 연결 중 오류가 발생했습니다.');
+      alert(err.response?.data?.message || '이메일 인증에 실패했습니다.');
     } finally {
       setVerifying(false);
     }
@@ -155,7 +155,6 @@ function SignupForm() {
   };
 
   // 닉네임 중복 확인
-
   const nameDuplicateCheck = async () => {
     const name = member.name.trim();
 
@@ -180,7 +179,7 @@ function SignupForm() {
       }
     } catch (err) {
       setNameDuplicate(true);
-      alert(err.message || '중복 확인에 실패했습니다.');
+      alert(err.response?.data?.message || '중복 확인에 실패했습니다.');
     }
   };
 
