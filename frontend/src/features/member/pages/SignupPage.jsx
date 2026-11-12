@@ -90,7 +90,10 @@ function SignupForm() {
 
     try {
       const res = await memberApi.register({ ...member, role });
-      alert(res.message);
+
+      if (res.message === '회원가입 성공') {
+        alert('회원가입에 성공하셨습니다.');
+      }
       navigate('/login');
     } catch (error) {
       alert(error.response?.data?.message || '회원가입 요청에 실패했습니다.');
@@ -115,7 +118,9 @@ function SignupForm() {
       const res = await memberApi.emailVerify(email, verificationCode);
 
       setVerifiedEmail(email);
-      alert(res.message);
+      if (res.message === '요청 성공') {
+        alert('인증에 성공하셨습니다.');
+      }
       console.log(res);
     } catch (err) {
       console.error(err);
@@ -144,7 +149,9 @@ function SignupForm() {
       setCodeSent(true);
       setVerifiedEmail('');
       setVerificationCode('');
-      alert(res.message);
+      if (res.message === '요청 성공') {
+        alert('인증 번호가 성공적으로 전송되었습니다.');
+      }
       console.log(res);
     } catch (err) {
       console.error(err);
