@@ -1,72 +1,38 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from './member/hooks/useAuth.js';
-import { eventApi } from './event/api/eventApi.js';
-import { formatShort, STATUS_BADGE } from './event/utils/format.js';
-import './home.css';
+import React, { useRef } from 'react';
+import { useAuth } from '../auth/AuthContext';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Home = () => {
-  const { accessToken, authLoading, role, logout } = useAuth();
-  const [events, setEvents] = useState([]);
-  const [eventsLoading, setEventsLoading] = useState(true);
-  const [eventsError, setEventsError] = useState(false);
-  const [loggingOut, setLoggingOut] = useState(false);
-  const canCreate = Boolean(accessToken && role === 'ADMIN');
-  const createDestination = authLoading ? '/events' : canCreate ? '/admin/events' : accessToken ? '/events' : '/login';
-
-  useEffect(() => {
-    let active = true;
-    eventApi.list({ status: 'OPEN', page: 0, size: 3 })
-      .then((data) => {
-        if (active) setEvents(Array.isArray(data) ? data.slice(0, 3) : (data?.content ?? []).slice(0, 3));
-      })
-      .catch(() => { if (active) setEventsError(true); })
-      .finally(() => { if (active) setEventsLoading(false); });
-    return () => { active = false; };
-  }, []);
-
-  const handleLogout = async () => {
-    if (loggingOut) return;
-    setLoggingOut(true);
-    try { await logout(); }
-    catch (error) { console.error('로그아웃 서버 요청 실패:', error); }
-    finally { setLoggingOut(false); }
-  };
+  const navigate = useNavigate();
+  const { accessToken, authLoading, logout } = useAuth();
   const trackRef = useRef(null);
   const groupRef = useRef(null);
   const dragRef = useRef(null);
 
   const handlePointerDown = (event) => {
-    // 마우스 왼쪽 버튼 또는 터치/펜의 주 포인터만 드래그 처리
-    if (!event.isPrimary || (event.pointerType === 'mouse' && event.button !== 0)) return;
+    if (event.button !== 0) return;
 
-    const animation =
-      trackRef.current
-        ?.getAnimations()
-        .find((item) => item.effect?.getTiming()?.iterations === Infinity) ??
-      trackRef.current?.getAnimations()[0];
+    const animation = trackRef.current?.getAnimations()[0];
     const groupWidth = groupRef.current?.getBoundingClientRect().width;
 
-    const duration = Number(animation?.effect?.getComputedTiming()?.duration);
-    if (!animation || !groupWidth || !Number.isFinite(duration) || duration <= 0) return;
+    if (!animation || !groupWidth) return;
 
     animation.pause();
 
     dragRef.current = {
       startX: event.clientX,
       startTime: animation.currentTime ?? 0,
-      duration,
+      duration: animation.effect.getTiming().duration,
       groupWidth,
-      animation,
     };
 
-    if (event.currentTarget.setPointerCapture) event.currentTarget.setPointerCapture(event.pointerId);
+    event.currentTarget.setPointerCapture(event.pointerId);
   };
 
   const handlePointerMove = (event) => {
-    if (!dragRef.current || !event.isPrimary) return;
+    if (!dragRef.current) return;
 
-    const animation = dragRef.current.animation;
+    const animation = trackRef.current?.getAnimations()[0];
     if (!animation) return;
 
     const { startX, startTime, duration, groupWidth } = dragRef.current;
@@ -85,27 +51,25 @@ const Home = () => {
   const handlePointerUp = (event) => {
     if (!dragRef.current) return;
 
-    const { animation } = dragRef.current;
     dragRef.current = null;
 
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
 
-    if (animation.playState === 'paused') animation.play();
+    trackRef.current?.getAnimations()[0]?.play();
   };
 
   const handleLostPointerCapture = () => {
     if (!dragRef.current) return;
 
-    const { animation } = dragRef.current;
     dragRef.current = null;
-    if (animation.playState === 'paused') animation.play();
+    trackRef.current?.getAnimations()[0]?.play();
   };
 
   return (
     <>
-      <header className="w-full bg-ems-sidebar text-white">
+      <header className="w-full bg-[#111827] text-white">
         <div className="mx-auto flex max-w-[1200px] flex-wrap items-center justify-between gap-y-3 px-6 py-4 lg:h-[88px] lg:flex-nowrap lg:py-0">
           {/* 로고 */}
           <Link to="/" className="shrink-0">
@@ -113,6 +77,7 @@ const Home = () => {
               src="/sync5-logo.png"
               alt="SYNC5"
               className="h-[48px] w-auto object-contain lg:h-[64px]"
+              onClick={() => navigate('/')}
             />
           </Link>
 
@@ -121,18 +86,15 @@ const Home = () => {
             aria-label="메인 메뉴"
             className="order-3 flex w-full items-center justify-around gap-3 border-t border-white/10 pt-3 text-[13px] font-medium lg:order-none lg:w-auto lg:justify-center lg:gap-10 lg:border-0 lg:pt-0"
           >
-            <Link to="/" className="transition-colors hover:text-ems-primary">
+            <Link to="/" className="transition-colors hover:text-[#22c55e]">
               홈
             </Link>
 
-            <Link
-              to={createDestination}
-              className="transition-colors hover:text-ems-primary"
-            >
-              {accessToken && !canCreate ? '행사 탐색' : '개최 Event'}
+            <Link to="/events/create" className="transition-colors hover:text-[#22c55e]">
+              개최 Event
             </Link>
 
-            <Link to="/events" className="transition-colors hover:text-ems-primary">
+            <Link to="/events/search" className="transition-colors hover:text-[#22c55e]">
               검색
             </Link>
           </nav>
@@ -142,22 +104,21 @@ const Home = () => {
             {!authLoading &&
               (accessToken ? (
                 <>
-                  <Link to="/mypage" className="transition-colors hover:text-ems-primary">
+                  <Link to="/mypage" className="transition-colors hover:text-[#22c55e]">
                     마이페이지
                   </Link>
 
                   <button
                     type="button"
-                    onClick={handleLogout}
-                    disabled={loggingOut}
-                    className="transition-colors hover:text-ems-primary"
+                    onClick={logout}
+                    className="transition-colors hover:text-[#22c55e]"
                   >
-                    {loggingOut ? '로그아웃 중...' : '로그아웃'}
+                    로그아웃
                   </button>
                 </>
               ) : (
                 <>
-                  <Link to="/login" className="transition-colors hover:text-ems-primary">
+                  <Link to="/login" className="transition-colors hover:text-[#22c55e]">
                     로그인
                   </Link>
 
@@ -175,38 +136,11 @@ const Home = () => {
 
       <main className="bg-white">
         {/* Hero */}
-        <section className="relative overflow-hidden bg-(--ems-green-soft) px-6 py-20 sm:py-28">
+        <section className="relative overflow-hidden bg-[#f1f7f5] px-6 py-20 sm:py-28">
           <div className="pointer-events-none absolute -right-24 -top-32 h-[450px] w-[450px] rounded-full bg-ems-primary/10 blur-3xl" />
 
           <div className="relative mx-auto grid max-w-[1200px] items-center gap-12 lg:grid-cols-2">
-            <div>
-              <p className="text-[13px] font-bold tracking-widest text-ems-primary">
-                SYNC5 EVENT PLATFORM
-              </p>
-              <h1 className="mt-5 text-[36px] font-extrabold leading-tight text-ems-text sm:text-[48px]">
-                이벤트의 시작부터
-                <br />
-                참여의 순간까지
-              </h1>
-              <p className="mt-6 max-w-[520px] text-[15px] leading-8 text-ems-muted">
-                이벤트를 탐색하고 참가를 신청하세요. 주최자는 행사를 만들고 참가자를 관리할 수
-                있습니다.
-              </p>
-              <div className="mt-9 flex flex-wrap gap-3">
-                <Link
-                  to="/events"
-                  className="rounded-xl bg-ems-primary px-7 py-3.5 text-[14px] font-semibold text-white transition-colors hover:bg-ems-member-primary-hover"
-                >
-                  이벤트 둘러보기
-                </Link>
-                <Link
-                  to={createDestination}
-                  className="rounded-xl border border-ems-member-input-border bg-white px-7 py-3.5 text-[14px] font-semibold text-ems-text transition-colors hover:bg-ems-background"
-                >
-                  {authLoading ? '이벤트 둘러보기' : accessToken && !canCreate ? '행사 목록 보기' : '이벤트 개최하기'}
-                </Link>
-              </div>
-            </div>
+            <div>{/* 기존 Hero 제목, 설명, 버튼 전체 */}</div>
 
             {/* 오른쪽 소개 패널 */}
             <div className="hidden rounded-[24px] border border-[#d6e3dc] bg-white/80 p-6 shadow-[0_20px_60px_rgba(20,34,56,0.06)] lg:block">
@@ -223,7 +157,7 @@ const Home = () => {
               </div>
 
               <div className="mt-6 flex items-center justify-between">
-                <p className="text-[13px] text-ems-muted">탐색 · 신청 · 실시간 참여</p>
+                <p className="text-[13px] text-[#63758a]">탐색 · 신청 · 실시간 참여</p>
                 <span className="text-[20px] text-ems-primary">↗</span>
               </div>
             </div>
@@ -244,51 +178,120 @@ const Home = () => {
               <p className="mt-3 text-[14px] text-ems-muted">다양한 이벤트를 만나보세요.</p>
             </div>
 
-            {/* Event Service 실제 목록. 샘플 데이터와 섞지 않는다. */}
-            {eventsLoading && <p className="py-10 text-center text-ems-muted" role="status">이벤트를 불러오는 중입니다.</p>}
-            {!eventsLoading && eventsError && (
-              <div role="alert" className="rounded-2xl border border-ems-border bg-white p-8 text-center text-ems-muted">
-                현재 이벤트 정보를 불러올 수 없습니다. 행사 목록에서 다시 확인해 주세요.
-              </div>
-            )}
-            {!eventsLoading && !eventsError && events.length === 0 && (
-              <p className="rounded-2xl border border-ems-border bg-white p-8 text-center text-ems-muted">현재 모집 중인 이벤트가 없습니다.</p>
-            )}
-            {!eventsLoading && !eventsError && events.length > 0 && (
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {events.map((event, index) => {
-                  const badge = STATUS_BADGE[event.status] ?? STATUS_BADGE.OPEN;
-                  const capacity = Math.max(0, Number(event.capacity) || 0);
-                  const participants = Math.max(0, Number(event.participants ?? event.registeredCount ?? 0) || 0);
-                  return (
-                    <Link to={`/events/${encodeURIComponent(event.id)}`} key={event.id}
-                      className="group flex flex-col overflow-hidden rounded-[20px] border border-ems-member-input-border bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-ems-primary">
-                      <div className={`relative flex h-[175px] items-center justify-center ${index % 2 === 0 ? 'bg-ems-member-primary-soft' : 'bg-(--ems-blue-soft)'}`}>
-                        <span className="text-[58px]" aria-hidden="true">{['📅', '🎟️', '💻'][index % 3]}</span>
+            {/* 이벤트 카드 */}
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {[
+                {
+                  id: 1,
+                  title: '개발자 기술 컨퍼런스',
+                  category: '컨퍼런스',
+                  status: '모집 중',
+                  date: '2026.11.21',
+                  location: '온라인',
+                  participants: 24,
+                  capacity: 80,
+                  color: 'bg-ems-member-primary-soft',
+                  icon: '💻',
+                },
+                {
+                  id: 2,
+                  title: '클라우드 아키텍처 세미나',
+                  category: '세미나',
+                  status: '모집 중',
+                  date: '2026.11.28',
+                  location: '온라인',
+                  participants: 12,
+                  capacity: 40,
+                  color: 'bg-[#e8eef9]',
+                  icon: '☁️',
+                },
+                {
+                  id: 3,
+                  title: '실전 AI 워크숍',
+                  category: '워크숍',
+                  status: '접수 예정',
+                  date: '2026.12.05',
+                  location: '오프라인',
+                  participants: 0,
+                  capacity: 30,
+                  color: 'bg-[#f1eafd]',
+                  icon: '🤖',
+                },
+              ].map((event) => (
+                <article
+                  key={event.id}
+                  className="group flex flex-col overflow-hidden rounded-[20px] border border-ems-member-input-border bg-white shadow-[0_4px_20px_rgba(20,34,56,0.04)] transition-all duration-300 ease-out hover:-translate-y-1.5 hover:border-[#b9dfca] hover:shadow-[0_16px_40px_rgba(20,34,56,0.1)]"
+                >
+                  {/* 이미지 영역 */}
+                  <div
+                    className={`relative flex h-[175px] items-center justify-center overflow-hidden ${event.color}`}
+                  >
+                    <div className="absolute -right-10 -top-10 h-36 w-36 rounded-full border border-white/60" />
+                    <div className="absolute -bottom-14 -left-10 h-40 w-40 rounded-full bg-white/20" />
+
+                    <span className="relative text-[58px] transition-transform duration-500 ease-out group-hover:scale-110">
+                      {event.icon}
+                    </span>
+                  </div>
+
+                  {/* 정보 영역 */}
+                  <div className="p-6">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-[12px] font-semibold text-ems-primary">
+                        {event.category}
+                      </span>
+
+                      <span
+                        className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-semibold ${
+                          event.status === '모집 중'
+                            ? 'bg-ems-member-primary-soft text-ems-primary'
+                            : 'bg-[#fff4df] text-[#ac741c]'
+                        }`}
+                      >
+                        {event.status}
+                      </span>
+                    </div>
+
+                    <h3 className="mt-5 text-[18px] font-bold text-ems-text">{event.title}</h3>
+
+                    <div className="mt-5 space-y-3 text-[13px] text-ems-muted">
+                      <div className="flex items-center gap-2">
+                        <span aria-hidden="true">📅</span>
+                        <span>{event.date}</span>
                       </div>
-                      <div className="flex flex-1 flex-col p-6">
-                        <span className={`w-fit rounded-full px-3 py-1 text-[11px] font-semibold ${badge.className}`}>{badge.label}</span>
-                        <h3 className="mt-5 text-[18px] font-bold text-ems-text">{event.title}</h3>
-                        <p className="mt-5 text-[13px] text-ems-muted">📅 {event.startsAt && !Number.isNaN(Date.parse(event.startsAt)) ? formatShort(event.startsAt) : '일정 미정'}</p>
-                        <div className="mt-auto border-t border-ems-member-input-border pt-5">
-                          <p className="text-[12px] text-ems-muted">정원 {capacity > 0 ? `${capacity}명` : '미정'}{(event.participants != null || event.registeredCount != null) ? ` · 신청 ${participants}명` : ''}</p>
-                          {capacity > 0 && (event.participants != null || event.registeredCount != null) && (
-                            <div className="mt-3 h-[6px] overflow-hidden rounded-full bg-ems-member-input-border">
-                              <div className="h-full rounded-full bg-ems-primary" style={{ width: `${Math.min(100, participants / capacity * 100)}%` }} />
-                            </div>
-                          )}
-                        </div>
+
+                      <div className="flex items-center gap-2">
+                        <span aria-hidden="true">📍</span>
+                        <span>{event.location}</span>
                       </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            )}
-            <div className="mt-8 text-center">
-              <Link to="/events" className="inline-block rounded-xl bg-ems-primary px-6 py-3 text-[14px] font-semibold text-white hover:bg-ems-member-primary-hover">
-                전체 이벤트 둘러보기
-              </Link>
+                    </div>
+
+                    <div className="mt-6 border-t border-ems-member-input-border pt-5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[12px] text-ems-muted">참가 인원</span>
+
+                        <span className="text-[13px] font-semibold text-ems-text">
+                          {event.participants} / {event.capacity}명
+                        </span>
+                      </div>
+
+                      <div className="mt-3 h-[6px] overflow-hidden rounded-full bg-[#e5e9f0]">
+                        <div
+                          className="h-full rounded-full bg-ems-primary transition-all duration-500"
+                          style={{
+                            width: `${Math.min(100, (event.participants / event.capacity) * 100)}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              ))}
             </div>
+
+            <p className="mt-8 text-center text-[12px] text-ems-muted">
+              현재 표시된 이벤트는 디자인 확인용 샘플입니다.
+            </p>
           </div>
         </section>
 
@@ -415,25 +418,21 @@ const Home = () => {
         </section>
 
         {/* 하단 CTA */}
-        <section className="bg-(--ems-green-soft) px-6 py-16 sm:py-20">
+        <section className="bg-[#eaf5ef] px-6 py-16 sm:py-20">
           <div className="mx-auto max-w-[1200px] text-center">
             <h2 className="text-[28px] font-bold text-ems-text sm:text-[36px]">
               새로운 이벤트 경험을 시작해 보세요
             </h2>
 
-            <p className="mt-5 text-[15px] text-ems-muted">
+            <p className="mt-5 text-[15px] text-[#63758a]">
               SYNC5와 함께 더 많은 가능성을 만나보세요.
             </p>
 
             <Link
-              to={accessToken ? '/mypage' : authLoading ? '/events' : '/signup'}
+              to={accessToken ? '/mypage' : '/signup'}
               className="mt-8 inline-block rounded-xl bg-ems-primary px-8 py-3.5 text-[14px] font-semibold text-white transition hover:bg-ems-member-primary-hover"
             >
-              {accessToken
-                ? '마이페이지로 이동'
-                : authLoading
-                  ? '이벤트 둘러보기'
-                  : '무료로 시작하기'}
+              {accessToken ? '마이페이지로 이동' : '무료로 시작하기'}
             </Link>
           </div>
         </section>
@@ -452,8 +451,6 @@ const Home = () => {
 
           <div
             className="team-carousel mt-12"
-            aria-label="SYNC5 팀원 소개"
-            style={{ touchAction: 'pan-y' }}
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
@@ -496,13 +493,13 @@ const Home = () => {
       </main>
 
       {/* Footer */}
-      <footer className="bg-ems-sidebar px-6 py-14 text-white">
+      <footer className="bg-[#17253c] px-6 py-14 text-white">
         <div className="mx-auto max-w-[1200px]">
           <div className="grid gap-10 md:grid-cols-[1fr_auto] md:gap-20">
             {/* 브랜드 소개 */}
             <div>
               <Link to="/" className="inline-block text-[28px] font-extrabold tracking-tight">
-                SYNC<span className="text-ems-primary">5</span>
+                SYNC<span className="text-[#22c55e]">5</span>
               </Link>
 
               <p className="mt-3 text-[12px] font-medium tracking-wider text-[#a9b8cc]">
@@ -532,13 +529,13 @@ const Home = () => {
                 </a>
 
                 <Link
-                  to={authLoading ? '/events' : accessToken ? '/mypage' : '/login'}
+                  to={accessToken ? '/mypage' : '/login'}
                   className="transition-colors hover:text-white"
                 >
                   {accessToken ? '마이페이지' : '로그인'}
                 </Link>
 
-                {!authLoading && !accessToken && (
+                {!accessToken && (
                   <Link to="/signup" className="transition-colors hover:text-white">
                     회원가입
                   </Link>
