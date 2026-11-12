@@ -22,6 +22,8 @@ const MENUS = {
       { id: 'registrations', label: '신청 내역', href: '/registrations' },
       { id: 'seminars', label: '세미나 참여', href: '#' },
       { id: 'votes', label: '실시간 투표', href: '/polls/vote' },
+      { id: 'mypage', label: '마이페이지', href: '/mypage' },
+      { id: 'logout', label: '로그아웃', action: 'logout' },
     ],
   },
   // href: null = 아직 백엔드 API가 없어 화면을 연결하지 않은 메뉴 (보이기만 하고 누를 수 없음)

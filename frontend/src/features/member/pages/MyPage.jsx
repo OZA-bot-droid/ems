@@ -1,12 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { mapClassNames } from '../../../styles/classNames.js';
+import headerStyles from '../../../components/layout/header.module.scss';
+import Header from '../../../components/layout/LegacyHeader.jsx';
 import { useAuth } from '../hooks/useAuth.js';
 import { useApiUtil } from '../hooks/useApiUtil.js';
 import { eventApi } from '../../event/api/eventApi.js';
 import { registrationApi } from '../../event/api/registrationApi.js';
 
+const cx = (value) => mapClassNames(value, headerStyles);
+
 const MyPage = () => {
-  const { logout, authLoading, role } = useAuth();
+  const { authLoading, role } = useAuth();
   const apiReq = useApiUtil();
   const [member, setMember] = useState({
     email: '',
@@ -79,81 +84,10 @@ const MyPage = () => {
   }, [authLoading, role]);
 
   return (
-    <main className="min-h-screen bg-[#f7f9fc]">
-      <div className="min-h-screen w-full bg-[#f7f9fc] lg:flex">
-        {/* header 영역 */}
-        <aside className="flex flex-col justify-between bg-[#17253c] px-5 py-7 text-white lg:w-[214px] lg:shrink-0">
-          <div>
-            {/* EMS 로고 */}
-            <div>
-              <div className="flex items-center gap-3">
-                <span className="h-[27px] w-[7px] rounded-[3px] bg-[#169b62]" />
-
-                <h1 className="text-[23px] font-bold leading-none tracking-tight">EMS</h1>
-              </div>
-
-              <p className="mt-3 text-[10px] font-medium text-[#afc2d2]">EVENT PLATFORM</p>
-            </div>
-
-            {/* 워크스페이스 메뉴 */}
-            <nav aria-label="워크스페이스 메뉴" className="mt-14">
-              <p className="mb-5 text-[11px] font-semibold text-[#8fa2bb]">MY WORKSPACE</p>
-
-              <ul className="space-y-2">
-                <li className="flex items-center gap-4 rounded-[7px] px-2 py-3 text-[13px] font-medium text-[#b1bfd2]">
-                  <span
-                    className="h-[4px] w-[4px] shrink-0 rounded-full border border-[#b1bfd2]"
-                    aria-hidden="true"
-                  />
-                  <button>마이페이지</button>
-                </li>
-                {(role === 'ADMIN'
-                  ? [
-                      { label: '행사 찾기', to: '/events' },
-                      { label: '행사 관리', to: '/admin/events' },
-                      { label: '세션 관리', to: '/admin/sessions' },
-                      { label: '참가 승인', to: '/admin/approvals' },
-                      { label: '투표 관리', to: null },
-                    ]
-                  : [
-                      { label: '행사 찾기', to: '/events' },
-                      { label: '신청 내역', to: '/registrations' },
-                      { label: '세미나 참여', to: null },
-                      { label: '실시간 투표', to: null },
-                    ]
-                ).map(({ label, to }) => (
-                  <li
-                    key={label}
-                    className="flex items-center gap-4 rounded-[7px] px-2 py-3 text-[13px] font-medium text-[#b1bfd2]"
-                  >
-                    <span
-                      className="h-[4px] w-[4px] shrink-0 rounded-full border border-[#b1bfd2]"
-                      aria-hidden="true"
-                    />
-                    {to ? (
-                      <Link className="hover:text-white" to={to}>{label}</Link>
-                    ) : (
-                      <span aria-disabled="true" className="text-[#8295ae]">{label}</span>
-                    )}
-                  </li>
-                ))}
-                <li className="flex items-center gap-4 rounded-[7px] px-2 py-3 text-[13px] font-medium text-[#b1bfd2]">
-                  <span
-                    className="h-[4px] w-[4px] shrink-0 rounded-full border border-[#b1bfd2]"
-                    aria-hidden="true"
-                  />
-                  <button onClick={logout}>로그아웃</button>
-                </li>
-              </ul>
-            </nav>
-          </div>
-
-          {/* 사이드바 하단 */}
-          <div className="mt-14 text-[11px] text-[#8295ae] lg:mt-0">시안 / API 연결 전</div>
-        </aside>
-
-        {/* My Page 영역 */}
-        <section className="min-w-0 flex-1 px-6 py-10 sm:px-10 lg:px-12 lg:py-[65px] flex justify-center">
+    <div className={cx('app-shell')}>
+      <Header role={role ?? 'COMMON'} activePage="mypage" />
+      <main className={cx('app-main-content')}>
+        <section className="flex min-w-0 justify-center px-6 py-10 sm:px-10 lg:px-12 lg:py-[65px]">
           <div className="w-full max-w-[900px]">
             <div className="mb-8">
               <h2 className="text-[28px] font-bold text-[#142238]">마이페이지</h2>
@@ -282,8 +216,8 @@ const MyPage = () => {
             </div>
           </div>
         </section>
-      </div>
-    </main>
+      </main>
+    </div>
   );
 };
 
