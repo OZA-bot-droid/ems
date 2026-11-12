@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../features/member/hooks/useAuth';
 
 import { mapClassNames } from '../../styles/classNames.js';
@@ -44,12 +44,17 @@ const MENUS = {
 function RoleHeader({ role, activePage }) {
   const menu = MENUS[role];
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // 기존 AuthContext의 로그아웃 메서드를 재사용한다.
   const { accessToken, logout } = useAuth();
 
-  // 연속 클릭에 의한 중복 로그아웃 요청 방지
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+
+  // 페이지 이동이 완료되면 모바일 메뉴 자동 닫기
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname, location.search]);
 
   const handleLogout = async () => {
     if (loggingOut) return;
@@ -57,60 +62,87 @@ function RoleHeader({ role, activePage }) {
     setLoggingOut(true);
 
     try {
-      // 서버 Refresh Token 세션 무효화 요청
-      // AuthContext에서 Access Token 및 로그인 상태 정리
       await logout();
     } catch (error) {
-      // 서버 요청 실패 시 AuthContext는 로컬 상태를 정리한다.
-      // 단, 서버 세션 무효화까지 성공한 것은 아닐 수 있다.
       console.error('로그아웃 요청 실패:', error);
       alert('서버 로그아웃 요청에 실패했습니다.');
     } finally {
       setLoggingOut(false);
-
-      // 뒤로 가기로 보호 화면에 복귀하지 않도록 replace 사용
+      setMobileOpen(false);
       navigate('/login', { replace: true });
     }
   };
 
   return (
     <header className={cx('app-sidebar-header')} data-role={role}>
-      <Link className={cx('registration-brand')} href="/" aria-label="EMS 홈">
-        <span />
-        EMS
-      </Link>
+      {/* 데스크톱 브랜드 / 모바일 상단 바 */}
+      <div className={cx('header-top')}>
+        <div className={cx('brand-area')}>
+          <Link className={cx('registration-brand')} to="/home" aria-label="EMS 홈">
+            <span />
+            EMS
+          </Link>
 
-      <p className={cx('registration-platform')}>EVENT PLATFORM</p>
-
-      <p className={cx('registration-nav-heading')}>{menu.heading}</p>
-
-      <nav className={cx('registration-nav')} aria-label={`${role} 주 메뉴`}>
-        {menu.items.map(({ id, label, href }) =>
-          href === null ? (
-            <span className={cx('is-disabled')} aria-disabled="true" key={id}>
-              ◦　 {label}
-            </span>
-          ) : (
-            <Link
-              aria-current={activePage === id ? 'page' : undefined}
-              className={cx(activePage === id ? 'is-active' : '')}
-              to={href}
-              key={id}
-            >
-              ◦　 {label}
-            </Link>
-          ),
-        )}
-      </nav>
-
-      {/* 로그인 상태에서만 로그아웃 버튼 표시 */}
-      {accessToken && (
-        <div className={cx('registration-logout')}>
-          <button type="button" onClick={handleLogout} disabled={loggingOut}>
-            {loggingOut ? '로그아웃 중...' : '로그아웃'}
-          </button>
+          <p className={cx('registration-platform')}>EVENT PLATFORM</p>
         </div>
-      )}
+
+        {/* 모바일에서만 노출되는 메뉴 버튼 */}
+        <button
+          type="button"
+          className={cx('mobile-menu-toggle')}
+          aria-controls="ems-mobile-navigation"
+          aria-expanded={mobileOpen}
+          aria-label={mobileOpen ? '메뉴 닫기' : '메뉴 열기'}
+          onClick={() => setMobileOpen((prev) => !prev)}
+        >
+          <span aria-hidden="true">{mobileOpen ? '✕' : '☰'}</span>
+          <span>{mobileOpen ? '닫기' : '메뉴'}</span>
+        </button>
+      </div>
+
+      {/* 데스크톱에서는 항상 표시, 모바일에서는 접기 */}
+      <div
+        id="ems-mobile-navigation"
+        className={cx(`mobile-menu-panel ${mobileOpen ? 'is-open' : ''}`)}
+      >
+        <p className={cx('registration-nav-heading')}>{menu.heading}</p>
+
+        <nav className={cx('registration-nav')} aria-label={`${role} 주 메뉴`}>
+          {menu.items.map(({ id, label, href }) => {
+            const isActive = activePage === id;
+
+            // 경로가 아직 구현되지 않은 메뉴
+            if (!href || href === '#') {
+              return (
+                <span key={id} className={cx('is-disabled')} aria-disabled="true">
+                  ◦　 {label}
+                </span>
+              );
+            }
+
+            return (
+              <Link
+                key={id}
+                to={href}
+                aria-current={isActive ? 'page' : undefined}
+                className={cx(isActive ? 'is-active' : '')}
+                onClick={() => setMobileOpen(false)}
+              >
+                ◦　 {label}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* 로그인 사용자의 로그아웃 메뉴 */}
+        {accessToken && (
+          <div className={cx('registration-logout')}>
+            <button type="button" onClick={handleLogout} disabled={loggingOut}>
+              {loggingOut ? '로그아웃 중...' : '로그아웃'}
+            </button>
+          </div>
+        )}
+      </div>
     </header>
   );
 }

@@ -130,6 +130,28 @@
   padding: 35px 35px 24px;
 }
 
+// ========================================
+// Header 반응형 공통 구성
+// ========================================
+
+.header-top {
+  display: block;
+}
+
+.brand-area {
+  min-width: 0;
+}
+
+.mobile-menu-toggle {
+  // 데스크톱에서는 메뉴 버튼 숨김
+  display: none;
+}
+
+.mobile-menu-panel {
+  // 데스크톱에서는 항상 메뉴 표시
+  display: block;
+}
+
 /* 1024px 이상에서만 적용 */
 @media (min-width: 1024px) {
   .app-sidebar-header {
@@ -138,40 +160,236 @@
   }
 }
 
+/* ========================================
+ * EMS Mobile Header
+ * 760px 이하
+ *
+ * - ADMIN 기준 타이포그래피 유지
+ * - 가로 스크롤 메뉴 제거
+ * - 상단 Header + 접이식 메뉴 구성
+ * - 본문 전체 너비 사용
+ * ======================================== */
+
 @media (max-width: 760px) {
   .app-shell {
+    display: block;
+
+    width: 100%;
     height: auto;
-    min-height: 100vh;
+    min-height: 100dvh;
+
     overflow: visible;
+  }
+
+  // 모바일 Header 전체
+  .app-sidebar-header {
+    width: 100%;
+    min-width: 0;
+    height: auto;
+    min-height: 0;
+
+    padding: 0;
+
+    position: relative;
+    overflow: visible;
+
+    background: var(--ems-sidebar);
+    color: #fff;
+  }
+
+  // 상단 브랜드 + 메뉴 버튼
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    width: 100%;
+    min-height: 68px;
+
+    padding: 12px 18px;
+    gap: 16px;
+  }
+
+  .brand-area {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    min-width: 0;
+  }
+
+  .registration-brand {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+    font-size: 22px;
+    line-height: 28px;
+
+    span {
+      width: 6px;
+      height: 25px;
+    }
+  }
+
+  .registration-platform {
+    display: block;
+
+    margin: 1px 0 0 16px;
+
+    font-size: 9px;
+    line-height: 14px;
+  }
+
+  // 모바일 메뉴 토글 버튼
+  .mobile-menu-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    min-width: 76px;
+    min-height: 42px;
+
+    padding: 0 12px;
+
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 8px;
+
+    background: transparent;
+    color: #fff;
+
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    &:focus-visible {
+      outline: 2px solid #fff;
+      outline-offset: 3px;
+    }
+  }
+
+  // 메뉴 기본 상태: 접힘
+  .mobile-menu-panel {
+    display: none;
+
+    width: 100%;
+    padding: 16px 18px 20px;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  // 메뉴가 열린 상태
+  .mobile-menu-panel.is-open {
     display: block;
   }
 
-  .app-sidebar-header {
-    height: auto;
-    min-height: 0;
-    overflow: visible;
-    padding: 15px 18px;
+  // ADMIN / USER / COMMON 제목
+  .registration-nav-heading {
+    display: block;
+
+    margin: 0 0 14px;
+
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 18px;
+
+    color: #8fa2b7;
   }
 
-  .registration-platform,
-  .registration-nav-heading,
-  .registration-sidebar-note {
-    display: none;
-  }
-
+  // 모바일 메뉴: 세로 정렬
   .registration-nav {
-    display: flex;
-    overflow-x: auto;
-    gap: 20px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+
+    overflow: visible;
+
+    a,
+    .is-disabled {
+      display: flex;
+      align-items: center;
+
+      width: 100%;
+      min-width: 0;
+      min-height: 44px;
+
+      margin: 0;
+      padding: 0 14px;
+
+      border-radius: 8px;
+
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 20px;
+
+      color: #adbacc;
+      white-space: nowrap;
+    }
+
+    a {
+      &:hover,
+      &.is-active {
+        color: #fff;
+      }
+
+      &.is-active {
+        background: #29423f;
+        font-weight: 700;
+      }
+    }
+  }
+
+  // 모바일 로그아웃
+  .registration-logout {
     margin-top: 14px;
-    padding-bottom: 3px;
+    padding-top: 14px;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+
+    button {
+      width: 100%;
+      min-height: 44px;
+      padding: 10px 14px;
+    }
+  }
+
+  // Header 아래 전체 너비 본문
+  .registration-main,
+  .app-main-content {
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+
+    overflow: visible;
+    padding: 24px 18px;
+  }
+}
+
+// 작은 모바일 추가 조정
+@media (max-width: 380px) {
+  .header-top {
+    padding: 10px 14px;
+  }
+
+  .mobile-menu-panel {
+    padding: 14px;
   }
 
   .registration-main,
   .app-main-content {
-    min-height: auto;
-    overflow: visible;
-    padding: 27px 18px;
+    padding: 20px 14px;
   }
 }
 
