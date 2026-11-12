@@ -87,7 +87,10 @@ public class SecurityConfig {
                                     "/members/email/verify",
 
                                     "/members/password/reset-request",
-                                    "/members/password/reset"
+                                    "/members/password/reset",
+
+                                    "/members/name/duplicate",
+                                    "/members/email/found"
                                 )
                                 .permitAll()
                                 .anyRequest()

@@ -23,6 +23,7 @@ import PollListPage from '../features/interaction/pages/PollListPage';
 
 // 투표 결과
 import PollResultPage from '../features/interaction/pages/PollResultPage';
+import EmailFound from '../features/member/pages/EmailFound';
 
 function EventDetailRoute() {
   const { eventId } = useParams();
@@ -45,6 +46,7 @@ export const router = createBrowserRouter([
   { path: '/oauth-success', element: <OAuthCallbackPage /> },
   { path: '/events', element: <EventDiscoveryPage /> },
   { path: '/events/:eventId', element: <EventDetailRoute /> },
+  { path: '/email/found', element: <EmailFound /> },
   {
     element: <ProtectedRoute />,
     children: [

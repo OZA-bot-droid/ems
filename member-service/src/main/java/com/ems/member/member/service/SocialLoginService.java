@@ -35,7 +35,7 @@ public class SocialLoginService {
     // 소셜 회원가입
     public Member socialRegister(SocialLoginDTO dto, Role role) {
 
-        if(memberRepository.existsByProviderAndProviderId(dto.provider(), dto.providerId())) {
+        if(memberRepository.existsByEmail(dto.email())) {
             throw new MemberEmailDuplicatedException("이미 가입된 회원입니다.");
         } else {
 

@@ -5,7 +5,7 @@ import { memberApi } from '../api/memberApi.js';
 import Header from '../../../components/layout/LegacyHeader.jsx';
 
 const MyPage = () => {
-  const { role, authLoading, accessToken } = useAuth();
+  const { authLoading, accessToken } = useAuth();
   const navigate = useNavigate();
   const [member, setMember] = useState({});
   const [isEditing, setIsEditing] = useState(false);
@@ -43,11 +43,15 @@ const MyPage = () => {
       const res = await memberApi.updateMe(name);
 
       console.log(res);
-      setMember((prev) => ({
-        ...prev,
-        ...res.data,
-      }));
-      setIsEditing(false);
+      if (res.status >= 200 && res.status < 300) {
+        setMember((prev) => ({
+          ...prev,
+          ...res.data,
+        }));
+        setIsEditing(false);
+      } else {
+        alert('닉네임 수정에 실패했습니다.');
+      }
     } catch (err) {
       console.error(err);
       alert(err.response?.data?.message);
@@ -82,7 +86,7 @@ const MyPage = () => {
               <div className="mt-5 space-y-4 border-t border-[#e5e9f0] pt-5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-[12px] text-[#7a879a]">이름</p>
+                    <p className="text-[12px] text-[#7a879a]">닉네임</p>
 
                     {isEditing ? (
                       <input

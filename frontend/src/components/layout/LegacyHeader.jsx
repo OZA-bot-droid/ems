@@ -101,6 +101,11 @@ function RoleHeader({ role, activePage }) {
             </a>
           ),
         )}
+        {!authLoading && accessToken && (
+          <a onClick={logout} className="cursor-pointer">
+            ◦　 로그아웃
+          </a>
+        )}
       </nav>
 
       {/* 로그인 상태에서만 로그아웃 버튼 표시 */}

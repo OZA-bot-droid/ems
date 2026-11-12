@@ -66,6 +66,15 @@ public class MemberController {
         );
     }
 
+    @PostMapping("/name/duplicate")
+    public ResponseEntity<?> duplicateName(@Valid @RequestBody NameDTO dto) {
+
+        return new ResponseEntity<>(
+                new MessageResponseDTO<>(memberService.duplicateName(dto), SuccessCode.REQUEST_SUCCESS),
+                HttpStatus.OK
+        );
+    }
+
     // 회원가입 이메일 확인 메일 보내기
     @PostMapping("/email/send")
     public ResponseEntity<?> sendEmailCode(@Valid @RequestBody EmailDTO dto,
@@ -283,6 +292,16 @@ public class MemberController {
 
         return ResponseEntity.ok(
                 new MessageResponseDTO<>(null, SuccessCode.PASSWORD_RESET_SUCCESS)
+        );
+    }
+
+    @PostMapping("/email/found")
+    public ResponseEntity<?> foundEmail(@Valid @RequestBody NameDTO dto) {
+        return ResponseEntity.ok(
+                new MessageResponseDTO<>(
+                        memberService.foundEmail(dto),
+                        SuccessCode.REQUEST_SUCCESS
+                )
         );
     }
 }
