@@ -19,6 +19,9 @@ function SignupForm() {
   const [verifiedEmail, setVerifiedEmail] = useState('');
   const [sending, setSending] = useState(false);
   const [verifying, setVerifying] = useState(false);
+
+  const [nameDuplicate, setNameDuplicate] = useState(true);
+
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [role, setRole] = useState('');
   const [member, setMember] = useState({
@@ -48,6 +51,11 @@ function SignupForm() {
   // 자체 회원가입
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    if (nameDuplicate) {
+      alert('닉네임 중복 확인을 완료해주세요.');
+      return;
+    }
 
     if (!verifiedEmail || verifiedEmail !== member.email.trim().toLowerCase()) {
       alert('이메일 인증을 완료해주세요.');
@@ -144,6 +152,23 @@ function SignupForm() {
     }
   };
 
+  // 닉네임 중복 확인
+  const nameDuplicateCheck = async () => {
+    try {
+      const res = await memberApi.nameDuplicateCheck(member.name);
+
+      if (!res.data) {
+        alert('중복 확인 완료');
+        setNameDuplicate((prev) => !prev);
+      } else {
+        alert('닉네임이 중복되었습니다.');
+      }
+    } catch (err) {
+      console.log(err);
+      alert('서버 에러');
+    }
+  };
+
   return (
     <div className={cx('w-[600px] px-8')}>
       <form onSubmit={handleSubmit}>
@@ -159,21 +184,33 @@ function SignupForm() {
             htmlFor="signup-name"
             className={cx('block text-[13px] font-semibold text-[#142238]')}
           >
-            이름
+            닉네임
           </label>
-          <input
-            id="signup-name"
-            type="text"
-            name="name"
-            onChange={(event) =>
-              setMember((m) => ({ ...m, [event.target.name]: event.target.value }))
-            }
-            placeholder="홍길동"
-            autoComplete="name"
-            className={cx(
-              'mt-2 h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none transition placeholder:text-[#a0a9b8] focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15',
-            )}
-          />
+          <div className={cx('mt-2 flex gap-2')}>
+            <input
+              id="signup-name"
+              type="text"
+              name="name"
+              onChange={(event) =>
+                setMember((m) => ({ ...m, [event.target.name]: event.target.value }))
+              }
+              placeholder="홍길동"
+              autoComplete="name"
+              className={cx(
+                'h-[44px] min-w-0 flex-1 rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none transition placeholder:text-[#a0a9b8] focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15',
+              )}
+            />
+            <button
+              type="button"
+              onClick={nameDuplicateCheck}
+              disabled={!nameDuplicate}
+              className={cx(
+                'h-[44px] shrink-0 rounded-[10px] bg-[#169b62] px-4 text-[12px] font-semibold text-white hover:bg-[#128653] disabled:opacity-50',
+              )}
+            >
+              {nameDuplicate ? '중복 확인' : '확인 완료'}
+            </button>
+          </div>
         </div>
 
         <div className={cx('mt-4')}>

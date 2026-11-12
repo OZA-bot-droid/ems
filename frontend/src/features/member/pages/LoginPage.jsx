@@ -98,6 +98,14 @@ function LoginForm() {
 
         <button
           type="button"
+          onClick={() => navigate('/email/found')}
+          className={cx('block mt-[22px] text-[14px] font-semibold text-[#169b62] hover:underline')}
+        >
+          이메일을 잊어 버리셨나요?&nbsp;&nbsp; 이메일 찾기
+        </button>
+
+        <button
+          type="button"
           onClick={() => navigate('/password/request')}
           className={cx('block mt-[22px] text-[14px] font-semibold text-[#169b62] hover:underline')}
         >

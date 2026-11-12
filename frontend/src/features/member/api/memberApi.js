@@ -46,4 +46,7 @@ export const memberApi = {
   passwordChange: async (currentPassword, newPassword) =>
     responseData(await api.post('/members/password/change', { currentPassword, newPassword })),
   updateMe: async (name) => responseData(await api.patch('/members/me', { name })),
+  emailFound: async (name) => responseData(await publicApi.post('/members/email/found', { name })),
+  nameDuplicateCheck: async (name) =>
+    responseData(await publicApi.post('/members/name/duplicate', { name })),
 };

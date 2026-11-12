@@ -48,7 +48,7 @@ const MyPage = () => {
         }));
         setIsEditing(false);
       } else {
-        alert('이름 수정에 실패했습니다.');
+        alert('닉네임 수정에 실패했습니다.');
       }
     } catch (err) {
       console.error(err);
@@ -135,7 +135,7 @@ const MyPage = () => {
               <div className="mt-5 space-y-4 border-t border-[#e5e9f0] pt-5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-[12px] text-[#7a879a]">이름</p>
+                    <p className="text-[12px] text-[#7a879a]">닉네임</p>
 
                     {isEditing ? (
                       <input
