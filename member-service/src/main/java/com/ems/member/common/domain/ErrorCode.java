@@ -29,6 +29,7 @@ public enum ErrorCode {
 
     // 409 Conflict
     MEMBER_EMAIL_DUPLICATED(HttpStatus.CONFLICT),
+    MEMBER_NAME_DUPLICATED(HttpStatus.CONFLICT),
 
     // 429 Too Many Requests
     LOGIN_RATE_LIMITED(HttpStatus.TOO_MANY_REQUESTS),

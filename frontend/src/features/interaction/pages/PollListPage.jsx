@@ -19,13 +19,13 @@ export default function PollListPage() {
   return (
     <div className={cx('app-shell')}>
       <Header role="USER" activePage="votes" />
-
-      <main className={`${cx('app-main-content')} ${styles.main}`}>
-        <div className={styles.pageHeader}>
-          <h1 className={styles.pageTitle}>전체 투표 목록</h1>
-          <p className={styles.pageDescription}>참가 승인된 행사들의 투표 목록입니다.</p>
-        </div>
-
+      {/* 참가 가능한 투표 목록 전체 너비 적용 */}
+      <main className={cx('app-main-content w-full min-w-0 space-y-5 text-slate-800')}>
+        <header>
+          <p className="text-sm text-emerald-700">SYNC5 / Interaction</p>
+          <h1 className="text-2xl font-bold">투표 목록</h1>
+          <p className="text-sm text-slate-500">참가 승인된 세션의 투표 목록입니다.</p>
+        </header>
         <ApprovedPollResultList polls={polls} loading={loading} error={error} reload={reload} />
         <PollListPagination
           page={page}

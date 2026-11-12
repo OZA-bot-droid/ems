@@ -28,23 +28,16 @@ export default function PollResultPage() {
 
   return (
     <div className={cx('app-shell')}>
-      <Header />
-
-      <main className={`${cx('app-main-content')} ${styles.main}`}>
-        {/* 결과 페이지 제목 및 새로고침 버튼 */}
-        <div className={styles.pageHeader}>
-          <PollResultHeader from={from} pollId={pollId} onRefresh={reload} loading={loading} />
-        </div>
-
-        {/* 투표 결과 표시 */}
-        <div className={styles.resultCard}>
-          <PollResultDetail
-            results={results}
-            myOptionId={myOptionId}
-            loading={loading}
-            error={error}
-          />
-        </div>
+      <Header role={isAdminEntry ? 'ADMIN' : 'USER'} activePage="votes" />
+      {/* 투표 결과 본문 전체 너비 적용 */}
+      <main className={cx('app-main-content w-full min-w-0 space-y-5 text-slate-800')}>
+        <PollResultHeader from={from} pollId={pollId} onRefresh={reload} loading={loading} />
+        <PollResultDetail
+          results={results}
+          myOptionId={myOptionId}
+          loading={loading}
+          error={error}
+        />
       </main>
     </div>
   );

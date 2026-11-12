@@ -1,34 +1,187 @@
+/*
+ * EMS Design Tokens
+ *
+ * P1 수정 목적
+ * 1. 디자인 기준값을 한 곳에서 관리한다.
+ * 2. 기존 Event 스타일 변수명을 유지한다.
+ * 3. Tailwind CSS 4와 SCSS Modules가 같은 값을 참조한다.
+ * 4. 기존 화면의 색상과 크기는 변경하지 않는다.
+ */
+
 :root {
-  /* Event UI compatibility names; all components reference this source. */
+  /* ========================================
+   * 1. EMS 기본 색상
+   * ======================================== */
+
+  /* 브랜드 기본 색상 */
+  --ems-primary: #169b62;
+
+  /* 공통 사이드바 배경 */
+  --ems-sidebar: #17253c;
+
+  /* 페이지 배경 */
+  --ems-background: #f7f9fc;
+
+  /* 기본 본문 텍스트 */
+  --ems-text: #142238;
+
+  /* 기본 테두리 */
+  --ems-border: #e7ecf2;
+
+  /* ========================================
+   * 2. 폰트
+   * ======================================== */
+
+  --ems-font-family:
+    Pretendard, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* ========================================
+   * 3. 모서리 및 간격
+   * ======================================== */
+
+  --ems-radius-card: 16px;
+  --ems-spacing-unit: 4px;
+
+  /* 일반 서비스 화면 사이드바 */
+  --ems-sidebar-width: 214px;
+
+  /* Member 비로그인 인증 화면 사이드바 */
+  --ems-auth-sidebar-width: 420px;
+
+  /* ========================================
+   * 4. Event 기존 변수 호환
+   *
+   * 기존 SCSS Module에서 참조하는 이름을
+   * 유지하므로 해당 파일을 변경하지 않아도 된다.
+   * ======================================== */
+
   --ems-bg: var(--ems-background);
   --ems-surface: #fff;
   --ems-row: #f6f8fb;
+
   --ems-ink: var(--ems-text);
   --ems-muted: #7a879a;
   --ems-line: var(--ems-border);
+
   --ems-green: var(--ems-primary);
   --ems-green-dark: #11804f;
   --ems-green-soft: #eaf6f0;
+
   --ems-blue-soft: #eaf2fe;
+
   --ems-font: var(--ems-font-family);
 
-  --ems-primary: #169b62;
-  --ems-sidebar: #17253c;
-  --ems-background: #f7f9fc;
-  --ems-text: #142238;
-  --ems-border: #e7ecf2;
-  --ems-font-family: Pretendard, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --ems-radius-card: 16px;
-  --ems-spacing-unit: 4px;
+  /* ========================================
+ * P2 - Member 공통 디자인 토큰
+ *
+ * 기존 JSX의 하드코딩 색상을 그대로 보존한다.
+ * ======================================== */
+
+  /* Member 입력 필드 및 버튼 */
+  --ems-member-input-border: #e5e9f0;
+  --ems-member-divider: #d9dee7;
+  --ems-member-placeholder: #a0a9b8;
+  --ems-member-primary-hover: #128653;
+  --ems-member-primary-soft: #e6f5ee;
+  --ems-member-primary-soft-hover: #e6f5ee;
+
+  /* Member 보조 텍스트·상태 */
+  --ems-member-inactive: #9aa5b4;
+  --ems-member-icon-hover: #f1f4f8;
+
+  /* 소셜 로그인 브랜드 색상 */
+  --ems-google-blue: #4285f4;
+  --ems-naver-green: #03c75a;
+
+  /* Member 기존 크기 */
+  --ems-member-input-height: 44px;
+  --ems-member-login-input-height: 42px;
+  --ems-member-control-radius: 10px;
+  --ems-member-card-radius: 14px;
+
+  /* Member 비로그인 사이드바 전용 텍스트 */
+  --ems-sidebar-caption: #afc2d2;
+  --ems-sidebar-description: #bbc8d6;
+
+  /* ========================================
+ * P2 - Event 추가 토큰
+ * ======================================== */
+
+  /* 관리자 역할 */
+  --ems-admin-badge-bg: #fff4e8;
+  --ems-admin-badge-text: #966420;
+
+  /* 성공 알림 */
+  --ems-success-border: #c8e6d5;
+  --ems-success-bg: #f0faf4;
+  --ems-success-text: #216b46;
+
+  /* 오류 알림 */
+  --ems-error-border: #f2c8c5;
+  --ems-error-bg: #fef3f2;
+  --ems-error-text: #b42318;
+
+  /* ========================================
+ * P2 - Interaction 기존 디자인 유지
+ * ======================================== */
+
+  /* 기존 Tailwind emerald-700 */
+  --ems-interaction-primary: #047857;
+
+  /* 기존 Tailwind slate 색상 */
+  --ems-interaction-border: #e2e8f0;
+  --ems-interaction-input-border: #cbd5e1;
+
+  /* 기존 Tailwind red-600, red-700 */
+  --ems-interaction-danger: #dc2626;
+  --ems-interaction-danger-hover: #b91c1c;
 }
 
-/* Tailwind CSS 4 mappings: source values remain the --ems-* variables above. */
+/* ==========================================
+ * 5. Tailwind CSS 4 토큰 매핑
+ *
+ * 기존 Tailwind 유틸리티 이름을 유지한다.
+ * 예: bg-ems-primary, text-ems-text
+ * ========================================== */
+
 @theme inline {
   --color-ems-primary: var(--ems-primary);
   --color-ems-sidebar: var(--ems-sidebar);
   --color-ems-background: var(--ems-background);
   --color-ems-text: var(--ems-text);
   --color-ems-border: var(--ems-border);
+
   --font-ems: var(--ems-font-family);
   --radius-ems-card: var(--ems-radius-card);
+
+  /* P2 Tailwind CSS 4 추가 매핑 */
+
+  /* Member */
+  --color-ems-muted: var(--ems-muted);
+  --color-ems-surface: var(--ems-surface);
+  --color-ems-member-input-border: var(--ems-member-input-border);
+  --color-ems-member-divider: var(--ems-member-divider);
+  --color-ems-member-placeholder: var(--ems-member-placeholder);
+  --color-ems-member-primary-hover: var(--ems-member-primary-hover);
+  --color-ems-member-primary-soft: var(--ems-member-primary-soft);
+  --color-ems-member-inactive: var(--ems-member-inactive);
+  --color-ems-member-icon-hover: var(--ems-member-icon-hover);
+
+  --color-ems-google-blue: var(--ems-google-blue);
+  --color-ems-naver-green: var(--ems-naver-green);
+
+  /* Member 사이드바 텍스트 */
+  --color-ems-sidebar-caption: var(--ems-sidebar-caption);
+  --color-ems-sidebar-description: var(--ems-sidebar-description);
+
+  /* Event */
+  --color-ems-admin-badge-bg: var(--ems-admin-badge-bg);
+  --color-ems-admin-badge-text: var(--ems-admin-badge-text);
+
+  /* Interaction */
+  --color-ems-interaction-primary: var(--ems-interaction-primary);
+  --color-ems-interaction-border: var(--ems-interaction-border);
+  --color-ems-interaction-input-border: var(--ems-interaction-input-border);
+  --color-ems-interaction-danger: var(--ems-interaction-danger);
+  --color-ems-interaction-danger-hover: var(--ems-interaction-danger-hover);
 }

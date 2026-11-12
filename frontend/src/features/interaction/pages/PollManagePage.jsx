@@ -123,16 +123,12 @@ export default function PollManagePage() {
         </div>
       )}
       <Header role="ADMIN" activePage="votes" />
-
-      <main className={`${cx('app-main-content')} ${styles.main}`}>
-        <div className={styles.pageHeader}>
-          <PollManageHeader onCreateClick={openCreateModal} />
-        </div>
-
-        {/* 투표 관리 오류 메시지 */}
-        {management.error && (
-          <p className={styles.error} role="alert">
-            {management.error}
+      {/* 투표 관리자 본문: 공통 스크롤·너비 규격 적용 */}
+      <main className={cx('app-main-content w-full min-w-0 space-y-5 text-slate-800')}>
+        <PollManageHeader onCreateClick={() => creation.setOpen((v) => !v)} />
+        {error && (
+          <p className="rounded-lg bg-red-50 p-3 text-red-700" role="alert">
+            {error}
           </p>
         )}
 

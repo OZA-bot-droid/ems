@@ -66,6 +66,15 @@ public class MemberController {
         );
     }
 
+    @PostMapping("/name/duplicate")
+    public ResponseEntity<?> duplicateName(@Valid @RequestBody NameDTO dto) {
+
+        return new ResponseEntity<>(
+                new MessageResponseDTO<>(memberService.duplicateName(dto), SuccessCode.REQUEST_SUCCESS),
+                HttpStatus.OK
+        );
+    }
+
     // 회원가입 이메일 확인 메일 보내기
     @PostMapping("/email/send")
     public ResponseEntity<?> sendEmailCode(@Valid @RequestBody EmailDTO dto,
@@ -263,7 +272,7 @@ public class MemberController {
         // 회원이 없는 이메일이어도 똑같이 200 응답
         // 이메일 존재 여부 노출x
         return ResponseEntity.ok(
-                new MessageResponseDTO<>(null, SuccessCode.REQUEST_SUCCESS)
+                new MessageResponseDTO<>(null, SuccessCode.PASSWORD_RESET_REQUESTED)
         );
     }
 
@@ -272,7 +281,7 @@ public class MemberController {
 
         passwordResetService.resetPassword(dto.token(), dto.newPassword());
         return ResponseEntity.ok(
-                new MessageResponseDTO<>(null, SuccessCode.REQUEST_SUCCESS)
+                new MessageResponseDTO<>(null, SuccessCode.PASSWORD_RESET_SUCCESS)
         );
     }
 
@@ -285,4 +294,27 @@ public class MemberController {
                 new MessageResponseDTO<>(null, SuccessCode.PASSWORD_RESET_SUCCESS)
         );
     }
+    
+    @PostMapping("/email/found")
+    public ResponseEntity<?> foundEmail(
+            @Valid @RequestBody NameDTO dto,
+            HttpServletRequest request
+    ) {
+        // 1. 실제 요청 IP 확인
+        String ip = clientIpResolver.resolve(request);
+
+        // 2. IP별 반복 조회 제한
+        rateLimiter.checkEmailLookupIp(ip);
+
+        // 3. 마스킹된 이메일만 반환
+        String maskedEmail = memberService.foundEmail(dto);
+
+        return ResponseEntity.ok(
+                new MessageResponseDTO<>(
+                        maskedEmail,
+                        SuccessCode.REQUEST_SUCCESS
+                )
+        );
+    }
+
 }

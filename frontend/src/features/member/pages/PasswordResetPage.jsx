@@ -53,38 +53,31 @@ const PasswordReset = () => {
       // 현재 페이지의 방문 기록을 '/' 페이지로 교체한다.
       navigate('/login', { replace: true });
     } catch (err) {
-      if (
-        err.code === 'INVALID_PASSWORD_RESET_TOKEN' ||
-        err.response?.data?.code === 'INVALID_PASSWORD_RESET_TOKEN'
-      ) {
-        setMessage(err.message || '유효하지 않은 재설정 링크입니다.');
-      } else {
-        setMessage('서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.');
-      }
-      console.log(err);
+      console.error(err);
+      setMessage(err.response?.data?.message || '비밀번호 변경에 실패했습니다.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main className="min-h-screen bg-[#f7f9fc]">
-      <div className="min-h-screen w-full bg-[#f7f9fc] lg:flex">
-        {/* 왼쪽 브랜드 영역 */}
-        <Header role={role} activePage="events" />
+    <main className="min-h-screen bg-ems-background">
+      <div className="min-h-screen w-full bg-ems-background lg:flex">
+        {/* 비로그인 사용자가 접근하는 비밀번호 재설정 화면 */}
+        <Header role="COMMON" activePage="login" />
 
         {/* 오른쪽 비밀번호 입력 영역 */}
         <section className="flex flex-1 items-center justify-center px-8 py-14 sm:px-12 lg:px-[72px] lg:py-0">
           <form onSubmit={passwordResetSuccess} className="w-full max-w-[510px]">
-            <h2 className="text-[26px] font-bold text-[#142238]">비밀번호 재설정</h2>
-            <p className="mt-3 text-[14px] text-[#7a879a]">
+            <h2 className="text-[26px] font-bold text-ems-text">비밀번호 재설정</h2>
+            <p className="mt-3 text-[14px] text-ems-muted">
               계정에 사용할 새 비밀번호를 입력해주세요.
             </p>
 
             <div className="mt-9">
               <label
                 htmlFor="new-password"
-                className="block text-[13px] font-semibold text-[#142238]"
+                className="block text-[13px] font-semibold text-ems-text"
               >
                 새 비밀번호
               </label>
@@ -95,9 +88,9 @@ const PasswordReset = () => {
                 value={newPassword}
                 onChange={(event) => setNewPassword(event.target.value)}
                 placeholder="새 비밀번호를 입력해주세요."
-                className="h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15"
+                className="h-[44px] w-full rounded-[10px] border border-ems-member-input-border bg-white px-4 text-[13px] text-ems-text outline-none focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15"
               />
-              <p className="mt-2 text-[12px] text-[#7a879a]">
+              <p className="mt-2 text-[12px] text-ems-muted">
                 8~20자, 영문·숫자·특수문자(!@#$%^&*) 포함
               </p>
             </div>
@@ -105,7 +98,7 @@ const PasswordReset = () => {
             <div className="mt-5">
               <label
                 htmlFor="confirm-password"
-                className="block text-[13px] font-semibold text-[#142238]"
+                className="block text-[13px] font-semibold text-ems-text"
               >
                 새 비밀번호 확인
               </label>
@@ -116,7 +109,7 @@ const PasswordReset = () => {
                 value={passwordConfirm}
                 onChange={(event) => setPasswordConfirm(event.target.value)}
                 placeholder="새 비밀번호를 확인을 입력해주세요."
-                className="h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15"
+                className="h-[44px] w-full rounded-[10px] border border-ems-member-input-border bg-white px-4 text-[13px] text-ems-text outline-none focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15"
               />
             </div>
 
@@ -129,7 +122,7 @@ const PasswordReset = () => {
             <button
               type="submit"
               disabled={loading || !token}
-              className="mt-8 h-[44px] w-full rounded-[10px] bg-[#169b62] text-[13px] font-semibold text-white transition-colors hover:bg-[#128653] disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-8 h-[44px] w-full rounded-[10px] bg-ems-primary text-[13px] font-semibold text-white transition-colors hover:bg-ems-member-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
             >
               {loading ? '변경 중...' : '비밀번호 변경하기'}
             </button>
@@ -141,7 +134,7 @@ const PasswordReset = () => {
             <button
               type="button"
               onClick={() => navigate('/')}
-              className="mt-7 w-full text-[13px] font-semibold text-[#169b62] hover:underline"
+              className="mt-7 w-full text-[13px] font-semibold text-ems-primary hover:underline"
             >
               로그인으로 돌아가기
             </button>

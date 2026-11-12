@@ -1,9 +1,89 @@
+// ========================================
+// EMS Global Styles
+//
+// P1 수정 목적
+// 1. 중복된 전역 스타일 선언 통합
+// 2. CSS 디자인 토큰 활용
+// 3. 기존 화면 스타일 및 동작 유지
+// 4. Tailwind와 역할 분리
+// ========================================
+
+// 기존 Sass 변수 참조 유지
 @use './variables' as *;
-:root { font-family: var(--ems-font-family); color: $text; background: var(--ems-background); }
-* { box-sizing: border-box; }
-html, body, #root { min-width: 320px; min-height: 100%; margin: 0; }
-body { min-height: 100vh; background: var(--ems-background); }
-a { color: $brand; text-decoration: none; }
-button, input, select { font: inherit; }
-button { cursor: pointer; }
-pre { overflow-x:auto; }
+
+// ========================================
+// 1. 전역 기본 설정
+// ========================================
+
+:root {
+  font-family: var(--ems-font-family);
+  color: $text;
+  background: var(--ems-background);
+}
+
+// ========================================
+// 2. Box Sizing
+// ========================================
+
+* {
+  box-sizing: border-box;
+}
+
+// ========================================
+// 3. HTML 및 React Root
+// ========================================
+
+html,
+body,
+#root {
+  min-width: 320px;
+  min-height: 100%;
+  margin: 0;
+}
+
+// ========================================
+// 4. Body
+//
+// style.css에 있던 색상 선언을 통합했다.
+// ========================================
+
+body {
+  min-height: 100vh;
+  color: var(--ems-text);
+  background: var(--ems-background);
+}
+
+// ========================================
+// 5. Anchor
+//
+// 기존 전역 링크 색상과 장식 유지
+// ========================================
+
+a {
+  color: $brand;
+  text-decoration: none;
+}
+
+// ========================================
+// 6. Form Elements
+//
+// Tailwind 및 기존 폼 스타일과의 호환 유지
+// ========================================
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+// ========================================
+// 7. Code / Preformatted Text
+// ========================================
+
+pre {
+  overflow-x: auto;
+}

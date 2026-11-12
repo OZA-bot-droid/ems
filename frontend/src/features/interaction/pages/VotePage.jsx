@@ -39,12 +39,14 @@ export default function VotePage() {
     <div className={cx('app-shell')}>
       {/* 전체 화면 레이아웃 및 사용자용 공통 헤더. */}
       <Header role="USER" activePage="votes" />
-
-      <main className={`${cx('app-main-content')} ${styles.main}`}>
-        <header className={styles.pageHeader}>
-          <h1 className={styles.pageTitle}>실시간 투표</h1>
-          <p className={styles.pageDescription}>
-            승인된 행사 참가자에게 공개된 투표입니다. {socketConnected ? '' : '실시간 연결 실패'}
+      {/* 실시간 투표 본문 전체 너비 적용 */}
+      <main className={cx('app-main-content w-full min-w-0 space-y-5')}>
+        <header>
+          <p className="text-sm text-emerald-700">SYNC5 / Interaction</p>
+          <h1 className="text-2xl font-bold">실시간 투표</h1>
+          <p className="text-sm text-slate-500">
+            승인된 행사 참가자에게 공개된 투표입니다.{' '}
+            {socketConnected ? '실시간 연결됨' : '주기적으로 업데이트 중'}
           </p>
         </header>
 

@@ -1,9 +1,17 @@
 .admin-approval-page {
   display: flex;
+
+  // 참가 승인 목록 전체 너비 사용
   width: 100%;
-  max-width: 1120px;
+  min-width: 0;
+
+  // 기존 최대 너비 제한 제거
+  // max-width: 1120px;
+
+  // 기존 높이 및 세로 레이아웃 유지
   min-height: 731px;
   flex-direction: column;
+
   color: var(--ems-ink);
   font-family: var(--ems-font);
 }
@@ -40,8 +48,10 @@
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  background: #fff4e8;
-  color: #966420;
+  // 관리자 역할 배지
+  // 기존 색상을 그대로 사용하되 디자인 토큰으로 연결
+  background: var(--ems-admin-badge-bg);
+  color: var(--ems-admin-badge-text);
   font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
@@ -91,9 +101,11 @@
   line-height: 1.5;
 }
 
+// 참가 승인 오류 메시지
+// 기존 패딩과 폰트 설정은 상위 선택자에서 유지
 .admin-approval-error {
-  background: #fef3f2;
-  color: #b42318;
+  background: var(--ems-error-bg);
+  color: var(--ems-error-text);
 }
 
 .admin-approval-message {
@@ -187,8 +199,9 @@
     color: var(--ems-green-dark);
   }
 
+  // 기존 거절 버튼 hover 색상 유지
   .is-reject:hover {
-    color: #b42318;
+    color: var(--ems-error-text);
   }
 }
 
@@ -206,8 +219,8 @@
   }
 
   &.is-rejected {
-    background: #fef3f2;
-    color: #b42318;
+    background: var(--ems-error-bg);
+    color: var(--ems-error-text);
   }
 }
 
@@ -218,10 +231,10 @@
   gap: 12px;
   margin: -19px 0 14px;
   padding: 9px 12px;
-  border: 1px solid #c8e6d5;
+  border: 1px solid var(--ems-success-border);
   border-radius: 8px;
-  background: #f0faf4;
-  color: #216b46;
+  background: var(--ems-success-bg);
+  color: var(--ems-success-text);
   font-size: 12px;
 
   button {

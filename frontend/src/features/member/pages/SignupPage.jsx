@@ -7,6 +7,7 @@ import { getClientId } from '../utils/getClientId.js';
 import NoLoginHeaders from '../components/NoLoginHeaders.jsx';
 import { memberApi } from '../api/memberApi.js';
 import PasswordInput from '../components/PasswordInput.jsx';
+import { signupInput, primaryButton, outlineButton } from '../styles/memberFormStyles.js';
 
 function SignupForm() {
   const navigate = useNavigate();
@@ -19,6 +20,9 @@ function SignupForm() {
   const [verifiedEmail, setVerifiedEmail] = useState('');
   const [sending, setSending] = useState(false);
   const [verifying, setVerifying] = useState(false);
+
+  const [nameDuplicate, setNameDuplicate] = useState(true);
+
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [role, setRole] = useState('');
   const [member, setMember] = useState({
@@ -48,6 +52,11 @@ function SignupForm() {
   // 자체 회원가입
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    if (nameDuplicate) {
+      alert('닉네임 중복 확인을 완료해주세요.');
+      return;
+    }
 
     if (!verifiedEmail || verifiedEmail !== member.email.trim().toLowerCase()) {
       alert('이메일 인증을 완료해주세요.');
@@ -84,7 +93,8 @@ function SignupForm() {
       alert(res.message);
       navigate('/login');
     } catch (error) {
-      alert(error?.message || '회원가입 요청에 실패했습니다.');
+      alert(error.response?.data?.message || '회원가입 요청에 실패했습니다.');
+      console.log(error);
     }
   };
 
@@ -115,7 +125,7 @@ function SignupForm() {
     }
   };
 
-  // 이메일 인증 요청 함수 추가
+  // 이메일 인증 요청 함수
   const sendVerificationCode = async () => {
     const email = member.email.trim().toLowerCase();
 
@@ -138,48 +148,92 @@ function SignupForm() {
       console.log(res);
     } catch (err) {
       console.error(err);
-      alert('서버 연결 중 오류가 발생했습니다.');
+      alert(err.response?.data?.message || '요청을 처리하지 못했습니다.');
     } finally {
       setSending(false);
     }
   };
 
+  // 닉네임 중복 확인
+
+  const nameDuplicateCheck = async () => {
+    const name = member.name.trim();
+
+    // 빈 닉네임 확인 방지
+    if (!name) {
+      alert('닉네임을 입력해주세요.');
+      return;
+    }
+
+    try {
+      const res = await memberApi.nameDuplicateCheck(name);
+
+      // 현재 API 응답 data:
+      // true  = 중복
+      // false = 사용 가능
+      if (res.data === false) {
+        setNameDuplicate(false);
+        alert('사용 가능한 닉네임입니다.');
+      } else {
+        setNameDuplicate(true);
+        alert('이미 사용 중인 닉네임입니다.');
+      }
+    } catch (err) {
+      setNameDuplicate(true);
+      alert(err.message || '중복 확인에 실패했습니다.');
+    }
+  };
+
   return (
-    <div className={cx('w-[600px] px-8')}>
+    <div className={cx('w-full max-w-[600px] px-8')}>
       <form onSubmit={handleSubmit}>
-        <h2 className={cx('text-[26px] font-bold tracking-[-0.02em] text-[#142238]')}>
+        <h2 className={cx('text-[26px] font-bold tracking-[-0.02em] text-ems-text')}>
           새로운 계정을 만들어보세요
         </h2>
-        <p className={cx('mt-2 text-[14px] leading-6 text-[#7a879a]')}>
+        <p className={cx('mt-2 text-[14px] leading-6 text-ems-muted')}>
           필수 정보를 입력하여 EMS에 가입하세요.
         </p>
 
         <div className={cx('mt-7')}>
           <label
             htmlFor="signup-name"
-            className={cx('block text-[13px] font-semibold text-[#142238]')}
+            className={cx('block text-[13px] font-semibold text-ems-text')}
           >
-            이름
+            닉네임
           </label>
-          <input
-            id="signup-name"
-            type="text"
-            name="name"
-            onChange={(event) =>
-              setMember((m) => ({ ...m, [event.target.name]: event.target.value }))
-            }
-            placeholder="홍길동"
-            autoComplete="name"
-            className={cx(
-              'mt-2 h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none transition placeholder:text-[#a0a9b8] focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15',
-            )}
-          />
+          <div className={cx('mt-2 flex gap-2')}>
+            <input
+              id="signup-name"
+              type="text"
+              name="name"
+              onChange={(event) => {
+                setMember((m) => ({
+                  ...m,
+                  name: event.target.value,
+                }));
+
+                // 닉네임을 변경하면 이전 확인 결과 무효화
+                setNameDuplicate(true);
+              }}
+              placeholder="홍길동"
+              autoComplete="name"
+              className={cx(`${signupInput} min-w-0 flex-1`)}
+            />
+            <button
+              type="button"
+              onClick={nameDuplicateCheck}
+              disabled={!nameDuplicate}
+              className={cx(`${primaryButton} h-[44px] shrink-0 text-[12px]`)}
+            >
+              {nameDuplicate ? '중복 확인' : '확인 완료'}
+            </button>
+          </div>
         </div>
 
         <div className={cx('mt-4')}>
           <label
             htmlFor="signup-email"
-            className={cx('block text-[13px] font-semibold text-[#142238]')}
+            className={cx('block text-[13px] font-semibold text-ems-text')}
           >
             이메일
           </label>
@@ -201,18 +255,14 @@ function SignupForm() {
               disabled={sending || verifying}
               placeholder="name@example.com"
               autoComplete="email"
-              className={cx(
-                'h-[44px] min-w-0 flex-1 rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none transition placeholder:text-[#a0a9b8] focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15',
-              )}
+              className={cx(`${signupInput} min-w-0 flex-1`)}
             />
 
             <button
               type="button"
               onClick={sendVerificationCode}
               disabled={sending || verifying || Boolean(verifiedEmail)}
-              className={cx(
-                'h-[44px] shrink-0 rounded-[10px] bg-[#169b62] px-4 text-[12px] font-semibold text-white hover:bg-[#128653] disabled:opacity-50',
-              )}
+              className={cx(`${primaryButton} h-[44px] shrink-0 text-[12px]`)}
             >
               {sending ? '발송 중...' : codeSent ? '재발송' : '인증번호 발송'}
             </button>
@@ -224,7 +274,7 @@ function SignupForm() {
             <div className={cx('mt-3')}>
               <label
                 htmlFor="signup-verification-code"
-                className={cx('block text-[13px] font-semibold text-[#142238]')}
+                className={cx('block text-[13px] font-semibold text-ems-text')}
               >
                 이메일 인증번호
               </label>
@@ -240,7 +290,12 @@ function SignupForm() {
                   onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ''))}
                   placeholder="6자리 인증번호"
                   className={cx(
-                    'h-[44px] min-w-0 flex-1 rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] outline-none focus:border-[#169b62]',
+                    // 기존 44px 높이, flex 너비, focus 동작 유지
+                    'h-[44px] min-w-0 flex-1 rounded-[10px] ' +
+                      'border border-ems-member-input-border ' +
+                      'bg-white px-4 text-[13px] outline-none ' +
+                      // P2: 하드코딩된 초록색만 토큰으로 교체
+                      'focus:border-ems-primary',
                   )}
                 />
 
@@ -248,22 +303,20 @@ function SignupForm() {
                   type="button"
                   onClick={verifyEmailCode}
                   disabled={verifying || sending || verificationCode.length !== 6}
-                  className={cx(
-                    'rounded-[10px] border border-[#169b62] px-4 text-[12px] font-semibold text-[#169b62] hover:bg-[#e6f5ee] disabled:opacity-50',
-                  )}
+                  className={cx(`${outlineButton} `)}
                 >
                   {verifying ? '확인 중...' : '인증 확인'}
                 </button>
               </div>
 
-              <p className={cx('mt-2 text-[12px] text-[#7a879a]')}>
+              <p className={cx('mt-2 text-[12px] text-ems-muted')}>
                 이메일로 발송된 6자리 인증번호를 입력해주세요.
               </p>
             </div>
           )}
 
           {verifiedEmail && (
-            <p className={cx('mt-3 text-[12px] font-semibold text-[#169b62]')}>
+            <p className={cx('mt-3 text-[12px] font-semibold text-ems-primary')}>
               ✓ 이메일 인증이 완료되었습니다.
             </p>
           )}
@@ -272,7 +325,7 @@ function SignupForm() {
         <div className={cx('mt-4')}>
           <label
             htmlFor="signup-password"
-            className={cx('block text-[13px] font-semibold text-[#142238]')}
+            className={cx('block text-[13px] font-semibold text-ems-text')}
           >
             비밀번호
           </label>
@@ -286,16 +339,14 @@ function SignupForm() {
             }
             placeholder="••••••••"
             autoComplete="new-password"
-            className={cx(
-              'h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none transition placeholder:text-[#a0a9b8] focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15',
-            )}
+            className={cx(`${signupInput} w-full`)}
           />
         </div>
 
         <div className={cx('mt-4')}>
           <label
             htmlFor="signup-password-confirm"
-            className={cx('block text-[13px] font-semibold text-[#142238]')}
+            className={cx('block text-[13px] font-semibold text-ems-text')}
           >
             비밀번호 확인
           </label>
@@ -306,9 +357,7 @@ function SignupForm() {
             onChange={(event) => setPasswordConfirm(event.target.value)}
             placeholder="••••••••"
             autoComplete="new-password"
-            className={cx(
-              'h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none transition placeholder:text-[#a0a9b8] focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15',
-            )}
+            className={cx(`${signupInput} w-full`)}
           />
         </div>
 
@@ -323,8 +372,8 @@ function SignupForm() {
                   rounded-full px-5 py-2 transition-all duration-200
                   ${
                     role === 'USER'
-                      ? 'bg-[#169b62] text-white font-bold'
-                      : 'bg-transparent text-[#9aa5b4] font-medium'
+                      ? 'bg-ems-primary text-white font-bold'
+                      : 'bg-transparent text-ems-member-inactive font-medium'
                   }
                 `)}
             >
@@ -337,8 +386,8 @@ function SignupForm() {
                   rounded-full px-5 py-2 transition-all duration-200
                   ${
                     role === 'ADMIN'
-                      ? 'bg-[#169b62] text-white font-bold'
-                      : 'bg-transparent text-[#9aa5b4] font-medium'
+                      ? 'bg-ems-primary text-white font-bold'
+                      : 'bg-transparent text-ems-member-inactive font-medium'
                   }
                 `)}
             >
@@ -350,7 +399,7 @@ function SignupForm() {
         <button
           type="submit"
           className={cx(
-            'mt-7 flex h-[44px] w-full items-center justify-center rounded-[10px] bg-[#169b62] px-4 text-[13px] font-semibold text-white transition-colors hover:bg-[#128653] focus:outline-none focus:ring-2 focus:ring-[#169b62]/30',
+            `${primaryButton} mt-7 flex h-[44px] w-full items-center justify-center focus:outline-none focus:ring-2 focus:ring-ems-primary/30`,
           )}
         >
           회원가입
@@ -364,7 +413,7 @@ function SignupForm() {
           type="button"
           onClick={() => navigate('/login')}
           className={cx(
-            'mt-4 block w-full text-center text-[13px] font-medium text-[#169b62] hover:underline',
+            'mt-4 block w-full text-center text-[13px] font-medium text-ems-primary hover:underline',
           )}
         >
           이미 계정이 있으신가요?&nbsp;&nbsp; 로그인
@@ -384,11 +433,11 @@ function SignupForm() {
           type="button"
           onClick={googleSignup}
           className={cx(
-            'mt-[22px] flex h-[42px] w-full items-center justify-center gap-[12px] rounded-[10px] border border-[#d9dee7] bg-white',
+            'mt-[22px] flex h-[42px] w-full items-center justify-center gap-[12px] rounded-[10px] border border-ems-member-divider bg-white',
           )}
         >
-          <span className={cx('text-[16px] font-bold text-[#4285f4]')}>G</span>
-          <span className={cx('text-[13px] font-semibold text-[#142238]')}>Google로 회원가입</span>
+          <span className={cx('text-[16px] font-bold text-ems-google-blue')}>G</span>
+          <span className={cx('text-[13px] font-semibold text-ems-text')}>Google로 회원가입</span>
         </button>
 
         {/* Naver */}
@@ -396,7 +445,7 @@ function SignupForm() {
           type="button"
           onClick={naverSignup}
           className={cx(
-            'mt-[10px] flex h-[42px] w-full items-center justify-center gap-[12px] rounded-[10px] bg-[#03c75a] text-white',
+            'mt-[10px] flex h-[42px] w-full items-center justify-center gap-[12px] rounded-[10px] bg-ems-naver-green text-white',
           )}
         >
           <span className={cx('text-[16px] font-bold')}>N</span>
@@ -409,8 +458,8 @@ function SignupForm() {
 
 const Signup = () => {
   return (
-    <main className={cx('min-h-screen bg-[#f7f9fc]')}>
-      <div className={cx('min-h-screen w-full bg-[#f7f9fc] lg:flex')}>
+    <main className={cx('min-h-screen bg-ems-background')}>
+      <div className={cx('min-h-screen w-full bg-ems-background lg:flex')}>
         <NoLoginHeaders />
 
         <section

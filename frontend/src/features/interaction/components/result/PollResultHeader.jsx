@@ -11,6 +11,11 @@ export default function PollResultHeader({ from, pollId, onRefresh, loading }) {
   return (
     <header className="flex flex-wrap items-center justify-between gap-3">
       <div>
+<<<<<<< HEAD
+=======
+        {/* 기존 emerald-700 색상 유지 */}
+        <p className="text-sm text-ems-interaction-primary">SYNC5 / Interaction</p>
+>>>>>>> develop
         <h1 className="text-2xl font-bold">투표 결과</h1>
         <p className="text-sm text-slate-500">
           투표 ID: {pollId} · {fromManage ? '관리자 관리 화면에서 진입' : '투표 목록에서 진입'}
