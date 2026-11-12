@@ -11,8 +11,8 @@ const MENUS = {
   COMMON: {
     heading: 'EXPLORE',
     items: [
+      { id: 'home', label: '메인 화면', href: '/' },
       { id: 'events', label: '행사 목록', href: '/events' },
-      // { id: 'event-detail', label: '행사 상세', href: '/events' },
       { id: 'login', label: '로그인', href: '/login' },
       { id: 'signup', label: '회원가입', href: '/signup' },
     ],

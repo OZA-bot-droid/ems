@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from './member/hooks/useAuth.js';
 import { eventApi } from './event/api/eventApi.js';
 import { formatShort, STATUS_BADGE } from './event/utils/format.js';
-import logo from '../components/img/SYNC5trans.png'
+import logo from '../components/img/SYNC5trans.png';
 import './home.css';
 
 const Home = () => {
@@ -13,25 +13,43 @@ const Home = () => {
   const [eventsError, setEventsError] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const canCreate = Boolean(accessToken && role === 'ADMIN');
-  const createDestination = authLoading ? '/events' : canCreate ? '/admin/events' : accessToken ? '/events' : '/login';
+  const createDestination = authLoading
+    ? '/events'
+    : canCreate
+      ? '/admin/events'
+      : accessToken
+        ? '/events'
+        : '/login';
 
   useEffect(() => {
     let active = true;
-    eventApi.list({ status: 'OPEN', page: 0, size: 3 })
+    eventApi
+      .list({ status: 'OPEN', page: 0, size: 3 })
       .then((data) => {
-        if (active) setEvents(Array.isArray(data) ? data.slice(0, 3) : (data?.content ?? []).slice(0, 3));
+        if (active)
+          setEvents(Array.isArray(data) ? data.slice(0, 3) : (data?.content ?? []).slice(0, 3));
       })
-      .catch(() => { if (active) setEventsError(true); })
-      .finally(() => { if (active) setEventsLoading(false); });
-    return () => { active = false; };
+      .catch(() => {
+        if (active) setEventsError(true);
+      })
+      .finally(() => {
+        if (active) setEventsLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
   const handleLogout = async () => {
     if (loggingOut) return;
     setLoggingOut(true);
-    try { await logout(); }
-    catch (error) { console.error('로그아웃 서버 요청 실패:', error); }
-    finally { setLoggingOut(false); }
+    try {
+      await logout();
+    } catch (error) {
+      console.error('로그아웃 서버 요청 실패:', error);
+    } finally {
+      setLoggingOut(false);
+    }
   };
   const trackRef = useRef(null);
   const groupRef = useRef(null);
@@ -61,7 +79,8 @@ const Home = () => {
       animation,
     };
 
-    if (event.currentTarget.setPointerCapture) event.currentTarget.setPointerCapture(event.pointerId);
+    if (event.currentTarget.setPointerCapture)
+      event.currentTarget.setPointerCapture(event.pointerId);
   };
 
   const handlePointerMove = (event) => {
@@ -110,11 +129,7 @@ const Home = () => {
         <div className="mx-auto flex max-w-[1200px] flex-wrap items-center justify-between gap-y-3 px-6 py-4 lg:h-[88px] lg:flex-nowrap lg:py-0">
           {/* 로고 */}
           <Link to="/" className="shrink-0">
-            <img
-              src={logo}
-              alt="SYNC5"
-              className="h-[48px] w-auto object-contain lg:h-[64px]"
-            />
+            <img src={logo} alt="SYNC5" className="h-[48px] w-auto object-contain lg:h-[64px]" />
           </Link>
 
           {/* 메뉴 */}
@@ -126,10 +141,7 @@ const Home = () => {
               홈
             </Link>
 
-            <Link
-              to={createDestination}
-              className="transition-colors hover:text-ems-primary"
-            >
+            <Link to={createDestination} className="transition-colors hover:text-ems-primary">
               {accessToken && !canCreate ? '행사 탐색' : '개최 Event'}
             </Link>
 
@@ -204,7 +216,11 @@ const Home = () => {
                   to={createDestination}
                   className="rounded-xl border border-ems-member-input-border bg-white px-7 py-3.5 text-[14px] font-semibold text-ems-text transition-colors hover:bg-ems-background"
                 >
-                  {authLoading ? '이벤트 둘러보기' : accessToken && !canCreate ? '행사 목록 보기' : '이벤트 개최하기'}
+                  {authLoading
+                    ? '이벤트 둘러보기'
+                    : accessToken && !canCreate
+                      ? '행사 목록 보기'
+                      : '이벤트 개최하기'}
                 </Link>
               </div>
             </div>
@@ -246,38 +262,77 @@ const Home = () => {
             </div>
 
             {/* Event Service 실제 목록. 샘플 데이터와 섞지 않는다. */}
-            {eventsLoading && <p className="py-10 text-center text-ems-muted" role="status">이벤트를 불러오는 중입니다.</p>}
+            {eventsLoading && (
+              <p className="py-10 text-center text-ems-muted" role="status">
+                이벤트를 불러오는 중입니다.
+              </p>
+            )}
             {!eventsLoading && eventsError && (
-              <div role="alert" className="rounded-2xl border border-ems-border bg-white p-8 text-center text-ems-muted">
+              <div
+                role="alert"
+                className="rounded-2xl border border-ems-border bg-white p-8 text-center text-ems-muted"
+              >
                 현재 이벤트 정보를 불러올 수 없습니다. 행사 목록에서 다시 확인해 주세요.
               </div>
             )}
             {!eventsLoading && !eventsError && events.length === 0 && (
-              <p className="rounded-2xl border border-ems-border bg-white p-8 text-center text-ems-muted">현재 모집 중인 이벤트가 없습니다.</p>
+              <p className="rounded-2xl border border-ems-border bg-white p-8 text-center text-ems-muted">
+                현재 모집 중인 이벤트가 없습니다.
+              </p>
             )}
             {!eventsLoading && !eventsError && events.length > 0 && (
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {events.map((event, index) => {
                   const badge = STATUS_BADGE[event.status] ?? STATUS_BADGE.OPEN;
                   const capacity = Math.max(0, Number(event.capacity) || 0);
-                  const participants = Math.max(0, Number(event.participants ?? event.registeredCount ?? 0) || 0);
+                  const participants = Math.max(
+                    0,
+                    Number(event.participants ?? event.registeredCount ?? 0) || 0,
+                  );
                   return (
-                    <Link to={`/events/${encodeURIComponent(event.id)}`} key={event.id}
-                      className="home-event-card group flex flex-col overflow-hidden rounded-[20px] border border-ems-member-input-border bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-ems-primary">
-                      <div className={`relative flex h-[175px] items-center justify-center ${index % 2 === 0 ? 'bg-ems-member-primary-soft' : 'bg-(--ems-blue-soft)'}`}>
-                        <span className="text-[58px]" aria-hidden="true">{['📅', '🎟️', '💻'][index % 3]}</span>
+                    <Link
+                      to={`/events/${encodeURIComponent(event.id)}`}
+                      key={event.id}
+                      className="home-event-card group flex flex-col overflow-hidden rounded-[20px] border border-ems-member-input-border bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-ems-primary"
+                    >
+                      <div
+                        className={`relative flex h-[175px] items-center justify-center ${index % 2 === 0 ? 'bg-ems-member-primary-soft' : 'bg-(--ems-blue-soft)'}`}
+                      >
+                        <span className="text-[58px]" aria-hidden="true">
+                          {['📅', '🎟️', '💻'][index % 3]}
+                        </span>
                       </div>
                       <div className="flex flex-1 flex-col p-6">
-                        <span className={`w-fit rounded-full px-3 py-1 text-[11px] font-semibold ${badge.className}`}>{badge.label}</span>
+                        <span
+                          className={`w-fit rounded-full px-3 py-1 text-[11px] font-semibold ${badge.className}`}
+                        >
+                          {badge.label}
+                        </span>
                         <h3 className="mt-5 text-[18px] font-bold text-ems-text">{event.title}</h3>
-                        <p className="mt-5 text-[13px] text-ems-muted">📅 {event.startsAt && !Number.isNaN(Date.parse(event.startsAt)) ? formatShort(event.startsAt) : '일정 미정'}</p>
+                        <p className="mt-5 text-[13px] text-ems-muted">
+                          📅{' '}
+                          {event.startsAt && !Number.isNaN(Date.parse(event.startsAt))
+                            ? formatShort(event.startsAt)
+                            : '일정 미정'}
+                        </p>
                         <div className="mt-auto border-t border-ems-member-input-border pt-5">
-                          <p className="text-[12px] text-ems-muted">정원 {capacity > 0 ? `${capacity}명` : '미정'}{(event.participants != null || event.registeredCount != null) ? ` · 신청 ${participants}명` : ''}</p>
-                          {capacity > 0 && (event.participants != null || event.registeredCount != null) && (
-                            <div className="mt-3 h-[6px] overflow-hidden rounded-full bg-ems-member-input-border">
-                              <div className="h-full rounded-full bg-ems-primary" style={{ width: `${Math.min(100, participants / capacity * 100)}%` }} />
-                            </div>
-                          )}
+                          <p className="text-[12px] text-ems-muted">
+                            정원 {capacity > 0 ? `${capacity}명` : '미정'}
+                            {event.participants != null || event.registeredCount != null
+                              ? ` · 신청 ${participants}명`
+                              : ''}
+                          </p>
+                          {capacity > 0 &&
+                            (event.participants != null || event.registeredCount != null) && (
+                              <div className="mt-3 h-[6px] overflow-hidden rounded-full bg-ems-member-input-border">
+                                <div
+                                  className="h-full rounded-full bg-ems-primary"
+                                  style={{
+                                    width: `${Math.min(100, (participants / capacity) * 100)}%`,
+                                  }}
+                                />
+                              </div>
+                            )}
                         </div>
                       </div>
                     </Link>
@@ -286,7 +341,10 @@ const Home = () => {
               </div>
             )}
             <div className="mt-8 text-center">
-              <Link to="/events" className="inline-block rounded-xl bg-ems-primary px-6 py-3 text-[14px] font-semibold text-white hover:bg-ems-member-primary-hover">
+              <Link
+                to="/events"
+                className="inline-block rounded-xl bg-ems-primary px-6 py-3 text-[14px] font-semibold text-white hover:bg-ems-member-primary-hover"
+              >
                 전체 이벤트 둘러보기
               </Link>
             </div>
@@ -430,11 +488,7 @@ const Home = () => {
               to={accessToken ? '/mypage' : authLoading ? '/events' : '/signup'}
               className="mt-8 inline-block rounded-xl bg-ems-primary px-8 py-3.5 text-[14px] font-semibold text-white transition hover:bg-ems-member-primary-hover"
             >
-              {accessToken
-                ? '마이페이지로 이동'
-                : authLoading
-                  ? '이벤트 둘러보기'
-                  : '시작하기'}
+              {accessToken ? '마이페이지로 이동' : authLoading ? '이벤트 둘러보기' : '시작하기'}
             </Link>
           </div>
         </section>
@@ -470,7 +524,7 @@ const Home = () => {
                   aria-hidden={groupIndex === 1}
                 >
                   {[
-                    { name: '오좌언', role: '전체 통합', initials: 'OJ' },
+                    { name: '오좌언', role: '공통 인프라 · 통합', initials: 'OJ' },
                     { name: '하진철', role: 'Member · 인증', initials: 'HJ' },
                     { name: '박천보', role: 'Interaction · 투표', initials: 'PC' },
                     { name: '이도형', role: 'Event · 참가 승인', initials: 'DH' },
@@ -502,7 +556,10 @@ const Home = () => {
           <div className="grid gap-10 md:grid-cols-[1fr_auto] md:gap-20">
             {/* 브랜드 소개 */}
             <div>
-              <Link to="/" className="home-footer-brand inline-block text-[28px] font-extrabold tracking-tight">
+              <Link
+                to="/"
+                className="home-footer-brand inline-block text-[28px] font-extrabold tracking-tight"
+              >
                 SYNC<span className="text-ems-primary">5</span>
               </Link>
 
