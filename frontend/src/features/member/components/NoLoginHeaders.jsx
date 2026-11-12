@@ -8,7 +8,10 @@ const NoLoginHeaders = () => {
           <span className="h-[39px] w-3 rounded-[5px] bg-ems-primary" />
           <h1 className="text-[36px] font-bold leading-none tracking-[-0.02em]">EMS</h1>
         </div>
-        <p className="mt-5 text-[13px] font-semibold text-[#afc2d2]">CLOUD NATIVE EVENT PLATFORM</p>
+        {/* 플랫폼 소개 문구 */}
+        <p className="mt-5 text-[13px] font-semibold text-ems-sidebar-caption">
+          CLOUD NATIVE EVENT PLATFORM
+        </p>
       </div>
 
       <div className="mt-28 lg:mt-[132px]">
@@ -16,7 +19,8 @@ const NoLoginHeaders = () => {
           함께 만드는
           <br />더 나은 행사 경험
         </h2>
-        <p className="mt-12 text-[16px] leading-[1.15] text-[#bbc8d6]">
+        {/* 사이드바 설명 문구 */}
+        <p className="mt-12 text-[16px] leading-[1.15] text-ems-sidebar-description">
           행사 탐색부터 실시간 참여까지
           <br />
           통합 이벤트 관리 플랫폼

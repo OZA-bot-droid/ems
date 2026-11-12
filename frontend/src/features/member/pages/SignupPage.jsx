@@ -290,7 +290,12 @@ function SignupForm() {
                   onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ''))}
                   placeholder="6자리 인증번호"
                   className={cx(
-                    'h-[44px] min-w-0 flex-1 rounded-[10px] border border-ems-member-input-border bg-white px-4 text-[13px] outline-none focus:border-[#169b62]',
+                    // 기존 44px 높이, flex 너비, focus 동작 유지
+                    'h-[44px] min-w-0 flex-1 rounded-[10px] ' +
+                      'border border-ems-member-input-border ' +
+                      'bg-white px-4 text-[13px] outline-none ' +
+                      // P2: 하드코딩된 초록색만 토큰으로 교체
+                      'focus:border-ems-primary',
                   )}
                 />
 
@@ -334,7 +339,7 @@ function SignupForm() {
             }
             placeholder="••••••••"
             autoComplete="new-password"
-            className={cx(`${signupInput} `)}
+            className={cx(`${signupInput} w-full`)}
           />
         </div>
 
@@ -352,7 +357,7 @@ function SignupForm() {
             onChange={(event) => setPasswordConfirm(event.target.value)}
             placeholder="••••••••"
             autoComplete="new-password"
-            className={cx(`${signupInput} `)}
+            className={cx(`${signupInput} w-full`)}
           />
         </div>
 

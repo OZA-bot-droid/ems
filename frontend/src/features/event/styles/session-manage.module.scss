@@ -86,10 +86,13 @@
     cursor: pointer;
   }
 
+  // 세션 관리 오류 알림
+  // 기존 색상값을 그대로 사용하고
+  // EMS 공통 오류 토큰으로 연결한다.
   &.is-error {
-    border-color: #f2c8c5;
-    background: #fef3f2;
-    color: #b42318;
+    border-color: var(--ems-error-border);
+    background: var(--ems-error-bg);
+    color: var(--ems-error-text);
   }
 }
 

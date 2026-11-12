@@ -93,6 +93,10 @@
   --ems-member-control-radius: 10px;
   --ems-member-card-radius: 14px;
 
+  /* Member 비로그인 사이드바 전용 텍스트 */
+  --ems-sidebar-caption: #afc2d2;
+  --ems-sidebar-description: #bbc8d6;
+
   /* ========================================
  * P2 - Event 추가 토큰
  * ======================================== */
@@ -159,6 +163,10 @@
 
   --color-ems-google-blue: var(--ems-google-blue);
   --color-ems-naver-green: var(--ems-naver-green);
+
+  /* Member 사이드바 텍스트 */
+  --color-ems-sidebar-caption: var(--ems-sidebar-caption);
+  --color-ems-sidebar-description: var(--ems-sidebar-description);
 
   /* Event */
   --color-ems-admin-badge-bg: var(--ems-admin-badge-bg);

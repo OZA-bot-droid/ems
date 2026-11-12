@@ -93,9 +93,11 @@
   line-height: 1.5;
 }
 
+// 참가 승인 오류 메시지
+// 기존 패딩과 폰트 설정은 상위 선택자에서 유지
 .admin-approval-error {
-  background: #fef3f2;
-  color: #b42318;
+  background: var(--ems-error-bg);
+  color: var(--ems-error-text);
 }
 
 .admin-approval-message {
@@ -189,8 +191,9 @@
     color: var(--ems-green-dark);
   }
 
+  // 기존 거절 버튼 hover 색상 유지
   .is-reject:hover {
-    color: #b42318;
+    color: var(--ems-error-text);
   }
 }
 
@@ -208,8 +211,8 @@
   }
 
   &.is-rejected {
-    background: #fef3f2;
-    color: #b42318;
+    background: var(--ems-error-bg);
+    color: var(--ems-error-text);
   }
 }
 

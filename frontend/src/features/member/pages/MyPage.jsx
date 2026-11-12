@@ -112,7 +112,13 @@ const MyPage = () => {
                         value={newName}
                         maxLength={50}
                         onChange={(e) => setNewName(e.target.value)}
-                        className="mt-1 h-9 rounded-lg border border-ems-member-divider px-3 text-[13px] outline-none focus:border-[#169b62]"
+                        // P2: focus 색상만 디자인 토큰으로 변경
+                        // 기존 높이, 테두리 및 여백 유지
+                        className={
+                          'mt-1 h-9 rounded-lg border ' +
+                          'border-ems-member-divider px-3 text-[13px] ' +
+                          'outline-none focus:border-ems-primary'
+                        }
                       />
                     ) : (
                       <p className="mt-1 text-[14px] font-medium text-ems-text">{member.name}</p>
