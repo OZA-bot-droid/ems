@@ -32,23 +32,25 @@ const PasswordChange = () => {
     }
 
     setLoading(true);
+
     try {
-      const res = await memberApi.passwordChange(currentPassword, newPassword);
+      // 비밀번호 재설정 요청
+      await memberApi.passwordReset(token, newPassword);
 
-      console.log(res);
-      setMessage(res.message);
-      if (res.status < 200 || res.status >= 300) {
-        return;
-      } else {
-        setAccessToken(null);
-        localStorage.removeItem('isLoginSession');
-
-        // 현재 페이지의 방문 기록을 '/login' 페이지로 교체한다.
-        navigate('/login', { replace: true });
-      }
+      // 정상 완료되면 로그인 페이지로 이동
+      navigate('/login', {
+        replace: true,
+        state: {
+          notice: '비밀번호가 변경되었습니다. 다시 로그인해주세요.',
+        },
+      });
     } catch (err) {
-      console.error(err);
-      setMessage('서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.');
+      // 서버에서 전달한 실제 오류 메시지 표시
+      if (err.code === 'INVALID_PASSWORD_RESET_TOKEN') {
+        setMessage('재설정 링크가 만료되었거나 유효하지 않습니다.');
+      } else {
+        setMessage(err.message || '비밀번호 재설정에 실패했습니다.');
+      }
     } finally {
       setLoading(false);
     }

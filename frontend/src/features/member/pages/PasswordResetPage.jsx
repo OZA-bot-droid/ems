@@ -70,8 +70,8 @@ const PasswordReset = () => {
   return (
     <main className="min-h-screen bg-[#f7f9fc]">
       <div className="min-h-screen w-full bg-[#f7f9fc] lg:flex">
-        {/* 왼쪽 브랜드 영역 */}
-        <Header role={role} activePage="events" />
+        {/* 비로그인 사용자가 접근하는 비밀번호 재설정 화면 */}
+        <Header role="COMMON" activePage="login" />
 
         {/* 오른쪽 비밀번호 입력 영역 */}
         <section className="flex flex-1 items-center justify-center px-8 py-14 sm:px-12 lg:px-[72px] lg:py-0">

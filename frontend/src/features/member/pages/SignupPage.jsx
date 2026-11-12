@@ -153,19 +153,32 @@ function SignupForm() {
   };
 
   // 닉네임 중복 확인
-  const nameDuplicateCheck = async () => {
-    try {
-      const res = await memberApi.nameDuplicateCheck(member.name);
 
-      if (!res.data) {
-        alert('중복 확인 완료');
-        setNameDuplicate((prev) => !prev);
+  const nameDuplicateCheck = async () => {
+    const name = member.name.trim();
+
+    // 빈 닉네임 확인 방지
+    if (!name) {
+      alert('닉네임을 입력해주세요.');
+      return;
+    }
+
+    try {
+      const res = await memberApi.nameDuplicateCheck(name);
+
+      // 현재 API 응답 data:
+      // true  = 중복
+      // false = 사용 가능
+      if (res.data === false) {
+        setNameDuplicate(false);
+        alert('사용 가능한 닉네임입니다.');
       } else {
-        alert('닉네임이 중복되었습니다.');
+        setNameDuplicate(true);
+        alert('이미 사용 중인 닉네임입니다.');
       }
     } catch (err) {
-      console.log(err);
-      alert('서버 에러');
+      setNameDuplicate(true);
+      alert(err.message || '중복 확인에 실패했습니다.');
     }
   };
 
@@ -191,9 +204,15 @@ function SignupForm() {
               id="signup-name"
               type="text"
               name="name"
-              onChange={(event) =>
-                setMember((m) => ({ ...m, [event.target.name]: event.target.value }))
-              }
+              onChange={(event) => {
+                setMember((m) => ({
+                  ...m,
+                  name: event.target.value,
+                }));
+
+                // 닉네임을 변경하면 이전 확인 결과 무효화
+                setNameDuplicate(true);
+              }}
               placeholder="홍길동"
               autoComplete="name"
               className={cx(
