@@ -56,6 +56,8 @@ export const router = createBrowserRouter([
       { path: '/mypage', element: <MyPage /> },
       { path: '/polls', element: <VotePage /> },
       { path: '/polls/vote', element: <VotePage /> },
+      { path: '/polls/user', element: <PollListPage /> },
+      { path: '/polls/:pollId/results', element: <PollResultPage /> },
     ],
   },
   {

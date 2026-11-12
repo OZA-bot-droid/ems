@@ -5,7 +5,7 @@ import { memberApi } from '../api/memberApi.js';
 import Header from '../../../components/layout/LegacyHeader.jsx';
 
 const MyPage = () => {
-  const { authLoading, accessToken } = useAuth();
+  const { role, authLoading, accessToken } = useAuth();
   const navigate = useNavigate();
   const [member, setMember] = useState({});
   const [isEditing, setIsEditing] = useState(false);
@@ -54,7 +54,7 @@ const MyPage = () => {
       }
     } catch (err) {
       console.error(err);
-      alert(err.message || '닉네임 수정에 실패했습니다.');
+      alert(err.response?.data?.message);
     } finally {
       setSaving(false);
     }
@@ -63,7 +63,7 @@ const MyPage = () => {
   return (
     <main className="min-h-screen bg-[#f7f9fc]">
       <div className="min-h-screen w-full bg-[#f7f9fc] lg:flex">
-        <Header role={!authLoading && accessToken ? member.role : 'COMMON'} />
+        <Header role={role} activePage="events" />
 
         {/* My Page 영역 */}
         <section className="min-w-0 flex-1 px-6 py-10 sm:px-10 lg:px-12 lg:py-[65px] flex justify-center">

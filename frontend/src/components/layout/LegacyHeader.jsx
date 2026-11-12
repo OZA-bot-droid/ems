@@ -1,6 +1,10 @@
-import { useAuth } from '../../features/member/hooks/useAuth.js';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../features/member/hooks/useAuth';
+
 import { mapClassNames } from '../../styles/classNames.js';
 import module0 from './header.module.scss';
+
 const cx = (value) => mapClassNames(value, module0);
 
 const MENUS = {
@@ -23,24 +27,51 @@ const MENUS = {
       { id: 'votes', label: '실시간 투표', href: '/polls/vote' },
     ],
   },
-  // href: null = 아직 백엔드 API가 없어 화면을 연결하지 않은 메뉴 (보이기만 하고 누를 수 없음)
   ADMIN: {
     heading: 'ADMIN WORKSPACE',
     items: [
-      { id: 'dashboard', label: '운영 대시보드', href: null }, // 통계·집계 API 없음
-      { id: 'event-list', label: '행사 목록', href: '/events' }, // 사용자와 같은 행사 목록 (관리자는 상단에 [행사 관리] 탭도 보임)
-      { id: 'events', label: '행사 관리', href: '/admin/events' }, // Event Service /events
-      { id: 'sessions', label: '세션 관리', href: '/admin/sessions' }, // /events/{id}/sessions
-      { id: 'approvals', label: '참가 승인', href: '/admin/approvals' }, // ADMIN / 11 참가 승인
-      { id: 'votes', label: '투표 관리', href: '/admin/polls' }, // Interaction Service 미구현
-      { id: 'statistics', label: '기본 통계', href: null }, // 통계 API 없음
+      { id: 'dashboard', label: '운영 대시보드', href: null },
+      { id: 'event-list', label: '행사 목록', href: '/events' },
+      { id: 'events', label: '행사 관리', href: '/admin/events' },
+      { id: 'sessions', label: '세션 관리', href: '/admin/sessions' },
+      { id: 'approvals', label: '참가 승인', href: '/admin/approvals' },
+      { id: 'votes', label: '투표 관리', href: '/admin/polls' },
+      { id: 'statistics', label: '기본 통계', href: null },
     ],
   },
 };
 
 function RoleHeader({ role, activePage }) {
   const menu = MENUS[role];
-  const { accessToken, authLoading, logout } = useAuth();
+  const navigate = useNavigate();
+
+  // 기존 AuthContext의 로그아웃 메서드를 재사용한다.
+  const { accessToken, logout } = useAuth();
+
+  // 연속 클릭에 의한 중복 로그아웃 요청 방지
+  const [loggingOut, setLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    if (loggingOut) return;
+
+    setLoggingOut(true);
+
+    try {
+      // 서버 Refresh Token 세션 무효화 요청
+      // AuthContext에서 Access Token 및 로그인 상태 정리
+      await logout();
+    } catch (error) {
+      // 서버 요청 실패 시 AuthContext는 로컬 상태를 정리한다.
+      // 단, 서버 세션 무효화까지 성공한 것은 아닐 수 있다.
+      console.error('로그아웃 요청 실패:', error);
+      alert('서버 로그아웃 요청에 실패했습니다.');
+    } finally {
+      setLoggingOut(false);
+
+      // 뒤로 가기로 보호 화면에 복귀하지 않도록 replace 사용
+      navigate('/login', { replace: true });
+    }
+  };
 
   return (
     <header className={cx('app-sidebar-header')} data-role={role}>
@@ -48,8 +79,11 @@ function RoleHeader({ role, activePage }) {
         <span />
         EMS
       </a>
+
       <p className={cx('registration-platform')}>EVENT PLATFORM</p>
+
       <p className={cx('registration-nav-heading')}>{menu.heading}</p>
+
       <nav className={cx('registration-nav')} aria-label={`${role} 주 메뉴`}>
         {menu.items.map(({ id, label, href }) =>
           href === null ? (
@@ -67,18 +101,28 @@ function RoleHeader({ role, activePage }) {
             </a>
           ),
         )}
-        {!authLoading && accessToken && (
-          <a onClick={logout} className="cursor-pointer">
-            ◦　 로그아웃
-          </a>
-        )}
       </nav>
+
+      {/* 로그인 상태에서만 로그아웃 버튼 표시 */}
+      {accessToken && (
+        <div className={cx('registration-logout')}>
+          <button type="button" onClick={handleLogout} disabled={loggingOut}>
+            {loggingOut ? '로그아웃 중...' : '로그아웃'}
+          </button>
+        </div>
+      )}
     </header>
   );
 }
 
 export default function Header({ role = 'COMMON', activePage = 'events' }) {
-  if (role === 'ADMIN') return <RoleHeader role="ADMIN" activePage={activePage} />;
-  if (role === 'USER') return <RoleHeader role="USER" activePage={activePage} />;
+  if (role === 'ADMIN') {
+    return <RoleHeader role="ADMIN" activePage={activePage} />;
+  }
+
+  if (role === 'USER') {
+    return <RoleHeader role="USER" activePage={activePage} />;
+  }
+
   return <RoleHeader role="COMMON" activePage={activePage} />;
 }

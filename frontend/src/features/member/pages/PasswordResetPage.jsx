@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { memberApi } from '../api/memberApi.js';
 import PasswordInput from '../components/PasswordInput.jsx';
+import Header from '../../../components/layout/LegacyHeader.jsx';
 
 const PasswordReset = () => {
   const params = new URLSearchParams(window.location.search);
@@ -62,31 +63,8 @@ const PasswordReset = () => {
   return (
     <main className="min-h-screen bg-[#f7f9fc]">
       <div className="min-h-screen w-full bg-[#f7f9fc] lg:flex">
-        {/* 왼쪽 브랜드 영역 */}
-        <aside className="bg-[#17253c] px-8 py-10 text-white sm:px-12 lg:w-[420px] lg:shrink-0 lg:px-14">
-          <div className="lg:pt-[65px]">
-            <div className="flex items-center gap-3">
-              <span className="h-[39px] w-3 rounded-[5px] bg-[#169b62]" />
-              <h1 className="text-[36px] font-bold">EMS</h1>
-            </div>
-            <p className="mt-5 text-[13px] font-semibold text-[#afc2d2]">
-              CLOUD NATIVE EVENT PLATFORM
-            </p>
-          </div>
-
-          <div className="mt-20 lg:mt-[132px]">
-            <h2 className="text-[29px] font-bold leading-tight">
-              새로운 비밀번호로
-              <br />
-              다시 시작하세요
-            </h2>
-            <p className="mt-10 text-[16px] leading-relaxed text-[#bbc8d6]">
-              안전한 계정 관리를 위해
-              <br />
-              새로운 비밀번호를 설정해주세요.
-            </p>
-          </div>
-        </aside>
+        {/* 비로그인 사용자가 접근하는 비밀번호 재설정 화면 */}
+        <Header role="COMMON" activePage="login" />
 
         {/* 오른쪽 비밀번호 입력 영역 */}
         <section className="flex flex-1 items-center justify-center px-8 py-14 sm:px-12 lg:px-[72px] lg:py-0">
