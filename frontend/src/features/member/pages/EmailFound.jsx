@@ -13,14 +13,22 @@ const EmailFound = () => {
   const emailFound = async (event) => {
     event.preventDefault();
 
-    try {
-      const res = await memberApi.emailFound(name);
+    const trimmedName = name.trim();
 
-      alert('당신의 이메일은 ' + res.data + '입니다.');
-      console.log(res);
+    if (!trimmedName) {
+      alert('닉네임을 입력해주세요.');
+      return;
+    }
+
+    try {
+      // 서버가 마스킹한 이메일을 반환
+      const res = await memberApi.emailFound(trimmedName);
+
+      // 개인정보가 포함될 수 있으므로 응답 로그를 남기지 않음
+      alert(`가입된 이메일: ${res.data}`);
     } catch (err) {
-      console.error(err);
-      alert('존재하지 않는 회원입니다.');
+      // 사용자 존재 여부가 직접 드러나지 않는 안내
+      alert('이메일 정보를 확인할 수 없습니다.');
     }
   };
 
@@ -36,7 +44,7 @@ const EmailFound = () => {
             <p className="mt-3 text-[14px] leading-6 text-[#7a879a]">
               가입한 닉네임을 입력하면
               <br />
-              가입한 이메일을 보내드립니다.
+              이메일 주소의 일부를 확인할 수 있습니다.
             </p>
 
             <div className="mt-9">

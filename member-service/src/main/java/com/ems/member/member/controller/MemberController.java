@@ -294,14 +294,27 @@ public class MemberController {
                 new MessageResponseDTO<>(null, SuccessCode.PASSWORD_RESET_SUCCESS)
         );
     }
-
+    
     @PostMapping("/email/found")
-    public ResponseEntity<?> foundEmail(@Valid @RequestBody NameDTO dto) {
+    public ResponseEntity<?> foundEmail(
+            @Valid @RequestBody NameDTO dto,
+            HttpServletRequest request
+    ) {
+        // 1. 실제 요청 IP 확인
+        String ip = clientIpResolver.resolve(request);
+
+        // 2. IP별 반복 조회 제한
+        rateLimiter.checkEmailLookupIp(ip);
+
+        // 3. 마스킹된 이메일만 반환
+        String maskedEmail = memberService.foundEmail(dto);
+
         return ResponseEntity.ok(
                 new MessageResponseDTO<>(
-                        memberService.foundEmail(dto),
+                        maskedEmail,
                         SuccessCode.REQUEST_SUCCESS
                 )
         );
     }
+
 }
