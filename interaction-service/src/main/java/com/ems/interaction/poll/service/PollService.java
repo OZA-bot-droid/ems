@@ -170,8 +170,9 @@ public class PollService {
             return List.of();
         }
 
+        // 11/12 수정 - 승인된 세션의 ACTIVE 투표를 ID 내림차순으로 조회
         // 4. 해당 세션에 속한 ACTIVE 투표 조회
-        List<Poll> polls = pollRepository.findBySessionIdInAndStatus(sessionIds, Status.ACTIVE);
+        List<Poll> polls = pollRepository.findBySessionIdInAndStatusOrderByIdDesc(sessionIds, Status.ACTIVE);
 
         if (polls.isEmpty()) {
             return List.of();

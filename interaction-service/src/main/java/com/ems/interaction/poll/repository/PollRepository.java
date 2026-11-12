@@ -55,4 +55,7 @@ public interface PollRepository extends JpaRepository<Poll, Long> {
     // 일반 사용자용 전체 투표 목록 조회
     Page<Poll> findBySessionIdIn(List<Long> sessionIds, Pageable pageable);
 
+    //11/12 추가
+    // 승인된 세션의 ACTIVE 투표를 ID 내림차순으로 조회
+    List<Poll> findBySessionIdInAndStatusOrderByIdDesc(List<Long> sessionIds, Status status);
 }
