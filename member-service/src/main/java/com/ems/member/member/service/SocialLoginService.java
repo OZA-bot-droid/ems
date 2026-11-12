@@ -76,7 +76,7 @@ public class SocialLoginService {
 
         LoginCodeData loginCodeData = loginCodes.remove(code);
 
-        if(loginCodeData == null) {
+        if(loginCodeData == null || !loginCodeData.expiresAt().isAfter(Instant.now())) {
             throw new InvalidOAuthCodeException("유효하지 않은 로그인 코드입니다.");
         }
 

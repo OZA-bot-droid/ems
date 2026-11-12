@@ -18,6 +18,7 @@ import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.HexFormat;
+import java.util.Locale;
 import java.util.Optional;
 
 @Service
@@ -44,7 +45,11 @@ public class PasswordResetService {
 
     public void requestResetToken(String email) {
 
-        Optional<Member> optionalMember = memberRepository.findByEmail(email);
+        Optional<Member> optionalMember = memberRepository.findByEmail(
+                // Locale.ROOT : 실행 환경의 국가나 언어 설정에 영향을 받지 않음
+                // toLowerCase : 대문자를 소문자로 변환
+                email.trim().toLowerCase(Locale.ROOT)
+        );
         if (optionalMember.isEmpty()) {
             // 이메일 계정 존재 여부 숨기기
             return;

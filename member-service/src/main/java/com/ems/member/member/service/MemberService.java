@@ -48,7 +48,6 @@ public class MemberService {
     // 회원가입
     public void registerMember(MemberRegisterDTO dto) {
 
-        String email = dto.email().trim().toLowerCase(Locale.ROOT);
         if(memberRepository.existsByEmail(dto.email())) {
             throw new MemberEmailDuplicatedException("이미 가입된 이메일입니다.");
         }
@@ -56,7 +55,10 @@ public class MemberService {
             throw new MemberNameDuplicatedException("이미 사용 중인 닉네임입니다.");
         }
 
-        emailVerificationService.consumeVerifiedEmail(email);
+        // 이메일 인증 확인
+        emailVerificationService.consumeVerifiedEmail(dto.email());
+
+        // 회원 저장
         memberRepository.save(
                 dto.toEntity(
                         passwordEncoder.encode(dto.password())
@@ -156,7 +158,12 @@ public class MemberService {
         Member member = memberRepository.findById(Long.parseLong(memberId))
                 .orElseThrow(() -> new MemberNotFoundException("존재하지 않은 회원입니다."));
 
-        member.changeName(dto.name().trim());
+        String name = dto.name().trim();
+        if(!member.getName().equals(name) && memberRepository.existsByName(name)) {
+            throw new MemberNameDuplicatedException("이미 사용 중인 닉네임입니다.");
+        }
+
+        member.changeName(name);
         return new MemberInformationDTO(member);
     }
 
