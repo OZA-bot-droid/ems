@@ -179,7 +179,7 @@ function SignupForm() {
       }
     } catch (err) {
       setNameDuplicate(true);
-      alert(err.message || '중복 확인에 실패했습니다.');
+      alert(err.response?.data?.message || '중복 확인에 실패했습니다.');
     }
   };
 

@@ -35,7 +35,7 @@ const PasswordChange = () => {
 
     try {
       // 비밀번호 재설정 요청
-      await memberApi.passwordReset(token, newPassword);
+      await memberApi.passwordReset(currentPassword, newPassword);
 
       // 정상 완료되면 로그인 페이지로 이동
       navigate('/login', {

@@ -26,7 +26,7 @@ const MyPage = () => {
         setMember((m) => ({ ...m, ...res }));
       } catch (err) {
         console.error(err);
-        alert(err.message || '회원 정보를 불러오지 못했습니다.');
+        alert(err.response?.data?.message || '회원 정보를 불러오지 못했습니다.');
       }
     };
     myInfo();
