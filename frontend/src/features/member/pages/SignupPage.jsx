@@ -185,7 +185,7 @@ function SignupForm() {
   };
 
   return (
-    <div className={cx('w-[600px] px-8')}>
+    <div className={cx('w-full max-w-[600px] px-8')}>
       <form onSubmit={handleSubmit}>
         <h2 className={cx('text-[26px] font-bold tracking-[-0.02em] text-ems-text')}>
           새로운 계정을 만들어보세요

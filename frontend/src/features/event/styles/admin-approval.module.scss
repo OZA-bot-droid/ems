@@ -1,9 +1,17 @@
 .admin-approval-page {
   display: flex;
+
+  // 참가 승인 목록 전체 너비 사용
   width: 100%;
-  max-width: 1120px;
+  min-width: 0;
+
+  // 기존 최대 너비 제한 제거
+  // max-width: 1120px;
+
+  // 기존 높이 및 세로 레이아웃 유지
   min-height: 731px;
   flex-direction: column;
+
   color: var(--ems-ink);
   font-family: var(--ems-font);
 }

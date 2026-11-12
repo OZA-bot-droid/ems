@@ -26,7 +26,8 @@ export default function PollManagePage() {
   return (
     <div className={cx('app-shell')}>
       <Header role="ADMIN" activePage="votes" />
-      <main className="mx-auto max-w-6xl space-y-5 p-5 text-slate-800">
+      {/* 투표 관리자 본문: 공통 스크롤·너비 규격 적용 */}
+      <main className={cx('app-main-content w-full min-w-0 space-y-5 text-slate-800')}>
         <PollManageHeader onCreateClick={() => creation.setOpen((v) => !v)} />
         {error && (
           <p className="rounded-lg bg-red-50 p-3 text-red-700" role="alert">

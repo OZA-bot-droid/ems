@@ -42,6 +42,12 @@
   --ems-radius-card: 16px;
   --ems-spacing-unit: 4px;
 
+  /* 일반 서비스 화면 사이드바 */
+  --ems-sidebar-width: 214px;
+
+  /* Member 비로그인 인증 화면 사이드바 */
+  --ems-auth-sidebar-width: 420px;
+
   /* ========================================
    * 4. Event 기존 변수 호환
    *

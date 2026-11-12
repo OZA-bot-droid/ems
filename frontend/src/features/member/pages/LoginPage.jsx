@@ -40,7 +40,8 @@ function LoginForm() {
 
   return (
     <div className={cx('flex justify-center')}>
-      <form onSubmit={handleSubmit} className={cx('w-[600px]')}>
+      {/* 로그인 폼은 최대 600px 유지, 작은 화면에서는 축소 */}
+      <form onSubmit={handleSubmit} className={cx('w-full max-w-[600px]')}>
         <h2 className={cx('text-[26px] font-bold leading-normal tracking-[-0.02em] text-ems-text')}>
           다시 만나 반갑습니다
         </h2>

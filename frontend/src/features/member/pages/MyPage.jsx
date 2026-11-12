@@ -84,8 +84,9 @@ const MyPage = () => {
         <Header role={role} activePage="events" />
 
         {/* My Page 영역 */}
+        {/* 사이드바를 제외한 나머지 영역을 모두 사용 */}
         <section className="min-w-0 flex-1 px-6 py-10 sm:px-10 lg:px-12 lg:py-[65px] flex justify-center">
-          <div className="w-full max-w-[900px]">
+          <div className="w-full min-w-0">
             <div className="mb-8">
               <h2 className="text-[28px] font-bold text-ems-text">마이페이지</h2>
               <p className="mt-3 text-[13px] text-ems-muted">내 정보와 활동 내역을 확인하세요.</p>

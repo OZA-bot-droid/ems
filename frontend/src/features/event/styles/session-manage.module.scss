@@ -2,8 +2,12 @@
 // 색은 event.scss의 --ems-* 변수를 우선 사용합니다.
 
 .session-manage-page {
+  // 세션 관리 본문 전체 너비 사용
   width: 100%;
-  max-width: 816px;
+  min-width: 0;
+
+  // max-width: 816px; 제거
+
   color: var(--ems-ink);
   font-family: var(--ems-font);
 }

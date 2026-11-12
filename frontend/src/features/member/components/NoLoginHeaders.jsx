@@ -2,7 +2,13 @@ import React from 'react';
 
 const NoLoginHeaders = () => {
   return (
-    <aside className="bg-ems-sidebar px-8 py-10 text-white sm:px-12 lg:w-[420px] lg:shrink-0 lg:px-14">
+    <aside
+      className={
+        'bg-ems-sidebar px-8 py-10 text-white ' +
+        'sm:px-12 lg:w-[var(--ems-auth-sidebar-width)] ' +
+        'lg:shrink-0 lg:px-14'
+      }
+    >
       <div className="lg:pt-[65px]">
         <div className="flex items-center gap-3">
           <span className="h-[39px] w-3 rounded-[5px] bg-ems-primary" />

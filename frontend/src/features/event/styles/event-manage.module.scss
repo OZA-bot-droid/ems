@@ -1,7 +1,14 @@
 .event-manage-page {
+  // 행사 관리 콘텐츠 전체 너비 사용
   width: 100%;
-  max-width: 1120px;
-  margin: 0 auto;
+  min-width: 0;
+
+  // 기존 max-width 제한 제거
+  // max-width: 1120px;
+
+  // 전체 너비에서는 중앙 정렬이 불필요
+  margin: 0;
+
   color: var(--ems-ink);
   font-family: var(--ems-font);
 }
