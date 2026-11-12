@@ -209,7 +209,9 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
                     || path.equals("/api/members/password/reset-request")
                     || path.equals("/api/members/password/reset")
                     || path.equals("/api/members/email/send")
-                    || path.equals("/api/members/email/verify");
+                    || path.equals("/api/members/email/verify")
+                    || path.equals("/api/members/name/duplicate")
+                    || path.equals("/api/members/email/found");
         }
 
         if (HttpMethod.DELETE.equals(method)) {
