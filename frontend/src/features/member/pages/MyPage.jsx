@@ -54,7 +54,7 @@ const MyPage = () => {
       }
     } catch (err) {
       console.error(err);
-      alert(err.message);
+      alert(err.message || '닉네임 수정에 실패했습니다.');
     } finally {
       setSaving(false);
     }

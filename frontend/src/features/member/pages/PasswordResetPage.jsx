@@ -36,19 +36,7 @@ const PasswordReset = () => {
 
     setLoading(true);
     try {
-      const res = await memberApi.passwordReset(token, newPassword);
-
-      if (!(res.status >= 200 && res.status < 300)) {
-        if (res.data?.code === 'INVALID_PASSWORD_RESET_TOKEN') {
-          setMessage(res.data.message);
-        } else {
-          setMessage('비밀번호 변경에 실패했습니다.');
-        }
-        return;
-      } else {
-        const data = res.data;
-        console.log(data);
-      }
+      await memberApi.passwordReset(token, newPassword);
 
       // 현재 페이지의 방문 기록을 '/' 페이지로 교체한다.
       navigate('/login', { replace: true });
