@@ -16,6 +16,9 @@ export default function AdminApprovalPage() {
   const [busyId, setBusyId] = useState(null);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [rejectTarget, setRejectTarget] = useState(null);
+  const [rejectReason, setRejectReason] = useState('');
+  const [rejectError, setRejectError] = useState('');
 
   const loadRegistrations = useCallback(async () => {
     setLoading(true);
@@ -34,23 +37,40 @@ export default function AdminApprovalPage() {
     loadRegistrations();
   }, [loadRegistrations]);
 
-  async function decide(registration, decision) {
+  async function decide(registration) {
     setBusyId(registration.id);
     setError('');
     setNotice('');
     try {
-      if (decision === 'approve') {
-        await registrationApi.approve(registration.id);
-      } else {
-        const reason = window.prompt('참가 거절 사유 (최대 1000자)');
-        if (!reason?.trim()) return;
-        if (reason.trim().length > 1000) throw new Error('거절 사유는 최대 1000자입니다.');
-        await registrationApi.reject(registration.id, reason.trim());
-      }
+      await registrationApi.approve(registration.id);
       setRegistrations((current) => current.filter((item) => item.id !== registration.id));
-      setNotice(`회원 ${registration.userId}님의 참가 신청을 ${decision === 'approve' ? '승인' : '거절'}했어요.`);
+      setNotice(`회원 ${registration.userId}님의 참가 신청을 승인했어요.`);
     } catch (requestError) {
       setError(requestError.message || '신청을 처리하지 못했습니다.');
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function submitRejection(event) {
+    event.preventDefault();
+    if (!rejectTarget || !rejectReason.trim()) {
+      setRejectError('거부 사유를 입력해 주세요.');
+      return;
+    }
+
+    setBusyId(rejectTarget.id);
+    setRejectError('');
+    setError('');
+    setNotice('');
+    try {
+      await registrationApi.reject(rejectTarget.id, rejectReason.trim());
+      setRegistrations((current) => current.filter((item) => item.id !== rejectTarget.id));
+      setNotice(`회원 ${rejectTarget.userId}님의 참가 신청을 승인 거부했어요.`);
+      setRejectTarget(null);
+      setRejectReason('');
+    } catch (requestError) {
+      setRejectError(requestError.message || '신청을 처리하지 못했습니다.');
     } finally {
       setBusyId(null);
     }
@@ -104,7 +124,7 @@ export default function AdminApprovalPage() {
                       <button
                         className={cx("is-approve")}
                         disabled={busyId === registration.id}
-                        onClick={() => decide(registration, 'approve')}
+                        onClick={() => decide(registration)}
                         type="button"
                       >
                         [승인]
@@ -112,7 +132,11 @@ export default function AdminApprovalPage() {
                       <button
                         className={cx("is-reject")}
                         disabled={busyId === registration.id}
-                        onClick={() => decide(registration, 'reject')}
+                        onClick={() => {
+                          setRejectTarget(registration);
+                          setRejectReason('');
+                          setRejectError('');
+                        }}
                         type="button"
                       >
                         [거절]
@@ -125,6 +149,71 @@ export default function AdminApprovalPage() {
           </section>
         </section>
       </main>
+
+      {rejectTarget && (
+        <div
+          className={cx("admin-reject-backdrop")}
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget && busyId !== rejectTarget.id) {
+              setRejectTarget(null);
+            }
+          }}
+        >
+          <form
+            className={cx("admin-reject-dialog")}
+            onSubmit={submitRejection}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="admin-reject-title"
+          >
+            <button
+              className={cx("admin-reject-close")}
+              onClick={() => setRejectTarget(null)}
+              type="button"
+              disabled={busyId === rejectTarget.id}
+              aria-label="닫기"
+            >
+              ×
+            </button>
+            <p className={cx("admin-reject-eyebrow")}>참가 신청 처리</p>
+            <h2 id="admin-reject-title">신청을 승인 거부할까요?</h2>
+            <p className={cx("admin-reject-description")}>회원 {rejectTarget.userId}님 · {rejectTarget.eventTitle}<br />작성한 사유는 회원의 신청 내역에서 확인할 수 있어요.</p>
+            <label htmlFor="admin-rejection-reason">거부 사유</label>
+            <textarea
+              id="admin-rejection-reason"
+              autoFocus
+              maxLength={1000}
+              rows={5}
+              value={rejectReason}
+              onChange={(event) => {
+                const input = event.currentTarget;
+                input.style.height = 'auto';
+                input.style.height = input.scrollHeight + 'px';
+                setRejectReason(input.value);
+              }}
+              placeholder="신청을 거부하는 이유를 입력해 주세요."
+              required
+            />
+            <div className={cx("admin-reject-footer")}>
+              <span>{rejectReason.length}/1000자</span>
+              <div>
+                <button
+                  className={cx("is-cancel")}
+                  onClick={() => setRejectTarget(null)}
+                  type="button"
+                  disabled={busyId === rejectTarget.id}
+                >취소</button>
+                <button
+                  className={cx("is-submit")}
+                  type="submit"
+                  disabled={busyId === rejectTarget.id || !rejectReason.trim()}
+                >{busyId === rejectTarget.id ? '처리 중…' : '승인 거부'}</button>
+              </div>
+            </div>
+            {rejectError && <p className={cx("admin-approval-error")} role="alert">{rejectError}</p>}
+          </form>
+        </div>
+      )}
     </div>
   );
 }

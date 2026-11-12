@@ -206,57 +206,6 @@ function SignupForm() {
               주최자
             </button>
           </div>
-<<<<<<< HEAD
-
-          <button
-            type="submit"
-            className={cx("mt-7 flex h-[44px] w-full items-center justify-center rounded-[10px] bg-[#169b62] px-4 text-[13px] font-semibold text-white transition-colors hover:bg-[#128653] focus:outline-none focus:ring-2 focus:ring-[#169b62]/30")}
-          >
-            회원가입
-          </button>
-
-          {errorMessage && (
-            <p className={cx("mt-3 text-center text-[12px] text-red-500")}>{errorMessage}</p>
-          )}
-
-          <button
-            type="button"
-            onClick={() => navigate('/login')}
-            className={cx("mt-4 block w-full text-center text-[13px] font-medium text-[#169b62] hover:underline")}
-          >
-            이미 계정이 있으신가요?&nbsp;&nbsp; 로그인
-          </button>
-        </form>
-
-        {/* 소셜 로그인 영역 */}
-        <div className={cx("pb-4")}>
-          <div className={cx("my-4 flex items-center gap-3")}>
-            <div className={cx("h-px flex-1 bg-gray-200")} />
-            <span className={cx("text-xs text-gray-400")}>또는</span>
-            <div className={cx("h-px flex-1 bg-gray-200")} />
-          </div>
-
-          {/* Google */}
-          <button
-            type="button"
-            onClick={googleSignup}
-            className={cx("mt-[22px] flex h-[42px] w-full items-center justify-center gap-[12px] rounded-[10px] border border-[#d9dee7] bg-white")}
-          >
-            <span className={cx("text-[16px] font-bold text-[#4285f4]")}>G</span>
-            <span className={cx("text-[13px] font-semibold text-[#142238]")}>Google로 회원가입</span>
-          </button>
-
-          {/* Naver */}
-          <button
-            type="button"
-            onClick={naverSignup}
-            className={cx("mt-[10px] flex h-[42px] w-full items-center justify-center gap-[12px] rounded-[10px] bg-[#03c75a] text-white")}
-          >
-            <span className={cx("text-[16px] font-bold")}>N</span>
-            <span className={cx("text-[13px] font-semibold")}>Naver로 회원가입</span>
-          </button>
-=======
->>>>>>> origin/feature/event_dou2
         </div>
 
         <button

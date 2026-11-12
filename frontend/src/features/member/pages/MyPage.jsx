@@ -182,44 +182,6 @@ const MyPage = () => {
                   <p className="mt-1 text-[14px] font-medium text-[#142238]">{member.email}</p>
                 </div>
               </div>
-<<<<<<< HEAD
-
-              <div className="mt-5 min-h-[120px] rounded-[10px] border border-[#e5e9f0] bg-[#f7f9fc] p-4">
-                {eventLoading ? (
-                  <p className="py-8 text-center text-[12px] text-[#7a879a]">행사 정보를 불러오는 중이에요…</p>
-                ) : eventError ? (
-                  <p className="py-8 text-center text-[12px] text-rose-600" role="alert">{eventError}</p>
-                ) : eventItems.length === 0 ? (
-                  <p className="py-8 text-center text-[12px] text-[#7a879a]">
-                    {role === 'ADMIN' ? '아직 주최한 행사가 없어요.' : '아직 참가 신청한 행사가 없어요.'}
-                  </p>
-                ) : (
-                  <ul className="space-y-2">
-                    {eventItems.map((item) => {
-                      const statusLabels = {
-                        PENDING: '승인 대기', APPROVED: '승인 완료', REJECTED: '승인 거부', CANCELLED: '취소됨',
-                        OPEN: '모집 중', CLOSED: '마감', DRAFT: '작성 중',
-                      };
-                      const to = role === 'ADMIN' ? `/events/${item.id}` : '/registrations';
-                      return (
-                        <li key={`${item.itemType}-${item.id}`}>
-                          <Link className="flex items-center justify-between gap-3 rounded-[8px] bg-white px-3 py-3 text-[12px] hover:bg-[#eaf5ef]" to={to}>
-                            <span className="min-w-0 truncate font-semibold text-[#142238]">{item.title}</span>
-                            <span className="shrink-0 text-[#7a879a]">{statusLabels[item.status] || item.status}</span>
-                          </Link>
-                        </li>
-                      );
-                    })}
-                    <li className="pt-1 text-right">
-                      <Link className="text-[11px] font-semibold text-[#169b62] hover:underline" to={role === 'ADMIN' ? '/admin/events' : '/registrations'}>
-                        {role === 'ADMIN' ? '행사 관리로 이동 →' : '신청 내역 전체 보기 →'}
-                      </Link>
-                    </li>
-                  </ul>
-                )}
-              </div>
-=======
->>>>>>> origin/feature/event_dou2
             </section>
 
             {/* 다른 서비스가 사용할 공간 */}
@@ -249,12 +211,39 @@ const MyPage = () => {
                   </div>
                 </div>
 
-                <div className="mt-5 flex min-h-[120px] items-center justify-center rounded-[10px] border border-dashed border-[#d9dee7] bg-[#f7f9fc] p-4">
-                  <p className="text-center text-[12px] leading-6 text-[#7a879a]">
-                    행사 신청 및 주최 행사
-                    <br />
-                    연동 예정
-                  </p>
+                <div className="mt-5 min-h-[120px] rounded-[10px] border border-[#e5e9f0] bg-[#f7f9fc] p-4">
+                  {eventLoading ? (
+                    <p className="py-8 text-center text-[12px] text-[#7a879a]">행사 정보를 불러오는 중이에요…</p>
+                  ) : eventError ? (
+                    <p className="py-8 text-center text-[12px] text-rose-600" role="alert">{eventError}</p>
+                  ) : eventItems.length === 0 ? (
+                    <p className="py-8 text-center text-[12px] text-[#7a879a]">
+                      {role === 'ADMIN' ? '아직 주최한 행사가 없어요.' : '아직 참가 신청한 행사가 없어요.'}
+                    </p>
+                  ) : (
+                    <ul className="space-y-2">
+                      {eventItems.map((item) => {
+                        const statusLabels = {
+                          PENDING: '승인 대기', APPROVED: '승인 완료', REJECTED: '승인 거부', CANCELLED: '취소됨',
+                          OPEN: '모집 중', CLOSED: '마감', DRAFT: '작성 중',
+                        };
+                        const to = role === 'ADMIN' ? `/events/${item.id}` : '/registrations';
+                        return (
+                          <li key={`${item.itemType}-${item.id}`}>
+                            <Link className="flex items-center justify-between gap-3 rounded-[8px] bg-white px-3 py-3 text-[12px] hover:bg-[#eaf5ef]" to={to}>
+                              <span className="min-w-0 truncate font-semibold text-[#142238]">{item.title}</span>
+                              <span className="shrink-0 text-[#7a879a]">{statusLabels[item.status] || item.status}</span>
+                            </Link>
+                          </li>
+                        );
+                      })}
+                      <li className="pt-1 text-right">
+                        <Link className="text-[11px] font-semibold text-[#169b62] hover:underline" to={role === 'ADMIN' ? '/admin/events' : '/registrations'}>
+                          {role === 'ADMIN' ? '행사 관리로 이동 →' : '신청 내역 전체 보기 →'}
+                        </Link>
+                      </li>
+                    </ul>
+                  )}
                 </div>
               </section>
 
