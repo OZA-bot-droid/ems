@@ -272,7 +272,7 @@ public class MemberController {
         // 회원이 없는 이메일이어도 똑같이 200 응답
         // 이메일 존재 여부 노출x
         return ResponseEntity.ok(
-                new MessageResponseDTO<>(null, SuccessCode.REQUEST_SUCCESS)
+                new MessageResponseDTO<>(null, SuccessCode.PASSWORD_RESET_REQUESTED)
         );
     }
 
@@ -281,7 +281,7 @@ public class MemberController {
 
         passwordResetService.resetPassword(dto.token(), dto.newPassword());
         return ResponseEntity.ok(
-                new MessageResponseDTO<>(null, SuccessCode.REQUEST_SUCCESS)
+                new MessageResponseDTO<>(null, SuccessCode.PASSWORD_RESET_SUCCESS)
         );
     }
 

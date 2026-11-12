@@ -1,6 +1,7 @@
 package com.ems.member.member.service;
 
 import com.ems.member.common.exception.InvalidCredentialsException;
+import com.ems.member.common.exception.MemberNameDuplicatedException;
 import com.ems.member.common.exception.MemberNotFoundException;
 import com.ems.member.common.exception.MemberEmailDuplicatedException;
 import com.ems.member.member.domain.Member;
@@ -50,6 +51,9 @@ public class MemberService {
         String email = dto.email().trim().toLowerCase(Locale.ROOT);
         if(memberRepository.existsByEmail(dto.email())) {
             throw new MemberEmailDuplicatedException("이미 가입된 이메일입니다.");
+        }
+        if(memberRepository.existsByName(dto.name().trim())) {
+            throw new MemberNameDuplicatedException("이미 사용 중인 닉네임입니다.");
         }
 
         emailVerificationService.consumeVerifiedEmail(email);
