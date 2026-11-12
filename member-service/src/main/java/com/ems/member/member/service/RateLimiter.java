@@ -119,4 +119,14 @@ public class RateLimiter {
         acquire("password-reset-email" + normalizedEmail, 5);
         acquire("password-reset-ip"+ ip, 30);
     }
+
+    /**
+     * 이메일 찾기 요청 제한
+     * IP별 1시간 최대 10회
+     *
+     * 기존 acquire() 메서드와 Caffeine 캐시를 재사용한다.
+     */
+    public void checkEmailLookupIp(String ip) {
+        acquire("email-lookup-ip:" + ip, 10);
+    }
 }

@@ -165,13 +165,49 @@ public class MemberService {
         return memberRepository.existsByName(dto.name());
     }
 
+
     public String foundEmail(NameDTO dto) {
-        if(!duplicateName(dto)) {
-            throw new MemberNotFoundException("존재하지 않는 회원입니다.");
-        } else {
-            return memberRepository.findByName(dto.name())
-                    .orElseThrow(() -> new MemberNotFoundException("존재하지 않는 회원입니다."))
-                    .getEmail();
-        }
+        // 닉네임으로 회원을 조회
+        Member member = memberRepository.findByName(dto.name())
+                .orElseThrow(() ->
+                        new MemberNotFoundException("존재하지 않는 회원입니다.")
+                );
+
+        // 이메일 원문을 반환하지 않고 마스킹한 값만 반환
+        return maskEmail(member.getEmail());
     }
+
+    /**
+     * 이메일 아이디의 앞 2글자만 표시하고 나머지를 *로 변경.
+     * 도메인은 기존 주소를 구분할 수 있도록 유지.
+     *
+     * honggildong@gmail.com -> ho********@gmail.com
+     * abc@naver.com          -> ab*@naver.com
+     * ab@gmail.com           -> a*@gmail.com
+     * a@gmail.com            -> *@gmail.com
+     */
+    private String maskEmail(String email) {
+        if (email == null || email.isBlank()) {
+            throw new IllegalStateException("회원 이메일 정보가 없습니다.");
+        }
+
+        int atIndex = email.indexOf('@');
+
+        if (atIndex <= 0 || atIndex == email.length() - 1) {
+            throw new IllegalStateException("잘못된 이메일 형식입니다.");
+        }
+
+        String localPart = email.substring(0, atIndex);
+        String domain = email.substring(atIndex);
+
+        int visibleCount = localPart.length() <= 2
+                ? Math.max(0, localPart.length() - 1)
+                : 2;
+
+        String visible = localPart.substring(0, visibleCount);
+        String masked = "*".repeat(localPart.length() - visibleCount);
+
+        return visible + masked + domain;
+    }
+
 }
