@@ -25,8 +25,15 @@
   padding: 24px 21px;
   position: relative;
   overflow-y: auto;
-  background: #17253c;
+
+  background: var(--ems-sidebar);
   color: #fff;
+
+  // ADMIN 레이아웃에서 사용하던 글꼴 기준
+  font-family: 'Inter', 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .registration-brand {
