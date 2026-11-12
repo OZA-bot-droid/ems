@@ -1,0 +1,45 @@
+/* Home 전용 캐러셀: design tokens는 전역 tokens.css를 재사용합니다. */
+.team-carousel {
+  width: 100%;
+  max-width: 1050px;
+  margin: 0 auto;
+  overflow: hidden;
+  cursor: grab;
+  user-select: none;
+  touch-action: pan-y;
+
+  mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+}
+.team-carousel:active {
+  cursor: grabbing;
+}
+.team-carousel-track {
+  display: flex;
+  width: max-content;
+  animation: team-carousel-scroll 30s linear infinite;
+  will-change: transform;
+}
+.team-carousel-group {
+  display: flex;
+  flex-shrink: 0;
+  gap: 16px;
+  padding-right: 16px;
+}
+@keyframes team-carousel-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .team-carousel-track {
+    animation: none;
+  }
+
+  .team-carousel {
+    overflow-x: auto;
+    mask-image: none;
+  }
+}
