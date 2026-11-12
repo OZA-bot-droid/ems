@@ -12,7 +12,7 @@ const MENUS = {
     heading: 'EXPLORE',
     items: [
       { id: 'events', label: '행사 목록', href: '/events' },
-      { id: 'event-detail', label: '행사 상세', href: '/events' },
+      // { id: 'event-detail', label: '행사 상세', href: '/events' },
       { id: 'login', label: '로그인', href: '/login' },
       { id: 'signup', label: '회원가입', href: '/signup' },
     ],
@@ -20,7 +20,7 @@ const MENUS = {
   USER: {
     heading: 'MY WORKSPACE',
     items: [
-      { id: 'dashboard', label: '내 대시보드', href: '/' },
+      { id: 'mypage', label: '마이페이지', href: '/mypage' },
       { id: 'events', label: '행사 찾기', href: '/events' },
       { id: 'registrations', label: '신청 내역', href: '/registrations' },
       { id: 'seminars', label: '세미나 참여', href: '#' },
@@ -30,13 +30,13 @@ const MENUS = {
   ADMIN: {
     heading: 'ADMIN WORKSPACE',
     items: [
-      { id: 'dashboard', label: '운영 대시보드', href: null },
+      { id: 'mypage', label: '마이페이지', href: '/mypage' },
       { id: 'event-list', label: '행사 목록', href: '/events' },
       { id: 'events', label: '행사 관리', href: '/admin/events' },
       { id: 'sessions', label: '세션 관리', href: '/admin/sessions' },
       { id: 'approvals', label: '참가 승인', href: '/admin/approvals' },
       { id: 'votes', label: '투표 관리', href: '/admin/polls' },
-      { id: 'statistics', label: '기본 통계', href: null },
+      // { id: 'statistics', label: '기본 통계', href: null },
     ],
   },
 };
