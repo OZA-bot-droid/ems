@@ -28,7 +28,7 @@ export default function PollResultPage() {
 
   return (
     <div className={cx('app-shell')}>
-      <Header role={isAdminEntry ? 'ADMIN' : 'USER'} activePage="votes" />
+      <Header role={role} activePage="votes" />
       {/* 투표 결과 본문 전체 너비 적용 */}
       <main className={cx('app-main-content w-full min-w-0 space-y-5 text-slate-800')}>
         <PollResultHeader from={from} pollId={pollId} onRefresh={reload} loading={loading} />
