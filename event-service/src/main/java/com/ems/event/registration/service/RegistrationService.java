@@ -24,6 +24,8 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class RegistrationService {
 
+    private static final int MAX_APPLICATION_ATTEMPTS_PER_EVENT = 3;
+
     private final RegistrationRepository registrationRepository;
     private final EventRepository eventRepository;
 
@@ -32,7 +34,7 @@ public class RegistrationService {
         this.eventRepository = eventRepository;
     }
 
-    /** 중복 신청을 확인한 뒤 새 신청을 PENDING 상태로 저장합니다. */
+    /** 취소 이력은 보존하고, 행사별 신청 시도는 최대 3회까지 허용합니다. */
     @Transactional
     public Registration apply(Long userId, Long eventId) {
         Event event = eventRepository.findById(eventId)
@@ -40,14 +42,19 @@ public class RegistrationService {
         if (event.getStatus() != EventStatus.OPEN || !event.getEndsAt().isAfter(Instant.now())) {
             throw new BusinessException(HttpStatus.CONFLICT, "EVENT_NOT_OPEN", "현재 참가 신청할 수 없는 행사입니다.");
         }
-        registrationRepository.findByUserIdAndEventId(userId, eventId)
-                .ifPresent(existing -> {
-                    throw new BusinessException(HttpStatus.CONFLICT, "ALREADY_REGISTERED", "이미 이 행사에 신청한 이력이 있습니다.");
-                });
+        if (registrationRepository.existsByUserIdAndEventIdAndStatusNot(
+                userId, eventId, RegistrationStatus.CANCELLED)) {
+            throw new BusinessException(HttpStatus.CONFLICT, "ALREADY_REGISTERED", "이미 이 행사에 신청한 이력이 있습니다.");
+        }
+        if (registrationRepository.countByUserIdAndEventId(userId, eventId)
+                >= MAX_APPLICATION_ATTEMPTS_PER_EVENT) {
+            throw new BusinessException(HttpStatus.CONFLICT, "REGISTRATION_ATTEMPT_LIMIT",
+                    "이 행사의 참가 신청은 최대 3회까지 가능합니다.");
+        }
         try {
             return registrationRepository.saveAndFlush(new Registration(userId, eventId));
         } catch (DataIntegrityViolationException exception) {
-            // 동시에 들어온 중복 요청은 DB 제약 위반으로도 차단합니다.
+            // 동시에 들어온 중복 요청은 활성 신청에 대한 DB 부분 유일 인덱스로도 차단합니다.
             throw new BusinessException(HttpStatus.CONFLICT, "ALREADY_REGISTERED", "이미 이 행사에 신청한 이력이 있습니다.");
         }
     }
