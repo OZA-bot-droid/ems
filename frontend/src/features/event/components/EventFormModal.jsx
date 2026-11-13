@@ -71,6 +71,19 @@ export default function EventFormModal({ event, onClose, onSaved }) {
     return errors;
   }
 
+  // 이 창에서 이미 적어 둔 "다른 세션"이 쓰는 시간대 (자기 자신은 빼고)
+  // 세션 관리 화면(SessionFormModal)과 같은 규칙: 딱 붙는 건 겹침 아님
+  const busyFor = (key) =>
+    sessions
+      .filter((o) => o.key !== key && o.startsAt && o.endsAt && o.endsAt > o.startsAt)
+      .map((o) => ({ start: o.startsAt, end: o.endsAt }));
+  // 시작 시각 t: 다른 세션이 진행 중이면 막음 (start <= t < end)
+  const sessionStartBlocked = (key) => (t) => busyFor(key).some((b) => b.start <= t && t < b.end);
+  // 종료 시각 t: [시작, t) 가 다른 세션과 겹치면 막음 + 자기 시작과 같거나 앞서면 막음
+  const sessionEndBlocked = (key, startsAt) => (t) =>
+    (Boolean(startsAt) && t <= startsAt) ||
+    busyFor(key).some((b) => b.start < t && b.end > (startsAt || t));
+
   // 세션 1차 검사: 빈칸, 종료>시작, 행사 시간 안, 세션끼리 겹침
   // (아직 서버에 없는 세션들이라 겹침도 화면에서 미리 확인할 수 있습니다)
   function validateSessions() {
@@ -209,6 +222,7 @@ export default function EventFormModal({ event, onClose, onSaved }) {
               id="ev-start"
               value={form.startsAt}
               min={startChanged ? nowKstInput() : undefined} // 지난 시각은 고를 수 없음
+              hideBlocked // 지난 시·분은 회색이 아니라 목록에서 아예 빼기
               onChange={(v) => setForm((f) => ({ ...f, startsAt: v }))}
             />
           </Field>
@@ -217,6 +231,9 @@ export default function EventFormModal({ event, onClose, onSaved }) {
               id="ev-end"
               value={form.endsAt}
               min={form.startsAt || undefined} // 시작 이후만 고를 수 있음
+              // 시작과 "같은" 시각도 안 되므로(종료 > 시작) 그 시각까지 함께 숨김
+              isBlocked={(v) => Boolean(form.startsAt) && v <= form.startsAt}
+              hideBlocked // 시작 이전 시·분은 회색이 아니라 목록에서 아예 빼기
               onChange={(v) => setForm((f) => ({ ...f, endsAt: v }))}
             />
           </Field>
@@ -295,6 +312,8 @@ export default function EventFormModal({ event, onClose, onSaved }) {
                         value={s.startsAt}
                         min={form.startsAt || undefined} // 행사 시작~종료 안에서만 고를 수 있음
                         max={form.endsAt || undefined}
+                        isBlocked={sessionStartBlocked(s.key)} // 이미 적어 둔 다른 세션 시간대
+                        hideBlocked // 고를 수 없는 시·분은 목록에서 아예 빼기
                         onChange={(v) => changeSession(s.key, 'startsAt', v)}
                       />
                     </Field>
@@ -304,6 +323,9 @@ export default function EventFormModal({ event, onClose, onSaved }) {
                         value={s.endsAt}
                         min={s.startsAt || form.startsAt || undefined} // 세션 시작(없으면 행사 시작) 이후
                         max={form.endsAt || undefined}
+                        // 다른 세션과 겹치는 시각 + 자기 시작과 같은 시각(종료 > 시작)을 함께 막음
+                        isBlocked={sessionEndBlocked(s.key, s.startsAt)}
+                        hideBlocked // 고를 수 없는 시·분은 목록에서 아예 빼기
                         onChange={(v) => changeSession(s.key, 'endsAt', v)}
                       />
                     </Field>

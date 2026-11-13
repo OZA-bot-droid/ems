@@ -3,6 +3,7 @@ import style0 from '../styles/event-manage.module.scss';
 const cx = value => mapClassNames(value, style0);
 // ADMIN / 09 · 행사 관리의 본문 (좌측 공통 헤더와 페이지 헤더는 상위 레이아웃에서 제공합니다.)
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { eventApi } from '../api/eventApi.js';
 import { useAuth } from '../../member/hooks/useAuth.js';
 import { formatShort, STATUS_BADGE } from '../utils/format.js';
@@ -32,6 +33,7 @@ const SORT_OPTIONS = [
 
 export default function EventManage({ onManageSessions }) {
   const { memberId } = useAuth();
+  const navigate = useNavigate();
   const [page, setPage] = useState(0);
   const [sort, setSort] = useState(SORT_OPTIONS[0].value);
   const [result, setResult] = useState(null);
@@ -84,8 +86,9 @@ export default function EventManage({ onManageSessions }) {
   }
 
   // [세션 관리]: 부모가 화면 전환을 넘겨주면 그걸 쓰고, 아니면 세션 관리 페이지로 이동
+  // navigate: 페이지를 통째로 새로고침하지 않아서 로그인 상태가 유지되고 더 빠름
   const openSessions = (eventId) =>
-    onManageSessions ? onManageSessions(eventId) : (window.location.href = `/admin/sessions?eventId=${eventId}`);
+    onManageSessions ? onManageSessions(eventId) : navigate(`/admin/sessions?eventId=${eventId}`);
 
   const events = result?.content ?? [];
   const myId = String(memberId);

@@ -1,6 +1,7 @@
 // 04 · 행사 상세 화면
 // 흐름: 화면이 뜨면 → 행사 정보 + 세션 목록을 "동시에" 요청(Promise.all) → 둘 다 오면 그리기
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { eventApi } from '../api/eventApi.js';
 import { registrationApi } from '../api/registrationApi.js';
 import { useAuth } from '../../member/hooks/useAuth.js';
@@ -14,6 +15,8 @@ const APPROVAL_HREF = () => '/admin/approvals';
 
 export default function EventDetail({ eventId, onBack }) {
   const { role, memberId } = useAuth();
+  // navigate: 페이지를 통째로 새로고침하지 않아서 로그인 상태가 유지되고 더 빠름
+  const navigate = useNavigate();
   const [event, setEvent] = useState(null);
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -202,7 +205,7 @@ export default function EventDetail({ eventId, onBack }) {
                 <button
                   disabled={!isOwner}
                   title={isOwner ? '이 행사의 세션을 추가·수정합니다' : '내가 만든 행사만 관리할 수 있습니다'}
-                  onClick={() => window.location.assign(`/admin/sessions?eventId=${event.id}`)}
+                  onClick={() => navigate(`/admin/sessions?eventId=${event.id}`)}
                   className="h-[42px] min-w-[150px] rounded-[10px] border border-(--ems-green) bg-(--ems-surface) px-4 text-[13px] font-semibold text-(--ems-green) hover:bg-(--ems-green-soft) disabled:cursor-not-allowed disabled:border-slate-300 disabled:text-slate-400 disabled:hover:bg-(--ems-surface)"
                 >
                   세션 관리
@@ -210,7 +213,7 @@ export default function EventDetail({ eventId, onBack }) {
                 <button
                   disabled={!isOwner}
                   title={isOwner ? '신청자를 승인·거절합니다' : '내가 만든 행사만 관리할 수 있습니다'}
-                  onClick={() => window.location.assign(APPROVAL_HREF(event.id))}
+                  onClick={() => navigate(APPROVAL_HREF(event.id))}
                   className="h-[42px] min-w-[150px] rounded-[10px] bg-(--ems-green) px-4 text-[13px] font-semibold text-white hover:bg-(--ems-green-dark) disabled:cursor-not-allowed disabled:bg-slate-300"
                 >
                   참가 승인{summary ? ` · 대기 ${summary.pending}명` : ''}
