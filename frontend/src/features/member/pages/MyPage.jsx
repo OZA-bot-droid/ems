@@ -3,8 +3,10 @@ import { useAuth } from '../hooks/useAuth.js';
 import { useNavigate } from 'react-router-dom';
 import { memberApi } from '../api/memberApi.js';
 import Header from '../../../components/layout/LegacyHeader.jsx';
-import Button from '../../../components/ui/Button.jsx';
-import Modal from '../../../components/ui/Modal.jsx';
+import { mapClassNames } from '../../../styles/classNames.js';
+import layoutStyles from '../../../components/layout/header.module.scss';
+
+const cx = (value) => mapClassNames(value, layoutStyles);
 
 const MyPage = () => {
   const { role, authLoading, accessToken } = useAuth();
@@ -13,22 +15,6 @@ const MyPage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [newName, setNewName] = useState('');
   const [saving, setSaving] = useState(false);
-
-  const [open, setOpen] = useState(false);
-
-  // 삭제 버튼을 누르면 Modal 표시
-  const handleOpen = () => setOpen(true);
-
-  // 취소하거나 닫기 버튼을 누르면 Modal 숨김
-  const handleClose = () => setOpen(false);
-
-  const handleDelete = async () => {
-    // TODO: eventApi.delete(eventId) 연결
-    console.log('행사 삭제 요청');
-
-    // 삭제 완료 후 모달 닫기
-    handleClose();
-  };
 
   useEffect(() => {
     // 재발급이 완료되기 전까지 대기
@@ -72,20 +58,20 @@ const MyPage = () => {
       }
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message);
+      alert(err.message || '닉네임 수정에 실패했습니다.');
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <main className="min-h-screen bg-ems-background">
-      <div className="min-h-screen w-full bg-ems-background lg:flex">
-        <Header role={role} activePage="events" />
+    <div className={cx('app-shell')}>
+      {/* ADMIN과 동일한 Header 및 활성 메뉴 */}
+      <Header role={role} activePage="mypage" />
 
-        {/* My Page 영역 */}
-        {/* 사이드바를 제외한 나머지 영역을 모두 사용 */}
-        <section className="min-w-0 flex-1 px-6 py-10 sm:px-10 lg:px-12 lg:py-[65px] flex justify-center">
+      {/* ADMIN과 같은 본문 영역 및 스크롤 방식 */}
+      <main className={cx('app-main-content')}>
+        <section className="w-full min-w-0">
           <div className="w-full min-w-0">
             <div className="mb-8">
               <h2 className="text-[28px] font-bold text-ems-text">마이페이지</h2>
@@ -167,27 +153,6 @@ const MyPage = () => {
                         비밀번호 변경
                       </button>
                     )}
-                    {/* <Button></Button>
-                    <>
-                      <Button type="button" onClick={handleOpen}>
-                        행사 삭제
-                      </Button>
-
-                      <Modal open={open} title="행사 삭제 확인" onClose={handleClose}>
-                        <p>정말 이 행사를 삭제하시겠습니까?</p>
-                        <p>삭제한 행사는 복구할 수 없습니다.</p>
-
-                        <div className="modal-actions">
-                          <Button type="button" onClick={handleClose}>
-                            취소
-                          </Button>
-
-                          <Button type="button" onClick={handleDelete}>
-                            삭제
-                          </Button>
-                        </div>
-                      </Modal>
-                    </> */}
                   </div>
                 </div>
 
@@ -269,8 +234,8 @@ const MyPage = () => {
             </div>
           </div>
         </section>
-      </div>
-    </main>
+      </main>
+    </div>
   );
 };
 

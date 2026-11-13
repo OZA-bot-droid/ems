@@ -24,6 +24,7 @@ import PollListPage from '../features/interaction/pages/PollListPage';
 // 투표 결과
 import PollResultPage from '../features/interaction/pages/PollResultPage';
 import EmailFound from '../features/member/pages/EmailFound';
+import Home from '../features/Home';
 
 function EventDetailRoute() {
   const { eventId } = useParams();
@@ -37,7 +38,8 @@ function EventDetailRoute() {
 
 // Actual Event/Member UI is mounted without the scaffold MainLayout to avoid duplicate sidebars.
 export const router = createBrowserRouter([
-  { path: '/', element: <Navigate to="/events" replace /> },
+  { path: '/', element: <Navigate to="/home" replace /> },
+  { path: '/home', element: <Home /> },
   { path: '/login', element: <LoginPage /> },
   { path: '/signup', element: <SignupPage /> },
   { path: '/password/request', element: <PasswordRequestPage /> },

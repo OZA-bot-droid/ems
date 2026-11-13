@@ -8,10 +8,7 @@
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0",
     "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "sync:repo": "node scripts/import-from-ems-repo.mjs --apply",
-    "sync:preview": "node scripts/import-from-ems-repo.mjs --dry-run",
-    "sync:validate": "node scripts/validate-integration.mjs"
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@tailwindcss/vite": "4.1.5",
