@@ -17,13 +17,16 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
     private final AuthenticationEntryPointImpl authenticationEntryPoint;
     private final AccessDeniedHandlerImpl accessDeniedHandler;
 
     public SecurityConfig(OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler,
+                          OAuth2LoginFailureHandler oAuth2LoginFailureHandler,
                           AuthenticationEntryPointImpl authenticationEntryPoint,
                           AccessDeniedHandlerImpl accessDeniedHandler) {
         this.oAuth2LoginSuccessHandler = oAuth2LoginSuccessHandler;
+        this.oAuth2LoginFailureHandler = oAuth2LoginFailureHandler;
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.accessDeniedHandler = accessDeniedHandler;
     }
@@ -80,13 +83,16 @@ public class SecurityConfig {
                                     "/oauth2/**",           // /oauth2/authorization/google
                                     "/login/oauth2/**",     // /login/oauth2/code/google
 
+                                    "/members/email/send",
+                                    "/members/email/verify",
+
                                     "/members/password/reset-request",
-                                    "/members/password/reset"
+                                    "/members/password/reset",
+
+                                    "/members/name/duplicate",
+                                    "/members/email/found"
                                 )
                                 .permitAll()
-                                //.requestMatchers("/members/admin").hasRole("ADMIN")
-                                //.requestMatchers("/members/user").hasRole("USER")
-                                //.requestMatchers("/members/all").hasAnyRole("USER", "ADMIN")
                                 .anyRequest()
                                 .authenticated()
                 )
@@ -105,6 +111,7 @@ public class SecurityConfig {
                 // 소셜 계정으로 로그인시 handler 실행
                 .oauth2Login(oauth2 ->
                         oauth2.successHandler(oAuth2LoginSuccessHandler)
+                                .failureHandler(oAuth2LoginFailureHandler)
                 )
                 // Spring Security에서 인증/인가 실패가 발생했을 때 어떻게 응답할지 정하는 설정
                 // controller에 도달하기 전에 발생하는 Security 예외이기 때문에 별도 Handler가 필요

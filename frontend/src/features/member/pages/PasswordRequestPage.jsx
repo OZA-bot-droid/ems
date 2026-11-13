@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useApiUtil } from '../hooks/useApiUtil.js';
+import { memberApi } from '../api/memberApi.js';
 
 const PasswordRequest = () => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
-  const apiReq = useApiUtil();
 
   const passwordResetRequest = async (event) => {
     event.preventDefault();
@@ -18,38 +17,40 @@ const PasswordRequest = () => {
     setMessage('');
 
     try {
-      const res = await apiReq('/api/members/password/reset-request', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json;charset=utf-8',
-        },
-        body: JSON.stringify({ email }),
-      });
+      const res = await memberApi.passwordResetRequest(email);
 
-      if (!(res.status >= 200 && res.status < 300)) {
+      console.log(res.data);
+      if (res.status < 200 || res.status >= 300) {
         throw new Error('비밀번호 재설정 요청에 실패했습니다.');
       } else {
         setMessage(
           '계정에 해당하는 이메일이 있다면 재설정 안내가 발송됩니다. 메일함을 확인해주세요.',
         );
-        const data = res.data;
-        console.log(data);
       }
-    } catch {
-      setMessage('요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.');
+    } catch (err) {
+      console.error(err);
+      setMessage(
+        err.response?.data?.message || '요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.',
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main className="min-h-screen bg-[#f7f9fc]">
-      <div className="min-h-screen w-full bg-[#f7f9fc] lg:flex">
+    <main className="min-h-screen bg-ems-background">
+      <div className="min-h-screen w-full bg-ems-background lg:flex">
         {/* header 영역 */}
-        <aside className="bg-[#17253c] px-8 py-10 text-white sm:px-12 lg:w-[420px] lg:shrink-0 lg:px-14">
+        <aside
+          className={
+            'bg-ems-sidebar px-8 py-10 text-white ' +
+            'sm:px-12 lg:w-[var(--ems-auth-sidebar-width)] ' +
+            'lg:shrink-0 lg:px-14'
+          }
+        >
           <div className="lg:pt-[65px]">
             <div className="flex items-center gap-3">
-              <span className="h-[39px] w-3 rounded-[5px] bg-[#169b62]" />
+              <span className="h-[39px] w-3 rounded-[5px] bg-ems-primary" />
               <h1 className="text-[36px] font-bold">EMS</h1>
             </div>
             <p className="mt-5 text-[13px] font-semibold text-[#afc2d2]">
@@ -74,8 +75,8 @@ const PasswordRequest = () => {
         {/* main 영역 */}
         <section className="flex flex-1 items-center justify-center px-8 py-14 sm:px-12 lg:px-[72px] lg:py-0">
           <form onSubmit={passwordResetRequest} className="w-full max-w-[510px]">
-            <h2 className="text-[26px] font-bold text-[#142238]">비밀번호 찾기</h2>
-            <p className="mt-3 text-[14px] leading-6 text-[#7a879a]">
+            <h2 className="text-[26px] font-bold text-ems-text">비밀번호 찾기</h2>
+            <p className="mt-3 text-[14px] leading-6 text-ems-muted">
               가입한 이메일 주소를 입력하면
               <br />
               비밀번호 재설정 안내를 보내드립니다.
@@ -84,7 +85,7 @@ const PasswordRequest = () => {
             <div className="mt-9">
               <label
                 htmlFor="request-email"
-                className="block text-[13px] font-semibold text-[#142238]"
+                className="block text-[13px] font-semibold text-ems-text"
               >
                 이메일
               </label>
@@ -97,14 +98,14 @@ const PasswordRequest = () => {
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 placeholder="name@example.com"
-                className="mt-2 h-[44px] w-full rounded-[10px] border border-[#e5e9f0] bg-white px-4 text-[13px] text-[#142238] outline-none placeholder:text-[#9aa5b4] focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15"
+                className="mt-2 h-[44px] w-full rounded-[10px] border border-ems-member-input-border bg-white px-4 text-[13px] text-ems-text outline-none placeholder:text-ems-member-inactive focus:border-[#169b62] focus:ring-2 focus:ring-[#169b62]/15"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="mt-7 h-[44px] w-full rounded-[10px] bg-[#169b62] text-[13px] font-semibold text-white transition-colors hover:bg-[#128653] disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-7 h-[44px] w-full rounded-[10px] bg-ems-primary text-[13px] font-semibold text-white transition-colors hover:bg-ems-member-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
             >
               {loading ? '요청 중...' : '재설정 이메일 보내기'}
             </button>
@@ -118,7 +119,7 @@ const PasswordRequest = () => {
             <button
               type="button"
               onClick={() => navigate('/login')}
-              className="mt-7 w-full text-[13px] font-semibold text-[#169b62] hover:underline"
+              className="mt-7 w-full text-[13px] font-semibold text-ems-primary hover:underline"
             >
               로그인으로 돌아가기
             </button>

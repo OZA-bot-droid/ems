@@ -1,7 +1,12 @@
 // 관리자 페이지 공통 머리 (Figma ADMIN 09~13: "09 · 행사 관리" + 설명 + ADMIN 배지)
+
 .admin-page {
+  // 관리자 본문이 사용 가능한 가로 공간을 채움
   width: 100%;
-  max-width: 1120px;
+  min-width: 0;
+
+  // max-width: 1120px; 제거
+
   color: var(--ems-ink);
   font-family: var(--ems-font);
 }
@@ -37,8 +42,10 @@
   box-sizing: border-box;
   margin-top: 7px;
   border-radius: 999px;
-  background: #fff4e8;
-  color: #966420;
+  // 관리자 역할 배지
+  // 기존 색상을 그대로 사용하되 디자인 토큰으로 연결
+  background: var(--ems-admin-badge-bg);
+  color: var(--ems-admin-badge-text);
   font-size: 12px;
   font-weight: 600;
   white-space: nowrap;

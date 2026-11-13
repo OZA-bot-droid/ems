@@ -12,6 +12,7 @@ public enum ErrorCode {
     INVALID_REQUEST(HttpStatus.BAD_REQUEST),
     INVALID_OAUTH_CODE(HttpStatus.BAD_REQUEST),
     INVALID_PASSWORD_RESET_TOKEN(HttpStatus.BAD_REQUEST),
+    INVALID_EMAIL_VERIFICATION(HttpStatus.BAD_REQUEST),
 
     // 401 Unauthorized
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED),
@@ -28,6 +29,10 @@ public enum ErrorCode {
 
     // 409 Conflict
     MEMBER_EMAIL_DUPLICATED(HttpStatus.CONFLICT),
+    MEMBER_NAME_DUPLICATED(HttpStatus.CONFLICT),
+
+    // 429 Too Many Requests
+    LOGIN_RATE_LIMITED(HttpStatus.TOO_MANY_REQUESTS),
 
     // 500 Interval Server Error
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR),

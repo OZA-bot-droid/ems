@@ -4,6 +4,8 @@ import com.ems.member.member.domain.Member;
 import com.ems.member.member.domain.Role;
 import jakarta.validation.constraints.*;
 
+import java.util.Locale;
+
 public record MemberRegisterDTO(@Email(message = "올바른 이메일 형식이 아닙니다.")
                                 @NotBlank(message = "이메일을 입력해주세요.")
                                 @Size(max = 254, message = "이메일은 254자를 초과할 수 없습니다.")
@@ -37,5 +39,15 @@ public record MemberRegisterDTO(@Email(message = "올바른 이메일 형식이 
                 .role(this.role)
                 .provider("local")
                 .build();
+    }
+
+    public MemberRegisterDTO {
+        if(email != null) {
+            email = email.trim().toLowerCase(Locale.ROOT);
+        }
+
+        if(name != null) {
+            name = name.trim();
+        }
     }
 }

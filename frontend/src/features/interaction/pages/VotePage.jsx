@@ -39,7 +39,8 @@ export default function VotePage() {
     <div className={cx('app-shell')}>
       {/* 전체 화면 레이아웃 및 사용자용 공통 헤더. */}
       <Header role="USER" activePage="votes" />
-      <main className="mx-auto max-w-6xl space-y-5 p-5">
+      {/* 실시간 투표 본문 전체 너비 적용 */}
+      <main className={cx('app-main-content w-full min-w-0 space-y-5')}>
         <header>
           <p className="text-sm text-emerald-700">SYNC5 / Interaction</p>
           <h1 className="text-2xl font-bold">실시간 투표</h1>

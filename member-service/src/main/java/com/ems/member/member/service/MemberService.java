@@ -1,14 +1,14 @@
 package com.ems.member.member.service;
 
 import com.ems.member.common.exception.InvalidCredentialsException;
+import com.ems.member.common.exception.MemberNameDuplicatedException;
 import com.ems.member.common.exception.MemberNotFoundException;
 import com.ems.member.common.exception.MemberEmailDuplicatedException;
 import com.ems.member.member.domain.Member;
-import com.ems.member.member.dto.LoginResponseDTO;
-import com.ems.member.member.dto.MemberInformationDTO;
-import com.ems.member.member.dto.MemberLoginDTO;
-import com.ems.member.member.dto.MemberRegisterDTO;
+import com.ems.member.member.dto.*;
 import com.ems.member.member.repository.MemberRepository;
+import com.ems.member.member.repository.RefreshTokenRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+
+import java.util.Locale;
 
 @Service
 @Transactional
@@ -25,17 +27,22 @@ public class MemberService {
     private final JwtTokenService jwtTokenService;
     private final PasswordEncoder passwordEncoder;
     private final AuthService authService;
-    @org.springframework.beans.factory.annotation.Value("${app.cookie-secure:false}")
-    private boolean cookieSecure;
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final EmailVerificationService emailVerificationService;
+    @Value("${app.cookie-secure:false}") private boolean cookieSecure;
 
     public MemberService(MemberRepository memberRepository,
                          JwtTokenService jwtTokenService,
                          PasswordEncoder passwordEncoder,
-                         AuthService authService) {
+                         AuthService authService,
+                         RefreshTokenRepository refreshTokenRepository,
+                         EmailVerificationService emailVerificationService) {
         this.memberRepository = memberRepository;
         this.jwtTokenService = jwtTokenService;
         this.passwordEncoder = passwordEncoder;
         this.authService = authService;
+        this.refreshTokenRepository = refreshTokenRepository;
+        this.emailVerificationService = emailVerificationService;
     }
 
     // 회원가입
@@ -44,7 +51,14 @@ public class MemberService {
         if(memberRepository.existsByEmail(dto.email())) {
             throw new MemberEmailDuplicatedException("이미 가입된 이메일입니다.");
         }
+        if(memberRepository.existsByName(dto.name().trim())) {
+            throw new MemberNameDuplicatedException("이미 사용 중인 닉네임입니다.");
+        }
 
+        // 이메일 인증 확인
+        emailVerificationService.consumeVerifiedEmail(dto.email());
+
+        // 회원 저장
         memberRepository.save(
                 dto.toEntity(
                         passwordEncoder.encode(dto.password())
@@ -111,6 +125,96 @@ public class MemberService {
         Member member = memberRepository.findById(Long.parseLong(memberId))
                 .orElseThrow(() -> new MemberNotFoundException("회원을 찾을 수 없습니다."));
 
-        return new MemberInformationDTO(member.getEmail(), member.getName());
+        return new MemberInformationDTO(member);
     }
+
+    public void changePassword(String memberId, PasswordChangeDTO dto) {
+
+        Member member = memberRepository.findById(Long.parseLong(memberId))
+                .orElseThrow(() -> new MemberNotFoundException("존재하지 않는 회원입니다."));
+
+        // 자체 로그인 회원만 비밀번호 변경
+        if(!"LOCAL".equalsIgnoreCase(member.getProvider())) {
+            throw new InvalidCredentialsException("비밀번호 변경에 실패했습니다.");
+        }
+
+        // 현재 비밀번호 검증
+        // 기존 비밀번호와 새로운 비밀번호가 동일한지 확인
+        // 일치 여부를 알려주는 oracle 역할을 할 수 있으니 주의
+        if(!passwordEncoder.matches(dto.currentPassword(), member.getPasswordHash())
+                || passwordEncoder.matches(dto.newPassword(), member.getPasswordHash())) {
+            throw new InvalidCredentialsException("비밀번호 변경에 실패했습니다.");
+        }
+
+        // 새로운 비밀번호 저장
+        member.changePassword(passwordEncoder.encode(dto.newPassword()));
+
+        // 모든 기기의 refresh token 폐기
+        refreshTokenRepository.deleteByMember(member);
+    }
+
+    public MemberInformationDTO updateMember(String memberId, MemberUpdateDTO dto) {
+
+        Member member = memberRepository.findById(Long.parseLong(memberId))
+                .orElseThrow(() -> new MemberNotFoundException("존재하지 않은 회원입니다."));
+
+        String name = dto.name().trim();
+        if(!member.getName().equals(name) && memberRepository.existsByName(name)) {
+            throw new MemberNameDuplicatedException("이미 사용 중인 닉네임입니다.");
+        }
+
+        member.changeName(name);
+        return new MemberInformationDTO(member);
+    }
+
+    public boolean duplicateName(NameDTO dto) {
+
+        return memberRepository.existsByName(dto.name());
+    }
+
+
+    public String foundEmail(NameDTO dto) {
+        // 닉네임으로 회원을 조회
+        Member member = memberRepository.findByName(dto.name())
+                .orElseThrow(() ->
+                        new MemberNotFoundException("존재하지 않는 회원입니다.")
+                );
+
+        // 이메일 원문을 반환하지 않고 마스킹한 값만 반환
+        return maskEmail(member.getEmail());
+    }
+
+    /**
+     * 이메일 아이디의 앞 2글자만 표시하고 나머지를 *로 변경.
+     * 도메인은 기존 주소를 구분할 수 있도록 유지.
+     *
+     * honggildong@gmail.com -> ho********@gmail.com
+     * abc@naver.com          -> ab*@naver.com
+     * ab@gmail.com           -> a*@gmail.com
+     * a@gmail.com            -> *@gmail.com
+     */
+    private String maskEmail(String email) {
+        if (email == null || email.isBlank()) {
+            throw new IllegalStateException("회원 이메일 정보가 없습니다.");
+        }
+
+        int atIndex = email.indexOf('@');
+
+        if (atIndex <= 0 || atIndex == email.length() - 1) {
+            throw new IllegalStateException("잘못된 이메일 형식입니다.");
+        }
+
+        String localPart = email.substring(0, atIndex);
+        String domain = email.substring(atIndex);
+
+        int visibleCount = localPart.length() <= 2
+                ? Math.max(0, localPart.length() - 1)
+                : 2;
+
+        String visible = localPart.substring(0, visibleCount);
+        String masked = "*".repeat(localPart.length() - visibleCount);
+
+        return visible + masked + domain;
+    }
+
 }

@@ -2,8 +2,12 @@
 // 색은 event.scss의 --ems-* 변수를 우선 사용합니다.
 
 .session-manage-page {
+  // 세션 관리 본문 전체 너비 사용
   width: 100%;
-  max-width: 816px;
+  min-width: 0;
+
+  // max-width: 816px; 제거
+
   color: var(--ems-ink);
   font-family: var(--ems-font);
 }
@@ -55,8 +59,10 @@
   box-sizing: border-box;
   margin-top: 7px;
   border-radius: 999px;
-  background: #fff4e8;
-  color: #966420;
+  // 관리자 역할 배지
+  // 기존 색상을 그대로 사용하되 디자인 토큰으로 연결
+  background: var(--ems-admin-badge-bg);
+  color: var(--ems-admin-badge-text);
   font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
@@ -69,10 +75,10 @@
   gap: 12px;
   margin: 0 0 16px;
   padding: 12px 16px;
-  border: 1px solid #c8e6d5;
+  border: 1px solid var(--ems-success-border);
   border-radius: 9px;
-  background: #f0faf4;
-  color: #216b46;
+  background: var(--ems-success-bg);
+  color: var(--ems-success-text);
   font-size: 13px;
 
   button {
@@ -84,10 +90,13 @@
     cursor: pointer;
   }
 
+  // 세션 관리 오류 알림
+  // 기존 색상값을 그대로 사용하고
+  // EMS 공통 오류 토큰으로 연결한다.
   &.is-error {
-    border-color: #f2c8c5;
-    background: #fef3f2;
-    color: #b42318;
+    border-color: var(--ems-error-border);
+    background: var(--ems-error-bg);
+    color: var(--ems-error-text);
   }
 }
 

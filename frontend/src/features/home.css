@@ -1,0 +1,85 @@
+/* EMS Home-specific styling. Do not change global.scss or the shared tokens.css. */
+.ems-home {
+  color: var(--ems-text);
+  font-family: var(--ems-font-family);
+  background: var(--ems-surface);
+  min-height: 100vh;
+  width: 100%;
+  isolation: isolate;
+}
+
+/* global.scss uses `a { color: $brand; }`. Direct anchor color overrides
+   the inherited `text-white` on header/footer; scope corrections to Home. */
+.ems-home .home-topbar a,
+.ems-home .home-topbar button {
+  color: #fff;
+}
+.ems-home .home-topbar a:hover,
+.ems-home .home-topbar button:hover {
+  color: var(--ems-primary);
+}
+.ems-home .home-topbar a.bg-ems-primary,
+.ems-home .home-topbar a.bg-ems-primary:hover {
+  color: #fff;
+}
+
+/* The primary CTAs must retain white labels despite the global anchor rule. */
+.ems-home .home-main a.bg-ems-primary,
+.ems-home .home-footer a.bg-ems-primary {
+  color: #fff;
+}
+.ems-home .home-main a.bg-white,
+.ems-home .home-main .home-event-card {
+  color: var(--ems-text);
+}
+.ems-home .home-main .home-event-card:hover {
+  color: var(--ems-text);
+}
+
+/* Dark-footer labels are intentionally lighter than body copy. */
+.ems-home .home-footer a {
+  color: #a9b8cc;
+}
+.ems-home .home-footer .home-footer-brand {
+  color: #fff;
+}
+.ems-home .home-footer nav a:not(.bg-ems-primary):hover {
+  color: #fff;
+}
+.ems-home .home-footer a.bg-ems-primary {
+  color: #fff;
+}
+
+/* Keep carousel rules local to the landing page. */
+.ems-home .team-carousel {
+  width: 100%;
+  max-width: 1050px;
+  margin-left: auto;
+  margin-right: auto;
+  overflow: hidden;
+  cursor: grab;
+  user-select: none;
+  touch-action: pan-y;
+  mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+}
+.ems-home .team-carousel:active { cursor: grabbing; }
+.ems-home .team-carousel-track {
+  display: flex;
+  width: max-content;
+  animation: team-carousel-scroll 30s linear infinite;
+  will-change: transform;
+}
+.ems-home .team-carousel-group {
+  display: flex;
+  flex-shrink: 0;
+  gap: 16px;
+  padding-right: 16px;
+}
+@keyframes team-carousel-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ems-home .team-carousel-track { animation: none; }
+  .ems-home .team-carousel { overflow-x: auto; mask-image: none; }
+}
