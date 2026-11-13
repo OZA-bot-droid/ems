@@ -284,7 +284,8 @@
   h2 {
     margin: 0 24px 12px 0;
     color: var(--ems-ink);
-    font-size: 20px;
+    font-size: 28px;
+    font-weight: 600;
   }
 }
 
@@ -302,14 +303,15 @@
 .admin-reject-eyebrow {
   margin: 0 0 8px;
   color: var(--ems-green);
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .admin-reject-description {
   margin: 0 0 20px;
   color: var(--ems-muted);
   font-size: 13px;
+  font-weight: 400;
   line-height: 1.6;
 }
 
@@ -317,7 +319,7 @@
   display: block;
   margin-bottom: 8px;
   color: var(--ems-ink);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
 }
 
@@ -333,6 +335,7 @@
   color: var(--ems-ink);
   font: inherit;
   font-size: 13px;
+  font-weight: 400;
   line-height: 1.5;
 
   &:focus {
@@ -348,7 +351,8 @@
   gap: 12px;
   margin-top: 14px;
   color: var(--ems-muted);
-  font-size: 12px;
+  font-size: 13px;
+  font-weight: 400;
 }
 
 .admin-reject-buttons {

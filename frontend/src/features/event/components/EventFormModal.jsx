@@ -171,8 +171,8 @@ export default function EventFormModal({ event, onClose, onSaved }) {
         {/* 머리 */}
         <div className={cx("flex items-start justify-between gap-4 border-b border-(--ems-line) pb-4")}>
           <div className={cx("flex flex-col gap-1")}>
-            <h2 className={cx("text-[23px] font-bold text-(--ems-ink)")}>{isEdit ? '행사 수정' : '새 행사 등록'}</h2>
-            <p className={cx("text-xs text-(--ems-muted)")}>
+            <h2 className={cx("text-[28px] font-semibold text-(--ems-ink)")}>{isEdit ? '행사 수정' : '새 행사 등록'}</h2>
+            <p className={cx("text-[13px] font-normal text-(--ems-muted)")}>
               {isEdit ? '바꿀 내용을 고친 뒤 저장하세요.' : '행사 정보를 입력하여 새로운 이벤트를 생성합니다.'}
             </p>
           </div>
@@ -218,7 +218,7 @@ export default function EventFormModal({ event, onClose, onSaved }) {
                 max={form.endsAt || undefined} // 행사가 끝나기 전까지만
                 onChange={(v) => setForm((f) => ({ ...f, postedDate: v }))}
               />
-              <span className={cx("text-[11px] text-(--ems-muted)")}>
+              <span className={cx("text-[13px] font-normal text-(--ems-muted)")}>
                 비워 두면 직접 [공개]를 눌러야 합니다. 정하면 그 시각에 자동으로 "모집 중"이 됩니다.
               </span>
             </Field>
@@ -238,8 +238,8 @@ export default function EventFormModal({ event, onClose, onSaved }) {
             <div className={cx("flex flex-col gap-3 border-t border-(--ems-line) pt-5")}>
               <div className={cx("flex items-center justify-between")}>
                 <div className={cx("flex flex-col gap-0.5")}>
-                  <span className={cx("text-sm font-bold text-(--ems-ink)")}>세션 {sessions.length > 0 && `· ${sessions.length}개`}</span>
-                  <span className={cx("text-[11px] text-(--ems-muted)")}>선택 · 행사 시간 안에서 겹치지 않게 (끝나는 시각에 바로 시작은 가능)</span>
+                  <span className={cx("text-sm font-semibold text-(--ems-ink)")}>세션 {sessions.length > 0 && `· ${sessions.length}개`}</span>
+                  <span className={cx("text-[13px] font-normal text-(--ems-muted)")}>선택 · 행사 시간 안에서 겹치지 않게 (끝나는 시각에 바로 시작은 가능)</span>
                 </div>
                 <button
                   type="button"
@@ -299,12 +299,12 @@ export default function EventFormModal({ event, onClose, onSaved }) {
           )}
 
           {serverError && (
-            <p className={cx("rounded-[8px] bg-rose-50 px-4 py-2.5 text-xs font-semibold text-rose-700")}>
+            <p className={cx("rounded-[8px] bg-rose-50 px-4 py-2.5 text-[13px] font-normal text-rose-700")}>
               {serverError.message} <span className={cx("text-rose-400")}>({serverError.code})</span>
             </p>
           )}
 
-          <p className={cx("rounded-[8px] bg-(--ems-green-soft) px-4 py-2.5 text-xs font-semibold text-(--ems-green)")}>
+          <p className={cx("rounded-[8px] bg-(--ems-green-soft) px-4 py-2.5 text-[13px] font-normal text-(--ems-green)")}>
             {isEdit ? '행사 기간을 줄일 때는 세션이 기간 안에 있어야 합니다.' : '세션은 지금 함께 추가하거나, 등록 후 세션 관리에서 추가할 수 있습니다. 새 행사는 "작성 중"으로 시작되어 [공개]를 눌러야 참가 신청이 가능합니다.'}
           </p>
         </div>
@@ -330,15 +330,15 @@ export default function EventFormModal({ event, onClose, onSaved }) {
 }
 
 const inputClass =
-  'h-[43px] w-full rounded-[9px] border border-transparent bg-(--ems-bg) px-3.5 text-[13px] text-(--ems-ink) placeholder:text-(--ems-muted) focus:border-(--ems-green) focus:outline-none';
+  'h-[43px] w-full rounded-[9px] border border-transparent bg-(--ems-bg) px-3.5 text-[13px] font-normal text-(--ems-ink) placeholder:text-(--ems-muted) focus:border-(--ems-green) focus:outline-none';
 
 // 이름표 + 입력칸 + 빨간 안내 한 묶음
 function Field({ label, error, children }) {
   return (
     <label className={cx("flex flex-col gap-2")}>
-      <span className={cx("text-xs font-semibold text-(--ems-ink)")}>{label}</span>
+      <span className={cx("text-sm font-semibold text-(--ems-ink)")}>{label}</span>
       {children}
-      {error && <span className={cx("text-xs text-rose-600")}>{error}</span>}
+      {error && <span className={cx("text-[13px] font-normal text-rose-600")}>{error}</span>}
     </label>
   );
 }

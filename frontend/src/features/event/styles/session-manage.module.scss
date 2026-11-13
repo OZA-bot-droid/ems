@@ -523,14 +523,15 @@
 
   h2 {
     margin: 0;
-    font-size: 23px;
-    font-weight: 700;
+    font-size: 28px;
+    font-weight: 600;
   }
 
   p {
     margin: 6px 0 0;
     color: var(--ems-muted);
     font-size: 13px;
+    font-weight: 400;
   }
 
   button {
@@ -554,7 +555,7 @@
   gap: 8px;
 
   > span {
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 600;
   }
 
@@ -566,6 +567,7 @@
     background: var(--ems-bg);
     color: var(--ems-ink);
     font-size: 13px;
+    font-weight: 400;
 
     &::placeholder {
       color: var(--ems-muted);
@@ -579,7 +581,8 @@
 
   > em {
     color: #d92d20;
-    font-size: 12px;
+    font-size: 13px;
+    font-weight: 400;
     font-style: normal;
   }
 }
@@ -594,6 +597,7 @@
   background: var(--ems-bg);
   color: var(--ems-muted);
   font-size: 13px;
+  font-weight: 400;
 }
 
 // 시작 · 종료 나란히
@@ -609,8 +613,8 @@
   border-radius: 8px;
   background: #fef3f2;
   color: #b42318;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 400;
 
   span {
     color: #f97066;
@@ -623,8 +627,8 @@
   border-radius: 8px;
   background: var(--ems-green-soft);
   color: var(--ems-green);
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 400;
 }
 
 .session-modal-foot {

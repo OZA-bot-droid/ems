@@ -243,12 +243,13 @@ $ems-divider: tokens.$ems-border;
 .registration-dialog-eyebrow {
   margin: 0 0 8px;
   color: $ems-green;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 600;
 }
 .registration-dialog h2 {
   margin: 0 24px 20px 0;
-  font-size: 20px;
+  font-size: 28px;
+  font-weight: 600;
 }
 .registration-dialog dl {
   margin: 0;
@@ -260,13 +261,18 @@ $ems-divider: tokens.$ems-border;
   padding: 11px 0;
   border-top: 1px solid $ems-divider;
   font-size: 13px;
+  font-weight: 400;
 }
 .registration-dialog dt {
   color: $ems-muted;
+  font-size: 14px;
+  font-weight: 600;
 }
 .registration-dialog dd {
   margin: 0;
   overflow-wrap: anywhere;
+  font-size: 13px;
+  font-weight: 400;
 }
 .registration-reason-content {
   white-space: pre-wrap;
@@ -274,7 +280,8 @@ $ems-divider: tokens.$ems-border;
 .registration-dialog-note {
   margin: 14px 0 0;
   color: $ems-muted;
-  font-size: 12px;
+  font-size: 13px;
+  font-weight: 400;
 }
 
 // 좁은 화면에서 신청 페이지 콘텐츠를 조정합니다. 공통 헤더는 ../../component/header.scss에서 조정합니다.

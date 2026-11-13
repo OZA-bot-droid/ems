@@ -42,10 +42,10 @@ export default function RegistrationApplyModal({ event, applying, error, onClose
         <form onSubmit={submit}>
           <header className={cx("flex items-start justify-between gap-4")}>
             <div>
-              <h2 id="registration-apply-title" className={cx("text-[24px] font-bold text-(--ems-ink)")}>
+              <h2 id="registration-apply-title" className={cx("text-[28px] font-semibold text-(--ems-ink)")}>
                 행사 참가 신청
               </h2>
-              <p className={cx("mt-1 text-[13px] text-(--ems-muted)")}>
+              <p className={cx("mt-1 text-[13px] font-normal text-(--ems-muted)")}>
                 선택한 행사의 참가 신청 내용을 확인하세요.
               </p>
             </div>
@@ -61,8 +61,8 @@ export default function RegistrationApplyModal({ event, applying, error, onClose
           </header>
 
           <div className={cx("mt-5 rounded-[12px] bg-(--ems-green-soft) px-[17px] py-[14px]")}>
-            <p className={cx("text-[12px] font-semibold text-(--ems-green)")}>신청 행사</p>
-            <p className={cx("mt-1 text-[17px] font-bold text-(--ems-ink)")}>{event.title}</p>
+            <p className={cx("text-[14px] font-semibold text-(--ems-green)")}>신청 행사</p>
+            <p className={cx("mt-1 text-[13px] font-normal text-(--ems-ink)")}>{event.title}</p>
           </div>
 
           <div className={cx("mt-5 flex flex-col gap-4")}>
@@ -71,13 +71,13 @@ export default function RegistrationApplyModal({ event, applying, error, onClose
           </div>
 
           <div className={cx("mt-5")}>
-            <h3 className={cx("text-[13px] font-semibold text-(--ems-ink)")}>참가 안내</h3>
-            <p className={cx("mt-2 text-[12px] leading-5 text-(--ems-muted)")}>
+            <h3 className={cx("text-[14px] font-semibold text-(--ems-ink)")}>참가 안내</h3>
+            <p className={cx("mt-2 text-[13px] font-normal leading-5 text-(--ems-muted)")}>
               신청 후 관리자의 승인이 필요하며, 결과는 나의 신청 내역에서 확인합니다.
             </p>
           </div>
 
-          <label className={cx("mt-6 flex cursor-pointer items-start gap-2.5 text-[12px] leading-5 text-(--ems-ink)")}>
+          <label className={cx("mt-6 flex cursor-pointer items-start gap-2.5 text-[13px] font-normal leading-5 text-(--ems-ink)")}>
             <input
               checked={consented}
               className={cx("mt-0.5 size-[17px] shrink-0 accent-(--ems-green)")}
@@ -91,7 +91,7 @@ export default function RegistrationApplyModal({ event, applying, error, onClose
           </label>
 
           {(consentError || error) && (
-            <p className={cx("mt-2 text-[12px] text-rose-600")} role="alert">
+            <p className={cx("mt-2 text-[13px] font-normal text-rose-600")} role="alert">
               {consentError || error}
             </p>
           )}
@@ -114,7 +114,7 @@ export default function RegistrationApplyModal({ event, applying, error, onClose
                 {applying ? '신청 중…' : '참가 신청 완료'}
               </button>
             </div>
-            <p className={cx("mt-2 text-[11px] text-(--ems-muted)")}>
+            <p className={cx("mt-2 text-[13px] font-normal text-(--ems-muted)")}>
               ※ 필수 동의 후 제출 가능 · 중복 신청/정원 초과는 서버에서 검증
             </p>
           </div>
@@ -127,8 +127,8 @@ export default function RegistrationApplyModal({ event, applying, error, onClose
 function ReadOnlyField({ label }) {
   return (
     <div>
-      <p className={cx("text-[13px] font-semibold text-(--ems-ink)")}>{label}</p>
-      <div className={cx("mt-2 flex h-[44px] items-center rounded-[8px] bg-(--ems-bg) px-[14px] text-[13px] text-(--ems-muted)")}>
+      <p className={cx("text-[14px] font-semibold text-(--ems-ink)")}>{label}</p>
+      <div className={cx("mt-2 flex h-[44px] items-center rounded-[8px] bg-(--ems-bg) px-[14px] text-[13px] font-normal text-(--ems-muted)")}>
         로그인 회원 {label === '이메일' ? '이메일' : '이름'} · 자동 입력
       </div>
     </div>
