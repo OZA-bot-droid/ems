@@ -36,6 +36,12 @@ public class MemberController {
     private final CookieRequestOriginValidator originValidator;
     private final ClientIpResolver clientIpResolver;
 
+    // 내부 인증을 통과한 Event Service에 참가 신청용 회원 정보를 제공합니다.
+    @GetMapping("/internal/{memberId}/registration-profile")
+    public RegistrationApplicantProfile registrationProfile(@PathVariable Long memberId) {
+        return memberService.findRegistrationApplicantProfile(memberId);
+    }
+
     public MemberController(MemberService memberService,
                             AuthService authService,
                             SocialLoginService socialLoginService,

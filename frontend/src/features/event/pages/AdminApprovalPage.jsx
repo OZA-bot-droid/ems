@@ -19,6 +19,10 @@ export default function AdminApprovalPage() {
   const [rejectTarget, setRejectTarget] = useState(null);
   const [rejectReason, setRejectReason] = useState('');
   const [rejectError, setRejectError] = useState('');
+  const applicantLabel = (registration) => registration.applicantName || `회원 ${registration.userId}`;
+  const applicantDetails = (registration) => registration.applicantEmail
+    ? `${applicantLabel(registration)} (${registration.applicantEmail})`
+    : applicantLabel(registration);
 
   const loadRegistrations = useCallback(async () => {
     setLoading(true);
@@ -52,7 +56,7 @@ export default function AdminApprovalPage() {
       try {
         await registrationApi.approve(registration.id);
         setRegistrations((current) => current.filter((item) => item.id !== registration.id));
-        setNotice(`회원 ${registration.userId}님의 참가 신청을 승인했어요.`);
+        setNotice(`${applicantLabel(registration)}님의 참가 신청을 승인했어요.`);
       } catch (requestError) {
         setError(requestError.message || '신청을 처리하지 못했습니다.');
       } finally {
@@ -76,7 +80,7 @@ export default function AdminApprovalPage() {
     try {
       await registrationApi.reject(rejectTarget.id, reason);
       setRegistrations((current) => current.filter((item) => item.id !== rejectTarget.id));
-      setNotice(`회원 ${rejectTarget.userId}님의 참가 신청을 거절했어요.`);
+      setNotice(`${applicantLabel(rejectTarget)}님의 참가 신청을 거절했어요.`);
       setRejectTarget(null);
       setRejectReason('');
     } catch (requestError) {
@@ -125,12 +129,12 @@ export default function AdminApprovalPage() {
                 {registrations.map((registration) => (
                   <li className={cx("admin-approval-row")} key={registration.id}>
                     <div className={cx("admin-approval-applicant")}>
-                      <span className={cx("admin-approval-name")}>회원 {registration.userId}</span>
+                      <span className={cx("admin-approval-name")}>{applicantDetails(registration)}</span>
                       <span className={cx("admin-approval-separator")} aria-hidden="true">·</span>
                       <span className={cx("admin-approval-event")}>{registration.eventTitle}</span>
                     </div>
 
-                    <div className={cx("admin-approval-actions")} aria-label={`회원 ${registration.userId} 신청 처리`}>
+                    <div className={cx("admin-approval-actions")} aria-label={`${applicantLabel(registration)} 신청 처리`}>
                       <button
                         className={cx("is-approve")}
                         disabled={busyId === registration.id}
@@ -159,7 +163,7 @@ export default function AdminApprovalPage() {
           </section>
 
           <p className={cx("admin-approval-footer")}>
-            신청자 이름은 Member Service의 신청자 정보 API 연결 후 표시됩니다.
+            이름과 이메일은 신청 당시 정보로 표시됩니다.
           </p>
         </section>
       </main>
@@ -192,7 +196,7 @@ export default function AdminApprovalPage() {
             <p className={cx("admin-reject-eyebrow")}>참가 신청 처리</p>
             <h2 id="admin-reject-title">신청을 승인 거부할까요?</h2>
             <p className={cx("admin-reject-description")}>
-              회원 {rejectTarget.userId}님 · {rejectTarget.eventTitle}
+              {applicantDetails(rejectTarget)} · {rejectTarget.eventTitle}
               <br />
               작성한 사유는 회원의 신청 내역에서 확인할 수 있어요.
             </p>

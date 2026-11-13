@@ -28,6 +28,14 @@ public class Registration {
     @Column(name = "event_id", nullable = false)
     private Long eventId;
 
+    /** 신청 당시 회원 이름의 스냅샷입니다. */
+    @Column(name = "applicant_name")
+    private String applicantName;
+
+    /** 신청 당시 회원 이메일의 스냅샷입니다. */
+    @Column(name = "applicant_email")
+    private String applicantEmail;
+
     /** enum 이름을 문자열로 저장하며, 새 신청은 승인 대기 상태로 시작합니다. */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -52,8 +60,14 @@ public class Registration {
     protected Registration() { }
 
     public Registration(Long userId, Long eventId) {
+        this(userId, eventId, null, null);
+    }
+
+    public Registration(Long userId, Long eventId, String applicantName, String applicantEmail) {
         this.userId = userId;
         this.eventId = eventId;
+        this.applicantName = applicantName;
+        this.applicantEmail = applicantEmail;
         this.status = RegistrationStatus.PENDING;
     }
 
@@ -74,6 +88,8 @@ public class Registration {
     public Long getId() { return id; }
     public Long getUserId() { return userId; }
     public Long getEventId() { return eventId; }
+    public String getApplicantName() { return applicantName; }
+    public String getApplicantEmail() { return applicantEmail; }
     public RegistrationStatus getStatus() { return status; }
     public Instant getRequestedAt() { return requestedAt; }
     public Instant getUpdatedAt() { return updatedAt; }

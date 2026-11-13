@@ -12,6 +12,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationFilter;
 
 @Configuration
 public class SecurityConfig {
@@ -58,7 +59,9 @@ public class SecurityConfig {
 
     // Spring Security에서 어떤 요청에 어떤 보안 규칙을 적용할지 정의하는 필터 체인 객체
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, @Qualifier("accessTokenDecoder") JwtDecoder accessDecoder) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http,
+                                           @Qualifier("accessTokenDecoder") JwtDecoder accessDecoder,
+                                           InternalMemberServiceAuthFilter internalMemberServiceAuthFilter) throws Exception {
 
         // Spring Security의 CSRF(Cross-Site Request Forgery) 보호 기능을 끄는 설정
         // 사용자가 원하지 않는 요청을 다른 사이트가 대신 보내는 공격을 막는 기능
@@ -69,6 +72,7 @@ public class SecurityConfig {
                 // 어떤 HTTP 요청을 누구에게 허용할지 정하는 설정
                 .authorizeHttpRequests(author ->
                         author.requestMatchers(
+                                    "/members/internal/**",
                                     "/members/ping",
                                     "/members/register",
                                     "/members/login",
@@ -113,6 +117,7 @@ public class SecurityConfig {
                         oauth2.successHandler(oAuth2LoginSuccessHandler)
                                 .failureHandler(oAuth2LoginFailureHandler)
                 )
+                .addFilterBefore(internalMemberServiceAuthFilter, BearerTokenAuthenticationFilter.class)
                 // Spring Security에서 인증/인가 실패가 발생했을 때 어떻게 응답할지 정하는 설정
                 // controller에 도달하기 전에 발생하는 Security 예외이기 때문에 별도 Handler가 필요
                 .exceptionHandling(exception -> exception

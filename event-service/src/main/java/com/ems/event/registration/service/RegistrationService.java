@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -28,10 +29,18 @@ public class RegistrationService {
 
     private final RegistrationRepository registrationRepository;
     private final EventRepository eventRepository;
+    private final MemberProfileClient memberProfileClient;
 
-    public RegistrationService(RegistrationRepository registrationRepository, EventRepository eventRepository) {
+    @Autowired
+    public RegistrationService(RegistrationRepository registrationRepository, EventRepository eventRepository,
+                               MemberProfileClient memberProfileClient) {
         this.registrationRepository = registrationRepository;
         this.eventRepository = eventRepository;
+        this.memberProfileClient = memberProfileClient;
+    }
+
+    public RegistrationService(RegistrationRepository registrationRepository, EventRepository eventRepository) {
+        this(registrationRepository, eventRepository, null);
     }
 
     /** 취소 이력은 보존하고, 행사별 신청 시도는 최대 3회까지 허용합니다. */
@@ -51,8 +60,14 @@ public class RegistrationService {
             throw new BusinessException(HttpStatus.CONFLICT, "REGISTRATION_ATTEMPT_LIMIT",
                     "이 행사의 참가 신청은 최대 3회까지 가능합니다.");
         }
+        MemberProfileClient.ApplicantProfile applicant = memberProfileClient.findProfile(userId);
+        if (applicant == null || applicant.memberId() == null || applicant.name() == null || applicant.email() == null) {
+            throw new BusinessException(HttpStatus.BAD_GATEWAY, "MEMBER_PROFILE_UNAVAILABLE",
+                    "회원 정보를 확인할 수 없어 참가 신청을 처리하지 못했습니다.");
+        }
         try {
-            return registrationRepository.saveAndFlush(new Registration(userId, eventId));
+            return registrationRepository.saveAndFlush(
+                    new Registration(userId, eventId, applicant.name(), applicant.email()));
         } catch (DataIntegrityViolationException exception) {
             // 동시에 들어온 중복 요청은 활성 신청에 대한 DB 부분 유일 인덱스로도 차단합니다.
             throw new BusinessException(HttpStatus.CONFLICT, "ALREADY_REGISTERED", "이미 이 행사에 신청한 이력이 있습니다.");
@@ -84,6 +99,8 @@ public class RegistrationService {
                         registration.getEventId(),
                         eventTitles.get(registration.getEventId()),
                         registration.getUserId(),
+                        registration.getApplicantName(),
+                        registration.getApplicantEmail(),
                         registration.getStatus(),
                         registration.getRequestedAt(),
                         registration.getUpdatedAt(),
@@ -187,7 +204,8 @@ public class RegistrationService {
 
     /** 관리자가 확인할 신청 목록 행입니다. */
     public record AdminRegistration(
-            Long id, Long eventId, String eventTitle, Long userId, RegistrationStatus status,
+            Long id, Long eventId, String eventTitle, Long userId, String applicantName, String applicantEmail,
+            RegistrationStatus status,
             Instant requestedAt, Instant updatedAt, Instant decidedAt, String rejectionReason) { }
 
     /** 행사별 신청 상태 건수 응답입니다. */
