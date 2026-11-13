@@ -47,7 +47,7 @@ const FloatingChatBot = () => {
               <button
                 type="button"
                 onClick={scrollToTop}
-                className="flex h-[60px] w-[60px] items-center justify-center rounded-full bg-ems-google-blue text-ems-surface shadow-lg transition hover:scale-105"
+                className="flex h-[60px] w-[60px] items-center justify-center rounded-full bg-ems-secondary text-ems-surface shadow-lg transition hover:scale-105"
                 aria-label="맨 위로 이동"
                 title="맨 위로 이동"
                 style={{ fontSize: '22px' }}

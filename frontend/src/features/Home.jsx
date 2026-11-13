@@ -482,7 +482,7 @@ const Home = () => {
           <div className="mx-auto max-w-[1200px] px-6 text-center mb-5">
             <p className="text-[13px] font-bold tracking-widest text-ems-primary">OUR TEAM</p>
 
-            <h2 className="mt-4 text-[30px] font-bold text-ems-text">SYNC5를 만드는 사람들</h2>
+            <h2 className="mt-4 text-[30px] font-bold text-ems-text">SYNC5 팀원들</h2>
 
             <p className="mt-4 text-[14px] text-ems-muted">
               다섯 명의 팀원이 함께 만들어가는 이벤트 플랫폼
