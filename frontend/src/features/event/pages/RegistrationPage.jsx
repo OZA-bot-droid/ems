@@ -110,7 +110,7 @@ function RegistrationPage() {
               {FILTER_OPTIONS.map(([value, label]) => (
                 <button
                   aria-pressed={filter === value}
-                  className={cx(`${value === 'PENDING' ? 'pending-filter ' : ''}${filter === value ? 'selected' : ''}`)}
+                  className={cx(`${value === 'PENDING' ? 'pending-filter ' : ''}${value === 'REJECTED' ? 'rejected-filter ' : ''}${filter === value ? 'selected' : ''}`)}
                   key={value}
                   onClick={() => setFilter(value)}
                   type="button"
@@ -181,7 +181,7 @@ function RegistrationPage() {
                       )}
                       {row.status === 'REJECTED' && (
                         <button
-                          className={cx("registration-link")}
+                          className={cx("registration-link registration-reason-link")}
                           onClick={() => setReasonDetail(row)}
                           type="button"
                         >

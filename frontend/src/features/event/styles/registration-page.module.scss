@@ -89,7 +89,8 @@ $ems-divider: tokens.$ems-border;
   background: $ems-row;
   color: $ems-muted;
   font: inherit;
-  font-size: 11px;
+  font-size: 13px;
+  font-weight: 400;
   cursor: pointer;
 }
 .registration-filters button.selected {
@@ -101,7 +102,11 @@ $ems-divider: tokens.$ems-border;
   background: #fff4e8;
   color: #986123;
   box-shadow: inset 0 0 0 1px #d9b47f;
-  font-weight: 600;
+}
+.registration-filters button.rejected-filter.selected {
+  background: #fff0f0;
+  color: #a23b45;
+  box-shadow: inset 0 0 0 1px #e8b8bd;
 }
 .registration-row {
   min-height: 52px;
@@ -139,8 +144,8 @@ $ems-divider: tokens.$ems-border;
   flex: 0 0 auto;
   padding: 4px 8px;
   border-radius: 12px;
-  font-size: 10px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 400;
 }
 .registration-status.approved {
   color: #16804f;
@@ -171,13 +176,45 @@ $ems-divider: tokens.$ems-border;
   font: inherit;
   cursor: pointer;
 }
-.registration-link {
+.registration-actions button.registration-link {
+  min-height: 32px;
+  padding: 0 11px;
+  border: 1px solid $ems-green-soft;
+  border-radius: 7px;
+  background: $ems-green-soft;
   color: $ems-green;
-  font-size: 11px;
+  font-size: 13px;
+  font-weight: 400;
 }
-.registration-cancel {
+.registration-actions button.registration-cancel {
+  min-height: 32px;
+  padding: 0 11px;
+  border: 1px solid $ems-divider;
+  border-radius: 7px;
+  background: $ems-surface;
   color: $ems-muted;
-  font-size: 11px;
+  font-size: 13px;
+  font-weight: 400;
+}
+.registration-actions button.registration-reason-link {
+  border-color: $ems-divider;
+  background: $ems-surface;
+  color: $ems-muted;
+}
+.registration-actions button:focus-visible {
+  outline: 2px solid $ems-green;
+  outline-offset: 2px;
+}
+.registration-actions button.registration-link:hover:not(:disabled) {
+  border-color: $ems-green;
+}
+.registration-actions button.registration-cancel:hover:not(:disabled) {
+  border-color: $ems-muted;
+  color: $ems-ink;
+}
+.registration-actions button.registration-reason-link:hover:not(:disabled) {
+  border-color: $ems-muted;
+  color: $ems-ink;
 }
 .registration-cancel:disabled {
   opacity: 0.55;
