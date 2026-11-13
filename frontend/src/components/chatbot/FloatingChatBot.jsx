@@ -58,6 +58,7 @@ const FloatingChatBot = () => {
       return;
     }
 
+    setPosition(null);
     setIsOpen((prev) => !prev);
   };
 
@@ -77,21 +78,28 @@ const FloatingChatBot = () => {
 
       <div
         data-chat-widget
-        className="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-3"
+        className={`fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-3 ${
+          isOpen ? 'w-[min(450px,calc(100vw-48px))]' : 'w-[60px]'
+        }`}
         style={
           position
-            ? { left: position.x, top: position.y, right: 'auto', bottom: 'auto' }
+            ? {
+                left: position.x,
+                top: position.y,
+                right: 'auto',
+                bottom: 'auto',
+              }
             : undefined
         }
       >
-        {/* 채팅창 */}
         {isOpen ? (
+          /* 채팅창 */
           <div
-            className="relative w-[calc(100vw-48px)] max-w-[450px]"
+            className="relative w-full max-h-[calc(100dvh-48px)] overflow-y-auto rounded-[24px]"
             role="region"
             aria-label="EMS 안내 챗봇"
           >
-            {/* 기존 챗봇 헤더 위에 드래그 영역 배치 */}
+            {/* 헤더 드래그 영역 */}
             <div
               onPointerDown={handlePointerDown}
               onPointerMove={handlePointerMove}
@@ -104,7 +112,10 @@ const FloatingChatBot = () => {
             {/* 닫기 버튼 */}
             <button
               type="button"
-              onClick={() => setIsOpen(false)}
+              onClick={() => {
+                setIsOpen(false);
+                setPosition(null);
+              }}
               className="absolute right-3 top-3 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-white/15 text-[20px] text-white hover:bg-white/25"
               aria-label="챗봇 닫기"
             >
@@ -114,6 +125,7 @@ const FloatingChatBot = () => {
             <ChatBot floating />
           </div>
         ) : (
+          /* 버튼 영역 */
           <div className="flex flex-col items-center gap-3">
             {pathname === '/home' && (
               <button
@@ -136,10 +148,10 @@ const FloatingChatBot = () => {
               onPointerCancel={handlePointerUp}
               onClick={toggleChat}
               className="flex h-[60px] w-[60px] touch-none cursor-grab items-center justify-center rounded-full bg-ems-primary text-ems-surface shadow-lg active:cursor-grabbing"
-              aria-label={isOpen ? '챗봇 닫기' : '챗봇 열기'}
+              aria-label="챗봇 열기"
               style={{ fontSize: '22px' }}
             >
-              {isOpen ? '✕' : '💬'}
+              💬
             </button>
           </div>
         )}
