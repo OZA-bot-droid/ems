@@ -115,7 +115,7 @@ export default function EventDetail({ eventId, onBack }) {
 
   const badge = STATUS_BADGE[event.status] ?? { label: event.status, className: 'bg-slate-100' };
   const canApply = event.status === 'OPEN';
-  // 참여 링크는 행사를 만든 관리자에게만 옴 → 내 행사가 아니면 "없음"이 아니라 "승인 후 제공"
+  // 내가 만든 행사인가 (관리자 버튼을 쓸 수 있는지 판단)
   const isOwner = String(event.createdBy) === String(memberId);
   // 여러 날에 걸친 행사면 세션에 날짜도 같이 표시
   const multiDay = instantToKstInput(event.startsAt).slice(0, 10) !== instantToKstInput(event.endsAt).slice(0, 10);
@@ -149,15 +149,16 @@ export default function EventDetail({ eventId, onBack }) {
             </p>
           </section>
 
-          {/* 행사 일정: 줄무늬 행 3개 */}
+          {/* 행사 일정: 줄무늬 행. 참여 URL은 볼 수 있을 때만 한 줄 끼어든다 */}
           <section className="flex flex-col gap-2">
             <h3 className="text-lg font-bold text-(--ems-ink)">행사 일정</h3>
             <div className="flex flex-col gap-[7px]">
               <InfoRow striped>
                 <span className="tabular-nums">{formatRange(event.startsAt, event.endsAt)}</span>
               </InfoRow>
-              <InfoRow>
-                {event.meetingUrl ? (
+              {/* 참여 URL이 있을 때만 보여 준다 (없을 때 안내 문구는 두지 않음) */}
+              {event.meetingUrl && (
+                <InfoRow>
                   <a
                     href={event.meetingUrl}
                     target="_blank"
@@ -166,13 +167,10 @@ export default function EventDetail({ eventId, onBack }) {
                   >
                     온라인 · {event.meetingUrl}
                   </a>
-                ) : isOwner ? (
-                  '등록된 참여 링크가 없습니다.'
-                ) : (
-                  '온라인 세미나 · 참여 URL은 승인 후 제공'
-                )}
-              </InfoRow>
-              <InfoRow striped>
+                </InfoRow>
+              )}
+              {/* URL 줄이 빠지면 줄무늬가 연달아 나오므로 번갈아 보이게 맞춘다 */}
+              <InfoRow striped={!event.meetingUrl ? false : true}>
                 {/* 현재 참가자 수는 이도형 님의 신청 API가 생기면 연결 */}
                 정원 {event.capacity}명
               </InfoRow>
