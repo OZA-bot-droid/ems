@@ -170,7 +170,10 @@ const Home = () => {
                 </>
               ) : (
                 <>
-                  <Link to="/login" className="transition-colors hover:text-ems-primary">
+                  <Link
+                    to="/login"
+                    className="rounded-lg bg-ems-primary px-3 py-2 transition-colors text-white hover:bg-ems-member-primary-hover"
+                  >
                     로그인
                   </Link>
 
@@ -582,12 +585,9 @@ const Home = () => {
                   홈
                 </Link>
 
-                <a
-                  href="#events"
-                  className="rounded-xl bg-ems-primary px-7 py-3.5 text-[14px] font-semibold text-white transition-all duration-300 hover:-translate-y-1 hover:bg-ems-member-primary-hover hover:shadow-lg"
-                >
+                <Link href="/events" className="transition-colors hover:text-white">
                   이벤트 둘러보기
-                </a>
+                </Link>
 
                 <Link
                   to={authLoading ? '/events' : accessToken ? '/mypage' : '/login'}
