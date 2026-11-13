@@ -25,16 +25,15 @@ $ems-divider: tokens.$ems-border;
   justify-content: space-between;
   align-items: flex-start;
   gap: 20px;
-  margin-bottom: 48px;
+  margin-bottom: 28px;
 }
 .registration-heading h1 {
   margin: 0;
   font-size: 28px;
-  line-height: 1.65;
   font-weight: 600;
 }
 .registration-heading p {
-  margin: 1px 0 0;
+  margin: 8px 0 0;
   color: $ems-muted;
   font-size: 13px;
   font-weight: 400;
@@ -332,7 +331,7 @@ $ems-divider: tokens.$ems-border;
 // 좁은 화면에서 신청 페이지 콘텐츠를 조정합니다. 공통 헤더는 ../../component/header.scss에서 조정합니다.
 @media (max-width: 760px) {
   .registration-heading {
-    margin-bottom: 30px;
+    margin-bottom: 28px;
   }
   .registration-heading h1 {
     font-size: 28px;
