@@ -5,6 +5,7 @@ import { memberApi } from '../api/memberApi.js';
 import Header from '../../../components/layout/LegacyHeader.jsx';
 import { mapClassNames } from '../../../styles/classNames.js';
 import layoutStyles from '../../../components/layout/header.module.scss';
+import MyActivity from '../components/MyActivity.jsx';
 
 const cx = (value) => mapClassNames(value, layoutStyles);
 
@@ -16,6 +17,7 @@ const MyPage = () => {
   const [newName, setNewName] = useState('');
   const [saving, setSaving] = useState(false);
 
+  // 회원 정보 가져오기
   useEffect(() => {
     // 재발급이 완료되기 전까지 대기
     if (authLoading || !accessToken) {
@@ -36,6 +38,7 @@ const MyPage = () => {
     myInfo();
   }, [authLoading, accessToken]);
 
+  // 이름 바꾸기
   const updateName = async () => {
     const name = newName.trim();
 
@@ -163,75 +166,7 @@ const MyPage = () => {
               </div>
             </section>
 
-            {/* 다른 서비스가 사용할 공간 */}
-            <div className="mt-5 grid gap-5 sm:grid-cols-2">
-              {/* Event Service */}
-              <section className="rounded-[14px] border border-ems-member-input-border bg-white p-5">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-ems-member-primary-soft">
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.7"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-5 w-5 text-ems-primary"
-                      aria-hidden="true"
-                    >
-                      <rect x="3" y="5" width="18" height="16" rx="2" />
-                      <path d="M7 3v4M17 3v4M3 10h18" />
-                    </svg>
-                  </div>
-
-                  <div>
-                    <h3 className="text-[15px] font-bold text-ems-text">나의 행사</h3>
-                    <p className="mt-1 text-[11px] text-ems-muted">Event Service</p>
-                  </div>
-                </div>
-
-                <div className="mt-5 flex min-h-[120px] items-center justify-center rounded-[10px] border border-dashed border-ems-member-divider bg-ems-background p-4">
-                  <p className="text-center text-[12px] leading-6 text-ems-muted">
-                    행사 신청 및 주최 행사
-                    <br />
-                    연동 예정
-                  </p>
-                </div>
-              </section>
-
-              {/* Interaction Service */}
-              <section className="rounded-[14px] border border-ems-member-input-border bg-white p-5">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-ems-member-primary-soft">
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.7"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-5 w-5 text-ems-primary"
-                      aria-hidden="true"
-                    >
-                      <path d="M5 20V11M10 20V5M15 20v-8M20 20V8" />
-                    </svg>
-                  </div>
-
-                  <div>
-                    <h3 className="text-[15px] font-bold text-ems-text">나의 참여 활동</h3>
-                    <p className="mt-1 text-[11px] text-ems-muted">Interaction Service</p>
-                  </div>
-                </div>
-
-                <div className="mt-5 flex min-h-[120px] items-center justify-center rounded-[10px] border border-dashed border-ems-member-divider bg-ems-background p-4">
-                  <p className="text-center text-[12px] leading-6 text-ems-muted">
-                    투표 및 참여 내역
-                    <br />
-                    연동 예정
-                  </p>
-                </div>
-              </section>
-            </div>
+            <MyActivity role={role} />
           </div>
         </section>
       </main>
