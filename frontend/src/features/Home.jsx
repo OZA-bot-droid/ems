@@ -5,7 +5,7 @@ import { eventApi } from './event/api/eventApi.js';
 import { formatShort, STATUS_BADGE } from './event/utils/format.js';
 import logo from '../components/img/SYNC5trans.png';
 import './home.css';
-import ChatBot from '../components/chatBot/ChatBot.jsx';
+import ChatBot from '../components/chatbot/ChatBot.jsx';
 
 const Home = () => {
   const { accessToken, authLoading, role, logout } = useAuth();

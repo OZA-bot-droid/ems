@@ -25,6 +25,7 @@ import PollListPage from '../features/interaction/pages/PollListPage';
 import PollResultPage from '../features/interaction/pages/PollResultPage';
 import EmailFound from '../features/member/pages/EmailFound';
 import Home from '../features/Home';
+import FloatingChatBot from '../components/chatbot/FloatingChatBot';
 
 function EventDetailRoute() {
   const { eventId } = useParams();
@@ -38,39 +39,44 @@ function EventDetailRoute() {
 
 // Actual Event/Member UI is mounted without the scaffold MainLayout to avoid duplicate sidebars.
 export const router = createBrowserRouter([
-  { path: '/', element: <Navigate to="/home" replace /> },
-  { path: '/home', element: <Home /> },
-  { path: '/login', element: <LoginPage /> },
-  { path: '/signup', element: <SignupPage /> },
-  { path: '/password/request', element: <PasswordRequestPage /> },
-  { path: '/password/reset', element: <PasswordResetPage /> },
-  { path: '/password/change', element: <PasswordChangePage /> },
-  { path: '/oauth-success', element: <OAuthCallbackPage /> },
-  { path: '/events', element: <EventDiscoveryPage /> },
-  { path: '/events/:eventId', element: <EventDetailRoute /> },
-  { path: '/email/found', element: <EmailFound /> },
   {
-    element: <ProtectedRoute />,
+    element: <FloatingChatBot />,
     children: [
-      { path: '/registrations', element: <RegistrationPage /> },
-      { path: '/login/success', element: <Navigate to="/mypage" replace /> },
-      { path: '/me', element: <Navigate to="/mypage" replace /> },
-      { path: '/mypage', element: <MyPage /> },
-      { path: '/polls', element: <VotePage /> },
-      { path: '/polls/vote', element: <VotePage /> },
-      { path: '/polls/user', element: <PollListPage /> },
-      { path: '/polls/:pollId/results', element: <PollResultPage /> },
+      { path: '/', element: <Navigate to="/home" replace /> },
+      { path: '/home', element: <Home /> },
+      { path: '/login', element: <LoginPage /> },
+      { path: '/signup', element: <SignupPage /> },
+      { path: '/password/request', element: <PasswordRequestPage /> },
+      { path: '/password/reset', element: <PasswordResetPage /> },
+      { path: '/password/change', element: <PasswordChangePage /> },
+      { path: '/oauth-success', element: <OAuthCallbackPage /> },
+      { path: '/events', element: <EventDiscoveryPage /> },
+      { path: '/events/:eventId', element: <EventDetailRoute /> },
+      { path: '/email/found', element: <EmailFound /> },
+      {
+        element: <ProtectedRoute />,
+        children: [
+          { path: '/registrations', element: <RegistrationPage /> },
+          { path: '/login/success', element: <Navigate to="/mypage" replace /> },
+          { path: '/me', element: <Navigate to="/mypage" replace /> },
+          { path: '/mypage', element: <MyPage /> },
+          { path: '/polls', element: <VotePage /> },
+          { path: '/polls/vote', element: <VotePage /> },
+          { path: '/polls/user', element: <PollListPage /> },
+          { path: '/polls/:pollId/results', element: <PollResultPage /> },
+        ],
+      },
+      {
+        element: <ProtectedRoute role="ADMIN" />,
+        children: [
+          { path: '/admin/events', element: <AdminEventPage /> },
+          { path: '/admin/sessions', element: <AdminSessionPage /> },
+          { path: '/admin/approvals', element: <AdminApprovalPage /> },
+          { path: '/admin/polls', element: <PollManagePage /> },
+        ],
+      },
+      { path: '/bootstrap', element: <BootstrapPage /> },
+      { path: '*', element: <p role="alert">페이지를 찾을 수 없습니다.</p> },
     ],
   },
-  {
-    element: <ProtectedRoute role="ADMIN" />,
-    children: [
-      { path: '/admin/events', element: <AdminEventPage /> },
-      { path: '/admin/sessions', element: <AdminSessionPage /> },
-      { path: '/admin/approvals', element: <AdminApprovalPage /> },
-      { path: '/admin/polls', element: <PollManagePage /> },
-    ],
-  },
-  { path: '/bootstrap', element: <BootstrapPage /> },
-  { path: '*', element: <p role="alert">페이지를 찾을 수 없습니다.</p> },
 ]);

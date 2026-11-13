@@ -1,14 +1,21 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { CHAT_OPTIONS } from './data.js';
 
-const ChatBot = () => {
+const ChatBot = ({ floating = false }) => {
   const [chatInput, setChatInput] = useState('');
+  const chatScrollRef = useRef(null);
   const [messages, setMessages] = useState([
     {
       type: 'bot',
       text: '안녕하세요! EMS 챗봇입니다. 궁금한 항목을 선택해주세요.',
     },
   ]);
+
+  useEffect(() => {
+    if (chatScrollRef.current) {
+      chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+    }
+  }, [messages]);
 
   // 키워드 검색
   const findChatAnswer = (message) => {
@@ -52,12 +59,15 @@ const ChatBot = () => {
       },
     ]);
 
-    setChatStarted(false);
     setChatInput('');
   };
 
   return (
-    <div className="hidden overflow-hidden rounded-[24px] border border-[#d6e3dc] bg-white shadow-[0_20px_60px_rgba(20,34,56,0.06)] lg:flex lg:flex-col">
+    <div
+      className={`overflow-hidden rounded-[24px] border border-[#d6e3dc] bg-white shadow-[0_20px_60px_rgba(20,34,56,0.06)] ${
+        floating ? 'flex w-full flex-col' : 'hidden lg:flex lg:flex-col'
+      }`}
+    >
       {/* 챗봇 헤더 */}
       <div className="flex items-center gap-3 bg-[#17253c] px-5 py-4 text-white">
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#169b62] text-[20px]">
@@ -71,7 +81,10 @@ const ChatBot = () => {
       </div>
 
       {/* 채팅 메시지 */}
-      <div className="flex h-[260px] flex-col gap-3 overflow-y-auto bg-[#f7f9fc] p-4">
+      <div
+        ref={chatScrollRef}
+        className="flex h-[260px] flex-col gap-3 overflow-y-auto bg-[#f7f9fc] p-4"
+      >
         {messages.map((message, index) => (
           <div
             key={index}
