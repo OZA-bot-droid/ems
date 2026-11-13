@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import ChatBot from './ChatBot';
 
@@ -8,6 +8,20 @@ const FloatingChatBot = () => {
   const [position, setPosition] = useState(null);
   const dragRef = useRef(null);
   const movedRef = useRef(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      // 드래그 위치 초기화
+      setPosition(null);
+      dragRef.current = null;
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   const handlePointerDown = (e) => {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
