@@ -445,7 +445,7 @@
 }
 
 .session-manage-create {
-  width: 210px;
+  width: 120px;
   height: 42px;
   padding: 0 16px;
   border: 0;
@@ -677,10 +677,6 @@
   .session-modal-grid,
   .session-modal-foot {
     grid-template-columns: 1fr;
-  }
-
-  .session-manage-create {
-    width: 100%;
   }
 }
 
