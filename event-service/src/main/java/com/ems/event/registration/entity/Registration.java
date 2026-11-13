@@ -5,13 +5,9 @@ import java.time.Instant;
 
 /** 행사 참가 신청 한 건과 그 상태 변경 이력을 표현합니다. */
 @Entity
+// 취소되지 않은 신청의 부분 유일 제약은 V12 Flyway 마이그레이션에서 관리합니다.
 @Table(
         name = "registrations",
-        // 한 사용자가 같은 행사에 신청 행을 여러 개 만들지 못하게 합니다.
-        uniqueConstraints = @UniqueConstraint(
-                name = "uk_registration_user_event",
-                columnNames = {"user_id", "event_id"}
-        ),
         indexes = {
                 @Index(name = "idx_registration_user_status", columnList = "user_id,status"),
                 @Index(name = "idx_registration_event_status", columnList = "event_id,status")
