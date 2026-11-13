@@ -1,19 +1,21 @@
 import { useEffect, useMemo, useState } from 'react';
-import { eventApi } from '../../../event/api/eventApi.js';
+import { eventApi } from '../../event/api/eventApi.js';
 
-// 관리자 투표 목록의 행사명과 세션명 조회
-export function usePollEventSessionNames(rows) {
+// 현재 조회되는 투표 목록의 행사, 세션 조회
+export function getPollEventSessions(rows) {
   const [events, setEvents] = useState([]);
   const [sessions, setSessions] = useState([]);
 
   // 현재 투표 목록에 포함된 행사 ID 추출
   const eventIdsKey = useMemo(() => {
-    return [...new Set(
-      rows
-        .map((poll) => poll.eventId)
-        .filter((id) => id != null)
-        .map(String)
-    )]
+    return [
+      ...new Set(
+        rows
+          .map((poll) => poll.eventId)
+          .filter((id) => id != null)
+          .map(String),
+      ),
+    ]
       .sort()
       .join(',');
   }, [rows]);
@@ -61,22 +63,17 @@ export function usePollEventSessionNames(rows) {
           try {
             const data = await eventApi.manageSessions(eventId);
 
-            const sessionList = Array.isArray(data)
-              ? data
-              : data.content || [];
+            const sessionList = Array.isArray(data) ? data : data.content || [];
 
             return sessionList.map((session) => ({
               ...session,
               eventId,
             }));
           } catch (error) {
-            console.error(
-              `행사 ${eventId} 세션 조회 실패:`,
-              error
-            );
+            console.error(`행사 ${eventId} 세션 조회 실패:`, error);
             return [];
           }
-        })
+        }),
       );
 
       if (active) {

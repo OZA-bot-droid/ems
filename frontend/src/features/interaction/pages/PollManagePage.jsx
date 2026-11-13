@@ -11,7 +11,7 @@ import { mapClassNames } from '../../../styles/classNames.js';
 import styles from '../styles/PollManage.module.scss';
 import { usePollManagementRealtime } from '../hooks/manage/usePollManagementRealtime.js';
 import { interactionPanel } from '../styles/interactionStyles.js';
-import { usePollEventSessionNames } from '../hooks/manage/usePollEventSessionNames.js';
+import { getPollEventSessions } from '../utils/getPollEventSessions.js';
 
 const cx = (value) => mapClassNames(value, module0);
 
@@ -28,9 +28,7 @@ export default function PollManagePage() {
   const error = creation.error || management.error;
 
   // 투표 목록에 표시할 행사·세션 이름 조회
-  const { events, sessions } = usePollEventSessionNames(
-    management.rows
-  );
+  const { events, sessions } = getPollEventSessions(management.rows);
 
   // 관리자 투표 목록 실시간 상태 변경 감지
   const { socketConnected } = usePollManagementRealtime({
