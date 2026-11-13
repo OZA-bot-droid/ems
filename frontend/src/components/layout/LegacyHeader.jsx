@@ -23,7 +23,7 @@ const MENUS = {
       { id: 'mypage', label: '마이페이지', href: '/mypage' },
       { id: 'events', label: '행사 찾기', href: '/events' },
       { id: 'registrations', label: '신청 내역', href: '/registrations' },
-      { id: 'seminars', label: '세미나 참여', href: '#' },
+      // { id: 'seminars', label: '세미나 참여', href: '#' },
       { id: 'votes', label: '실시간 투표', href: '/polls/vote' },
     ],
   },
