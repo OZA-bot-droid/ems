@@ -75,13 +75,27 @@ public class EventService {
         return PageResponse.of(page, event -> EventResponse.from(event, true)); // 전부 내 행사 → 링크 보임
     }
 
-    /** 상세 조회. 남의 DRAFT는 없는 행사처럼 404, 화상 회의 링크는 만든 사람에게만 */
+    /** 상세 조회. 남의 DRAFT는 없는 행사처럼 404, 화상 회의 링크는 만든 사람과 승인된 참가자에게만 */
     public EventResponse getEvent(Long eventId, Long viewerId) {
         Event event = findEvent(eventId);
         if (!event.getStatus().isVisibleToPublic() && !event.isOwnedBy(viewerId)) {
             throw notFound(eventId);
         }
-        return EventResponse.from(event, event.isOwnedBy(viewerId));
+        return EventResponse.from(event, canSeeMeetingUrl(event, viewerId));
+    }
+
+    /**
+     * 화상 회의 링크를 보여 줄 수 있는 사람인가?
+     * - 행사를 만든 관리자: 언제나
+     * - 참가 신청이 승인된 회원: 승인 뒤부터 (대기·거절·취소는 보이지 않음)
+     */
+    private boolean canSeeMeetingUrl(Event event, Long viewerId) {
+        if (viewerId == null) {
+            return false;
+        }
+        return event.isOwnedBy(viewerId)
+                || registrationRepository.existsByEventIdAndUserIdAndStatus(
+                        event.getId(), viewerId, RegistrationStatus.APPROVED);
     }
 
     @Transactional

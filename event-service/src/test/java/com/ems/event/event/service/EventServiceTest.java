@@ -17,6 +17,7 @@ import com.ems.event.event.repository.EventRepository;
 import com.ems.event.event.dto.EventCreateRequest;
 import com.ems.event.event.dto.EventResponse;
 import com.ems.event.event.dto.EventUpdateRequest;
+import com.ems.event.registration.entity.RegistrationStatus;
 import com.ems.event.registration.repository.RegistrationRepository;
 import com.ems.event.session.repository.SessionRepository;
 import java.time.Clock;
@@ -111,14 +112,27 @@ class EventServiceTest {
     }
 
     @Test
-    @DisplayName("화상 회의 링크는 그 행사를 만든 관리자에게만 보인다 (일반 회원·다른 관리자·비로그인은 null)")
-    void meetingUrlOnlyForOwner() {
+    @DisplayName("화상 회의 링크는 만든 관리자와 승인된 참가자에게만 보인다 (대기·거절·다른 관리자·비로그인은 null)")
+    void meetingUrlOnlyForOwnerAndApproved() {
         when(eventRepository.findById(eventId)).thenReturn(Optional.of(openSeminar("https://zoom.us/j/1")));
+        // 2번 회원만 승인됨. 나머지는 승인 기록이 없다
+        when(registrationRepository.existsByEventIdAndUserIdAndStatus(
+                eventId, 2L, RegistrationStatus.APPROVED)).thenReturn(true);
 
-        assertThat(eventService.getEvent(eventId, 2L).meetingUrl()).isNull();              // 일반 회원
+        assertThat(eventService.getEvent(eventId, 2L).meetingUrl()).isEqualTo("https://zoom.us/j/1"); // 승인된 참가자
+        assertThat(eventService.getEvent(eventId, OWNER_ID).meetingUrl()).isEqualTo("https://zoom.us/j/1"); // 만든 관리자
+        assertThat(eventService.getEvent(eventId, 5L).meetingUrl()).isNull();              // 신청 전·대기·거절
         assertThat(eventService.getEvent(eventId, OTHER_ADMIN_ID).meetingUrl()).isNull();  // 다른 관리자
         assertThat(eventService.getEvent(eventId, null).meetingUrl()).isNull();            // 비로그인
-        assertThat(eventService.getEvent(eventId, OWNER_ID).meetingUrl()).isEqualTo("https://zoom.us/j/1");
+    }
+
+    @Test
+    @DisplayName("비로그인 상세 조회는 승인 여부를 DB에 묻지 않는다")
+    void anonymousDoesNotCheckApproval() {
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(openSeminar("https://zoom.us/j/1")));
+
+        assertThat(eventService.getEvent(eventId, null).meetingUrl()).isNull();
+        verify(registrationRepository, never()).existsByEventIdAndUserIdAndStatus(any(), any(), any());
     }
 
     @Test
