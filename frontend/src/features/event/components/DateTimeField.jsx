@@ -14,6 +14,8 @@ const MINUTES = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, '
 
 const boxClass =
   'h-[43px] rounded-[9px] border border-transparent bg-(--ems-bg) px-3 text-[13px] text-(--ems-ink) focus:border-(--ems-green) focus:outline-none';
+// 시·분 선택칸: 위 모양에 "행사 선택"과 같은 화살표를 더한 것 (높이·배경은 옆 날짜 칸에 맞춰 그대로)
+const selectClass = 'select-box select-box-sm h-[43px] bg-(--ems-bg) text-[13px]';
 
 // compact: 칸이 좁을 때(모달에서 시작·종료를 나란히 둘 때) 시·분 선택을 좁게
 // hideBlocked: 고를 수 없는 시·분을 회색으로 두지 않고 목록에서 아예 빼기 (지금 고른 값은 남겨 둠)
@@ -77,7 +79,7 @@ export default function DateTimeField({ id, value, onChange, minDate, maxDate, m
       <select
         id={`${id}-hour`}
         aria-label="시"
-        className={cx(`${boxClass} ${selectWidth}`)}
+        className={cx(`${selectClass} ${selectWidth}`)}
         value={parts.hour}
         onChange={(e) => update('hour', e.target.value)}
       >
@@ -91,7 +93,7 @@ export default function DateTimeField({ id, value, onChange, minDate, maxDate, m
       <select
         id={`${id}-minute`}
         aria-label="분"
-        className={cx(`${boxClass} ${selectWidth}`)}
+        className={cx(`${selectClass} ${selectWidth}`)}
         value={parts.minute}
         onChange={(e) => update('minute', e.target.value)}
       >

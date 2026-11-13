@@ -1,5 +1,9 @@
 // 03 · 행사 목록 화면
 // 흐름: 화면이 뜨면 → eventApi.list() 로 목록 요청 → 받은 content 를 카드로 그리기
+import { mapClassNames } from '../../../styles/classNames.js';
+import style0 from '../styles/event-list.module.scss';
+import style1 from '../styles/session-manage.module.scss'; // 선택 상자 공통 모양(.select-box)
+const cx = (value) => mapClassNames(value, style0, style1);
 import { useEffect, useState } from 'react';
 import { eventApi } from '../api/eventApi.js';
 import { formatShort, STATUS_BADGE } from '../utils/format.js';
@@ -43,26 +47,22 @@ export default function EventList({ onSelect }) {
   );
 
   return (
-    <section className="flex flex-col gap-8">
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex flex-col gap-1.5">
-          <h1 className="text-[27px] font-bold text-(--ems-ink)">행사 목록</h1>
-          <p className="text-[13px] text-(--ems-muted)">이벤트 탐색 · 검색 및 필터</p>
-        </div>
-      </header>
+    <section className={cx("event-list-page")} aria-label="행사 목록">
+      {/* 화면 제목은 페이지(EventDiscoveryPage)가 그린다 — 행사 관리와 같은 방식 */}
 
       {/* 검색 + 상태 필터 */}
-      <div className="flex flex-wrap gap-4">
+      <div className={cx("event-list-toolbar")}>
         <input
           id="event-search"
-          className="h-[45px] min-w-0 flex-1 rounded-[10px] border border-transparent bg-(--ems-surface) px-4 text-sm text-(--ems-ink) placeholder:text-(--ems-muted) focus:border-(--ems-green) focus:outline-none sm:max-w-[525px]"
+          className={cx("event-list-search")}
           placeholder="⌕ 행사명, 키워드로 검색"
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
         />
+        {/* 세션 관리의 "행사 선택" 상자와 같은 모양 */}
         <select
           id="event-status"
-          className="h-[45px] rounded-[10px] border border-transparent bg-(--ems-surface) px-4 text-[13px] font-semibold text-(--ems-ink) focus:border-(--ems-green) focus:outline-none"
+          className={cx("select-box event-list-filter")}
           value={status}
           onChange={(e) => {
             setStatus(e.target.value);
@@ -76,25 +76,27 @@ export default function EventList({ onSelect }) {
       </div>
 
       {/* 상황별 화면: 불러오는 중 / 에러 / 비어 있음 / 목록 */}
-      {loading && <p className="text-sm text-(--ems-muted)">행사를 불러오는 중입니다…</p>}
+      {loading && <p className={cx("event-list-feedback")}>행사를 불러오는 중입니다…</p>}
 
       {!loading && error && (
-        <div className="rounded-[14px] bg-rose-50 p-5 text-sm text-rose-700">
-          <p className="font-semibold">행사 목록을 불러오지 못했습니다.</p>
-          <p className="mt-1">
-            {error.message} <span className="text-rose-400">({error.code})</span>
+        <div className={cx("event-list-error")} role="alert">
+          <p>
+            <strong>행사 목록을 불러오지 못했습니다.</strong>
+          </p>
+          <p>
+            {error.message} <span>({error.code})</span>
           </p>
         </div>
       )}
 
       {!loading && !error && events.length === 0 && (
-        <div className="rounded-[14px] bg-(--ems-surface) p-10 text-center text-sm text-(--ems-muted)">
+        <div className={cx("event-list-empty")}>
           {keyword ? '검색어와 맞는 행사가 없습니다.' : '아직 등록된 행사가 없습니다.'}
         </div>
       )}
 
       {!loading && !error && events.length > 0 && (
-        <ul className="grid gap-[18px] md:grid-cols-2">
+        <ul className={cx("event-list-grid")}>
           {events.map((event, index) => (
             <li key={event.id}>
               <EventCard event={event} index={index} onClick={() => onSelect?.(event.id)} />
@@ -105,19 +107,19 @@ export default function EventList({ onSelect }) {
 
       {/* 페이지 이동 */}
       {result && result.totalPages > 1 && (
-        <nav className="flex items-center justify-center gap-3 text-sm text-(--ems-ink)">
+        <nav className={cx("event-list-pagination")} aria-label="페이지 이동">
           <button
-            className="rounded-[10px] bg-(--ems-surface) px-4 py-2 font-semibold disabled:opacity-40"
+            type="button"
             disabled={page === 0}
             onClick={() => setPage(page - 1)}
           >
             이전
           </button>
-          <span className="tabular-nums text-(--ems-muted)">
+          <span>
             {page + 1} / {result.totalPages}
           </span>
           <button
-            className="rounded-[10px] bg-(--ems-surface) px-4 py-2 font-semibold disabled:opacity-40"
+            type="button"
             disabled={page + 1 >= result.totalPages}
             onClick={() => setPage(page + 1)}
           >
@@ -131,27 +133,17 @@ export default function EventList({ onSelect }) {
 
 // 카드 한 장 (부품) — Figma 03 · Event card
 function EventCard({ event, index, onClick }) {
-  const badge = STATUS_BADGE[event.status] ?? { label: event.status, className: 'bg-slate-100' };
-  // Figma처럼 카드 그림 영역 색을 초록/파랑 번갈아
-  const visual = index % 2 === 0 ? 'bg-(--ems-green-soft)' : 'bg-(--ems-blue-soft)';
+  const badge = STATUS_BADGE[event.status] ?? { label: event.status };
   return (
-    <button
-      onClick={onClick}
-      className="flex h-full w-full flex-col gap-4 rounded-[14px] bg-(--ems-surface) p-3 text-left transition hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(20,34,56,0.08)] focus-visible:outline-2 focus-visible:outline-(--ems-green)"
-    >
-      <div className={`flex h-[72px] items-center rounded-[9px] px-4 ${visual}`}>
-        <span className="text-sm font-bold text-(--ems-green)">EMS EVENT</span>
-      </div>
-      <div className="flex flex-1 flex-col gap-2 px-2 pb-2">
-        <h2 className="text-[17px] font-bold leading-snug text-(--ems-ink)">{event.title}</h2>
-        <p className="text-[13px] text-(--ems-muted) tabular-nums">
+    <button type="button" onClick={onClick} className={cx("event-list-card")}>
+      {/* Figma처럼 카드 그림 영역 색을 초록·파랑 번갈아 */}
+      <div className={cx(`event-list-visual${index % 2 === 0 ? '' : ' is-alt'}`)}>EMS EVENT</div>
+      <div className={cx("event-list-body")}>
+        <h2 className={cx("event-list-title")}>{event.title}</h2>
+        <p className={cx("event-list-meta")}>
           {formatShort(event.startsAt)} · 정원 {event.capacity}명
         </p>
-        <span
-          className={`mt-2 w-fit rounded-full px-3 py-1 text-xs font-semibold ${badge.className}`}
-        >
-          {badge.label}
-        </span>
+        <span className={cx(`event-list-status is-${event.status.toLowerCase()}`)}>{badge.label}</span>
       </div>
     </button>
   );

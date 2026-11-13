@@ -25,10 +25,10 @@
 .event-manage-sort {
   display: inline-flex;
   align-items: center;
-  min-height: 42px;
-  border: 1px solid var(--ems-line);
-  border-radius: 8px;
-  background: var(--ems-surface);
+  min-height: 46px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: var(--ems-row);
   overflow: hidden;
   transition: border-color 150ms ease;
 
@@ -50,7 +50,7 @@
   }
 
   select {
-    min-height: 40px;
+    min-height: 44px;
     padding: 0 34px 0 12px;
     border: 0;
     background: transparent
@@ -135,8 +135,9 @@
   > h2 {
     margin: 0 0 17px;
     color: var(--ems-ink);
-    font-size: 19px;
-    font-weight: 750;
+    /* 제목 */
+    font-size: 14px;
+    font-weight: 600;
     letter-spacing: -0.025em;
   }
 }
@@ -195,15 +196,18 @@
     display: block;
     overflow: hidden;
     color: var(--ems-ink);
+    /* 제목 */
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 600;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
   span {
     color: var(--ems-muted);
-    font-size: 12px;
+    /* 내용 */
+    font-size: 13px;
+    font-weight: 400;
   }
 }
 
@@ -361,7 +365,9 @@
   margin: 0;
   padding: 26px 12px;
   color: var(--ems-muted);
+  /* 내용 */
   font-size: 13px;
+  font-weight: 400;
   text-align: center;
 
   &.is-error {

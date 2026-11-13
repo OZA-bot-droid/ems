@@ -14,7 +14,7 @@ import LoginRequiredModal from './LoginRequiredModal.jsx';
 const APPROVAL_HREF = () => '/admin/approvals';
 
 export default function EventDetail({ eventId, onBack }) {
-  const { role, memberId } = useAuth();
+  const { role, memberId, authLoading } = useAuth();
   // navigate: 페이지를 통째로 새로고침하지 않아서 로그인 상태가 유지되고 더 빠름
   const navigate = useNavigate();
   const [event, setEvent] = useState(null);
@@ -31,6 +31,10 @@ export default function EventDetail({ eventId, onBack }) {
   const [summary, setSummary] = useState(null); // 관리자: 신청 현황 (실패하면 그냥 안 보여줌)
 
   useEffect(() => {
+    // 로그인 확인이 끝나기 전에 요청하면 토큰이 아직 없어서 "남이 보는 것"으로 처리된다
+    // → 내가 만든 행사인데도 참여 URL이 숨겨진 채로 온다. 그래서 확인이 끝난 뒤에 부른다
+    if (authLoading) return;
+
     let ignore = false;
     setLoading(true);
     setError(null);
@@ -56,7 +60,7 @@ export default function EventDetail({ eventId, onBack }) {
     return () => {
       ignore = true;
     };
-  }, [eventId, isAdmin]);
+  }, [eventId, isAdmin, authLoading]);
 
   async function applyToEvent() {
     setApplying(true);

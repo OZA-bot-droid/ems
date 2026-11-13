@@ -197,7 +197,7 @@ export default function EventFormModal({ event, onClose, onSaved }) {
         {/* 머리 */}
         <div className={cx("flex items-start justify-between gap-4 border-b border-(--ems-line) pb-4")}>
           <div className={cx("flex flex-col gap-1")}>
-            <h2 className={cx("text-[23px] font-bold text-(--ems-ink)")}>{isEdit ? '행사 수정' : '새 행사 등록'}</h2>
+            <h2 className={cx("text-[23px] font-bold text-(--ems-ink)")}>{isEdit ? '행사 수정' : '행사 등록'}</h2>
             <p className={cx("text-xs text-(--ems-muted)")}>
               {isEdit ? '바꿀 내용을 고친 뒤 저장하세요.' : '행사 정보를 입력하여 새로운 이벤트를 생성합니다.'}
             </p>
