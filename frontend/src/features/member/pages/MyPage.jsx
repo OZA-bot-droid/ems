@@ -3,8 +3,10 @@ import { useAuth } from '../hooks/useAuth.js';
 import { useNavigate } from 'react-router-dom';
 import { memberApi } from '../api/memberApi.js';
 import Header from '../../../components/layout/LegacyHeader.jsx';
-import Button from '../../../components/ui/Button.jsx';
-import Modal from '../../../components/ui/Modal.jsx';
+import { mapClassNames } from '../../../styles/classNames.js';
+import layoutStyles from '../../../components/layout/header.module.scss';
+
+const cx = (value) => mapClassNames(value, layoutStyles);
 
 const MyPage = () => {
   const { role, authLoading, accessToken } = useAuth();
@@ -63,13 +65,13 @@ const MyPage = () => {
   };
 
   return (
-    <main className="min-h-screen bg-ems-background">
-      <div className="min-h-screen w-full bg-ems-background lg:flex">
-        <Header role={role} activePage="events" />
+    <div className={cx('app-shell')}>
+      {/* ADMIN과 동일한 Header 및 활성 메뉴 */}
+      <Header role={role} activePage="mypage" />
 
-        {/* My Page 영역 */}
-        {/* 사이드바를 제외한 나머지 영역을 모두 사용 */}
-        <section className="min-w-0 flex-1 px-6 py-10 sm:px-10 lg:px-12 lg:py-[65px] flex justify-center">
+      {/* ADMIN과 같은 본문 영역 및 스크롤 방식 */}
+      <main className={cx('app-main-content')}>
+        <section className="w-full min-w-0">
           <div className="w-full min-w-0">
             <div className="mb-8">
               <h2 className="text-[28px] font-bold text-ems-text">마이페이지</h2>
@@ -232,8 +234,8 @@ const MyPage = () => {
             </div>
           </div>
         </section>
-      </div>
-    </main>
+      </main>
+    </div>
   );
 };
 
