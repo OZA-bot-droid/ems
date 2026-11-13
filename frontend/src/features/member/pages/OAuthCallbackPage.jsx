@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { memberApi } from '../api/memberApi';
+import { getRoleFromAccessToken } from '../../../api/jwtClaims';
 
 export default function OAuthCallbackPage() {
   const navigate = useNavigate();
@@ -19,7 +20,8 @@ export default function OAuthCallbackPage() {
       setAccessToken(token);
       localStorage.setItem('isLoginSession', 'true');
       window.history.replaceState({}, '', '/oauth-success');
-      navigate('/mypage', { replace: true });
+      // 관리자(토큰의 role = ADMIN)는 행사 관리, 그 외는 마이페이지로
+      navigate(getRoleFromAccessToken(token) === 'ADMIN' ? '/admin/events' : '/mypage', { replace: true });
     }).catch(() => {
       if (active) {
         window.history.replaceState({}, '', '/oauth-success');

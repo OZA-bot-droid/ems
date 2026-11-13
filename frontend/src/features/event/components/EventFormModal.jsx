@@ -60,14 +60,29 @@ export default function EventFormModal({ event, onClose, onSaved }) {
     if (form.startsAt && form.endsAt && form.endsAt <= form.startsAt)
       errors.endsAt = '종료 일시는 시작 일시보다 뒤여야 합니다.';
     if (!form.capacity || Number(form.capacity) < 1) errors.capacity = '참가 정원은 1명 이상이어야 합니다.';
-    if (canSchedule && form.postedDate && postedChanged) {
-      if (form.postedDate <= nowKstInput()) errors.postedDate = '게시일은 현재 시간 이후로 설정하세요.';
-      else if (form.endsAt && form.postedDate >= form.endsAt)
-        errors.postedDate = '게시일은 행사 종료 일시보다 앞이어야 합니다.';
+    if (canSchedule && form.postedDate) {
+      if (postedChanged && form.postedDate <= nowKstInput())
+        errors.postedDate = '게시일은 현재 시간 이후로 설정하세요.';
+      // 게시일을 안 바꾸고 시작 일시만 앞당긴 경우도 검사 (서버와 같은 규칙)
+      else if (form.startsAt && form.postedDate >= form.startsAt)
+        errors.postedDate = '게시일은 행사 시작 일시보다 앞이어야 합니다.';
     }
     if (form.meetingUrl.length > 500) errors.meetingUrl = '500자까지 입력할 수 있습니다.';
     return errors;
   }
+
+  // 이 창에서 이미 적어 둔 "다른 세션"이 쓰는 시간대 (자기 자신은 빼고)
+  // 세션 관리 화면(SessionFormModal)과 같은 규칙: 딱 붙는 건 겹침 아님
+  const busyFor = (key) =>
+    sessions
+      .filter((o) => o.key !== key && o.startsAt && o.endsAt && o.endsAt > o.startsAt)
+      .map((o) => ({ start: o.startsAt, end: o.endsAt }));
+  // 시작 시각 t: 다른 세션이 진행 중이면 막음 (start <= t < end)
+  const sessionStartBlocked = (key) => (t) => busyFor(key).some((b) => b.start <= t && t < b.end);
+  // 종료 시각 t: [시작, t) 가 다른 세션과 겹치면 막음 + 자기 시작과 같거나 앞서면 막음
+  const sessionEndBlocked = (key, startsAt) => (t) =>
+    (Boolean(startsAt) && t <= startsAt) ||
+    busyFor(key).some((b) => b.start < t && b.end > (startsAt || t));
 
   // 세션 1차 검사: 빈칸, 종료>시작, 행사 시간 안, 세션끼리 겹침
   // (아직 서버에 없는 세션들이라 겹침도 화면에서 미리 확인할 수 있습니다)
@@ -99,7 +114,8 @@ export default function EventFormModal({ event, onClose, onSaved }) {
     return errors;
   }
 
-  async function submit(e) {
+  // publishNow = true 이면 [바로 공개]: 등록 → 세션 추가 → 상태를 OPEN으로 (새 등록일 때만)
+  async function submit(e, publishNow = false) {
     e.preventDefault(); // 폼 기본 동작(새로고침) 막기
     setServerError(null);
     const errors = validate();
@@ -120,7 +136,8 @@ export default function EventFormModal({ event, onClose, onSaved }) {
       meetingUrl: form.meetingUrl.trim() || empty,
     };
     // 게시 예약: 값을 넣었고(수정이면 바꿨을 때만) 작성 중일 때만 보냄
-    if (canSchedule && form.postedDate && postedChanged) body.postedDate = kstToInstant(form.postedDate);
+    // 바로 공개할 때는 게시 예약이 필요 없으므로 보내지 않음
+    if (canSchedule && form.postedDate && postedChanged && !publishNow) body.postedDate = kstToInstant(form.postedDate);
 
     setSaving(true);
     let saved;
@@ -149,6 +166,15 @@ export default function EventFormModal({ event, onClose, onSaved }) {
         result.created++;
       } catch (err) {
         result.failed.push({ title: s.title.trim(), message: err.message });
+      }
+    }
+    // [바로 공개]: 세션까지 만든 뒤 상태를 DRAFT → OPEN 으로 (행사 관리의 [공개] 버튼과 같은 요청)
+    if (publishNow) {
+      try {
+        saved = await eventApi.update(saved.id, { status: 'OPEN' });
+        result.published = true;
+      } catch (err) {
+        result.publishError = err.message; // 공개만 실패: 행사는 "작성 중"으로 남음
       }
     }
     setSaving(false);
@@ -196,6 +222,7 @@ export default function EventFormModal({ event, onClose, onSaved }) {
               id="ev-start"
               value={form.startsAt}
               min={startChanged ? nowKstInput() : undefined} // 지난 시각은 고를 수 없음
+              hideBlocked // 지난 시·분은 회색이 아니라 목록에서 아예 빼기
               onChange={(v) => setForm((f) => ({ ...f, startsAt: v }))}
             />
           </Field>
@@ -204,6 +231,9 @@ export default function EventFormModal({ event, onClose, onSaved }) {
               id="ev-end"
               value={form.endsAt}
               min={form.startsAt || undefined} // 시작 이후만 고를 수 있음
+              // 시작과 "같은" 시각도 안 되므로(종료 > 시작) 그 시각까지 함께 숨김
+              isBlocked={(v) => Boolean(form.startsAt) && v <= form.startsAt}
+              hideBlocked // 시작 이전 시·분은 회색이 아니라 목록에서 아예 빼기
               onChange={(v) => setForm((f) => ({ ...f, endsAt: v }))}
             />
           </Field>
@@ -215,7 +245,9 @@ export default function EventFormModal({ event, onClose, onSaved }) {
                 id="ev-posted"
                 value={form.postedDate}
                 min={nowKstInput()} // 지난 시각은 고를 수 없음
-                max={form.endsAt || undefined} // 행사가 끝나기 전까지만
+                max={form.startsAt || undefined} // 행사가 시작하기 전까지만
+                // max는 "같은 시각까지" 고를 수 있어서, 시작 시각과 같은 시각도 막음 (게시일 < 시작)
+                isBlocked={(v) => Boolean(form.startsAt) && v >= form.startsAt}
                 onChange={(v) => setForm((f) => ({ ...f, postedDate: v }))}
               />
               <span className={cx("text-[13px] font-normal text-(--ems-muted)")}>
@@ -280,6 +312,8 @@ export default function EventFormModal({ event, onClose, onSaved }) {
                         value={s.startsAt}
                         min={form.startsAt || undefined} // 행사 시작~종료 안에서만 고를 수 있음
                         max={form.endsAt || undefined}
+                        isBlocked={sessionStartBlocked(s.key)} // 이미 적어 둔 다른 세션 시간대
+                        hideBlocked // 고를 수 없는 시·분은 목록에서 아예 빼기
                         onChange={(v) => changeSession(s.key, 'startsAt', v)}
                       />
                     </Field>
@@ -289,6 +323,9 @@ export default function EventFormModal({ event, onClose, onSaved }) {
                         value={s.endsAt}
                         min={s.startsAt || form.startsAt || undefined} // 세션 시작(없으면 행사 시작) 이후
                         max={form.endsAt || undefined}
+                        // 다른 세션과 겹치는 시각 + 자기 시작과 같은 시각(종료 > 시작)을 함께 막음
+                        isBlocked={sessionEndBlocked(s.key, s.startsAt)}
+                        hideBlocked // 고를 수 없는 시·분은 목록에서 아예 빼기
                         onChange={(v) => changeSession(s.key, 'endsAt', v)}
                       />
                     </Field>
@@ -314,6 +351,17 @@ export default function EventFormModal({ event, onClose, onSaved }) {
           <button type="button" onClick={onClose} className={cx("h-[43px] flex-1 rounded-[9px] bg-(--ems-bg) text-[13px] font-semibold text-(--ems-ink)")}>
             취소
           </button>
+          {/* 새 등록일 때만: 작성 중을 건너뛰고 바로 "모집 중"으로 */}
+          {!isEdit && (
+            <button
+              type="button"
+              disabled={saving}
+              onClick={(e) => submit(e, true)}
+              className={cx("h-[43px] flex-1 rounded-[9px] border border-(--ems-green) bg-(--ems-surface) text-[13px] font-semibold text-(--ems-green) hover:bg-(--ems-green-soft) disabled:opacity-60")}
+            >
+              {saving ? '저장 중…' : '등록 후 바로 공개'}
+            </button>
+          )}
           <button type="submit" disabled={saving} className={cx("h-[43px] flex-1 rounded-[9px] bg-(--ems-green) text-[13px] font-semibold text-white hover:bg-(--ems-green-dark) disabled:opacity-60")}>
             {saving
               ? '저장 중…'

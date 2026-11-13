@@ -95,6 +95,28 @@
     }
   }
 
+  // 로그아웃처럼 이동이 아니라 동작하는 메뉴: 링크와 같은 모양의 버튼
+  .nav-action {
+    min-height: 42px;
+    margin-left: -8px;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    border: 0;
+    border-radius: 8px;
+    background: none;
+    color: #adbacc;
+    font: inherit;
+    font-size: 14px;
+    text-align: left;
+    white-space: nowrap;
+    cursor: pointer;
+
+    &:hover {
+      color: #fff;
+    }
+  }
+
   // 백엔드 API 연결 전 메뉴: 다른 메뉴와 같은 모양, 누를 수만 없음
   .is-disabled {
     min-height: 42px;

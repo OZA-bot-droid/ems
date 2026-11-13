@@ -1,18 +1,22 @@
 // 04 · 행사 상세 화면
 // 흐름: 화면이 뜨면 → 행사 정보 + 세션 목록을 "동시에" 요청(Promise.all) → 둘 다 오면 그리기
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { eventApi } from '../api/eventApi.js';
 import { registrationApi } from '../api/registrationApi.js';
 import { useAuth } from '../../member/hooks/useAuth.js';
 import { formatRange, formatTimeRange, instantToKstInput, STATUS_BADGE } from '../utils/format.js';
 import RegistrationApplyModal from './RegistrationApplyModal.jsx';
+import LoginRequiredModal from './LoginRequiredModal.jsx';
 
-// 참가 승인 화면 주소. 관리자용 "신청 목록 조회" API가 아직 없어서 화면이 없음 → null이면 버튼 비활성
-// (승인 화면이 생기면 예: (id) => `/admin/approvals?eventId=${id}` 로 바꾸면 바로 연결됨)
-const APPROVAL_HREF = null;
+// 참가 승인 화면 주소 (이도형 님 AdminApprovalPage). 내 행사들의 대기 신청을 승인·거절하는 화면
+// 지금 승인 화면은 행사별로 거르지 않으므로 eventId는 넘기지 않음 (행사별 필터가 생기면 ?eventId=${id} 추가)
+const APPROVAL_HREF = () => '/admin/approvals';
 
 export default function EventDetail({ eventId, onBack }) {
-  const { role, memberId } = useAuth();
+  const { role, memberId, authLoading } = useAuth();
+  // navigate: 페이지를 통째로 새로고침하지 않아서 로그인 상태가 유지되고 더 빠름
+  const navigate = useNavigate();
   const [event, setEvent] = useState(null);
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,9 +26,15 @@ export default function EventDetail({ eventId, onBack }) {
   const [showApplyModal, setShowApplyModal] = useState(false);
   const [applyError, setApplyError] = useState('');
   const isAdmin = role === 'ADMIN';
+  const isLoggedIn = Boolean(role); // 로그인하지 않으면 role이 없음 (EventDiscoveryPage도 같은 기준)
+  const [showLoginModal, setShowLoginModal] = useState(false); // 비로그인이 [참가 신청하기]를 눌렀을 때 뜨는 확인 창
   const [summary, setSummary] = useState(null); // 관리자: 신청 현황 (실패하면 그냥 안 보여줌)
 
   useEffect(() => {
+    // 로그인 확인이 끝나기 전에 요청하면 토큰이 아직 없어서 "남이 보는 것"으로 처리된다
+    // → 내가 만든 행사인데도 참여 URL이 숨겨진 채로 온다. 그래서 확인이 끝난 뒤에 부른다
+    if (authLoading) return;
+
     let ignore = false;
     setLoading(true);
     setError(null);
@@ -50,7 +60,7 @@ export default function EventDetail({ eventId, onBack }) {
     return () => {
       ignore = true;
     };
-  }, [eventId, isAdmin]);
+  }, [eventId, isAdmin, authLoading]);
 
   async function applyToEvent() {
     setApplying(true);
@@ -105,7 +115,7 @@ export default function EventDetail({ eventId, onBack }) {
 
   const badge = STATUS_BADGE[event.status] ?? { label: event.status, className: 'bg-slate-100' };
   const canApply = event.status === 'OPEN';
-  // 참여 링크는 행사를 만든 관리자에게만 옴 → 내 행사가 아니면 "없음"이 아니라 "승인 후 제공"
+  // 내가 만든 행사인가 (관리자 버튼을 쓸 수 있는지 판단)
   const isOwner = String(event.createdBy) === String(memberId);
   // 여러 날에 걸친 행사면 세션에 날짜도 같이 표시
   const multiDay = instantToKstInput(event.startsAt).slice(0, 10) !== instantToKstInput(event.endsAt).slice(0, 10);
@@ -124,7 +134,6 @@ export default function EventDetail({ eventId, onBack }) {
       <article className="flex flex-col gap-8 rounded-[14px] bg-(--ems-surface) p-5">
         {/* 머리: Event hero */}
         <header className="flex flex-col gap-3 rounded-[12px] bg-(--ems-green-soft) px-6 py-6">
-          <p className="text-sm font-bold text-(--ems-green)">EMS 2026 · EVENT</p>
           <h2 className="text-[26px] font-bold text-(--ems-ink)">{event.title}</h2>
           <span className={`w-fit rounded-full px-3 py-1 text-xs font-semibold ${badge.className}`}>
             {badge.label}
@@ -140,15 +149,16 @@ export default function EventDetail({ eventId, onBack }) {
             </p>
           </section>
 
-          {/* 행사 일정: 줄무늬 행 3개 */}
+          {/* 행사 일정: 줄무늬 행. 참여 URL은 볼 수 있을 때만 한 줄 끼어든다 */}
           <section className="flex flex-col gap-2">
             <h3 className="text-lg font-bold text-(--ems-ink)">행사 일정</h3>
             <div className="flex flex-col gap-[7px]">
               <InfoRow striped>
                 <span className="tabular-nums">{formatRange(event.startsAt, event.endsAt)}</span>
               </InfoRow>
-              <InfoRow>
-                {event.meetingUrl ? (
+              {/* 참여 URL이 있을 때만 보여 준다 (없을 때 안내 문구는 두지 않음) */}
+              {event.meetingUrl && (
+                <InfoRow>
                   <a
                     href={event.meetingUrl}
                     target="_blank"
@@ -157,13 +167,10 @@ export default function EventDetail({ eventId, onBack }) {
                   >
                     온라인 · {event.meetingUrl}
                   </a>
-                ) : isOwner ? (
-                  '등록된 참여 링크가 없습니다.'
-                ) : (
-                  '온라인 세미나 · 참여 URL은 승인 후 제공'
-                )}
-              </InfoRow>
-              <InfoRow striped>
+                </InfoRow>
+              )}
+              {/* URL 줄이 빠지면 줄무늬가 연달아 나오므로 번갈아 보이게 맞춘다 */}
+              <InfoRow striped={!event.meetingUrl ? false : true}>
                 {/* 현재 참가자 수는 이도형 님의 신청 API가 생기면 연결 */}
                 정원 {event.capacity}명
               </InfoRow>
@@ -193,22 +200,22 @@ export default function EventDetail({ eventId, onBack }) {
             )}
           </section>
 
-          {/* 관리자: [세션 관리] [참가 승인] / 일반 사용자: [참가 신청하기] */}
-          {isAdmin ? (
+          {/* 관리자: [세션 관리] [참가 승인] / 그 외: [참가 신청하기] (비로그인은 누르면 로그인 안내 창) */}
+          {isAdmin && isOwner ? (
             <div className="flex flex-col items-end gap-2">
               <div className="flex flex-wrap justify-end gap-2">
                 <button
                   disabled={!isOwner}
                   title={isOwner ? '이 행사의 세션을 추가·수정합니다' : '내가 만든 행사만 관리할 수 있습니다'}
-                  onClick={() => window.location.assign(`/admin/sessions?eventId=${event.id}`)}
+                  onClick={() => navigate(`/admin/sessions?eventId=${event.id}`)}
                   className="h-[42px] min-w-[150px] rounded-[10px] border border-(--ems-green) bg-(--ems-surface) px-4 text-[13px] font-semibold text-(--ems-green) hover:bg-(--ems-green-soft) disabled:cursor-not-allowed disabled:border-slate-300 disabled:text-slate-400 disabled:hover:bg-(--ems-surface)"
                 >
                   세션 관리
                 </button>
                 <button
-                  disabled={!APPROVAL_HREF}
-                  title={APPROVAL_HREF ? '신청자를 승인·거절합니다' : '참가 승인 화면 준비 중 (관리자용 신청 목록 API 필요)'}
-                  onClick={() => APPROVAL_HREF && window.location.assign(APPROVAL_HREF(event.id))}
+                  disabled={!isOwner}
+                  title={isOwner ? '신청자를 승인·거절합니다' : '내가 만든 행사만 관리할 수 있습니다'}
+                  onClick={() => navigate(APPROVAL_HREF(event.id))}
                   className="h-[42px] min-w-[150px] rounded-[10px] bg-(--ems-green) px-4 text-[13px] font-semibold text-white hover:bg-(--ems-green-dark) disabled:cursor-not-allowed disabled:bg-slate-300"
                 >
                   참가 승인{summary ? ` · 대기 ${summary.pending}명` : ''}
@@ -227,9 +234,11 @@ export default function EventDetail({ eventId, onBack }) {
                 {applyMessage}
               </p>
             )}
+          {!(isAdmin && !isOwner) && (
             <button
               disabled={!canApply || applying}
               onClick={() => {
+                if (!isLoggedIn) return setShowLoginModal(true); // 비로그인: 신청 창 대신 로그인 안내
                 setApplyError('');
                 setShowApplyModal(true);
               }}
@@ -237,10 +246,18 @@ export default function EventDetail({ eventId, onBack }) {
             >
               {canApply ? '참가 신청하기' : event.status === 'CLOSED' ? '신청이 마감되었습니다' : '아직 모집 전입니다'}
             </button>
+          )}
           </div>
           )}
         </div>
       </article>
+
+      {showLoginModal && (
+        <LoginRequiredModal
+          onClose={() => setShowLoginModal(false)}
+          onConfirm={() => window.location.assign('/login')}
+        />
+      )}
 
       {!isAdmin && showApplyModal && (
         <RegistrationApplyModal

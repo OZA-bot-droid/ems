@@ -6,6 +6,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getClientId } from '../utils/getClientId.js';
 import { useAuth } from '../hooks/useAuth.js';
 import NoLoginHeaders from '../components/NoLoginHeaders.jsx';
+import { getRoleFromAccessToken } from '../../../api/jwtClaims.js';
 import PasswordInput from '../components/PasswordInput.jsx';
 
 function LoginForm() {
@@ -30,8 +31,9 @@ function LoginForm() {
     event.preventDefault();
 
     try {
-      await login({ email, password });
-      navigate('/mypage', { replace: true });
+      const token = await login({ email, password });
+      // 관리자(토큰의 role = ADMIN)는 행사 관리, 그 외는 마이페이지로
+      navigate(getRoleFromAccessToken(token) === 'ADMIN' ? '/admin/events' : '/mypage', { replace: true });
     } catch (err) {
       alert(err.response?.data?.message || '로그인 실패');
       console.error(err);
