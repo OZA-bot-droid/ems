@@ -253,7 +253,7 @@ const MyActivity = ({ role }) => {
               aria-pressed={pollTab === tab.id}
               className={`rounded-full px-4 py-2 text-xs font-semibold transition ${
                 pollTab === tab.id
-                  ? 'bg-ems-secondary text-white'
+                  ? 'bg-ems-primary text-white'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
