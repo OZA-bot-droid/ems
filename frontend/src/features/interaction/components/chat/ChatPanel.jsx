@@ -130,6 +130,17 @@ export default function ChatPanel({ sessionId, socketRef, socketConnected }) {
     }
   }
 
+  // 채팅 메시지에 처음 등장한 사용자 순서로 참가자 번호 부여
+  const participantNumbers = new Map();
+
+  messages.forEach((message) => {
+    const memberKey = String(message.memberId);
+
+    if (!participantNumbers.has(memberKey)) {
+      participantNumbers.set(memberKey, participantNumbers.size + 1);
+    }
+  });
+
   return (
     <section className={styles.chatCard}>
       {/* 채팅 헤더 */}
@@ -190,7 +201,7 @@ export default function ChatPanel({ sessionId, socketRef, socketConnected }) {
                   {/* 작성자 표시 */}
                   <div className={styles.chatMessageHeader}>
                     <span className={styles.chatSender}>
-                      {isMine ? '나' : `사용자 ${message.memberId}`}
+                      {isMine ? '나' : `참가자 ${participantNumbers.get(String(message.memberId))}`}
                     </span>
 
                     <time className={styles.chatTime}>{formatChatTime(message.createdAt)}</time>
