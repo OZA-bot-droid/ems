@@ -129,7 +129,7 @@ export default function PollManagePage() {
       <Header role="ADMIN" activePage="votes" />
       {/* 투표 관리자 본문: 공통 스크롤·너비 규격 적용 */}
       <main className={cx('app-main-content w-full min-w-0 space-y-5 text-slate-800')}>
-        <PollManageHeader onCreateClick={() => creation.setOpen((v) => !v)} />
+        <PollManageHeader />
         {error && (
           <p className="rounded-lg bg-red-50 p-3 text-red-700" role="alert">
             {error}
@@ -139,6 +139,7 @@ export default function PollManagePage() {
         {/* 등록된 투표 목록 */}
         <section className={styles.listCard}>
           <PollManageTable
+            onCreateClick={() => creation.setOpen((v) => !v)}
             eventFilter={eventFilter}
             sessionFilter={sessionFilter}
             loading={management.loading}
@@ -153,8 +154,6 @@ export default function PollManagePage() {
             onViewResults={management.goToResults}
           />
         </section>
-
-        <p className={styles.notice}>서버에서 Event 소유권과 실제 참가 승인 여부를 검증합니다.</p>
       </main>
     </div>
   );

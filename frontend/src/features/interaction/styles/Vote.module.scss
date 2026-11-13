@@ -28,11 +28,20 @@
 }
 
 /* 목록 + 상세 화면 */
+
+/* 투표 목록 / 투표 상세 / 채팅 */
 .voteLayout {
   display: grid;
-  grid-template-columns: 300px minmax(0, 1fr);
+  grid-template-columns:
+    minmax(220px, 0.8fr)
+    minmax(350px, 1.8fr)
+    minmax(300px, 1.3fr);
+
   gap: 20px;
-  align-items: start;
+  align-items: stretch;
+
+  width: 100%;
+  min-width: 0;
 }
 
 /* ======================================
@@ -162,7 +171,7 @@
 
 .detailTitle {
   margin: 0;
-  font-size: 21px;
+  font-size: 24px;
   font-weight: 700;
   color: #17243c;
 }
@@ -378,31 +387,65 @@
    반응형 레이아웃
 ====================================== */
 
+/* ======================================
+   반응형 레이아웃
+====================================== */
+
+/* 1200px 이하: 투표 목록 + 투표 상세 2열, 채팅 아래 배치 */
+@media (max-width: 1200px) {
+  .voteLayout {
+    grid-template-columns: minmax(220px, 1fr) minmax(0, 2fr);
+  }
+
+  /* 채팅창은 두 열 전체 너비 사용 */
+  .chatCard {
+    grid-column: 1 / -1;
+    height: 400px;
+  }
+}
+
+/* 900px 이하: 투표 목록, 투표 상세, 채팅 세로 배치 */
 @media (max-width: 900px) {
   .voteLayout {
     grid-template-columns: minmax(0, 1fr);
   }
 
+  /* 기존 카드 최소 높이 유지 */
   .listCard,
   .detailCard {
     min-height: 0;
   }
 
+  /* 기존 투표 목록 스크롤 높이 유지 */
   .pollList {
     max-height: 300px;
   }
+
+  /* 채팅창도 하나의 열에 배치 */
+  .chatCard {
+    grid-column: auto;
+    height: 400px;
+  }
 }
 
+/* 768px 이하: 모바일 여백 및 글씨 크기 조정 */
 @media (max-width: 768px) {
   .main {
     padding: 20px 16px;
   }
 
+  /* 기존 투표 카드 패딩 유지 */
   .listCard,
   .detailCard {
     padding: 16px;
   }
 
+  /* 모바일 채팅 카드 패딩 */
+  .chatCard {
+    padding: 16px;
+  }
+
+  /* 기존 투표 결과 스타일 유지 */
   .resultInfo {
     align-items: flex-start;
   }
@@ -414,4 +457,238 @@
   .resultCount {
     font-size: 12px;
   }
+}
+
+/* ======================================
+   실시간 채팅
+====================================== */
+
+/* 채팅 전체 카드 */
+.chatCard {
+  display: flex;
+  flex-direction: column;
+
+  min-width: 0;
+  height: 520px;
+  box-sizing: border-box;
+
+  padding: 20px;
+
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.04);
+}
+
+/* 채팅 헤더 */
+.chatHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+
+  padding-bottom: 14px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.chatTitle {
+  margin: 0;
+  color: #17243c;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.chatSubtitle {
+  margin: 6px 0 0;
+  color: #64748b;
+  font-size: 12px;
+}
+
+/* WebSocket 연결 상태 */
+.chatStatus {
+  flex-shrink: 0;
+
+  padding: 5px 8px;
+  border-radius: 20px;
+
+  background: #f1f5f9;
+  color: #64748b;
+
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* 채팅 메시지 영역 */
+.chatMessages {
+  flex: 1;
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  overflow-y: auto;
+  padding: 16px 0;
+}
+
+.chatEmpty {
+  margin: auto;
+  color: #94a3b8;
+  font-size: 13px;
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* 메시지 입력 영역 */
+.chatInputArea {
+  display: flex;
+  gap: 8px;
+
+  padding-top: 12px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.chatInput {
+  flex: 1;
+  min-width: 0;
+
+  padding: 10px 12px;
+
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+
+  font-size: 13px;
+  color: #17243c;
+
+  &:focus {
+    outline: none;
+    border-color: #059669;
+  }
+
+  &:disabled {
+    background: #f8fafc;
+    cursor: not-allowed;
+  }
+}
+
+/* 채팅 전송 버튼 */
+.chatSendButton {
+  flex-shrink: 0;
+
+  padding: 10px 14px;
+
+  background: #059669;
+  border: none;
+  border-radius: 8px;
+
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+/* ======================================
+   채팅 메시지 표시
+====================================== */
+
+/* 채팅 메시지 한 줄 */
+.chatMessageRow {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+}
+
+/* 다른 사용자 메시지: 왼쪽 정렬 */
+.chatMessageOther {
+  justify-content: flex-start;
+
+  .chatMessageBubble {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+    border-top-left-radius: 4px;
+  }
+}
+
+/* 내 메시지: 오른쪽 정렬 */
+.chatMessageMine {
+  justify-content: flex-end;
+
+  .chatMessageBubble {
+    background: #dcfce7;
+    border-color: #a7e6c1;
+    border-top-right-radius: 4px;
+  }
+}
+
+/* 채팅 말풍선 */
+.chatMessageBubble {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  width: fit-content;
+  max-width: 78%;
+  min-width: 80px;
+
+  padding: 10px 12px;
+
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+
+  box-sizing: border-box;
+  overflow-wrap: anywhere;
+}
+
+/* 메시지 작성자 및 작성 시각 */
+.chatMessageHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* 메시지 작성자 */
+.chatSender {
+  color: #334155;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* 작성 시각 */
+.chatTime {
+  flex-shrink: 0;
+
+  color: #94a3b8;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+/* 채팅 메시지 내용 */
+.chatMessageContent {
+  margin: 0;
+
+  color: #1e293b;
+  font-size: 13px;
+  line-height: 1.6;
+
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+/* 채팅 전송 오류 */
+.chatError {
+  margin: 0 0 8px;
+
+  color: #dc2626;
+  font-size: 12px;
+  line-height: 1.5;
 }

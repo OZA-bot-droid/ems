@@ -7,6 +7,7 @@ import module0 from '../../../components/layout/header.module.scss';
 import Header from '../../../components/layout/LegacyHeader.jsx';
 
 import styles from '../styles/Vote.module.scss';
+import ChatPanel from '../components/chat/ChatPanel.jsx';
 
 const cx = (value) => mapClassNames(value, module0);
 
@@ -27,6 +28,7 @@ export default function VotePage() {
     notice,
     busy,
     socketConnected,
+    socketRef,
     poll,
     submitted,
     canViewResults,
@@ -42,7 +44,6 @@ export default function VotePage() {
       {/* 실시간 투표 본문 전체 너비 적용 */}
       <main className={cx('app-main-content w-full min-w-0 space-y-5')}>
         <header>
-          <p className="text-sm text-emerald-700">SYNC5 / Interaction</p>
           <h1 className="text-2xl font-bold">실시간 투표</h1>
           <p className="text-sm text-slate-500">
             승인된 행사 참가자에게 공개된 투표입니다.{' '}
@@ -78,6 +79,12 @@ export default function VotePage() {
             submit={submit}
             showResults={showResults}
             results={results}
+          />
+
+          <ChatPanel
+            sessionId={poll?.sessionId ?? null}
+            socketRef={socketRef}
+            socketConnected={socketConnected}
           />
         </div>
       </main>

@@ -20,10 +20,6 @@ export default function VotePollList({ polls, selectedId, setSelectedId }) {
             onClick={() => setSelectedId(p.id)}
           >
             <strong className={styles.pollTitle}>{p.title}</strong>
-
-            <p className={styles.pollInfo}>
-              행사 {p.eventId} / 세션 {p.sessionId}
-            </p>
           </button>
         ))}
 

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import styles from '../../styles/PollList.module.scss';
+import { useApprovedPollEventSessionNames } from '../../hooks/result/useApprovedPollEventSessionNames.js';
 
 /**
  * 일반 사용자 목록 UI.
@@ -8,6 +9,8 @@ import styles from '../../styles/PollList.module.scss';
  * 결과 공개 여부·참가 권한은 pollApi.results()의 백엔드에서 최종 판정한다.
  */
 export default function ApprovedPollResultList({ polls, loading, error, reload }) {
+  const namesByEvent = useApprovedPollEventSessionNames(polls);
+
   return (
     <section className={styles.listCard}>
       <div className={styles.listHeader}>
@@ -36,8 +39,16 @@ export default function ApprovedPollResultList({ polls, loading, error, reload }
             <p className={styles.pollTitle}>{poll.title ?? `투표 ${poll.id}`}</p>
 
             <p className={styles.pollInfo}>
-              {poll.eventId != null ? `행사 ${poll.eventId}` : ''}
-              {poll.sessionId != null ? ` / 세션 ${poll.sessionId}` : ''}
+              {poll.eventId != null
+                ? `행사명 : ${namesByEvent[String(poll.eventId)]?.eventName || poll.eventId}`
+                : ''}
+
+              {poll.sessionId != null
+                ? ` / 세션명 : ${
+                    namesByEvent[String(poll.eventId)]?.sessions?.[String(poll.sessionId)] ||
+                    poll.sessionId
+                  }`
+                : ''}
             </p>
           </div>
 
@@ -45,7 +56,16 @@ export default function ApprovedPollResultList({ polls, loading, error, reload }
             <Link
               className={styles.resultButton}
               to={`/polls/${poll.id}/results`}
-              state={{ from: '/polls/user' }}
+              state={{
+                from: '/polls/user',
+                eventId: poll.eventId,
+                sessionId: poll.sessionId,
+
+                eventName: namesByEvent[String(poll.eventId)]?.eventName || '',
+
+                sessionName:
+                  namesByEvent[String(poll.eventId)]?.sessions?.[String(poll.sessionId)] || '',
+              }}
             >
               결과 확인
             </Link>

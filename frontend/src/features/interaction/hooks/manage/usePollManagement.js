@@ -72,11 +72,17 @@ export function usePollManagement(eventFilter, sessionFilter, mutationLock) {
   }
 
   // 결과 확인: 선택한 투표의 공통 결과 조회 페이지로 이동
-  function goToResults(pollId) {
+  function goToResults(pollId, names = {}) {
     if (pollId == null) return;
 
     navigate(`/polls/${encodeURIComponent(pollId)}/results`, {
-      state: { from: '/admin/polls' },
+      state: {
+        from: '/admin/polls',
+        eventId: names.eventId,
+        sessionId: names.sessionId,
+        eventName: names.eventName,
+        sessionName: names.sessionName,
+      },
     });
   }
 

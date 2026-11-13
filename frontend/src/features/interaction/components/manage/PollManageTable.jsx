@@ -4,6 +4,7 @@ import styles from '../../styles/PollManage.module.scss';
 
 // 관리자 Poll 목록, 상태 조작 버튼, 페이징을 표시하는 컴포넌트
 export default function PollManageTable({
+  onCreateClick,
   eventFilter,
   sessionFilter,
   loading,
@@ -19,10 +20,17 @@ export default function PollManageTable({
 }) {
   return (
     <section className={panel}>
-      <h2 className="mb-4 font-bold">
-        등록된 투표 {eventFilter && '(행사 ' + eventFilter + ')'}{' '}
-        {sessionFilter && '(세션 ' + sessionFilter + ')'}
-      </h2>
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h2 className="font-bold">
+          등록된 투표 {eventFilter && '(행사 ' + eventFilter + ')'}{' '}
+          {sessionFilter && '(세션 ' + sessionFilter + ')'}
+        </h2>
+
+        <button type="button" className={btn} onClick={onCreateClick}>
+          ＋ 새 투표
+        </button>
+      </div>
+
       {/* 로딩 → 빈 목록 → 투표 테이블 순으로 조건부 렌더링 */}
       {loading ? (
         <p>불러오는 중...</p>
@@ -49,14 +57,13 @@ export default function PollManageTable({
                     {p.eventId} / {p.sessionId}
                   </td> */}
                   <td className="p-3">
-                    {events.find(
-                      (event) => String(event.id) === String(p.eventId)
-                    )?.title ?? p.eventId}
+                    {events.find((event) => String(event.id) === String(p.eventId))?.title ??
+                      p.eventId}
                     {' / '}
                     {sessions.find(
                       (session) =>
                         String(session.id) === String(p.sessionId) &&
-                        String(session.eventId) === String(p.eventId)
+                        String(session.eventId) === String(p.eventId),
                     )?.title ?? p.sessionId}
                   </td>
                   <td className="p-3">{new Date(p.startsAt).toLocaleString('ko-KR')}</td>
@@ -101,7 +108,23 @@ export default function PollManageTable({
                     <button
                       type="button"
                       className={styles.resultButton}
-                      onClick={() => onViewResults(p.id)}
+                      onClick={() =>
+                        onViewResults(p.id, {
+                          eventId: p.eventId,
+                          sessionId: p.sessionId,
+
+                          eventName:
+                            events.find((event) => String(event.id) === String(p.eventId))?.title ||
+                            '',
+
+                          sessionName:
+                            sessions.find(
+                              (session) =>
+                                String(session.id) === String(p.sessionId) &&
+                                String(session.eventId) === String(p.eventId),
+                            )?.title || '',
+                        })
+                      }
                     >
                       확인
                     </button>

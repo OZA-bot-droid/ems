@@ -12,11 +12,8 @@ export default function PollResultHeader({ from, pollId, onRefresh, loading }) {
     <header className="flex flex-wrap items-center justify-between gap-3">
       <div>
         {/* 기존 emerald-700 색상 유지 */}
-        <p className="text-sm text-ems-interaction-primary">SYNC5 / Interaction</p>
         <h1 className="text-2xl font-bold">투표 결과</h1>
-        <p className="text-sm text-slate-500">
-          투표 ID: {pollId} · {fromManage ? '관리자 관리 화면에서 진입' : '투표 목록에서 진입'}
-        </p>
+        <p className="text-sm text-slate-500">행사·세션의 투표 결과를 조회합니다.</p>
       </div>
       <div className="flex gap-2">
         <Link className="rounded-lg border px-4 py-2 text-sm" to={backTo}>

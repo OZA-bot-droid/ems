@@ -26,6 +26,9 @@ export default function PollResultPage() {
   // 전체 투표 결과 및 사용자 본인 투표 기록 조회
   const { results, myOptionId, loading, error, reload } = usePollTotalResults(pollId, role);
 
+  const eventName = location.state?.eventName || '';
+  const sessionName = location.state?.sessionName || '';
+
   return (
     <div className={cx('app-shell')}>
       <Header role={role} activePage="votes" />
@@ -37,6 +40,8 @@ export default function PollResultPage() {
           myOptionId={myOptionId}
           loading={loading}
           error={error}
+          eventName={eventName}
+          sessionName={sessionName}
         />
       </main>
     </div>

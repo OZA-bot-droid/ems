@@ -1,5 +1,6 @@
 import styles from '../../styles/Vote.module.scss';
 import VoteResults from './VoteResults.jsx';
+import { useVoteEventSessionNames } from '../../hooks/vote/useVoteEventSessionNames.js';
 
 /** 선택한 투표의 선택지, 제출 버튼, 결과 조회 버튼과 결과 영역. */
 export default function VotePollDetail({
@@ -13,6 +14,8 @@ export default function VotePollDetail({
   showResults,
   results,
 }) {
+  const { eventName, sessionName } = useVoteEventSessionNames(poll);
+
   return (
     <section className={styles.detailCard}>
       {!poll && <p className={styles.emptyMessage}>왼쪽에서 투표를 선택하세요.</p>}
@@ -20,10 +23,10 @@ export default function VotePollDetail({
       {poll && (
         <>
           <h2 className={styles.detailTitle}>{poll.title}</h2>
-          <p className={styles.detailInfo}>{new Date(poll.endsAt).toLocaleString('ko-KR')} 종료</p>
           <p className={styles.detailInfo}>
-            {canViewResults ? '투표 결과 조회 가능' : '투표 결과 조회 불가능'}
+            행사명 : {eventName || poll.eventId} / 세션명 : {sessionName || poll.sessionId}
           </p>
+          <p className={styles.detailInfo}>{new Date(poll.endsAt).toLocaleString('ko-KR')} 종료</p>
 
           {/* 제출한 투표이거나 요청 처리 중이면 선택지 입력을 비활성화한다. */}
           <fieldset disabled={submitted != null || busy} className={styles.optionList}>

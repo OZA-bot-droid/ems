@@ -1,5 +1,6 @@
 import styles from '../../styles/PollManage.module.scss';
 import { field, btn } from './pollManageStyles.js';
+import DateTimeField from '../../../event/components/DateTimeField.jsx';
 
 export default function PollCreateForm({
   form,
@@ -11,12 +12,45 @@ export default function PollCreateForm({
   onSubmit,
   onCancel,
 }) {
+  function toLocalDateTime(value) {
+    if (!value) return '';
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+
+    const offset = date.getTimezoneOffset() * 60_000;
+
+    return new Date(date.getTime() - offset).toISOString().slice(0, 16);
+  }
+
+  // 현재 선택한 세션 정보
+  const selectedSession = sessions.find((s) => String(s.id) === String(form.sessionId));
+
+  // 세션 진행 시간 표시용
+  function formatSessionDateTime(value) {
+    if (!value) return '-';
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) return '-';
+
+    return date.toLocaleString('ko-KR', {
+      timeZone: 'Asia/Seoul',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+  }
+
   return (
     <form className={styles.createForm} onSubmit={onSubmit}>
       {/* 행사 변경 시 이전 세션 선택을 초기화하여 잘못된 조합 방지 */}
       <div className={styles.formGrid}>
         <label className={styles.formLabel}>
-          행사
+          <h3 className={styles.optionsTitle}>행사</h3>
           <select
             required
             className={styles.formField}
@@ -26,6 +60,8 @@ export default function PollCreateForm({
                 ...s,
                 eventId: e.target.value,
                 sessionId: '',
+                startsAt: '',
+                endsAt: '',
               }))
             }
           >
@@ -39,12 +75,23 @@ export default function PollCreateForm({
         </label>
 
         <label className={styles.formLabel}>
-          세션
+          <h3 className={styles.optionsTitle}>세션</h3>
           <select
             required
             className={styles.formField}
             value={form.sessionId}
-            onChange={(e) => update('sessionId', e.target.value)}
+            onChange={(e) => {
+              const sessionId = e.target.value;
+
+              const selectedSession = sessions.find((s) => String(s.id) === String(sessionId));
+
+              setForm((prev) => ({
+                ...prev,
+                sessionId,
+                startsAt: selectedSession ? toLocalDateTime(selectedSession.startsAt) : '',
+                endsAt: selectedSession ? toLocalDateTime(selectedSession.endsAt) : '',
+              }));
+            }}
           >
             <option value="">세션 선택</option>
             {sessions.map((s) => (
@@ -56,9 +103,22 @@ export default function PollCreateForm({
         </label>
       </div>
 
+      {/* 선택한 세션의 진행 시간 */}
+      {selectedSession && (
+        <div className={styles.sessionTimeInfo}>
+          <span className={styles.sessionTimeLabel}>세션 진행 시간</span>
+
+          <span className={styles.sessionTimeValue}>
+            {formatSessionDateTime(selectedSession.startsAt)}
+            {' ~ '}
+            {formatSessionDateTime(selectedSession.endsAt)}
+          </span>
+        </div>
+      )}
+
       {/* 투표 질문 */}
       <label className={styles.formLabel}>
-        질문
+        <h3 className={styles.optionsTitle}>질문</h3>
         <input
           required
           maxLength={255}
@@ -71,27 +131,31 @@ export default function PollCreateForm({
 
       {/* 투표 시작 및 종료 일시 */}
       <div className={styles.formGrid}>
-        <label className={styles.formLabel}>
-          시작
-          <input
-            required
-            type="datetime-local"
-            className={styles.formField}
+        <div className={`${styles.formLabel} ${styles.TimeField}`}>
+          <label htmlFor="poll-starts-at" className={styles.optionsTitle}>
+            시작
+          </label>
+          <DateTimeField
+            key={`start-${form.sessionId}`}
+            id="poll-starts-at"
             value={form.startsAt}
-            onChange={(e) => update('startsAt', e.target.value)}
+            onChange={(value) => update('startsAt', value)}
+            compact
           />
-        </label>
+        </div>
 
-        <label className={styles.formLabel}>
-          종료
-          <input
-            required
-            type="datetime-local"
-            className={styles.formField}
+        <div className={`${styles.formLabel} ${styles.TimeField}`}>
+          <label htmlFor="poll-ends-at" className={styles.optionsTitle}>
+            종료
+          </label>
+          <DateTimeField
+            key={`end-${form.sessionId}`}
+            id="poll-ends-at"
             value={form.endsAt}
-            onChange={(e) => update('endsAt', e.target.value)}
+            onChange={(value) => update('endsAt', value)}
+            compact
           />
-        </label>
+        </div>
       </div>
 
       {/* 선택지는 최소 2개 유지하며 각 항목을 추가·수정·삭제 가능 */}

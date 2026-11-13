@@ -22,7 +22,6 @@ export default function PollListPage() {
       {/* 참가 가능한 투표 목록 전체 너비 적용 */}
       <main className={cx('app-main-content w-full min-w-0 space-y-5 text-slate-800')}>
         <header>
-          <p className="text-sm text-emerald-700">SYNC5 / Interaction</p>
           <h1 className="text-2xl font-bold">투표 목록</h1>
           <p className="text-sm text-slate-500">참가 승인된 세션의 투표 목록입니다.</p>
         </header>
