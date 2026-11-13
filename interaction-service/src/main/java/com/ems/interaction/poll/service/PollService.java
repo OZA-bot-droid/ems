@@ -79,11 +79,6 @@ public class PollService {
             throw new ApiException(ErrorCode.INVALID_PERIOD);
         }
 
-        // 투표 시작·종료 시간 검증
-        if (!dto.getStartsAt().isAfter(Instant.now())) {
-            throw new ApiException(ErrorCode.INVALID_PERIOD);
-        }
-
         // 선택지 최소 2개 검증
         if (dto.getOptions() == null || dto.getOptions().size() < 2) {
             throw new ApiException(ErrorCode.VALIDATION_ERROR);
