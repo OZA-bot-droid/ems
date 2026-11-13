@@ -5,6 +5,7 @@ import { eventApi } from './event/api/eventApi.js';
 import { formatShort, STATUS_BADGE } from './event/utils/format.js';
 import logo from '../components/img/SYNC5trans.png';
 import './home.css';
+import ChatBot from '../components/chatBot/ChatBot.jsx';
 
 const Home = () => {
   const { accessToken, authLoading, role, logout } = useAuth();
@@ -225,25 +226,8 @@ const Home = () => {
               </div>
             </div>
 
-            {/* 오른쪽 소개 패널 */}
-            <div className="hidden rounded-[24px] border border-[#d6e3dc] bg-white/80 p-6 shadow-[0_20px_60px_rgba(20,34,56,0.06)] lg:block">
-              <div className="flex items-center justify-between">
-                <p className="text-[13px] font-bold tracking-wider text-ems-text">
-                  EVENT EXPERIENCE
-                </p>
-                <span className="text-[24px]">✦</span>
-              </div>
-
-              <div className="mt-6 flex h-[190px] flex-col items-center justify-center rounded-2xl bg-ems-member-primary-soft">
-                <span className="text-[52px]">🎟️</span>
-                <p className="mt-3 text-[18px] font-bold text-ems-text">함께하는 새로운 경험</p>
-              </div>
-
-              <div className="mt-6 flex items-center justify-between">
-                <p className="text-[13px] text-ems-muted">탐색 · 신청 · 실시간 참여</p>
-                <span className="text-[20px] text-ems-primary">↗</span>
-              </div>
-            </div>
+            {/* ChatBot */}
+            <ChatBot />
           </div>
         </section>
 

@@ -51,9 +51,6 @@ const PasswordReset = () => {
   return (
     <main className="min-h-screen bg-ems-background">
       <div className="min-h-screen w-full bg-ems-background lg:flex">
-        {/* 비로그인 사용자가 접근하는 비밀번호 재설정 화면 */}
-        <Header role="COMMON" activePage="login" />
-
         {/* 오른쪽 비밀번호 입력 영역 */}
         <section className="flex flex-1 items-center justify-center px-8 py-14 sm:px-12 lg:px-[72px] lg:py-0">
           <form onSubmit={passwordResetSuccess} className="w-full max-w-[510px]">

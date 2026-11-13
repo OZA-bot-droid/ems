@@ -98,9 +98,8 @@ function LoginForm() {
         <button
           type="button"
           onClick={() => navigate('/email/found')}
-          className={cx(
-            'block mt-[22px] text-[14px] font-semibold text-ems-primary hover:underline',
-          )}
+          className={cx('block mt-[22px] font-semibold text-ems-primary hover:underline')}
+          style={{ fontSize: '14px' }}
         >
           이메일을 잊어 버리셨나요?&nbsp;&nbsp; 이메일 찾기
         </button>
@@ -111,8 +110,9 @@ function LoginForm() {
           className={cx(
             'block mt-[22px] text-[14px] font-semibold text-ems-primary hover:underline',
           )}
+          style={{ fontSize: '14px' }}
         >
-          비밀번호를 잊어 버리셨나요?&nbsp;&nbsp; 비밀번호 재발급
+          비밀번호를 잊어 버리셨나요?&nbsp;&nbsp; 비밀번호 찾기
         </button>
 
         <button
@@ -121,6 +121,7 @@ function LoginForm() {
           className={cx(
             'block mt-[22px] text-[14px] font-semibold text-ems-primary hover:underline',
           )}
+          style={{ fontSize: '14px' }}
         >
           계정이 없으신가요?&nbsp;&nbsp; 회원가입
         </button>

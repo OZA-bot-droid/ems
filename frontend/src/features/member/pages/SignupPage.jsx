@@ -421,6 +421,7 @@ function SignupForm() {
           className={cx(
             'mt-4 block w-full text-center text-[13px] font-medium text-ems-primary hover:underline',
           )}
+          style={{ fontSize: '14px' }}
         >
           이미 계정이 있으신가요?&nbsp;&nbsp; 로그인
         </button>

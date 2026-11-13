@@ -42,6 +42,7 @@ const PasswordInput = ({
             'hover:bg-ems-member-icon-hover ' +
             'hover:text-ems-text',
         )}
+        style={{ fontSize: '13px' }}
       >
         {showPassword ? '숨김' : '보기'}
       </button>

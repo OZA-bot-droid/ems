@@ -26,6 +26,7 @@ const EmailFound = () => {
 
       // 개인정보가 포함될 수 있으므로 응답 로그를 남기지 않음
       alert(`가입된 이메일: ${res.data}`);
+      navigate('/login');
     } catch (err) {
       // 사용자 존재 여부가 직접 드러나지 않는 안내
       alert('이메일 정보를 확인할 수 없습니다.');
@@ -40,7 +41,7 @@ const EmailFound = () => {
         {/* main 영역 */}
         <section className="flex flex-1 items-center justify-center px-8 py-14 sm:px-12 lg:px-[72px] lg:py-0">
           <form onSubmit={emailFound} className="w-full max-w-[510px]">
-            <h2 className="text-[26px] font-bold text-ems-text">닉네임 찾기</h2>
+            <h2 className="text-[26px] font-bold text-ems-text">이메일 찾기</h2>
             <p className="mt-3 text-[14px] leading-6 text-ems-muted">
               가입한 닉네임을 입력하면
               <br />
@@ -76,8 +77,8 @@ const EmailFound = () => {
 
             <button
               type="button"
-              onClick={() => navigate('/login')}
               className="mt-7 w-full text-[13px] font-semibold text-ems-primary hover:underline"
+              onClick={() => navigate('/login')}
             >
               로그인으로 돌아가기
             </button>
