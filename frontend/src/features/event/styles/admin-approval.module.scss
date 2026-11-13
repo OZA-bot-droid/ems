@@ -27,8 +27,8 @@
   h1 {
     margin: 0;
     color: var(--ems-ink);
-    font-size: 27px;
-    font-weight: 700;
+    font-size: 28px;
+    font-weight: 600;
     letter-spacing: -0.02em;
     line-height: 1.3;
   }
@@ -37,6 +37,7 @@
     margin: 8px 0 0;
     color: var(--ems-muted);
     font-size: 13px;
+    font-weight: 400;
     line-height: 1.4;
   }
 }
@@ -82,8 +83,8 @@
   h2 {
     margin: 0;
     color: var(--ems-ink);
-    font-size: 20px;
-    font-weight: 700;
+    font-size: 14px;
+    font-weight: 600;
     letter-spacing: -0.02em;
   }
 }
@@ -98,6 +99,7 @@
   padding: 10px 12px;
   border-radius: 8px;
   font-size: 13px;
+  font-weight: 400;
   line-height: 1.5;
 }
 
@@ -141,6 +143,7 @@
   gap: 9px;
   color: var(--ems-ink);
   font-size: 13px;
+  font-weight: 400;
   white-space: nowrap;
 }
 
@@ -253,6 +256,7 @@
   margin: 72px 0 0;
   color: var(--ems-muted);
   font-size: 13px;
+  font-weight: 400;
   line-height: 1.5;
 }
 
@@ -260,7 +264,8 @@
   margin: auto 0 0;
   padding-top: 18px;
   color: var(--ems-muted);
-  font-size: 11px;
+  font-size: 13px;
+  font-weight: 400;
 }
 
 .admin-reject-backdrop {

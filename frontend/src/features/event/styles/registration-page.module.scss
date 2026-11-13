@@ -29,14 +29,15 @@ $ems-divider: tokens.$ems-border;
 }
 .registration-heading h1 {
   margin: 0;
-  font-size: 27px;
+  font-size: 28px;
   line-height: 1.65;
-  font-weight: 700;
+  font-weight: 600;
 }
 .registration-heading p {
   margin: 1px 0 0;
   color: $ems-muted;
   font-size: 13px;
+  font-weight: 400;
 }
 .registration-role {
   display: inline-flex;
@@ -69,8 +70,9 @@ $ems-divider: tokens.$ems-border;
 .registration-card-heading h2 {
   flex: 1 1 auto;
   margin: 0;
-  font-size: 19px;
+  font-size: 14px;
   line-height: 1.5;
+  font-weight: 600;
   white-space: nowrap;
 }
 .registration-filters {
@@ -122,14 +124,15 @@ $ems-divider: tokens.$ems-border;
 .registration-event strong {
   overflow: hidden;
   color: $ems-ink;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .registration-event time {
   color: $ems-muted;
-  font-size: 10px;
+  font-size: 13px;
+  font-weight: 400;
   white-space: nowrap;
 }
 .registration-status {
@@ -186,6 +189,7 @@ $ems-divider: tokens.$ems-border;
   margin: 31px 0;
   color: $ems-muted;
   font-size: 13px;
+  font-weight: 400;
 }
 .registration-error {
   margin: 24px 0;
@@ -194,6 +198,7 @@ $ems-divider: tokens.$ems-border;
   background: #fff4e8;
   color: #7b4f1e;
   font-size: 13px;
+  font-weight: 400;
 }
 .registration-error p {
   margin: 6px 0 0;
@@ -203,16 +208,19 @@ $ems-divider: tokens.$ems-border;
   margin: 12px 0;
   color: #b42332;
   font-size: 13px;
+  font-weight: 400;
 }
 .registration-security-note {
   margin: 76px 0 0;
   color: $ems-muted;
   font-size: 13px;
+  font-weight: 400;
 }
 .registration-footer {
   margin-top: 75px;
   color: $ems-muted;
-  font-size: 11px;
+  font-size: 13px;
+  font-weight: 400;
 }
 
 // 상세 보기 팝업
@@ -290,7 +298,7 @@ $ems-divider: tokens.$ems-border;
     margin-bottom: 30px;
   }
   .registration-heading h1 {
-    font-size: 22px;
+    font-size: 28px;
   }
   .registration-role {
     min-width: auto;
