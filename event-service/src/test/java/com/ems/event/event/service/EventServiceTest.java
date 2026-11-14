@@ -33,6 +33,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /** DB 없이 EventService의 규칙만 검사한다 (Repository는 가짜 객체 Mock) */
 @ExtendWith(MockitoExtension.class)
@@ -73,6 +74,8 @@ class EventServiceTest {
 
     private static Event openSeminar(String meetingUrl) {
         Event event = seminar(meetingUrl);
+        // 저장된 행사를 흉내 내서 repository 조회 시 사용할 ID를 설정합니다.
+        ReflectionTestUtils.setField(event, "id", 1L);
         event.update(null, null, null, null, null, null, EventStatus.OPEN);
         return event;
     }
