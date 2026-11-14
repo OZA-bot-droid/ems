@@ -1,6 +1,8 @@
 import PollPagination from './PollPagination.jsx';
 import { panel, btn, closeBtn } from './pollManageStyles.js';
 import styles from '../../styles/PollManage.module.scss';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 // 관리자 Poll 목록, 상태 조작 버튼, 페이징을 표시하는 컴포넌트
 export default function PollManageTable({
@@ -18,17 +20,36 @@ export default function PollManageTable({
   onChangeStatus,
   onViewResults,
 }) {
+  // 태블릿·모바일에서 펼쳐진 투표 ID
+  const [expandedPollId, setExpandedPollId] = useState(null);
+
+  // 같은 투표를 다시 누르면 접히고,
+  // 다른 투표를 누르면 해당 투표가 펼쳐진다.
+  const togglePoll = (pollId) => {
+    setExpandedPollId((current) => (current === pollId ? null : pollId));
+  };
+
+  useEffect(() => {
+    setExpandedPollId(null);
+  }, [page]);
+
   return (
     <section className={panel}>
-      <div className="mb-4 flex items-center justify-between gap-3">
+      <div className={styles.tableHeader}>
         <h2 className="font-bold">
           등록된 투표 {eventFilter && '(행사 ' + eventFilter + ')'}{' '}
           {sessionFilter && '(세션 ' + sessionFilter + ')'}
         </h2>
 
-        <button type="button" className={btn} onClick={onCreateClick}>
-          ＋ 새 투표
-        </button>
+        <div className={styles.headerActions}>
+          <Link to="/polls/vote" className={styles.votePageLink}>
+            실시간 투표
+          </Link>
+
+          <button type="button" className={btn} onClick={onCreateClick}>
+            ＋ 새 투표
+          </button>
+        </div>
       </div>
 
       {/* 로딩 → 빈 목록 → 투표 테이블 순으로 조건부 렌더링 */}
@@ -51,12 +72,38 @@ export default function PollManageTable({
             <tbody>
               {/* p: 조회된 투표 한 건, canActivate/canClose는 API 응답의 버튼 활성화 여부 */}
               {rows.map((p) => (
-                <tr key={p.id} className="border-b">
-                  <td className="p-3 font-semibold">{p.title}</td>
-                  {/* <td className="p-3">
-                    {p.eventId} / {p.sessionId}
-                  </td> */}
-                  <td className="p-3">
+                <tr
+                  key={p.id}
+                  className={`${styles.pollRow} ${
+                    expandedPollId === p.id ? styles.isExpanded : ''
+                  }`}
+                >
+                  <td data-label="투표" className="p-3 font-semibold">
+                    {/* PC: 기존 투표 제목 */}
+                    <span className={styles.desktopPollTitle}>{p.title}</span>
+
+                    {/* 태블릿·모바일: 클릭 가능한 제목 */}
+                    <button
+                      type="button"
+                      className={styles.mobilePollToggle}
+                      onClick={() => togglePoll(p.id)}
+                      aria-expanded={expandedPollId === p.id}
+                      aria-label={`${p.title} 상세 정보 ${
+                        expandedPollId === p.id ? '접기' : '펼치기'
+                      }`}
+                    >
+                      <span>{p.title}</span>
+
+                      <span
+                        className={`${styles.pollToggleIcon} ${
+                          expandedPollId === p.id ? styles.pollToggleIconOpen : ''
+                        }`}
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </td>
+
+                  <td data-label="행사 / 세션" className="p-3">
                     {events.find((event) => String(event.id) === String(p.eventId))?.title ??
                       p.eventId}
                     {' / '}
@@ -66,9 +113,16 @@ export default function PollManageTable({
                         String(session.eventId) === String(p.eventId),
                     )?.title ?? p.sessionId}
                   </td>
-                  <td className="p-3">{new Date(p.startsAt).toLocaleString('ko-KR')}</td>
-                  <td className="p-3">{new Date(p.endsAt).toLocaleString('ko-KR')}</td>
-                  <td>
+
+                  <td data-label="시작" className="p-3">
+                    {new Date(p.startsAt).toLocaleString('ko-KR')}
+                  </td>
+
+                  <td data-label="종료" className="p-3">
+                    {new Date(p.endsAt).toLocaleString('ko-KR')}
+                  </td>
+
+                  <td data-label="상태">
                     <span
                       className={`${styles.statusBadge} ${
                         p.status === 'ACTIVE'
@@ -82,7 +136,7 @@ export default function PollManageTable({
                     </span>
                   </td>
 
-                  <td>
+                  <td data-label="관리">
                     <div className={styles.actionGroup}>
                       <button
                         type="button"
@@ -104,7 +158,7 @@ export default function PollManageTable({
                     </div>
                   </td>
 
-                  <td>
+                  <td data-label="결과 확인">
                     <button
                       type="button"
                       className={styles.resultButton}
@@ -112,11 +166,9 @@ export default function PollManageTable({
                         onViewResults(p.id, {
                           eventId: p.eventId,
                           sessionId: p.sessionId,
-
                           eventName:
                             events.find((event) => String(event.id) === String(p.eventId))?.title ||
                             '',
-
                           sessionName:
                             sessions.find(
                               (session) =>

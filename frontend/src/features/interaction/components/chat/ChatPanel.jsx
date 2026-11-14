@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSessionChat } from '../../hooks/chat/useSessionChat.js';
 import { tokenStore } from '../../../../api/tokenStore.js';
+import { useChatSessionInfo } from '../../hooks/chat/useChatSessionInfo.js';
 import styles from '../../styles/Vote.module.scss';
 
 /**
@@ -54,7 +55,7 @@ function formatChatTime(value) {
  * socketRef: 기존 투표 WebSocket 연결
  * socketConnected: STOMP 연결 상태
  */
-export default function ChatPanel({ sessionId, socketRef, socketConnected }) {
+export default function ChatPanel({ poll, sessionId, socketRef, socketConnected }) {
   // 채팅 입력값
   const [content, setContent] = useState('');
 
@@ -80,6 +81,9 @@ export default function ChatPanel({ sessionId, socketRef, socketConnected }) {
   // 채팅 메시지 전송 가능 여부
   const canSend =
     hasSession && socketConnected && content.trim().length > 0 && content.trim().length <= 1000;
+
+  // 선택한 투표의 세션명, 관리자 ID 조회
+  const { sessionName, adminId } = useChatSessionInfo(poll);
 
   /**
    * 로그인 토큰이 갱신되면 사용자 ID도 갱신한다.
@@ -149,7 +153,9 @@ export default function ChatPanel({ sessionId, socketRef, socketConnected }) {
           <h2 className={styles.chatTitle}>실시간 채팅</h2>
 
           <p className={styles.chatSubtitle}>
-            {hasSession ? `세션 ${sessionId} 채팅방` : '투표를 선택하면 채팅방이 표시됩니다.'}
+            {hasSession
+              ? `${sessionName || `세션 ${sessionId}`} 채팅방`
+              : '투표를 선택하면 채팅방이 표시됩니다.'}
           </p>
         </div>
 
@@ -190,18 +196,26 @@ export default function ChatPanel({ sessionId, socketRef, socketConnected }) {
               message.memberId != null &&
               String(message.memberId) === myMemberId;
 
+            // 관리자 인지 확인
+            const isAdmin =
+              adminId != null && message.memberId != null && String(message.memberId) === adminId;
+
             return (
               <div
                 key={message.id}
                 className={`${styles.chatMessageRow} ${
                   isMine ? styles.chatMessageMine : styles.chatMessageOther
-                }`}
+                } ${isAdmin ? styles.chatMessageAdmin : ''}`}
               >
                 <div className={styles.chatMessageBubble}>
                   {/* 작성자 표시 */}
                   <div className={styles.chatMessageHeader}>
                     <span className={styles.chatSender}>
-                      {isMine ? '나' : `참가자 ${participantNumbers.get(String(message.memberId))}`}
+                      {isMine
+                        ? '나'
+                        : isAdmin
+                          ? '관리자'
+                          : `참가자 ${participantNumbers.get(String(message.memberId))}`}
                     </span>
 
                     <time className={styles.chatTime}>{formatChatTime(message.createdAt)}</time>

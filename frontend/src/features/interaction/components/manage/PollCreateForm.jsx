@@ -53,7 +53,7 @@ export default function PollCreateForm({
           <h3 className={styles.optionsTitle}>행사</h3>
           <select
             required
-            className={styles.formField}
+            className={`${styles.formField} ${styles.selectBox}`}
             value={form.eventId}
             onChange={(e) =>
               setForm((s) => ({

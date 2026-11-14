@@ -1,10 +1,16 @@
 import styles from '../../styles/Vote.module.scss';
+import { Link } from 'react-router-dom';
 
 /** 참여 가능 투표 목록 및 선택 UI. */
 export default function VotePollList({ polls, selectedId, setSelectedId }) {
   return (
     <aside className={styles.listCard}>
-      <h2 className={styles.listHeader}>투표 목록 ({polls.length})</h2>
+      <div className={styles.listHeader}>
+        <h2>투표 목록</h2>
+        <Link to="/polls/user" state={{ from: '/polls/vote' }} className={styles.allPollsLink}>
+          전체 목록 ↗
+        </Link>
+      </div>
 
       {/* 투표 항목이 많으면 목록 내부에서 스크롤한다. */}
       <div className={styles.pollList}>

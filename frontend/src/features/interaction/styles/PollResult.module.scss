@@ -27,17 +27,165 @@
    투표 결과 카드
 ====================================== */
 
+/* 결과 카드 */
 .resultCard {
   width: 100%;
+  min-width: 0;
   min-height: 475px;
   box-sizing: border-box;
-
   padding: 24px;
-  background: #ffffff;
-  border-radius: 14px;
 
+  background: #ffffff;
   border: 1px solid #e2e8f0;
+  border-radius: 14px;
   box-shadow: 0 2px 4px rgba(15, 23, 42, 0.04);
+}
+
+/* 행사명 + 버튼 영역 */
+.resultTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.eventInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 정보 공통 라벨 */
+.infoLabel {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--ems-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* 행사 이름 */
+.eventName {
+  margin: 0;
+  color: var(--ems-ink);
+  font-size: 20px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+/* 버튼 그룹 */
+.resultActions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* 버튼 공통 */
+.backButton,
+.refreshButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 40px;
+  padding: 0 16px;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+
+  color: var(--ems-ink);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+
+  transition:
+    background-color 0.15s,
+    border-color 0.15s;
+
+  &:hover:not(:disabled) {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ems-green);
+    outline-offset: 2px;
+  }
+}
+
+.refreshButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* 세션 정보 */
+.sessionInfo {
+  padding: 16px 18px;
+  margin-bottom: 20px;
+
+  background: var(--ems-row);
+  border-radius: 10px;
+}
+
+.sessionName {
+  margin: 0;
+  color: var(--ems-ink);
+  font-size: 16px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+/* 전체 투표 수 통계 */
+.voteSummary {
+  padding: 20px 22px;
+  margin-bottom: 28px;
+
+  border: 1px solid #cce9db;
+  border-radius: 12px;
+  background: #f0faf5;
+}
+
+.totalVotes {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  color: #047857;
+
+  strong {
+    font-size: 34px;
+    font-weight: 800;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+  }
+
+  span {
+    font-size: 15px;
+    font-weight: 600;
+  }
+}
+
+/* 로딩 및 오류 */
+.resultMessage {
+  padding: 16px;
+  color: var(--ems-muted);
+  font-size: 13px;
+}
+
+.resultError {
+  padding: 12px 16px;
+  background: #fef2f2;
+  border-radius: 8px;
+  color: #b91c1c;
+  font-size: 13px;
 }
 
 /* ======================================
@@ -138,7 +286,7 @@
    반응형 레이아웃
 ====================================== */
 
-/* 좁은 화면 대응 */
+/* 태블릿 및 모바일 */
 @media (max-width: 768px) {
   .main {
     padding: 20px 16px;
@@ -148,6 +296,42 @@
   .resultCard {
     min-height: 350px;
     padding: 16px;
+  }
+
+  .resultTop {
+    flex-wrap: nowrap;
+    gap: 12px;
+  }
+
+  .eventName {
+    font-size: 18px;
+  }
+
+  .resultActions {
+    flex-shrink: 0;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+    width: auto;
+    gap: 8px;
+  }
+
+  .backButton,
+  .refreshButton {
+    min-height: 36px;
+    padding: 0 12px;
+    font-size: 12px;
+  }
+
+  .sessionInfo {
+    padding: 14px;
+  }
+
+  .voteSummary {
+    padding: 16px;
+  }
+
+  .totalVotes strong {
+    font-size: 28px;
   }
 
   .resultOption {
@@ -169,5 +353,33 @@
   .myVoteBadge {
     padding: 3px 7px;
     font-size: 10px;
+  }
+}
+
+/* 작은 모바일 */
+@media (max-width: 480px) {
+  .resultTop {
+    gap: 8px;
+  }
+
+  .eventInfo {
+    flex: 1 1 0;
+  }
+
+  .eventName {
+    font-size: 16px;
+    line-height: 1.4;
+  }
+
+  .resultActions {
+    flex: 0 0 auto;
+    gap: 6px;
+  }
+
+  .backButton,
+  .refreshButton {
+    min-height: 34px;
+    padding: 0 8px;
+    font-size: 11px;
   }
 }

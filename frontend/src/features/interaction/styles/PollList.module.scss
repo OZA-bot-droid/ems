@@ -1,36 +1,6 @@
 /* 일반 사용자 투표 목록 페이지 - interaction/styles/PollList.module.scss */
 
 /* ======================================
-   페이지 레이아웃
-====================================== */
-
-/* 페이지의 main 요소에 적용: 사이드바를 제외한 콘텐츠 영역을 채운다. */
-.main {
-  width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
-  padding: 28px 32px 40px;
-  color: #17243c;
-}
-
-.pageHeader {
-  margin-bottom: 36px;
-}
-
-.pageTitle {
-  margin: 0;
-  color: #17243c;
-  font-size: 26px;
-  font-weight: 700;
-}
-
-.pageDescription {
-  margin-top: 8px;
-  color: #8190a9;
-  font-size: 13px;
-}
-
-/* ======================================
    투표 목록 카드
 ====================================== */
 
@@ -44,6 +14,7 @@
   border-radius: 14px;
 }
 
+/* 투표 목록 제목 + 버튼 그룹 */
 .listHeader {
   display: flex;
   align-items: center;
@@ -53,6 +24,17 @@
   margin-bottom: 22px;
 }
 
+/* 이전 페이지 + 새로고침 버튼 그룹 */
+.listActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-left: auto;
+}
+
+/* 투표 목록 제목 */
 .listTitle {
   margin: 0;
   color: #17243c;
@@ -89,6 +71,9 @@
   margin-top: 6px;
   color: #8190a9;
   font-size: 13px;
+
+  overflow-wrap: anywhere;
+  line-height: 1.5;
 }
 
 /* ======================================
@@ -96,20 +81,42 @@
 ====================================== */
 
 .refreshButton {
-  padding: 9px 14px;
-  background: #fff;
-  border: 1px solid #d8dfe8;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 40px;
+  padding: 0 16px;
+
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
-  color: #17243c;
+  background: #ffffff;
+
+  color: var(--ems-ink);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
   cursor: pointer;
 
+  transition:
+    background-color 0.15s,
+    border-color 0.15s;
+
   &:hover:not(:disabled) {
-    background: #f4f6fa;
+    background: #f1f5f9;
+    border-color: #94a3b8;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ems-green);
+    outline-offset: 2px;
   }
 
   &:disabled {
+    opacity: 0.4;
     cursor: not-allowed;
-    opacity: 0.5;
   }
 }
 
@@ -155,29 +162,29 @@
   font-size: 13px;
 }
 
-/* 투표가 0개일 때 카드 안쪽 중앙에 빈 상태 안내 표시 */
-.emptyState {
-  display: flex;
-  min-height: 350px;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  text-align: center;
-}
+// /* 투표가 0개일 때 카드 안쪽 중앙에 빈 상태 안내 표시 */
+// .emptyState {
+//   display: flex;
+//   min-height: 350px;
+//   flex-direction: column;
+//   align-items: center;
+//   justify-content: center;
+//   gap: 12px;
+//   text-align: center;
+// }
 
-.emptyTitle {
-  margin: 0;
-  color: #465873;
-  font-size: 20px;
-  font-weight: 700;
-}
+// .emptyTitle {
+//   margin: 0;
+//   color: #465873;
+//   font-size: 20px;
+//   font-weight: 700;
+// }
 
-.emptyDescription {
-  margin: 0;
-  color: #8190a9;
-  font-size: 14px;
-}
+// .emptyDescription {
+//   margin: 0;
+//   color: #8190a9;
+//   font-size: 14px;
+// }
 
 /* ======================================
    페이징네이션
@@ -264,9 +271,38 @@
     padding: 20px 16px;
   }
 
+  /* 목록 상단 버튼 그룹 */
+  .listActions {
+    gap: 8px;
+  }
+
+  .listActions .refreshButton {
+    min-height: 36px;
+    padding: 0 10px;
+    font-size: 12px;
+  }
+
+  /* 투표 정보와 결과 확인 버튼을 같은 줄에 배치 */
   .pollItem {
-    flex-direction: column;
-    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .pollText {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .resultButton,
+  .disabledButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    min-height: 38px;
+    padding: 0 12px;
+    font-size: 12px;
+    white-space: nowrap;
   }
 
   .listCard {
@@ -291,5 +327,12 @@
 
   .pageInfo {
     font-size: 11px;
+  }
+}
+
+/* 작은 모바일 */
+@media (max-width: 480px) {
+  .listActions {
+    gap: 6px;
   }
 }

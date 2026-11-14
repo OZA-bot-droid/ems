@@ -1,69 +1,73 @@
-.PageManageHeader {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 28px;
+/* 투표 관리 화면 — 정리본: 기본 스타일 → 1200px → 768px 순서 */
 
-  h1 {
-    margin: 0;
-    color: var(--ems-ink);
-    font-size: 27px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-  }
+/* ========== 페이지 및 목록 ========== */
 
-  p {
-    margin: 8px 0 0;
-    color: var(--ems-muted);
-    font-size: 13px;
-  }
-}
+// .PageManageHeader {
+//   display: flex;
+//   align-items: flex-start;
+//   justify-content: space-between;
+//   gap: 16px;
+//   margin-bottom: 28px;
 
-.adminrole {
-  display: inline-flex;
-  min-width: 95px;
-  min-height: 29px;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  margin-top: 7px;
-  border-radius: 999px;
-  // 관리자 역할 배지
-  // 기존 색상을 그대로 사용하되 디자인 토큰으로 연결
-  background: var(--ems-admin-badge-bg);
-  color: var(--ems-admin-badge-text);
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
-}
+//   h1 {
+//     margin: 0;
+//     color: var(--ems-ink);
+//     font-size: 27px;
+//     font-weight: 700;
+//     letter-spacing: -0.02em;
+//   }
 
-// 관리자 투표 관리 페이지 메인 영역
-.main {
-  width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
-  padding: 28px 32px 40px;
-  color: #17243c;
-}
+//   p {
+//     margin: 8px 0 0;
+//     color: var(--ems-muted);
+//     font-size: 13px;
+//   }
+// }
 
-// 페이지 제목 영역
-.pageHeader {
-  margin-bottom: 28px;
-}
+// .adminrole {
+//   display: inline-flex;
+//   min-width: 95px;
+//   min-height: 29px;
+//   align-items: center;
+//   justify-content: center;
+//   box-sizing: border-box;
+//   margin-top: 7px;
+//   border-radius: 999px;
+//   // 관리자 역할 배지
+//   // 기존 색상을 그대로 사용하되 디자인 토큰으로 연결
+//   background: var(--ems-admin-badge-bg);
+//   color: var(--ems-admin-badge-text);
+//   font-size: 12px;
+//   font-weight: 600;
+//   white-space: nowrap;
+// }
 
-.pageTitle {
-  margin: 0;
-  font-size: 26px;
-  font-weight: 700;
-  color: #17243c;
-}
+// // 관리자 투표 관리 페이지 메인 영역
+// .main {
+//   width: 100%;
+//   min-width: 0;
+//   box-sizing: border-box;
+//   padding: 28px 32px 40px;
+//   color: #17243c;
+// }
 
-.pageDescription {
-  margin-top: 8px;
-  font-size: 13px;
-  color: #8190a9;
-}
+// // 페이지 제목 영역
+// .pageHeader {
+//   margin-bottom: 28px;
+// }
+
+// .pageTitle {
+//   margin: 0;
+//   font-size: 26px;
+//   font-weight: 700;
+//   color: #17243c;
+// }
+
+// .pageDescription {
+//   margin-top: 8px;
+//   font-size: 13px;
+//   color: #8190a9;
+// }
 
 // 투표 관리 목록 카드
 .listCard {
@@ -75,15 +79,15 @@
   border-radius: 14px;
 }
 
-// 투표 생성 폼 카드
-.createCard {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 24px;
-  margin-bottom: 24px;
-  background: #fff;
-  border-radius: 14px;
-}
+// // 투표 생성 폼 카드
+// .createCard {
+//   width: 100%;
+//   box-sizing: border-box;
+//   padding: 24px;
+//   margin-bottom: 24px;
+//   background: #fff;
+//   border-radius: 14px;
+// }
 
 // 안내 문구
 .notice {
@@ -101,90 +105,67 @@
   color: #b91c1c;
 }
 
-// 반응형 레이아웃
-@media (max-width: 768px) {
-  .main {
-    padding: 20px 16px;
-  }
-
-  .listCard {
-    min-height: 350px;
-    padding: 16px;
-  }
-
-  .createCard {
-    padding: 16px;
-  }
-}
-
-// 페이징네이션 영역
-.pagination {
+/* 헤더 버튼 그룹 */
+.headerActions {
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: flex-end;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 28px;
-  padding: 20px 0 8px;
+  gap: 10px;
+  margin-left: auto;
 }
 
-// 기본 페이지 버튼
-.pageButton {
+/* 실시간 투표 이동 버튼 */
+.votePageLink {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 38px;
-  height: 38px;
-  padding: 0 10px;
 
-  border: 1px solid #d8dfe8;
+  min-height: 40px;
+  padding: 0 16px;
+
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
   background: #ffffff;
 
-  color: #17243c;
+  color: var(--ems-ink);
   font-size: 13px;
   font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.15s ease;
+  text-decoration: none;
+  white-space: nowrap;
 
-  &:hover:not(:disabled):not(.activePage) {
-    background: #f4f6fa;
+  &:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
   }
 
-  &:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-}
-
-// 현재 선택된 페이지
-.activePage {
-  background: #047857;
-  border-color: #047857;
-  color: #ffffff;
-
-  &:hover:not(:disabled) {
-    background: #065f46;
+  &:focus-visible {
+    outline: 2px solid var(--ems-green);
+    outline-offset: 2px;
   }
 }
 
-@media (max-width: 768px) {
-  .pagination {
-    gap: 5px;
-  }
+/* ======================================
+   투표 관리 반응형 보완
+====================================== */
 
-  .pageButton {
-    min-width: 34px;
-    height: 34px;
-    padding: 0 8px;
+/* 등록된 투표 제목 + 새 투표 버튼 */
+.tableHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+
+  h2 {
+    min-width: 0;
+    margin: 0;
+    font-weight: 700;
   }
 }
 
-/* 투표 관리 테이블 영역 */
-.tableWrapper {
-  width: 100%;
-  overflow-x: auto;
-}
+/* ========== 테이블 및 상태/관리 버튼 ========== */
 
 .pollTable {
   width: 100%;
@@ -310,6 +291,61 @@
     background: #065f46;
   }
 }
+
+/* ========== 페이징네이션 ========== */
+
+// 페이징네이션 영역
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 28px;
+  padding: 20px 0 8px;
+}
+
+// 기본 페이지 버튼
+.pageButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 38px;
+  height: 38px;
+  padding: 0 10px;
+
+  border: 1px solid #d8dfe8;
+  border-radius: 8px;
+  background: #ffffff;
+
+  color: #17243c;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+
+  &:hover:not(:disabled):not(.activePage) {
+    background: #f4f6fa;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+// 현재 선택된 페이지
+.activePage {
+  background: #047857;
+  border-color: #047857;
+  color: #ffffff;
+
+  &:hover:not(:disabled) {
+    background: #065f46;
+  }
+}
+
+/* ========== 투표 생성 모달 및 입력 폼 ========== */
 
 /* ================================
    투표 생성 모달
@@ -455,21 +491,23 @@
   }
 }
 
-// 행사·세션 select에만 오른쪽 여백 추가
+// 행사·세션 선택 드롭다운
 select.formField {
-  padding-right: 36px;
-}
-
-select.formField {
-  height: 43px;
-  border-radius: 9px;
+  height: 46px;
+  padding: 0 34px 0 14px;
   border: 1px solid transparent;
+  border-radius: 9px;
 
-  background-color: var(--ems-bg);
+  background-color: var(--ems-row);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%237a879a' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+
   color: var(--ems-ink);
-
-  padding: 0 36px 0 12px;
-  font-size: 13px;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  appearance: none;
 
   &:focus {
     border-color: var(--ems-green);
@@ -481,6 +519,30 @@ select.formField {
   input,
   select {
     font-weight: 400;
+  }
+
+  // 시작·종료 시간의 시·분 드롭다운
+  select {
+    height: 43px;
+    padding: 0 24px 0 12px;
+
+    border: 1px solid transparent;
+    border-radius: 9px;
+
+    background-color: var(--ems-row);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%237a879a' stroke-width='1.5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+
+    color: var(--ems-ink);
+    font-size: 13px;
+    cursor: pointer;
+    appearance: none;
+
+    &:focus {
+      border-color: var(--ems-green);
+      outline: none;
+    }
   }
 }
 
@@ -646,11 +708,248 @@ select.formField {
   }
 }
 
-/* ================================
-   반응형
-================================ */
+/* ========== 아코디언 기본 (PC) ========== */
 
+/* ======================================
+   태블릿·모바일 투표 아코디언
+====================================== */
+
+/* PC에서는 기존 테이블 제목만 표시 */
+.desktopPollTitle {
+  display: inline;
+}
+
+/* PC에서는 펼치기 버튼 숨김 */
+.mobilePollToggle {
+  display: none;
+}
+
+/* ========== 태블릿·모바일: 카드형 아코디언 ========== */
+@media (max-width: 1200px) {
+  .tableWrapper {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .pollTable {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    border-collapse: separate;
+
+    thead {
+      display: none;
+    }
+
+    tbody {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      width: 100%;
+    }
+
+    tr {
+      display: block;
+      width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+      padding: 16px;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      background: #ffffff;
+    }
+
+    td {
+      display: grid;
+      grid-template-columns: 90px minmax(0, 1fr);
+      align-items: center;
+      gap: 12px;
+
+      width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+      padding: 10px 0;
+      border-bottom: 1px solid #f1f5f9;
+
+      white-space: normal;
+      overflow-wrap: anywhere;
+
+      &::before {
+        content: attr(data-label);
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      &:last-child {
+        border-bottom: 0;
+      }
+
+      > .statusBadge,
+      > .resultButton {
+        justify-self: start;
+        width: auto;
+        max-width: 100%;
+      }
+    }
+  }
+
+  /* 버튼은 카드 내부에서 줄바꿈 허용 */
+  .actionGroup {
+    flex-wrap: wrap;
+    white-space: normal;
+  }
+
+  .listCard {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  /* PC용 제목 숨김 */
+  .desktopPollTitle {
+    display: none;
+  }
+
+  /* 투표 제목 버튼 */
+  .mobilePollToggle {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    padding: 4px 0;
+    border: 0;
+    background: transparent;
+
+    color: #17243c;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+
+    span:first-child {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #047857;
+      outline-offset: 4px;
+      border-radius: 4px;
+    }
+  }
+
+  /* 투표 아코디언 화살표 */
+  .pollToggleIcon {
+    display: inline-block;
+    width: 10px;
+    height: 6px;
+    flex-shrink: 0;
+
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%237a879a' stroke-width='1.5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+
+    transition: transform 0.2s ease;
+  }
+
+  /* 펼쳐진 경우 위쪽 화살표 */
+  .pollToggleIconOpen {
+    transform: rotate(180deg);
+  }
+
+  /* 접힌 상태에서는 제목만 표시 */
+  .pollTable tr td:not(:first-child) {
+    display: none;
+  }
+
+  /* 펼쳐진 투표의 상세 정보 표시 */
+  .pollTable tr.isExpanded td:not(:first-child) {
+    display: grid;
+  }
+
+  /* 투표 제목 행 */
+  .pollTable tr td:first-child {
+    display: block;
+    padding: 6px 0;
+    border-bottom: 0;
+  }
+
+  /* 기존 data-label의 '투표' 표시 제거 */
+  .pollTable tr td:first-child::before {
+    content: none;
+  }
+
+  /* 펼쳐진 상태에서 제목 아래 구분선 */
+  .pollTable tr.isExpanded td:first-child {
+    padding-bottom: 14px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  /* 펼쳐진 투표 카드 강조 */
+  .pollTable tr.isExpanded {
+    border-color: #a7d9c5;
+    background: #ffffff;
+  }
+}
+
+/* ========== 모바일 ========== */
 @media (max-width: 768px) {
+  .main {
+    padding: 20px 16px;
+  }
+
+  .listCard {
+    min-height: 350px;
+    padding: 12px;
+  }
+
+  .createCard {
+    padding: 16px;
+  }
+
+  .tableHeader {
+    align-items: flex-start;
+  }
+
+  .pollTable {
+    tr {
+      padding: 12px;
+    }
+
+    td {
+      grid-template-columns: 76px minmax(0, 1fr);
+      gap: 8px;
+      padding: 10px 0;
+      font-size: 12px;
+
+      &::before {
+        font-size: 11px;
+      }
+    }
+  }
+
+  .actionButton,
+  .resultButton {
+    min-height: 36px;
+  }
+
+  .pagination {
+    gap: 5px;
+  }
+
+  .pageButton {
+    min-width: 34px;
+    height: 34px;
+    padding: 0 8px;
+  }
+
   .modalOverlay {
     padding: 12px;
   }

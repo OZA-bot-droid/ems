@@ -26,7 +26,9 @@ export default function VotePollDetail({
           <p className={styles.detailInfo}>
             행사명 : {eventName || poll.eventId} / 세션명 : {sessionName || poll.sessionId}
           </p>
-          <p className={styles.detailInfo}>{new Date(poll.endsAt).toLocaleString('ko-KR')} 종료</p>
+          <p className={`${styles.detailInfo} ${styles.detailDeadline}`}>
+            {new Date(poll.endsAt).toLocaleString('ko-KR')} 종료
+          </p>
 
           {/* 제출한 투표이거나 요청 처리 중이면 선택지 입력을 비활성화한다. */}
           <fieldset disabled={submitted != null || busy} className={styles.optionList}>

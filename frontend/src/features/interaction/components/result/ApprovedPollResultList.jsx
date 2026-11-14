@@ -8,7 +8,7 @@ import { useApprovedPollEventSessionNames } from '../../hooks/result/useApproved
  * UserPollDTO에 showLiveResults 속성이 있다는 가정 없이 결과 확인 버튼을 표시한다.
  * 결과 공개 여부·참가 권한은 pollApi.results()의 백엔드에서 최종 판정한다.
  */
-export default function ApprovedPollResultList({ polls, loading, error, reload }) {
+export default function ApprovedPollResultList({ polls, loading, error, reload, backTo }) {
   const namesByEvent = useApprovedPollEventSessionNames(polls);
 
   return (
@@ -16,9 +16,20 @@ export default function ApprovedPollResultList({ polls, loading, error, reload }
       <div className={styles.listHeader}>
         <h2 className={styles.listTitle}>투표 목록</h2>
 
-        <button type="button" className={styles.refreshButton} onClick={reload} disabled={loading}>
-          목록 새로고침
-        </button>
+        <div className={styles.listActions}>
+          <Link to={backTo} className={styles.refreshButton}>
+            ← 이전 페이지
+          </Link>
+
+          <button
+            type="button"
+            className={styles.refreshButton}
+            onClick={reload}
+            disabled={loading}
+          >
+            새로고침
+          </button>
+        </div>
       </div>
 
       {loading && <p className={styles.emptyMessage}>투표 목록 불러오는 중...</p>}
@@ -35,7 +46,7 @@ export default function ApprovedPollResultList({ polls, loading, error, reload }
 
       {polls.map((poll) => (
         <div key={poll.id} className={styles.pollItem}>
-          <div>
+          <div className={styles.pollText}>
             <p className={styles.pollTitle}>{poll.title ?? `투표 ${poll.id}`}</p>
 
             <p className={styles.pollInfo}>

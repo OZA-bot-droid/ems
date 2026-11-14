@@ -8,6 +8,8 @@ import Header from '../../../components/layout/LegacyHeader.jsx';
 
 import styles from '../styles/Vote.module.scss';
 import ChatPanel from '../components/chat/ChatPanel.jsx';
+import { useAuth } from '../../member/hooks/useAuth.js';
+import headerStyles from '../styles/PollHeader.module.scss';
 
 const cx = (value) => mapClassNames(value, module0);
 
@@ -36,19 +38,32 @@ export default function VotePage() {
     showResults,
   } = useVotePage();
 
+  // 현재 로그인한 사용자의 역할
+  const { role } = useAuth();
+
   // 화면 렌더링: 투표 목록 / 선택지 / 결과 / 연결·오류 상태를 표시한다.
   return (
     <div className={cx('app-shell')}>
-      {/* 전체 화면 레이아웃 및 사용자용 공통 헤더. */}
-      <Header role="USER" activePage="votes" />
+      {/* 로그인 사용자 역할에 따라 관리자/일반 사용자 헤더 표시 */}
+      <Header role={role === 'ADMIN' ? 'ADMIN' : 'USER'} activePage="votes" />
       {/* 실시간 투표 본문 전체 너비 적용 */}
       <main className={cx('app-main-content w-full min-w-0 space-y-5')}>
-        <header>
-          <h1 className="text-2xl font-bold">실시간 투표</h1>
-          <p className="text-sm text-slate-500">
-            승인된 행사 참가자에게 공개된 투표입니다.{' '}
-            {socketConnected ? '실시간 연결됨' : '주기적으로 업데이트 중'}
-          </p>
+        <header className={headerStyles.pollPageHeader}>
+          <div>
+            <h1>실시간 투표</h1>
+            <p>
+              승인된 행사 참가자에게 공개된 투표입니다.{' '}
+              {socketConnected ? '실시간 연결됨' : '주기적으로 업데이트 중'}
+            </p>
+          </div>
+
+          <span
+            className={`${headerStyles.pollPageRole} ${
+              role === 'ADMIN' ? headerStyles.pollPageRoleAdmin : headerStyles.pollPageRoleUser
+            }`}
+          >
+            {role === 'ADMIN' ? 'ADMIN' : 'USER'}
+          </span>
         </header>
 
         {/* 요청 실패 시 오류 메시지 표시. */}
@@ -82,6 +97,7 @@ export default function VotePage() {
           />
 
           <ChatPanel
+            poll={poll}
             sessionId={poll?.sessionId ?? null}
             socketRef={socketRef}
             socketConnected={socketConnected}

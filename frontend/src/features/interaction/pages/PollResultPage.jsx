@@ -29,12 +29,16 @@ export default function PollResultPage() {
   const eventName = location.state?.eventName || '';
   const sessionName = location.state?.sessionName || '';
 
+  //돌아가기 경로를 결정
+  const backTo = from === '/admin/polls' ? '/admin/polls' : '/polls/user';
+
   return (
     <div className={cx('app-shell')}>
       <Header role={role} activePage="votes" />
       {/* 투표 결과 본문 전체 너비 적용 */}
       <main className={cx('app-main-content w-full min-w-0 space-y-5 text-slate-800')}>
-        <PollResultHeader from={from} pollId={pollId} onRefresh={reload} loading={loading} />
+        <PollResultHeader />
+
         <PollResultDetail
           results={results}
           myOptionId={myOptionId}
@@ -42,6 +46,8 @@ export default function PollResultPage() {
           error={error}
           eventName={eventName}
           sessionName={sessionName}
+          backTo={backTo}
+          onRefresh={reload}
         />
       </main>
     </div>

@@ -1,33 +1,25 @@
-import { Link } from 'react-router-dom';
+import { useAuth } from '../../../member/hooks/useAuth.js';
+import styles from '../../styles/PollHeader.module.scss';
 
-/** 진입 경로가 관리자 투표 관리인지 구분하되, 조회 권한은 서버가 최종 판단한다. */
-export default function PollResultHeader({ from, pollId, onRefresh, loading }) {
-  // 관리자 투표 관리 페이지에서 진입했는지 확인
-  const fromManage = from === '/admin/polls';
-
-  // 진입 경로에 따른 돌아가기 주소
-  const backTo = fromManage ? '/admin/polls' : '/polls/user';
+export default function PollResultHeader() {
+  const { role } = useAuth();
 
   return (
-    <header className="flex flex-wrap items-center justify-between gap-3">
+    <header className={styles.pollPageHeader}>
       <div>
-        {/* 기존 emerald-700 색상 유지 */}
-        <h1 className="text-2xl font-bold">투표 결과</h1>
-        <p className="text-sm text-slate-500">행사·세션의 투표 결과를 조회합니다.</p>
+        <h1>투표 결과</h1>
+        <p>행사·세션의 투표 결과를 조회합니다.</p>
       </div>
-      <div className="flex gap-2">
-        <Link className="rounded-lg border px-4 py-2 text-sm" to={backTo}>
-          돌아가기
-        </Link>
-        <button
-          type="button"
-          className="rounded-lg border px-4 py-2 text-sm disabled:opacity-40"
-          disabled={loading}
-          onClick={onRefresh}
+
+      {(role === 'ADMIN' || role === 'USER') && (
+        <span
+          className={`${styles.pollPageRole} ${
+            role === 'ADMIN' ? styles.pollPageRoleAdmin : styles.pollPageRoleUser
+          }`}
         >
-          새로고침
-        </button>
-      </div>
+          {role}
+        </span>
+      )}
     </header>
   );
 }
