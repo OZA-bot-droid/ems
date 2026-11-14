@@ -10,6 +10,7 @@ import { formatShort, STATUS_BADGE } from '../utils/format.js';
 import EventFormModal from './EventFormModal.jsx';
 import ApprovedListModal from './ApprovedListModal.jsx';
 import EventDetail from './EventDetail.jsx';
+import { pollApi } from '../../interaction/api/pollApi.js';
 
 // 상태별 다음 단계 (DRAFT → OPEN → CLOSED, 되돌리기 없음)
 const NEXT_STATUS = {
@@ -64,13 +65,43 @@ export default function EventManage({ onManageSessions }) {
 
   async function changeStatus(event) {
     const next = NEXT_STATUS[event.status];
+
     try {
+      // 1. 행사 상태 변경
       await eventApi.update(event.id, { status: next.to });
-      setConfirm(null);
-      refresh(`"${event.title}" 행사를 ${next.label}했습니다.`);
     } catch (err) {
       setConfirm(null);
-      setNotice({ type: 'error', text: `${err.message} (${err.code})` });
+      setNotice({
+        type: 'error',
+        text: `행사 상태 변경 실패: ${err.message}`,
+      });
+      return;
+    }
+
+    setConfirm(null);
+
+    // 2. 행사를 마감하는 경우에만 투표 종료
+    if (next.to === 'CLOSED') {
+      try {
+        await pollApi.closeByEvent(event.id);
+      } catch (err) {
+        refresh(`"${event.title}" 행사는 마감되었지만 투표 마감에 실패했습니다. 투표 마감을 다시 요청해 주세요.`);
+        return;
+      }
+    }
+
+    refresh(`"${event.title}" 행사를 ${next.label}했습니다.`);
+  }
+
+  async function retryClosePolls(event) {
+    try {
+      await pollApi.closeByEvent(event.id);
+      refresh(`"${event.title}" 행사의 투표 마감을 완료했습니다.`);
+    } catch (err) {
+      setNotice({
+        type: 'error',
+        text: `투표 마감 실패: ${err.message}`,
+      });
     }
   }
 
