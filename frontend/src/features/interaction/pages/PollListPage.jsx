@@ -5,6 +5,7 @@ import ApprovedPollResultList from '../components/result/ApprovedPollResultList.
 import PollListPagination from '../components/result/PollListPagination.jsx';
 import { useApprovedPolls } from '../hooks/result/useApprovedPolls.js';
 import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../../member/hooks/useAuth.js';
 
 import styles from '../styles/PollList.module.scss';
 import headerStyles from '../styles/PollHeader.module.scss';
@@ -22,9 +23,14 @@ export default function PollListPage() {
 
   const backTo = location.state?.from === '/polls/vote' ? '/polls/vote' : '/events';
 
+  // 로그인 사용자 역할
+  const { role } = useAuth();
+  const isAdmin = role === 'ADMIN';
+
   return (
     <div className={cx('app-shell')}>
-      <Header role="USER" activePage="votes" />
+      {/* 로그인 역할에 따라 사이드바 구분 */}
+      <Header role={isAdmin ? 'ADMIN' : 'USER'} activePage="votes" />
       {/* 참가 가능한 투표 목록 전체 너비 적용 */}
       <main className={cx('app-main-content w-full min-w-0 space-y-5 text-slate-800')}>
         <header className={headerStyles.pollPageHeader}>
@@ -33,8 +39,12 @@ export default function PollListPage() {
             <p>참가 승인된 세션의 투표 목록입니다.</p>
           </div>
 
-          <span className={`${headerStyles.pollPageRole} ${headerStyles.pollPageRoleUser}`}>
-            USER
+          <span
+            className={`${headerStyles.pollPageRole} ${
+              isAdmin ? headerStyles.pollPageRoleAdmin : headerStyles.pollPageRoleUser
+            }`}
+          >
+            {isAdmin ? 'ADMIN' : 'USER'}
           </span>
         </header>
         <ApprovedPollResultList
