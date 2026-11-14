@@ -131,7 +131,9 @@ const MyActivity = ({ role }) => {
     if (item.status !== 'APPROVED') return false;
 
     const endsAt = item.event?.endsAt;
-    const hasEnded = endsAt ? new Date(endsAt).getTime() < now : false;
+    const hasEnded =
+      item.event?.status === 'CLOSED' ||
+      (endsAt ? new Date(endsAt).getTime() <= now : false);
 
     return eventTab === 'ended' ? hasEnded : !hasEnded;
   });
