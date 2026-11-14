@@ -65,8 +65,8 @@ export default function ChatPanel({ poll, sessionId, socketRef, socketConnected 
   // 현재 로그인한 사용자 ID
   const [myMemberId, setMyMemberId] = useState(() => getMemberIdFromToken(tokenStore.get()));
 
-  // 채팅 목록 하단 스크롤용 ref
-  const messagesEndRef = useRef(null);
+  // 채팅 메시지 스크롤 영역
+  const chatMessagesRef = useRef(null);
 
   // 기존 채팅 Hook 연결
   const { messages, loading, error, sendMessage } = useSessionChat(
@@ -106,14 +106,13 @@ export default function ChatPanel({ poll, sessionId, socketRef, socketConnected 
     setSendError('');
   }, [sessionId]);
 
-  /**
-   * 새 메시지 수신 시 채팅 목록 아래로 이동
-   */
+  /* 새 메시지 수신 시 채팅창 내부만 아래로 이동 */
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({
-      behavior: 'auto',
-      block: 'end',
-    });
+    const container = chatMessagesRef.current;
+
+    if (!container) return;
+
+    container.scrollTop = container.scrollHeight;
   }, [messages]);
 
   /**
@@ -167,6 +166,7 @@ export default function ChatPanel({ poll, sessionId, socketRef, socketConnected 
 
       {/* 채팅 메시지 목록 */}
       <div
+        ref={chatMessagesRef}
         className={styles.chatMessages}
         role="log"
         aria-label="실시간 채팅 메시지"
@@ -227,9 +227,6 @@ export default function ChatPanel({ poll, sessionId, socketRef, socketConnected 
               </div>
             );
           })}
-
-        {/* 자동 스크롤 위치 */}
-        <div ref={messagesEndRef} />
       </div>
 
       {/* 전송 오류 */}
