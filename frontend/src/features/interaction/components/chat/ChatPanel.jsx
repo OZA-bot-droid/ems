@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useSessionChat } from '../../hooks/chat/useSessionChat.js';
 import { tokenStore } from '../../../../api/tokenStore.js';
 import { useChatSessionInfo } from '../../hooks/chat/useChatSessionInfo.js';
+import { useSessionPresence } from '../../hooks/chat/useSessionPresence.js';
 import styles from '../../styles/Vote.module.scss';
 
 /**
@@ -85,6 +86,9 @@ export default function ChatPanel({ poll, sessionId, socketRef, socketConnected 
   // 선택한 투표의 세션명, 관리자 ID 조회
   const { sessionName, adminId } = useChatSessionInfo(poll);
 
+  // 채팅방 접속 인원 및 입장·퇴장 알림
+  const { onlineCount, notices } = useSessionPresence(sessionId, socketRef, socketConnected);
+
   /**
    * 로그인 토큰이 갱신되면 사용자 ID도 갱신한다.
    */
@@ -106,14 +110,15 @@ export default function ChatPanel({ poll, sessionId, socketRef, socketConnected 
     setSendError('');
   }, [sessionId]);
 
-  /* 새 메시지 수신 시 채팅창 내부만 아래로 이동 */
+  /* 채팅 메시지 또는 입장·퇴장 알림 수신 시 */
   useEffect(() => {
     const container = chatMessagesRef.current;
 
     if (!container) return;
 
+    // 채팅창 내부 스크롤만 맨 아래로 이동
     container.scrollTop = container.scrollHeight;
-  }, [messages]);
+  }, [messages, notices]);
 
   /**
    * 채팅 메시지 전송
@@ -133,11 +138,47 @@ export default function ChatPanel({ poll, sessionId, socketRef, socketConnected 
     }
   }
 
-  // 채팅 메시지에 처음 등장한 사용자 순서로 참가자 번호 부여
+  // 채팅 메시지와 입장·퇴장 알림에 등장한 사용자에게 번호 부여
   const participantNumbers = new Map();
 
-  messages.forEach((message) => {
-    const memberKey = String(message.memberId);
+  // 채팅 메시지 + 입장·퇴장 알림을 시간순으로 표시
+  const timeline = [
+    ...messages.map((message) => ({
+      kind: 'message',
+      id: `message-${message.id}`,
+      occurredAt: message.createdAt,
+      data: message,
+    })),
+
+    ...notices.map((notice) => ({
+      kind: 'notice',
+      id: `notice-${notice.id}`,
+      occurredAt: notice.occurredAt,
+      data: notice,
+    })),
+  ].sort((a, b) => {
+    return new Date(a.occurredAt).getTime() - new Date(b.occurredAt).getTime();
+  });
+
+  // messages.forEach((message) => {
+  //   const memberKey = String(message.memberId);
+
+  //   if (!participantNumbers.has(memberKey)) {
+  //     participantNumbers.set(memberKey, participantNumbers.size + 1);
+  //   }
+  // });
+
+  timeline.forEach((item) => {
+    const memberId = item.data.memberId;
+
+    if (memberId == null) return;
+
+    const memberKey = String(memberId);
+
+    // 관리자에게는 참가자 번호를 부여하지 않음
+    if (adminId != null && memberKey === String(adminId)) {
+      return;
+    }
 
     if (!participantNumbers.has(memberKey)) {
       participantNumbers.set(memberKey, participantNumbers.size + 1);
@@ -158,10 +199,26 @@ export default function ChatPanel({ poll, sessionId, socketRef, socketConnected 
           </p>
         </div>
 
-        {/* WebSocket 연결 상태 */}
-        <span className={styles.chatStatus}>
-          {!hasSession ? '대기 중' : socketConnected ? '연결됨' : '연결 끊김'}
-        </span>
+        {/* 접속 인원 및 WebSocket 연결 상태 */}
+        <div className={styles.chatHeaderActions}>
+          {hasSession && socketConnected && (
+            <span className={styles.chatOnlineCount}>
+              {onlineCount == null ? '접속 인원 확인 중' : `접속 ${onlineCount}명`}
+            </span>
+          )}
+
+          <span
+            className={`${styles.chatStatus} ${
+              !hasSession
+                ? styles.chatStatusWaiting
+                : socketConnected
+                  ? styles.chatStatusConnected
+                  : styles.chatStatusDisconnected
+            }`}
+          >
+            {!hasSession ? '대기 중' : socketConnected ? '연결됨' : '연결 끊김'}
+          </span>
+        </div>
       </header>
 
       {/* 채팅 메시지 목록 */}
@@ -187,28 +244,57 @@ export default function ChatPanel({ poll, sessionId, socketRef, socketConnected 
           </p>
         )}
 
-        {/* 메시지 목록 */}
+        {/* 채팅 메시지 및 입장·퇴장 알림 */}
         {hasSession &&
-          messages.map((message) => {
-            // 로그인 사용자 ID와 작성자 ID 비교
+          timeline.map((item) => {
+            // 입장·퇴장 시스템 안내
+            if (item.kind === 'notice') {
+              const notice = item.data;
+
+              const isMine = myMemberId != null && String(notice.memberId) === myMemberId;
+
+              const isAdmin = adminId != null && String(notice.memberId) === adminId;
+
+              // 참가자 번호 조회
+              const participantNumber = participantNumbers.get(String(notice.memberId));
+
+              // 본인 / 관리자 / 일반 참가자 구분
+              const sender = isMine
+                ? '내가'
+                : isAdmin
+                  ? '관리자'
+                  : participantNumber != null
+                    ? `참가자 ${participantNumber}`
+                    : '참가자';
+
+              return (
+                <div key={item.id} className={styles.chatSystemNotice}>
+                  {notice.type === 'JOIN'
+                    ? `${sender}${isMine ? '' : '님이'} 입장했습니다.`
+                    : `${sender}${isMine ? '' : '님이'} 퇴장했습니다.`}
+                </div>
+              );
+            }
+
+            // 기존 일반 채팅 메시지
+            const message = item.data;
+
             const isMine =
               myMemberId != null &&
               message.memberId != null &&
               String(message.memberId) === myMemberId;
 
-            // 관리자 인지 확인
             const isAdmin =
               adminId != null && message.memberId != null && String(message.memberId) === adminId;
 
             return (
               <div
-                key={message.id}
+                key={item.id}
                 className={`${styles.chatMessageRow} ${
                   isMine ? styles.chatMessageMine : styles.chatMessageOther
                 } ${isAdmin ? styles.chatMessageAdmin : ''}`}
               >
                 <div className={styles.chatMessageBubble}>
-                  {/* 작성자 표시 */}
                   <div className={styles.chatMessageHeader}>
                     <span className={styles.chatSender}>
                       {isMine
@@ -221,7 +307,6 @@ export default function ChatPanel({ poll, sessionId, socketRef, socketConnected 
                     <time className={styles.chatTime}>{formatChatTime(message.createdAt)}</time>
                   </div>
 
-                  {/* 채팅 내용 */}
                   <p className={styles.chatMessageContent}>{message.content}</p>
                 </div>
               </div>

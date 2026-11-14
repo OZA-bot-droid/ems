@@ -476,11 +476,26 @@
   padding: 5px 8px;
   border-radius: 20px;
 
-  background: #f1f5f9;
-  color: #64748b;
-
   font-size: 11px;
   font-weight: 600;
+}
+
+/* 대기 중 - 회색 */
+.chatStatusWaiting {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+/* 연결됨 - 녹색 */
+.chatStatusConnected {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+/* 연결 끊김 - 빨간색 */
+.chatStatusDisconnected {
+  background: #fee2e2;
+  color: #b91c1c;
 }
 
 /* 채팅 메시지 영역 */
@@ -504,6 +519,45 @@
   font-size: 13px;
   text-align: center;
   line-height: 1.6;
+}
+
+/* ======================================
+   채팅 접속 현황 및 입장·퇴장 알림
+====================================== */
+
+/* 접속 인원 + 연결 상태 */
+.chatHeaderActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* 현재 접속 인원 */
+.chatOnlineCount {
+  color: var(--ems-muted);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* 입장·퇴장 시스템 메시지 */
+.chatSystemNotice {
+  align-self: center;
+  flex-shrink: 0;
+
+  max-width: 90%;
+  padding: 6px 12px;
+
+  border-radius: 999px;
+  background: #f1f5f9;
+
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 500;
+  text-align: center;
+  overflow-wrap: anywhere;
 }
 
 /* 메시지 입력 영역 */
