@@ -92,7 +92,7 @@ const MyActivity = ({ role }) => {
         try {
           const response = isAdmin
             ? await pollApi.mine({ page: 0, size: 100 })
-            : await pollApi.active();
+            : await pollApi.userPolls({ page: 0, size: 100 });
 
           if (!cancelled) setPolls(toRows(response));
         } catch (error) {
@@ -263,7 +263,7 @@ const MyActivity = ({ role }) => {
         </div>
 
         <div className="min-h-[220px] px-5 pb-5">
-          {userClosedPollsUnavailable ? (
+          {pollLoading ? (
             <div className="flex min-h-[180px] flex-col items-center justify-center rounded-xl bg-slate-50 px-4 text-center">
               <span className="text-3xl">🗳️</span>
               <p className="mt-3 text-sm font-semibold text-slate-700">마감된 투표</p>
