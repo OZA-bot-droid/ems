@@ -3,10 +3,19 @@ import module0 from '../styles/registration-page.module.scss';
 import module1 from '../styles/event-manage.module.scss';
 const cx = value => mapClassNames(value, module0, module1);
 import { useEffect, useState } from 'react';
+import { memberApi } from '../../member/api/memberApi.js';
 
 export default function RegistrationApplyModal({ event, applying, error, onClose, onSubmit }) {
   const [consented, setConsented] = useState(false);
   const [consentError, setConsentError] = useState('');
+  const [member, setMember] = useState(null);
+  const [memberError, setMemberError] = useState('');
+
+  useEffect(() => {
+    memberApi.me()
+      .then((data) => setMember(data))
+      .catch(() => setMemberError('회원 정보를 불러오지 못했습니다.'));
+  }, []);
 
   useEffect(() => {
     function handleKeyDown(event) {
@@ -18,6 +27,10 @@ export default function RegistrationApplyModal({ event, applying, error, onClose
 
   function submit(event) {
     event.preventDefault();
+    if (!member?.name || !member?.email) {
+      setMemberError('회원 정보를 확인할 수 없습니다.');
+      return;
+    }
     if (!consented) {
       setConsentError('참가 신청 안내에 동의해 주세요.');
       return;
@@ -66,8 +79,8 @@ export default function RegistrationApplyModal({ event, applying, error, onClose
           </div>
 
           <div className={cx("mt-5 flex flex-col gap-4")}>
-            <ReadOnlyField label="신청자 이름" />
-            <ReadOnlyField label="이메일" />
+            <ReadOnlyField label="신청자 이름" value={member?.name} />
+            <ReadOnlyField label="이메일" value={member?.email} />
           </div>
 
           <div className={cx("mt-5")}>
@@ -90,9 +103,9 @@ export default function RegistrationApplyModal({ event, applying, error, onClose
             <span>[필수] 참가 신청 및 개인정보 처리 안내를 확인했습니다.</span>
           </label>
 
-          {(consentError || error) && (
+          {(consentError || memberError || error) && (
             <p className={cx("mt-2 text-[13px] font-normal text-rose-600")} role="alert">
-              {consentError || error}
+              {consentError || memberError || error}
             </p>
           )}
 
@@ -124,12 +137,12 @@ export default function RegistrationApplyModal({ event, applying, error, onClose
   );
 }
 
-function ReadOnlyField({ label }) {
+function ReadOnlyField({ label, value }) {
   return (
     <div>
       <p className={cx("text-[14px] font-semibold text-(--ems-ink)")}>{label}</p>
       <div className={cx("mt-2 flex h-[44px] items-center rounded-[8px] bg-(--ems-bg) px-[14px] text-[13px] font-normal text-(--ems-muted)")}>
-        로그인 회원 {label === '이메일' ? '이메일' : '이름'} · 자동 입력
+        {value ?? '불러오는 중...'}
       </div>
     </div>
   );
