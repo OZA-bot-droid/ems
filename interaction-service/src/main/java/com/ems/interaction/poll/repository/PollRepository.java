@@ -13,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -45,12 +46,16 @@ public interface PollRepository extends JpaRepository<Poll, Long> {
 
 
     Page<Poll> findByUserIdAndEventIdOrderByIdDesc(Long userId, Long eventId, Pageable pageable);
+
     Page<Poll> findByUserIdAndSessionIdOrderByIdDesc(Long userId, Long sessionId, Pageable pageable);
-    Page<Poll> findByUserIdAndEventIdAndSessionIdOrderByIdDesc(
-            Long userId, Long eventId, Long sessionId, Pageable pageable);
 
-    //11/10 추가
+    Page<Poll> findByUserIdAndEventIdAndSessionIdOrderByIdDesc(Long userId, Long eventId, Long sessionId, Pageable pageable);
+
+    //11/12 추가
     // 일반 사용자용 전체 투표 목록 조회
-    Page<Poll> findByEventIdIn(Collection<Long> sessionIds, Pageable pageable);
+    Page<Poll> findBySessionIdIn(List<Long> sessionIds, Pageable pageable);
 
+    //11/12 추가
+    // 승인된 세션의 ACTIVE 투표를 ID 내림차순으로 조회
+    List<Poll> findBySessionIdInAndStatusOrderByIdDesc(List<Long> sessionIds, Status status);
 }

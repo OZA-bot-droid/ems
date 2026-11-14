@@ -69,7 +69,7 @@ export function useVotePage() {
   }, []);
 
   // 기존 VotePage의 WebSocket 생명주기 및 Topic 구독을 별도 Hook으로 이동한다.
-  const { socketConnected } = useVoteRealtime({
+  const { socketConnected, socketRef } = useVoteRealtime({
     selectedId,
     load,
     refreshResults,
@@ -141,6 +141,7 @@ export function useVotePage() {
     notice,
     busy,
     socketConnected,
+    socketRef,
     poll,
     submitted,
     canViewResults,

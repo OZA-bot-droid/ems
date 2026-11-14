@@ -1,30 +1,36 @@
-import { panel } from './voteStyles.js';
+import styles from '../../styles/Vote.module.scss';
+import { Link } from 'react-router-dom';
 
 /** 참여 가능 투표 목록 및 선택 UI. */
 export default function VotePollList({ polls, selectedId, setSelectedId }) {
   return (
-    <aside className={panel}>
-      <h2 className="mb-3 font-semibold">투표 목록 ({polls.length})</h2>
-      {/* 투표 목록 버튼: 클릭 시 selectedId를 바꿔 상세 조회 대상을 전환한다. */}
-      {polls.map((p) => (
-        <button
-          key={p.id}
-          aria-pressed={String(p.id) === String(selectedId)}
-          className={
-            'mb-2 w-full rounded-lg border p-3 text-left ' +
-            (String(p.id) === String(selectedId)
-              ? 'border-emerald-500 bg-emerald-50'
-              : 'border-slate-200')
-          }
-          onClick={() => setSelectedId(p.id)}
-        >
-          <strong>{p.title}</strong>
-          <p className="text-xs text-slate-500">
-            행사 {p.eventId} / 세션 {p.sessionId}
-          </p>
-        </button>
-      ))}
-      {polls.length === 0 && <p>참여 가능한 투표가 없습니다.</p>}
+    <aside className={styles.listCard}>
+      <div className={styles.listHeader}>
+        <h2>투표 목록</h2>
+        <Link to="/polls/user" state={{ from: '/polls/vote' }} className={styles.allPollsLink}>
+          전체 목록 ↗
+        </Link>
+      </div>
+
+      {/* 투표 항목이 많으면 목록 내부에서 스크롤한다. */}
+      <div className={styles.pollList}>
+        {/* 투표 목록 버튼: 클릭 시 selectedId를 바꿔 상세 조회 대상을 전환한다. */}
+        {polls.map((p) => (
+          <button
+            key={p.id}
+            type="button"
+            aria-pressed={String(p.id) === String(selectedId)}
+            className={`${styles.pollItem} ${
+              String(p.id) === String(selectedId) ? styles.selectedPoll : ''
+            }`}
+            onClick={() => setSelectedId(p.id)}
+          >
+            <strong className={styles.pollTitle}>{p.title}</strong>
+          </button>
+        ))}
+
+        {polls.length === 0 && <p className={styles.emptyMessage}>참여 가능한 투표가 없습니다.</p>}
+      </div>
     </aside>
   );
 }

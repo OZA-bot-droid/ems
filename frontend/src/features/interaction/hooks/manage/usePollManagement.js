@@ -13,24 +13,39 @@ export function usePollManagement(eventFilter, sessionFilter, mutationLock) {
 
   const navigate = useNavigate();
 
-  const refresh = useCallback(async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const data = await pollApi.mine({
-        page,
-        size: 10,
-        ...(eventFilter ? { eventId: eventFilter } : {}),
-        ...(sessionFilter ? { sessionId: sessionFilter } : {}),
-      });
-      setRows(data.content || []);
-      setPages(data.totalPages || 0);
-    } catch (e) {
-      setError(e.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [page, eventFilter, sessionFilter]);
+  const refresh = useCallback(
+    async ({ silent = false } = {}) => {
+      // 최초 조회와 페이지 이동 시에만 로딩 표시
+      if (!silent) {
+        setLoading(true);
+        setError('');
+      }
+
+      try {
+        const data = await pollApi.mine({
+          page,
+          size: 10,
+          ...(eventFilter ? { eventId: eventFilter } : {}),
+          ...(sessionFilter ? { sessionId: sessionFilter } : {}),
+        });
+
+        setRows(data.content || []);
+        setPages(data.totalPages || 0);
+      } catch (e) {
+        if (!silent) {
+          setError(e.message);
+        } else {
+          // 자동 갱신 실패 시 기존 화면 유지
+          console.error('투표 목록 자동 갱신 실패:', e);
+        }
+      } finally {
+        if (!silent) {
+          setLoading(false);
+        }
+      }
+    },
+    [page, eventFilter, sessionFilter],
+  );
 
   useEffect(() => {
     void refresh();
@@ -57,11 +72,17 @@ export function usePollManagement(eventFilter, sessionFilter, mutationLock) {
   }
 
   // 결과 확인: 선택한 투표의 공통 결과 조회 페이지로 이동
-  function goToResults(pollId) {
+  function goToResults(pollId, names = {}) {
     if (pollId == null) return;
 
     navigate(`/polls/${encodeURIComponent(pollId)}/results`, {
-      state: { from: '/admin/polls' },
+      state: {
+        from: '/admin/polls',
+        eventId: names.eventId,
+        sessionId: names.sessionId,
+        eventName: names.eventName,
+        sessionName: names.sessionName,
+      },
     });
   }
 

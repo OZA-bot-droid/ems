@@ -79,11 +79,6 @@ public class PollService {
             throw new ApiException(ErrorCode.INVALID_PERIOD);
         }
 
-        // 투표 시작·종료 시간 검증
-        if (!dto.getStartsAt().isAfter(Instant.now())) {
-            throw new ApiException(ErrorCode.INVALID_PERIOD);
-        }
-
         // 선택지 최소 2개 검증
         if (dto.getOptions() == null || dto.getOptions().size() < 2) {
             throw new ApiException(ErrorCode.VALIDATION_ERROR);
@@ -170,8 +165,9 @@ public class PollService {
             return List.of();
         }
 
+        // 11/12 수정 - 승인된 세션의 ACTIVE 투표를 ID 내림차순으로 조회
         // 4. 해당 세션에 속한 ACTIVE 투표 조회
-        List<Poll> polls = pollRepository.findBySessionIdInAndStatus(sessionIds, Status.ACTIVE);
+        List<Poll> polls = pollRepository.findBySessionIdInAndStatusOrderByIdDesc(sessionIds, Status.ACTIVE);
 
         if (polls.isEmpty()) {
             return List.of();
@@ -217,7 +213,7 @@ public class PollService {
         }
 
         // 6. DB 페이지 조회 및 목록 DTO 변환
-        return pollRepository.findByEventIdIn(sessionIds, pageable).map(UserPollDTO::from);
+        return pollRepository.findBySessionIdIn(sessionIds, pageable).map(UserPollDTO::from);
     }
 
     // 관리자가 투표를 수동으로 즉시 활성화
