@@ -228,13 +228,22 @@ export default function SessionFormModal({ event, session, sessions = [], onClos
                       max={eventEnd}
                       isBlocked={startBlocked(r.key)}
                       hideBlocked // 고를 수 없는 시·분(행사 밖·다른 세션 중)은 목록에서 아예 빼기
-                      onChange={(v) => changeRow(r.key, 'startsAt', v)}
+                      onChange={(v) =>
+                        setRows((list) =>
+                          list.map((row) =>
+                            row.key === r.key
+                              ? { ...row, startsAt: v, endsAt: '' }
+                              : row
+                          )
+                        )
+                      }
                     />
                     {err.startsAt && <em>{err.startsAt}</em>}
                   </label>
                   <label className={cx("session-modal-field")}>
                     <span>종료 일시 *</span>
                     <DateTimeField
+                      key={`${r.key}-${r.startsAt}`}
                       id={`ss-${r.key}-end`}
                       compact
                       value={r.endsAt}

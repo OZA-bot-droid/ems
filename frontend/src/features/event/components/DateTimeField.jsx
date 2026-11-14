@@ -30,6 +30,12 @@ export default function DateTimeField({ id, value, onChange, minDate, maxDate, m
   // 한 조각이 바뀌면: 세 조각이 다 있을 때만 완성된 값을, 아니면 빈 값을 부모에게 알림
   function update(name, next) {
     const merged = { ...parts, [name]: next };
+    if (name === 'date') {
+      merged.hour = '';
+      merged.minute = '';
+    } else if (name === 'hour') {
+      merged.minute = '';
+    }
     setParts(merged);
     const complete = merged.date && merged.hour && merged.minute;
     onChange(complete ? `${merged.date}T${merged.hour}:${merged.minute}` : '');
