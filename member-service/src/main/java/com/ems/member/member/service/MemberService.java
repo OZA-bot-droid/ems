@@ -128,6 +128,14 @@ public class MemberService {
         return new MemberInformationDTO(member);
     }
 
+    // Event Service가 신청 시점의 회원 이름과 이메일을 저장할 수 있도록 조회합니다.
+    @Transactional(readOnly = true)
+    public RegistrationApplicantProfile findRegistrationApplicantProfile(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberNotFoundException("회원을 찾을 수 없습니다."));
+        return new RegistrationApplicantProfile(member.getId(), member.getName(), member.getEmail());
+    }
+
     public void changePassword(String memberId, PasswordChangeDTO dto) {
 
         Member member = memberRepository.findById(Long.parseLong(memberId))

@@ -35,14 +35,19 @@ export default function SessionManage({ eventId = null, onBack }) {
         if (!alive) return;
         const mine = (data?.content ?? []).filter((e) => String(e.createdBy) === myId);
         setMyEvents(mine);
-        // 처음 선택: 받은 eventId가 내 행사면 그것, 아니면 첫 행사
-        setSelectedId((current) => (mine.some((e) => e.id === current) ? current : mine[0]?.id ?? null));
+        // 처음 선택: ① 이미 고른 행사 → ② 주소로 받은 eventId → ③ 첫 행사
+        // (로그인 정보가 늦게 와서 이 부분이 두 번 실행돼도 주소로 받은 행사를 잃지 않도록)
+        setSelectedId((current) => {
+          if (mine.some((e) => e.id === current)) return current;
+          if (mine.some((e) => e.id === eventId)) return eventId;
+          return mine[0]?.id ?? null;
+        });
       })
       .catch((err) => alive && setError(err));
     return () => {
       alive = false;
     };
-  }, [memberId]);
+  }, [memberId, eventId]);
 
   // ② 선택한 행사의 정보 + 세션 목록
   // 행사 정보는 ①에서 받은 내 행사 목록에서 꺼내고, 세션은 관리자용 주소로 불러옴
@@ -161,7 +166,7 @@ export default function SessionManage({ eventId = null, onBack }) {
 
               {sessions.length === 0 ? (
                 <p className={cx("session-manage-feedback")}>
-                  {locked ? '등록된 세션이 없습니다.' : '아직 세션이 없습니다. ‘새 세션 추가’로 시작하세요.'}
+                  {locked ? '등록된 세션이 없습니다.' : '아직 세션이 없습니다. ‘새 세션 등록’으로 시작하세요.'}
                 </p>
               ) : (
                 <ul className={cx("session-manage-list")}>
@@ -212,7 +217,7 @@ export default function SessionManage({ eventId = null, onBack }) {
               ) : (
                 <div className={cx("session-manage-footer")}>
                   <button className={cx("session-manage-create")} onClick={() => setModal({})} type="button">
-                    ＋ 새 세션 추가
+                    ＋ 세션 등록
                   </button>
                 </div>
               )}
@@ -228,9 +233,18 @@ export default function SessionManage({ eventId = null, onBack }) {
           session={modal.session}
           sessions={sessions}
           onClose={() => setModal(null)}
-          onSaved={(saved) => {
+          onSaved={(saved, result) => {
             setModal(null);
-            refresh(modal.session ? `"${saved.title}" 세션을 수정했습니다.` : `"${saved.title}" 세션을 추가했습니다.`);
+            if (modal.session) return refresh(`"${saved.title}" 세션을 수정했습니다.`);
+            // 새 등록: 여러 개를 한 번에 만들 수 있어서 결과를 한 줄로 알려 준다
+            const { created = 1, failed = [] } = result || {};
+            let message =
+              created > 1 ? `세션 ${created}개를 추가했습니다.` : `"${saved.title}" 세션을 추가했습니다.`;
+            if (failed.length > 0)
+              message += ` ${failed.length}개는 추가하지 못했습니다(${failed
+                .map((f) => `${f.title}: ${f.message}`)
+                .join(' / ')}).`;
+            refresh(message);
           }}
         />
       )}

@@ -17,6 +17,7 @@ import com.ems.event.event.repository.EventRepository;
 import com.ems.event.event.dto.EventCreateRequest;
 import com.ems.event.event.dto.EventResponse;
 import com.ems.event.event.dto.EventUpdateRequest;
+import com.ems.event.registration.entity.RegistrationStatus;
 import com.ems.event.registration.repository.RegistrationRepository;
 import com.ems.event.session.repository.SessionRepository;
 import java.time.Clock;
@@ -32,6 +33,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /** DB 없이 EventService의 규칙만 검사한다 (Repository는 가짜 객체 Mock) */
 @ExtendWith(MockitoExtension.class)
@@ -72,6 +74,8 @@ class EventServiceTest {
 
     private static Event openSeminar(String meetingUrl) {
         Event event = seminar(meetingUrl);
+        // 저장된 행사를 흉내 내서 repository 조회 시 사용할 ID를 설정합니다.
+        ReflectionTestUtils.setField(event, "id", 1L);
         event.update(null, null, null, null, null, null, EventStatus.OPEN);
         return event;
     }
@@ -111,14 +115,27 @@ class EventServiceTest {
     }
 
     @Test
-    @DisplayName("화상 회의 링크는 그 행사를 만든 관리자에게만 보인다 (일반 회원·다른 관리자·비로그인은 null)")
-    void meetingUrlOnlyForOwner() {
+    @DisplayName("화상 회의 링크는 만든 관리자와 승인된 참가자에게만 보인다 (대기·거절·다른 관리자·비로그인은 null)")
+    void meetingUrlOnlyForOwnerAndApproved() {
         when(eventRepository.findById(eventId)).thenReturn(Optional.of(openSeminar("https://zoom.us/j/1")));
+        // 2번 회원만 승인됨. 나머지는 승인 기록이 없다
+        when(registrationRepository.existsByEventIdAndUserIdAndStatus(
+                eventId, 2L, RegistrationStatus.APPROVED)).thenReturn(true);
 
-        assertThat(eventService.getEvent(eventId, 2L).meetingUrl()).isNull();              // 일반 회원
+        assertThat(eventService.getEvent(eventId, 2L).meetingUrl()).isEqualTo("https://zoom.us/j/1"); // 승인된 참가자
+        assertThat(eventService.getEvent(eventId, OWNER_ID).meetingUrl()).isEqualTo("https://zoom.us/j/1"); // 만든 관리자
+        assertThat(eventService.getEvent(eventId, 5L).meetingUrl()).isNull();              // 신청 전·대기·거절
         assertThat(eventService.getEvent(eventId, OTHER_ADMIN_ID).meetingUrl()).isNull();  // 다른 관리자
         assertThat(eventService.getEvent(eventId, null).meetingUrl()).isNull();            // 비로그인
-        assertThat(eventService.getEvent(eventId, OWNER_ID).meetingUrl()).isEqualTo("https://zoom.us/j/1");
+    }
+
+    @Test
+    @DisplayName("비로그인 상세 조회는 승인 여부를 DB에 묻지 않는다")
+    void anonymousDoesNotCheckApproval() {
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(openSeminar("https://zoom.us/j/1")));
+
+        assertThat(eventService.getEvent(eventId, null).meetingUrl()).isNull();
+        verify(registrationRepository, never()).existsByEventIdAndUserIdAndStatus(any(), any(), any());
     }
 
     @Test
@@ -386,10 +403,22 @@ class EventServiceTest {
     }
 
     @Test
-    @DisplayName("게시 예약: 게시일이 행사 종료 이후면 400 INVALID_POSTED_DATE")
-    void createEventWithPostedDateAfterEnd() {
+    @DisplayName("게시 예약: 게시일이 행사 시작 이후(진행 중)면 400 INVALID_POSTED_DATE")
+    void createEventWithPostedDateAfterStart() {
         EventCreateRequest request = new EventCreateRequest(
-                "예약 행사", null, 100, at("05:00"), at("08:00"), null, at("09:00"));
+                "예약 행사", null, 100, at("05:00"), at("08:00"), null, at("06:00"));
+
+        assertThatThrownBy(() -> eventService.createEvent(request, 99L))
+                .isInstanceOf(BusinessException.class)
+                .extracting("code").isEqualTo("INVALID_POSTED_DATE");
+        verify(eventRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("게시 예약: 게시일이 행사 시작 시각과 같아도 400 INVALID_POSTED_DATE")
+    void createEventWithPostedDateEqualStart() {
+        EventCreateRequest request = new EventCreateRequest(
+                "예약 행사", null, 100, at("05:00"), at("08:00"), null, at("05:00"));
 
         assertThatThrownBy(() -> eventService.createEvent(request, 99L))
                 .isInstanceOf(BusinessException.class)

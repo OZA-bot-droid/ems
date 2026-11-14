@@ -60,14 +60,29 @@ export default function EventFormModal({ event, onClose, onSaved }) {
     if (form.startsAt && form.endsAt && form.endsAt <= form.startsAt)
       errors.endsAt = '종료 일시는 시작 일시보다 뒤여야 합니다.';
     if (!form.capacity || Number(form.capacity) < 1) errors.capacity = '참가 정원은 1명 이상이어야 합니다.';
-    if (canSchedule && form.postedDate && postedChanged) {
-      if (form.postedDate <= nowKstInput()) errors.postedDate = '게시일은 현재 시간 이후로 설정하세요.';
-      else if (form.endsAt && form.postedDate >= form.endsAt)
-        errors.postedDate = '게시일은 행사 종료 일시보다 앞이어야 합니다.';
+    if (canSchedule && form.postedDate) {
+      if (postedChanged && form.postedDate <= nowKstInput())
+        errors.postedDate = '게시일은 현재 시간 이후로 설정하세요.';
+      // 게시일을 안 바꾸고 시작 일시만 앞당긴 경우도 검사 (서버와 같은 규칙)
+      else if (form.startsAt && form.postedDate >= form.startsAt)
+        errors.postedDate = '게시일은 행사 시작 일시보다 앞이어야 합니다.';
     }
     if (form.meetingUrl.length > 500) errors.meetingUrl = '500자까지 입력할 수 있습니다.';
     return errors;
   }
+
+  // 이 창에서 이미 적어 둔 "다른 세션"이 쓰는 시간대 (자기 자신은 빼고)
+  // 세션 관리 화면(SessionFormModal)과 같은 규칙: 딱 붙는 건 겹침 아님
+  const busyFor = (key) =>
+    sessions
+      .filter((o) => o.key !== key && o.startsAt && o.endsAt && o.endsAt > o.startsAt)
+      .map((o) => ({ start: o.startsAt, end: o.endsAt }));
+  // 시작 시각 t: 다른 세션이 진행 중이면 막음 (start <= t < end)
+  const sessionStartBlocked = (key) => (t) => busyFor(key).some((b) => b.start <= t && t < b.end);
+  // 종료 시각 t: [시작, t) 가 다른 세션과 겹치면 막음 + 자기 시작과 같거나 앞서면 막음
+  const sessionEndBlocked = (key, startsAt) => (t) =>
+    (Boolean(startsAt) && t <= startsAt) ||
+    busyFor(key).some((b) => b.start < t && b.end > (startsAt || t));
 
   // 세션 1차 검사: 빈칸, 종료>시작, 행사 시간 안, 세션끼리 겹침
   // (아직 서버에 없는 세션들이라 겹침도 화면에서 미리 확인할 수 있습니다)
@@ -99,7 +114,8 @@ export default function EventFormModal({ event, onClose, onSaved }) {
     return errors;
   }
 
-  async function submit(e) {
+  // publishNow = true 이면 [바로 공개]: 등록 → 세션 추가 → 상태를 OPEN으로 (새 등록일 때만)
+  async function submit(e, publishNow = false) {
     e.preventDefault(); // 폼 기본 동작(새로고침) 막기
     setServerError(null);
     const errors = validate();
@@ -120,7 +136,8 @@ export default function EventFormModal({ event, onClose, onSaved }) {
       meetingUrl: form.meetingUrl.trim() || empty,
     };
     // 게시 예약: 값을 넣었고(수정이면 바꿨을 때만) 작성 중일 때만 보냄
-    if (canSchedule && form.postedDate && postedChanged) body.postedDate = kstToInstant(form.postedDate);
+    // 바로 공개할 때는 게시 예약이 필요 없으므로 보내지 않음
+    if (canSchedule && form.postedDate && postedChanged && !publishNow) body.postedDate = kstToInstant(form.postedDate);
 
     setSaving(true);
     let saved;
@@ -151,6 +168,15 @@ export default function EventFormModal({ event, onClose, onSaved }) {
         result.failed.push({ title: s.title.trim(), message: err.message });
       }
     }
+    // [바로 공개]: 세션까지 만든 뒤 상태를 DRAFT → OPEN 으로 (행사 관리의 [공개] 버튼과 같은 요청)
+    if (publishNow) {
+      try {
+        saved = await eventApi.update(saved.id, { status: 'OPEN' });
+        result.published = true;
+      } catch (err) {
+        result.publishError = err.message; // 공개만 실패: 행사는 "작성 중"으로 남음
+      }
+    }
     setSaving(false);
     // 행사는 이미 만들어졌으니 실패한 세션이 있어도 창을 닫고 알림으로 알려줍니다 (다시 누르면 행사가 두 개 생기므로)
     onSaved(saved, result);
@@ -171,8 +197,8 @@ export default function EventFormModal({ event, onClose, onSaved }) {
         {/* 머리 */}
         <div className={cx("flex items-start justify-between gap-4 border-b border-(--ems-line) pb-4")}>
           <div className={cx("flex flex-col gap-1")}>
-            <h2 className={cx("text-[23px] font-bold text-(--ems-ink)")}>{isEdit ? '행사 수정' : '새 행사 등록'}</h2>
-            <p className={cx("text-xs text-(--ems-muted)")}>
+            <h2 className={cx("text-[28px] font-semibold text-(--ems-ink)")}>{isEdit ? '행사 수정' : '새 행사 등록'}</h2>
+            <p className={cx("text-[13px] font-normal text-(--ems-muted)")}>
               {isEdit ? '바꿀 내용을 고친 뒤 저장하세요.' : '행사 정보를 입력하여 새로운 이벤트를 생성합니다.'}
             </p>
           </div>
@@ -196,6 +222,7 @@ export default function EventFormModal({ event, onClose, onSaved }) {
               id="ev-start"
               value={form.startsAt}
               min={startChanged ? nowKstInput() : undefined} // 지난 시각은 고를 수 없음
+              hideBlocked // 지난 시·분은 회색이 아니라 목록에서 아예 빼기
               onChange={(v) => setForm((f) => ({ ...f, startsAt: v }))}
             />
           </Field>
@@ -204,6 +231,9 @@ export default function EventFormModal({ event, onClose, onSaved }) {
               id="ev-end"
               value={form.endsAt}
               min={form.startsAt || undefined} // 시작 이후만 고를 수 있음
+              // 시작과 "같은" 시각도 안 되므로(종료 > 시작) 그 시각까지 함께 숨김
+              isBlocked={(v) => Boolean(form.startsAt) && v <= form.startsAt}
+              hideBlocked // 시작 이전 시·분은 회색이 아니라 목록에서 아예 빼기
               onChange={(v) => setForm((f) => ({ ...f, endsAt: v }))}
             />
           </Field>
@@ -215,10 +245,12 @@ export default function EventFormModal({ event, onClose, onSaved }) {
                 id="ev-posted"
                 value={form.postedDate}
                 min={nowKstInput()} // 지난 시각은 고를 수 없음
-                max={form.endsAt || undefined} // 행사가 끝나기 전까지만
+                max={form.startsAt || undefined} // 행사가 시작하기 전까지만
+                // max는 "같은 시각까지" 고를 수 있어서, 시작 시각과 같은 시각도 막음 (게시일 < 시작)
+                isBlocked={(v) => Boolean(form.startsAt) && v >= form.startsAt}
                 onChange={(v) => setForm((f) => ({ ...f, postedDate: v }))}
               />
-              <span className={cx("text-[11px] text-(--ems-muted)")}>
+              <span className={cx("text-[13px] font-normal text-(--ems-muted)")}>
                 비워 두면 직접 [공개]를 눌러야 합니다. 정하면 그 시각에 자동으로 "모집 중"이 됩니다.
               </span>
             </Field>
@@ -238,8 +270,8 @@ export default function EventFormModal({ event, onClose, onSaved }) {
             <div className={cx("flex flex-col gap-3 border-t border-(--ems-line) pt-5")}>
               <div className={cx("flex items-center justify-between")}>
                 <div className={cx("flex flex-col gap-0.5")}>
-                  <span className={cx("text-sm font-bold text-(--ems-ink)")}>세션 {sessions.length > 0 && `· ${sessions.length}개`}</span>
-                  <span className={cx("text-[11px] text-(--ems-muted)")}>선택 · 행사 시간 안에서 겹치지 않게 (끝나는 시각에 바로 시작은 가능)</span>
+                  <span className={cx("text-sm font-semibold text-(--ems-ink)")}>세션 {sessions.length > 0 && `· ${sessions.length}개`}</span>
+                  <span className={cx("text-[13px] font-normal text-(--ems-muted)")}>선택 · 행사 시간 안에서 겹치지 않게 (끝나는 시각에 바로 시작은 가능)</span>
                 </div>
                 <button
                   type="button"
@@ -280,6 +312,8 @@ export default function EventFormModal({ event, onClose, onSaved }) {
                         value={s.startsAt}
                         min={form.startsAt || undefined} // 행사 시작~종료 안에서만 고를 수 있음
                         max={form.endsAt || undefined}
+                        isBlocked={sessionStartBlocked(s.key)} // 이미 적어 둔 다른 세션 시간대
+                        hideBlocked // 고를 수 없는 시·분은 목록에서 아예 빼기
                         onChange={(v) => changeSession(s.key, 'startsAt', v)}
                       />
                     </Field>
@@ -289,6 +323,9 @@ export default function EventFormModal({ event, onClose, onSaved }) {
                         value={s.endsAt}
                         min={s.startsAt || form.startsAt || undefined} // 세션 시작(없으면 행사 시작) 이후
                         max={form.endsAt || undefined}
+                        // 다른 세션과 겹치는 시각 + 자기 시작과 같은 시각(종료 > 시작)을 함께 막음
+                        isBlocked={sessionEndBlocked(s.key, s.startsAt)}
+                        hideBlocked // 고를 수 없는 시·분은 목록에서 아예 빼기
                         onChange={(v) => changeSession(s.key, 'endsAt', v)}
                       />
                     </Field>
@@ -299,12 +336,12 @@ export default function EventFormModal({ event, onClose, onSaved }) {
           )}
 
           {serverError && (
-            <p className={cx("rounded-[8px] bg-rose-50 px-4 py-2.5 text-xs font-semibold text-rose-700")}>
+            <p className={cx("rounded-[8px] bg-rose-50 px-4 py-2.5 text-[13px] font-normal text-rose-700")}>
               {serverError.message} <span className={cx("text-rose-400")}>({serverError.code})</span>
             </p>
           )}
 
-          <p className={cx("rounded-[8px] bg-(--ems-green-soft) px-4 py-2.5 text-xs font-semibold text-(--ems-green)")}>
+          <p className={cx("rounded-[8px] bg-(--ems-green-soft) px-4 py-2.5 text-[13px] font-normal text-(--ems-green)")}>
             {isEdit ? '행사 기간을 줄일 때는 세션이 기간 안에 있어야 합니다.' : '세션은 지금 함께 추가하거나, 등록 후 세션 관리에서 추가할 수 있습니다. 새 행사는 "작성 중"으로 시작되어 [공개]를 눌러야 참가 신청이 가능합니다.'}
           </p>
         </div>
@@ -314,6 +351,17 @@ export default function EventFormModal({ event, onClose, onSaved }) {
           <button type="button" onClick={onClose} className={cx("h-[43px] flex-1 rounded-[9px] bg-(--ems-bg) text-[13px] font-semibold text-(--ems-ink)")}>
             취소
           </button>
+          {/* 새 등록일 때만: 작성 중을 건너뛰고 바로 "모집 중"으로 */}
+          {!isEdit && (
+            <button
+              type="button"
+              disabled={saving}
+              onClick={(e) => submit(e, true)}
+              className={cx("h-[43px] flex-1 rounded-[9px] border border-(--ems-green) bg-(--ems-surface) text-[13px] font-semibold text-(--ems-green) hover:bg-(--ems-green-soft) disabled:opacity-60")}
+            >
+              {saving ? '저장 중…' : '등록 후 바로 공개'}
+            </button>
+          )}
           <button type="submit" disabled={saving} className={cx("h-[43px] flex-1 rounded-[9px] bg-(--ems-green) text-[13px] font-semibold text-white hover:bg-(--ems-green-dark) disabled:opacity-60")}>
             {saving
               ? '저장 중…'
@@ -330,15 +378,15 @@ export default function EventFormModal({ event, onClose, onSaved }) {
 }
 
 const inputClass =
-  'h-[43px] w-full rounded-[9px] border border-transparent bg-(--ems-bg) px-3.5 text-[13px] text-(--ems-ink) placeholder:text-(--ems-muted) focus:border-(--ems-green) focus:outline-none';
+  'h-[43px] w-full rounded-[9px] border border-transparent bg-(--ems-bg) px-3.5 text-[13px] font-normal text-(--ems-ink) placeholder:text-(--ems-muted) focus:border-(--ems-green) focus:outline-none';
 
 // 이름표 + 입력칸 + 빨간 안내 한 묶음
 function Field({ label, error, children }) {
   return (
     <label className={cx("flex flex-col gap-2")}>
-      <span className={cx("text-xs font-semibold text-(--ems-ink)")}>{label}</span>
+      <span className={cx("text-sm font-semibold text-(--ems-ink)")}>{label}</span>
       {children}
-      {error && <span className={cx("text-xs text-rose-600")}>{error}</span>}
+      {error && <span className={cx("text-[13px] font-normal text-rose-600")}>{error}</span>}
     </label>
   );
 }

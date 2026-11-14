@@ -50,3 +50,6 @@ management:
 
 ems:
   internal-token: ${EMS_INTERNAL_TOKEN}
+
+member-service:
+  url: ${MEMBER_SERVICE_URL:http://localhost:8081}
