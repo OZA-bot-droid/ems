@@ -121,4 +121,21 @@ public class PollController {
         }
     }
 
+    @PatchMapping("/polls/events/{eventId}/close")
+    public ResponseEntity<?> closePollsByEvent(
+            @PathVariable Long eventId,
+            @RequestHeader("X-Member-Id") Long userId,
+            @RequestHeader("X-User-Role") String role,
+            HttpServletRequest request) {
+
+        checkAdmin(role);
+
+        int closedCount = pollService.closePollsByEvent(eventId, userId);
+
+        return apiResponseBuilder.ok(
+                Map.of("closedCount", closedCount),
+                "행사 투표 일괄 마감 완료",
+                request
+        );
+    }
 }
