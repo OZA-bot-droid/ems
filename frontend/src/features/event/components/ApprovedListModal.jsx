@@ -96,7 +96,7 @@ export default function ApprovedListModal({ event, onClose }) {
               >
                 <span>
                   <span className="mr-3 text-(--ems-muted)">{i + 1}</span>
-                  회원 번호 {r.userId}
+                  {r.applicantName?.trim() || '이름 정보가 없습니다.'}
                 </span>
                 <span className="text-xs text-(--ems-muted)">
                   신청 {formatShort(r.requestedAt)} · 승인 {r.decidedAt ? formatShort(r.decidedAt) : '-'}
