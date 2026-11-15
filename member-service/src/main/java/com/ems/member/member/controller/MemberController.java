@@ -271,7 +271,13 @@ public class MemberController {
 
     // password 재설정 이메일 전송 -----------------------------------------------------
     @PostMapping("/password/reset-request")
-    public ResponseEntity<?> requestPasswordReset(@Valid @RequestBody EmailDTO dto) {
+    public ResponseEntity<?> requestPasswordReset(@Valid @RequestBody EmailDTO dto,
+                                                  HttpServletRequest request) {
+
+        String ip = clientIpResolver.resolve(request);
+
+        // 이메일별 5회, IP별 30회 요청 제한
+        rateLimiter.checkPasswordReset(dto.email(), ip);
 
         passwordResetService.requestResetToken(dto.email());
 
