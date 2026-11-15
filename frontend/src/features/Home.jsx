@@ -209,22 +209,23 @@ const Home = () => {
                 있습니다.
               </p>
               <div className="mt-9 flex flex-wrap gap-3">
+                {/* 모든 사용자: 행사 탐색 */}
                 <Link
                   to="/events"
                   className="rounded-xl bg-ems-primary px-7 py-3.5 text-[14px] font-semibold text-white transition-colors hover:bg-ems-member-primary-hover"
                 >
                   이벤트 둘러보기
                 </Link>
-                <Link
-                  to={createDestination}
-                  className="rounded-xl border border-ems-member-input-border bg-white px-7 py-3.5 text-[14px] font-semibold text-ems-text transition-colors hover:bg-ems-background"
-                >
-                  {authLoading
-                    ? '이벤트 둘러보기'
-                    : accessToken && !canCreate
-                      ? '행사 목록 보기'
-                      : '이벤트 개최하기'}
-                </Link>
+
+                {/* ADMIN 전용: 행사 생성 */}
+                {!authLoading && canCreate && (
+                  <Link
+                    to="/admin/events"
+                    className="rounded-xl border border-ems-member-input-border bg-white px-7 py-3.5 text-[14px] font-semibold text-ems-text transition-colors hover:bg-ems-background"
+                  >
+                    이벤트 개최하기
+                  </Link>
+                )}
               </div>
             </div>
 
