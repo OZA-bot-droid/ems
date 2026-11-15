@@ -15,6 +15,7 @@
 
   /* 브랜드 기본 색상 */
   --ems-primary: #169b62;
+  --ems-secondary: #fe3533;
 
   /* 공통 사이드바 배경 */
   --ems-sidebar: #17253c;
@@ -146,6 +147,7 @@
 
 @theme inline {
   --color-ems-primary: var(--ems-primary);
+  --color-ems-secondary: var(--ems-secondary);
   --color-ems-sidebar: var(--ems-sidebar);
   --color-ems-background: var(--ems-background);
   --color-ems-text: var(--ems-text);

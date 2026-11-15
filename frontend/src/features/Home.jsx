@@ -135,19 +135,21 @@ const Home = () => {
           {/* 메뉴 */}
           <nav
             aria-label="메인 메뉴"
-            className="order-3 flex w-full items-center justify-around gap-3 border-t border-white/10 pt-3 text-[13px] font-medium lg:order-none lg:w-auto lg:justify-center lg:gap-10 lg:border-0 lg:pt-0"
+            className="order-3 flex w-full items-center justify-around gap-3 border-t border-white/10 pt-3 text-[16px] font-semibold lg:order-none lg:w-auto lg:justify-center lg:gap-10 lg:border-0 lg:pt-0 lg:text-[20px]"
           >
             <Link to="/" className="transition-colors hover:text-ems-primary">
               홈
             </Link>
 
-            <Link to={createDestination} className="transition-colors hover:text-ems-primary">
-              {accessToken && !canCreate ? '행사 탐색' : '개최 Event'}
+            <Link to="/events" className="transition-colors hover:text-ems-primary">
+              행사 탐색
             </Link>
 
-            <Link to="/events" className="transition-colors hover:text-ems-primary">
-              검색
-            </Link>
+            {!authLoading && canCreate && (
+              <Link to="/admin/events" className="transition-colors hover:text-ems-primary">
+                행사 관리
+              </Link>
+            )}
           </nav>
 
           {/* 인증 메뉴 */}
@@ -498,7 +500,7 @@ const Home = () => {
           <div className="mx-auto max-w-[1200px] px-6 text-center mb-5">
             <p className="text-[13px] font-bold tracking-widest text-ems-primary">OUR TEAM</p>
 
-            <h2 className="mt-4 text-[30px] font-bold text-ems-text">SYNC5를 만드는 사람들</h2>
+            <h2 className="mt-4 text-[30px] font-bold text-ems-text">SYNC5 팀원들</h2>
 
             <p className="mt-4 text-[14px] text-ems-muted">
               다섯 명의 팀원이 함께 만들어가는 이벤트 플랫폼

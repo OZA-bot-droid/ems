@@ -5,15 +5,8 @@ export function validatePollForm(form, sessions) {
   const end = new Date(form.endsAt);
 
   if (!session) return '유효한 행사 및 세션을 선택하세요.';
-  if (
-    !(
-      start > new Date() &&
-      end > start &&
-      start >= new Date(session.startsAt) &&
-      end <= new Date(session.endsAt)
-    )
-  ) {
-    return '투표 일정은 미래의 세션 운영 시간 안에 있어야 합니다.';
+  if (!(end > start && start >= new Date(session.startsAt) && end <= new Date(session.endsAt))) {
+    return '투표 일정은 세션 운영 시간 안에 있어야 합니다.';
   }
   if (form.options.some((o) => !o.trim()) || form.options.length < 2) {
     return '선택지 두 개 이상을 입력하세요.';

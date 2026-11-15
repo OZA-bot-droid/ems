@@ -1,0 +1,87 @@
+@use '../../../styles/tokens' as tokens;
+
+/* ======================================
+   투표 관련 페이지 공통 헤더
+   - 투표 관리
+   - 실시간 투표
+   - 투표 목록
+   - 투표 결과
+====================================== */
+
+.pollPageHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 28px;
+
+  h1 {
+    margin: 0;
+    color: var(--ems-ink);
+    font-size: 27px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  p {
+    margin: 8px 0 0;
+    color: var(--ems-muted);
+    font-size: 13px;
+  }
+}
+
+/* ADMIN / USER 공통 배지 */
+.pollPageRole {
+  display: inline-flex;
+  min-width: 95px;
+  min-height: 29px;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  margin-top: 7px;
+  border-radius: 999px;
+
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ADMIN 배지 */
+.pollPageRoleAdmin {
+  background: var(--ems-admin-badge-bg);
+  color: var(--ems-admin-badge-text);
+}
+
+/* USER 배지 */
+.pollPageRoleUser {
+  background: tokens.$ems-primary-soft;
+  color: tokens.$ems-primary;
+}
+
+/* 헤더 오른쪽 추가 버튼 영역 */
+.pollHeaderActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* 태블릿·모바일 */
+@media (max-width: 768px) {
+  .pollPageHeader {
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+
+    h1 {
+      font-size: 24px;
+    }
+  }
+
+  .pollHeaderActions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

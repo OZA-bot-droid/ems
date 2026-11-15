@@ -115,5 +115,9 @@ export function useVoteRealtime({
     return unsubscribe;
   }, [socketConnected, selectedId, refreshResults]);
 
-  return { socketConnected };
+  // 기존 투표 WebSocket 연결을 채팅 Hook에서도 재사용할 수 있도록 반환한다.
+  return {
+    socketConnected,
+    socketRef,
+  };
 }

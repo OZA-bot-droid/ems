@@ -1,5 +1,4 @@
-
- // Access Token의 현재 값과 변경 알림을 제공하는 프론트 공통 저장소를 가져온다.
+// Access Token의 현재 값과 변경 알림을 제공하는 프론트 공통 저장소를 가져온다.
 import { tokenStore } from '../../../api/tokenStore.js';
 
 // Access Token이 없거나 만료되기 직전이면 공통 인증 계층을 통해 재발급한다.
@@ -10,7 +9,6 @@ import { refreshAccessToken } from '../../../api/axiosInstance.js';
  * Reconnects with backoff and replays subscriptions using fresh Access JWTs.
  * Call disconnect() on component unmount to stop all timers and reconnection.
  */
-
 
 // 투표 결과를 수신하기 위한 WebSocket/STOMP 연결 함수
 // onConnect: 연결 성공 시 실행
@@ -25,7 +23,6 @@ export function connectPollSocket({
   reconnectInitialMs = 1000,
   reconnectMaxMs = 30000,
 } = {}) {
-
   // 구독 ID → {id, destination, callback} 매핑.
   // 재접속 시 기존 구독을 복원하는 데 사용한다.
   const subscriptions = new Map();
@@ -109,7 +106,6 @@ export function connectPollSocket({
   // 예: /topic/sessions/{sessionId}/polls/{pollId}
   // 실제 접근 권한은 서버가 검증해야 한다.
   function subscribe(destination, callback) {
-
     // 동일 destination을 여러 곳에서 구독하더라도
     // 고유한 구독 ID를 할당한다.
     const id = 'sub-' + ++sequence;
@@ -125,6 +121,31 @@ export function connectPollSocket({
       if (connected) send('UNSUBSCRIBE', { id });
       subscriptions.delete(id);
     };
+  }
+
+  // 서버에 STOMP SEND 프레임을 전송한다.
+  // 채팅 메시지 전송에 사용한다.
+  // destination 예: /app/sessions/3/chat.send
+  function publish(destination, payload) {
+    // 연결이 종료되었거나 STOMP 연결이 확립되지 않은 경우 차단
+    if (disposed || !connected || socket?.readyState !== WebSocket.OPEN) {
+      throw new Error('WebSocket이 연결되지 않았습니다.');
+    }
+
+    // 전송 목적지 검증
+    if (typeof destination !== 'string' || !destination.startsWith('/app/')) {
+      throw new Error('올바르지 않은 STOMP 전송 경로입니다.');
+    }
+
+    // 기존 send() 함수를 재사용하여 STOMP SEND 프레임 전송
+    send(
+      'SEND',
+      {
+        destination,
+        'content-type': 'application/json',
+      },
+      JSON.stringify(payload),
+    );
   }
 
   // 오류를 Error 객체로 정규화해 외부 onError 콜백에 전달한다.
@@ -147,7 +168,10 @@ export function connectPollSocket({
     // 몰리지 않게 무작위 편차를 준다.
     const delay = Math.round(base * (0.8 + Math.random() * 0.4));
 
-    retryTimer = setTimeout(() => { retryTimer = null; void open(); }, delay);
+    retryTimer = setTimeout(() => {
+      retryTimer = null;
+      void open();
+    }, delay);
   }
 
   // heartbeat를 중단하고 현재 소켓의 이벤트 핸들러를
@@ -166,7 +190,8 @@ export function connectPollSocket({
       previous.onerror = null;
       previous.onclose = null;
 
-      if (previous.readyState === WebSocket.OPEN || previous.readyState === WebSocket.CONNECTING) previous.close();
+      if (previous.readyState === WebSocket.OPEN || previous.readyState === WebSocket.CONNECTING)
+        previous.close();
     }
   }
 
@@ -188,7 +213,6 @@ export function connectPollSocket({
   // STOMP CONNECT에 사용할 최신 Access Token을 가져온다.
   // 토큰이 없거나 만료가 30초 이내면 공통 재발급 함수에 요청한다.
   async function getValidToken() {
-
     // 로그인 상태의 Access Token을 공통 저장소에서 조회한다.
     const token = tokenStore.get();
 
@@ -197,7 +221,6 @@ export function connectPollSocket({
     // Only inspect expiry for proactive refresh;
     // the server verifies the JWT signature.
     try {
-
       // JWT payload를 클라이언트에서 디코딩해 exp만 검사한다.
       // 서명 검증은 서버 책임이다.
       const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
@@ -205,7 +228,6 @@ export function connectPollSocket({
       if (typeof payload.exp === 'number' && payload.exp * 1000 <= Date.now() + 30000) {
         return await refreshAccessToken();
       }
-
     } catch {
       return await refreshAccessToken();
     }
@@ -221,7 +243,8 @@ export function connectPollSocket({
     // 서버의 송신 가능 주기와 서버가 원하는
     // 수신 주기(ms)를 분리한다.
     const [serverCanSend, serverWantsReceive] = String(headers['heart-beat'] || '0,0')
-      .split(',').map(Number);
+      .split(',')
+      .map(Number);
 
     // 서버가 heartbeat 수신을 요구하면 클라이언트의
     // 송신 간격을 정한다(최소 10초).
@@ -233,23 +256,24 @@ export function connectPollSocket({
 
     // 연결이 열려 있으면 개행문자 하나를 전송해
     // 연결 생존 신호를 보낸다.
-    if (outbound) heartbeatTimer = setInterval(() => {
-      if (socket?.readyState === WebSocket.OPEN) socket.send('\n');
-    }, outbound);
+    if (outbound)
+      heartbeatTimer = setInterval(() => {
+        if (socket?.readyState === WebSocket.OPEN) socket.send('\n');
+      }, outbound);
 
     // 마지막 수신 후 예상 간격의 2.5배를 초과하면
     // 연결 이상으로 판단한다.
-    if (inbound) watchdogTimer = setInterval(() => {
-      if (Date.now() - lastRead > inbound * 2.5) {
-        disconnectCurrent(new Error('WebSocket heartbeat timeout'));
-      }
-    }, inbound);
+    if (inbound)
+      watchdogTimer = setInterval(() => {
+        if (Date.now() - lastRead > inbound * 2.5) {
+          disconnectCurrent(new Error('WebSocket heartbeat timeout'));
+        }
+      }, inbound);
   }
 
   // 조립된 STOMP 프레임을 명령·헤더·본문으로
   // 분해하고 종류별로 처리한다.
   function handleFrame(raw) {
-
     // 헤더와 본문은 첫 번째 빈 줄(\n\n)로 구분된다.
     const divider = raw.indexOf('\n\n');
     if (divider < 0) return;
@@ -258,10 +282,12 @@ export function connectPollSocket({
     const command = lines.shift()?.trim();
 
     // 각 헤더 줄에서 첫 콜론을 기준으로 이름과 값을 분리한다.
-    const headers = Object.fromEntries(lines.filter(Boolean).map(line => {
-      const i = line.indexOf(':');
-      return i < 0 ? [line, ''] : [line.slice(0, i), line.slice(i + 1)];
-    }));
+    const headers = Object.fromEntries(
+      lines.filter(Boolean).map((line) => {
+        const i = line.indexOf(':');
+        return i < 0 ? [line, ''] : [line.slice(0, i), line.slice(i + 1)];
+      }),
+    );
 
     // 연결 수립: 재시도 횟수 초기화 → heartbeat 시작
     // → 기존 구독 복원 → 콜백 호출.
@@ -276,17 +302,20 @@ export function connectPollSocket({
 
       onConnect?.(subscribe);
 
-    // 구독 ID로 콜백을 찾고 JSON 본문을 파싱해
-    // 투표 결과 등 수신 데이터를 전달한다.
+      // 구독 ID로 콜백을 찾고 JSON 본문을 파싱해
+      // 투표 결과 등 수신 데이터를 전달한다.
     } else if (command === 'MESSAGE') {
       const entry = subscriptions.get(headers.subscription);
       if (!entry) return;
 
-      try { entry.callback(JSON.parse(raw.slice(divider + 2))); }
-      catch (error) { report(error); }
+      try {
+        entry.callback(JSON.parse(raw.slice(divider + 2)));
+      } catch (error) {
+        report(error);
+      }
 
-    // 서버가 STOMP ERROR 프레임을 보낸 경우
-    // 현재 연결을 종료하고 재접속을 시도한다.
+      // 서버가 STOMP ERROR 프레임을 보낸 경우
+      // 현재 연결을 종료하고 재접속을 시도한다.
     } else if (command === 'ERROR') {
       disconnectCurrent(new Error(raw.slice(divider + 2) || 'STOMP 서버 오류'));
     }
@@ -306,8 +335,13 @@ export function connectPollSocket({
 
     // 토큰 재발급은 비동기다.
     // 실패하면 오류를 전달하고 조건에 따라 다시 시도한다.
-    try { token = await getValidToken(); }
-    catch (error) { report(error); if (tokenStore.get()) retry(); return; }
+    try {
+      token = await getValidToken();
+    } catch (error) {
+      report(error);
+      if (tokenStore.get()) retry();
+      return;
+    }
 
     if (disposed || socket || attempt !== generation) return;
     if (!token) return;
@@ -327,8 +361,13 @@ export function connectPollSocket({
     buffer = '';
     let ws;
 
-    try { ws = new WebSocket(url); }
-    catch (error) { report(error); retry(); return; }
+    try {
+      ws = new WebSocket(url);
+    } catch (error) {
+      report(error);
+      retry();
+      return;
+    }
 
     socket = ws;
 
@@ -348,7 +387,7 @@ export function connectPollSocket({
 
     // 서버의 WebSocket 텍스트 데이터를 누적한 뒤
     // 널 종료 문자 단위로 STOMP 프레임을 처리한다.
-    ws.onmessage = event => {
+    ws.onmessage = (event) => {
       if (ws !== socket || typeof event.data !== 'string') return;
 
       lastRead = Date.now();
@@ -391,7 +430,7 @@ export function connectPollSocket({
 
   // 로그인 토큰 변경을 감시한다.
   // 토큰이 갱신되면 새 토큰으로 STOMP 재인증하도록 재연결한다.
-  const unsubscribeToken = tokenStore.subscribe(next => {
+  const unsubscribeToken = tokenStore.subscribe((next) => {
     if (disposed) return;
 
     // 로그아웃 등으로 토큰이 제거되면
@@ -422,12 +461,16 @@ export function connectPollSocket({
   // 외부 React 컴포넌트/Hook에 노출할
   // 최소 인터페이스만 반환한다.
   return {
-
     // STOMP destination 구독을 등록하고 해제 함수를 받는다.
     subscribe,
 
+    // STOMP 메시지를 서버에 전송한다.
+    publish,
+
     // 현재 STOMP 연결 상태를 조회하는 읽기 전용 getter다.
-    get connected() { return connected; },
+    get connected() {
+      return connected;
+    },
 
     // 컴포넌트 언마운트 시 호출:
     // 재접속 금지, 타이머/이벤트/구독 정리, DISCONNECT 전송.
