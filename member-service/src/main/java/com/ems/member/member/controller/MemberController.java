@@ -36,6 +36,12 @@ public class MemberController {
     private final CookieRequestOriginValidator originValidator;
     private final ClientIpResolver clientIpResolver;
 
+    // 내부 인증을 통과한 Event Service에 참가 신청용 회원 정보를 제공합니다.
+    @GetMapping("/internal/{memberId}/registration-profile")
+    public RegistrationApplicantProfile registrationProfile(@PathVariable Long memberId) {
+        return memberService.findRegistrationApplicantProfile(memberId);
+    }
+
     public MemberController(MemberService memberService,
                             AuthService authService,
                             SocialLoginService socialLoginService,
@@ -132,8 +138,12 @@ public class MemberController {
         }
     }
 
-    // 새로운 access token 생성
-    // @CookieValue : 해당 api에 온 정보 중에 특정 cookie의 값을 가져오는 어노테이션
+    /*
+        Refresh Token을 이용해 새로운 JWT를 발급한다.
+        쿠키를 사용하는 요청이므로 Origin 검증을 수행한다.
+
+        @CookieValue : 해당 api에 온 정보 중에 특정 cookie의 값을 가져오는 어노테이션
+    */
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue(@RequestBody ClientDTO dto,
                                      @CookieValue("refreshToken") String refreshToken,
@@ -151,7 +161,12 @@ public class MemberController {
         );
     }
 
-    // 로그아웃
+    /*
+        로그아웃
+
+        Refresh Token을 폐기하고 브라우저의 쿠키를 삭제한다.
+        기존 Access Token은 만료 전까지 유효할 수 있다.
+    */
     @DeleteMapping("/logout")
     public ResponseEntity<?> logout(@RequestBody ClientDTO dto,
                                     @CookieValue(value = "refreshToken", required = false) String refreshToken,
@@ -248,6 +263,10 @@ public class MemberController {
     }
 
     // 소셜 로그인 token exchange ---------------------------------------------------
+    /*
+        OAuth2 로그인 성공 후 발급된 일회용 코드를 JWT로 교환
+        일회용 코드는 재사용할 수 없다.
+    */
     @PostMapping("/oauth2/exchange")
     public ResponseEntity<?> exchange(@RequestParam String code) {
 
@@ -264,8 +283,18 @@ public class MemberController {
     }
 
     // password 재설정 이메일 전송 -----------------------------------------------------
+    /*
+        비밀번호 재설정 이메일 발송을 요청
+        요청 횟수를 제한하고 계정 존재 여부는 노출하지 않는다.
+    */
     @PostMapping("/password/reset-request")
-    public ResponseEntity<?> requestPasswordReset(@Valid @RequestBody EmailDTO dto) {
+    public ResponseEntity<?> requestPasswordReset(@Valid @RequestBody EmailDTO dto,
+                                                  HttpServletRequest request) {
+
+        String ip = clientIpResolver.resolve(request);
+
+        // 이메일별 5회, IP별 30회 요청 제한
+        rateLimiter.checkPasswordReset(dto.email(), ip);
 
         passwordResetService.requestResetToken(dto.email());
 
@@ -276,6 +305,7 @@ public class MemberController {
         );
     }
 
+    // 비밀번호 reset
     @PostMapping("/password/reset")
     public ResponseEntity<?> resetPassword(@Valid @RequestBody PasswordResetDTO dto) {
 
@@ -285,6 +315,7 @@ public class MemberController {
         );
     }
 
+    // 비밀번호 바꾸기
     @PostMapping("/password/change")
     public ResponseEntity<?> changePassword(JwtAuthenticationToken authentication,
                                             @Valid @RequestBody PasswordChangeDTO dto) {
@@ -294,12 +325,10 @@ public class MemberController {
                 new MessageResponseDTO<>(null, SuccessCode.PASSWORD_RESET_SUCCESS)
         );
     }
-    
+
     @PostMapping("/email/found")
-    public ResponseEntity<?> foundEmail(
-            @Valid @RequestBody NameDTO dto,
-            HttpServletRequest request
-    ) {
+    public ResponseEntity<?> foundEmail(@Valid @RequestBody NameDTO dto,
+                                        HttpServletRequest request) {
         // 1. 실제 요청 IP 확인
         String ip = clientIpResolver.resolve(request);
 

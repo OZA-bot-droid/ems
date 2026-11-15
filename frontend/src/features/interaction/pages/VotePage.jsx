@@ -51,10 +51,7 @@ export default function VotePage() {
         <header className={headerStyles.pollPageHeader}>
           <div>
             <h1>실시간 투표</h1>
-            <p>
-              승인된 행사 참가자에게 공개된 투표입니다.{' '}
-              {socketConnected ? '실시간 연결됨' : '주기적으로 업데이트 중'}
-            </p>
+            <p>승인된 행사 참가자에게 공개된 투표입니다.</p>
           </div>
 
           <span

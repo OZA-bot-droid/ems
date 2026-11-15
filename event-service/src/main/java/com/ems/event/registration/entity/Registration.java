@@ -5,13 +5,9 @@ import java.time.Instant;
 
 /** 행사 참가 신청 한 건과 그 상태 변경 이력을 표현합니다. */
 @Entity
+// 취소되지 않은 신청의 부분 유일 제약은 V12 Flyway 마이그레이션에서 관리합니다.
 @Table(
         name = "registrations",
-        // 한 사용자가 같은 행사에 신청 행을 여러 개 만들지 못하게 합니다.
-        uniqueConstraints = @UniqueConstraint(
-                name = "uk_registration_user_event",
-                columnNames = {"user_id", "event_id"}
-        ),
         indexes = {
                 @Index(name = "idx_registration_user_status", columnList = "user_id,status"),
                 @Index(name = "idx_registration_event_status", columnList = "event_id,status")
@@ -31,6 +27,14 @@ public class Registration {
     /** 신청 대상 행사 ID입니다. 행사 테이블과의 FK는 통합 시 연결합니다. */
     @Column(name = "event_id", nullable = false)
     private Long eventId;
+
+    /** 신청 당시 회원 이름의 스냅샷입니다. */
+    @Column(name = "applicant_name")
+    private String applicantName;
+
+    /** 신청 당시 회원 이메일의 스냅샷입니다. */
+    @Column(name = "applicant_email")
+    private String applicantEmail;
 
     /** enum 이름을 문자열로 저장하며, 새 신청은 승인 대기 상태로 시작합니다. */
     @Enumerated(EnumType.STRING)
@@ -56,8 +60,14 @@ public class Registration {
     protected Registration() { }
 
     public Registration(Long userId, Long eventId) {
+        this(userId, eventId, null, null);
+    }
+
+    public Registration(Long userId, Long eventId, String applicantName, String applicantEmail) {
         this.userId = userId;
         this.eventId = eventId;
+        this.applicantName = applicantName;
+        this.applicantEmail = applicantEmail;
         this.status = RegistrationStatus.PENDING;
     }
 
@@ -78,6 +88,8 @@ public class Registration {
     public Long getId() { return id; }
     public Long getUserId() { return userId; }
     public Long getEventId() { return eventId; }
+    public String getApplicantName() { return applicantName; }
+    public String getApplicantEmail() { return applicantEmail; }
     public RegistrationStatus getStatus() { return status; }
     public Instant getRequestedAt() { return requestedAt; }
     public Instant getUpdatedAt() { return updatedAt; }

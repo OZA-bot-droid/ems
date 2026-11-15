@@ -1,0 +1,232 @@
+/* 03 · 행사 목록 화면 (사용자용 /events)
+   행사 관리(event-manage.module.scss)와 같은 방식: 화면 뜻이 담긴 클래스 이름을 쓰고
+   세부 모양은 이 파일에 모은다. (컴포넌트에는 Tailwind를 직접 쓰지 않는다) */
+
+.event-list-page {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  width: 100%;
+  min-width: 0;
+  color: var(--ems-ink);
+  font-family: var(--ems-font);
+}
+
+/* 검색 + 상태 필터 */
+.event-list-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.event-list-search {
+  flex: 1 1 260px;
+  min-width: 0;
+  height: 45px;
+  padding: 0 16px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: var(--ems-surface);
+  color: var(--ems-ink);
+  font: inherit;
+  font-size: 14px;
+
+  &::placeholder {
+    color: var(--ems-muted);
+  }
+
+  &:focus {
+    border-color: var(--ems-green);
+    outline: none;
+  }
+
+  @media (min-width: 640px) {
+    max-width: 525px;
+  }
+}
+
+/* 상태 필터: 세션 관리의 "행사 선택"과 같은 모양(.select-box)에 글자 굵기만 더함 */
+.event-list-filter {
+  font-weight: 600;
+}
+
+/* 상황별 안내: 불러오는 중 / 비어 있음 / 오류 */
+.event-list-feedback {
+  margin: 0;
+  color: var(--ems-muted);
+  /* 내용 */
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.event-list-empty {
+  padding: 40px;
+  border-radius: 14px;
+  background: var(--ems-surface);
+  color: var(--ems-muted);
+  /* 내용 */
+  font-size: 13px;
+  font-weight: 400;
+  text-align: center;
+}
+
+.event-list-error {
+  padding: 20px;
+  border-radius: 14px;
+  background: #fff1f2;
+  color: #b42318;
+  /* 내용 */
+  font-size: 13px;
+  font-weight: 400;
+
+  p {
+    margin: 0;
+
+    + p {
+      margin-top: 4px;
+    }
+  }
+
+  strong {
+    font-weight: 600;
+  }
+
+  span {
+    color: #e4a3a3;
+  }
+}
+
+/* 카드 목록 */
+.event-list-grid {
+  display: grid;
+  gap: 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.event-list-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  height: 100%;
+  padding: 12px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--ems-surface);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(20, 34, 56, 0.08);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ems-green);
+  }
+}
+
+/* 카드 윗부분 그림 자리 (Figma처럼 초록·파랑을 번갈아) */
+.event-list-visual {
+  display: flex;
+  align-items: center;
+  height: 72px;
+  padding: 0 16px;
+  border-radius: 9px;
+  background: var(--ems-green-soft);
+  color: var(--ems-green);
+  font-size: 14px;
+  font-weight: 700;
+
+  &.is-alt {
+    background: var(--ems-blue-soft);
+  }
+}
+
+.event-list-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 8px 8px;
+}
+
+.event-list-title {
+  margin: 0;
+  /* 제목 */
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.event-list-meta {
+  margin: 0;
+  color: var(--ems-muted);
+  /* 내용 */
+  font-size: 13px;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 상태 배지 (행사 관리의 .event-manage-status와 같은 구조: is-상태 로 색만 바꿈) */
+.event-list-status {
+  width: fit-content;
+  margin-top: 8px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: var(--ems-muted);
+  font-size: 12px;
+  font-weight: 600;
+
+  &.is-open {
+    background: var(--ems-green-soft);
+    color: var(--ems-green);
+  }
+
+  &.is-closed {
+    background: #fff1f2;
+    color: #e11d48;
+  }
+}
+
+.event-list-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--ems-ink);
+  font-size: 14px;
+
+  button {
+    padding: 8px 16px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--ems-surface);
+    color: inherit;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+  }
+
+  span {
+    color: var(--ems-muted);
+    font-variant-numeric: tabular-nums;
+  }
+}

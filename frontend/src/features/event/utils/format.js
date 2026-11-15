@@ -27,8 +27,18 @@ export function formatRange(startIso, endIso) {
   const e = parts(endIso);
   const start = `${s.year}.${s.month}.${s.day} ${s.hour}:${s.minute}`;
   const sameDay = s.year === e.year && s.month === e.month && s.day === e.day;
-  const end = sameDay ? `${e.hour}:${e.minute}` : `${e.year}.${e.month}.${e.day} ${e.hour}:${e.minute}`;
+  const end = sameDay
+    ? `${e.hour}:${e.minute}`
+    : `${e.year}.${e.month}.${e.day} ${e.hour}:${e.minute}`;
   return `${start} – ${end}`;
+}
+
+// 시작 날짜와 종료 날짜를 항상 모두 표시
+export function formatFullRange(startIso, endIso) {
+  const s = parts(startIso);
+  const e = parts(endIso);
+
+  return `${s.year}.${s.month}.${s.day} ${s.hour}:${s.minute} – ${e.year}.${e.month}.${e.day} ${e.hour}:${e.minute}`;
 }
 
 // 백엔드 상태값 → 화면 배지 (이름은 팀 합의 후 바꿀 수 있음, 색은 Figma 기준)

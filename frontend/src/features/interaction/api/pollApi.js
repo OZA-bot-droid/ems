@@ -24,4 +24,5 @@ export const pollApi = {
   // 11/11 추가
   // 로그인 사용자가 참가 승인받은 세션들의 투표 목록 (페이지 조회)
   userPolls: (params = {}) => api.get('/interactions/polls/users', { params }).then(unwrap),
+  closeByEvent: (eventId) => api.patch(`/interactions/polls/events/${eventId}/close`).then(unwrap),
 };

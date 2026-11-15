@@ -269,4 +269,49 @@ public class PollService {
 
         return pollId;
     }
+
+    public int closePollsByEvent(Long eventId, Long userId) {
+
+        EventAuthorizationClient.EventAccess access =
+                eventClient.eventAccess(eventId, userId);
+
+        // 해당 행사의 주최자인지 확인
+        if (!access.owner()) {
+            throw new ApiException(ErrorCode.EVENT_OWNER_REQUIRED);
+        }
+
+        // 행사가 실제로 마감됐는지 확인
+        if (!"CLOSED".equals(access.status())) {
+            throw new ApiException(
+                    HttpStatus.CONFLICT,
+                    "EVENT_NOT_CLOSED",
+                    "마감된 행사만 투표를 종료할 수 있습니다."
+            );
+        }
+
+        List<Poll> polls = pollRepository.findByEventId(eventId);
+
+        int closedCount = 0;
+
+        for (Poll poll : polls) {
+
+            // 이미 종료된 투표는 건너뜀
+            if (poll.getStatus() == Status.CLOSED) {
+                continue;
+            }
+
+            poll.close();
+            closedCount++;
+
+            eventPublisher.publishEvent(
+                    new PollStatusChangedEvent(
+                            poll.getId(),
+                            poll.getSessionId(),
+                            Status.CLOSED
+                    )
+            );
+        }
+
+        return closedCount;
+    }
 }

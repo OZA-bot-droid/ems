@@ -49,6 +49,9 @@ public class StompAuthInterceptor implements ChannelInterceptor {
     // 채팅 메시지 구독 Topic
     private static final Pattern CHAT_SUBSCRIBE_PATTERN = Pattern.compile("^/topic/sessions/([1-9]\\d*)/chat$");
 
+    // 채팅 접속 현황 구독 Topic
+    private static final Pattern PRESENCE_SUBSCRIBE_PATTERN = Pattern.compile("^/topic/sessions/([1-9]\\d*)/presence$");
+
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
@@ -220,6 +223,24 @@ public class StompAuthInterceptor implements ChannelInterceptor {
             return;
         }
 
+
+        /* ----------------------------------
+           채팅 접속 현황 Topic 구독
+        ---------------------------------- */
+
+        Matcher presenceMatcher = PRESENCE_SUBSCRIBE_PATTERN.matcher(destination);
+
+        if (presenceMatcher.matches()) {
+
+            Long sessionId = Long.valueOf(presenceMatcher.group(1));
+
+            // 기존 세션 접근 권한 검증 재사용
+            if (!canAccessSession(userId, sessionId)) {
+                throw new IllegalArgumentException("STOMP 구독 실패: 접속 현황 조회 권한이 없습니다.");
+            }
+
+            return;
+        }
 
         // 정의하지 않은 Topic은 모두 차단
         throw new IllegalArgumentException("STOMP 구독 실패: 허용되지 않은 Topic입니다.");

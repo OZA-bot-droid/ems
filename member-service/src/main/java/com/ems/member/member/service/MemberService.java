@@ -45,7 +45,11 @@ public class MemberService {
         this.emailVerificationService = emailVerificationService;
     }
 
-    // 회원가입
+    /*
+        회원가입
+        이메일과 닉네임의 중복 여부를 확인한 후, 이메일 인증이 완료된 사용자만 회원가입을 허용
+        비밀번호는 평문으로 저장하지 않고 PasswordEncoder를 통해 해시 처리한 후 저장
+    */
     public void registerMember(MemberRegisterDTO dto) {
 
         if(memberRepository.existsByEmail(dto.email())) {
@@ -66,7 +70,12 @@ public class MemberService {
         );
     }
 
-    // 로그인
+    /*
+        자체 로그인
+
+        인증에 성공하면 Access Token과 Refresh Token을 발급하고, Refresh Token의 해시를 DB에 저장
+        이메일 존재 여부나 로그인 방식이 노출되지 않도록 인증 실패 시 동일한 오류 메시지를 반환한다.
+    */
     public LoginResponseDTO login(MemberLoginDTO dto) {
 
         // 회원 존재 여부 => 없으면 401 에러
@@ -93,6 +102,15 @@ public class MemberService {
         }
     }
 
+    /*
+        Refresh Token을 HttpOnly 쿠키로 전달하기 위한 응답 헤더 생성
+
+        HttpOnly: JavaScript에서 쿠키에 직접 접근하지 못하도록 제한
+        Secure: HTTPS 연결에서만 쿠키를 전송하도록 설정
+        SameSite=Lax: 일부 교차 사이트 요청에서 쿠키 전송을 제한
+        Path: Member Service의 API 경로로 쿠키 전송 범위 제한
+        Secure 여부는 개발 및 배포 환경 설정에 따라 결정한다.
+    */
     public MultiValueMap<String, String> createRefreshTokenCookie(String refreshToken) {
 
         // 응답에 cookie를 넣어서 client에 저장하기 위함
@@ -128,6 +146,22 @@ public class MemberService {
         return new MemberInformationDTO(member);
     }
 
+    // Event Service가 신청 시점의 회원 이름과 이메일을 저장할 수 있도록 조회합니다.
+    @Transactional(readOnly = true)
+    public RegistrationApplicantProfile findRegistrationApplicantProfile(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberNotFoundException("회원을 찾을 수 없습니다."));
+        return new RegistrationApplicantProfile(member.getId(), member.getName(), member.getEmail());
+    }
+
+    /*
+        로그인한 회원만 비밀번호 변경 가능
+
+        현재 비밀번호가 일치하고 새 비밀번호가 기존과 달라야 한다.
+
+        변경된 비밀번호는 해시 처리해 저장
+        이후 모든 기기의 Refresh Token을 삭제하여 재발급을 차단
+    */
     public void changePassword(String memberId, PasswordChangeDTO dto) {
 
         Member member = memberRepository.findById(Long.parseLong(memberId))
@@ -153,6 +187,7 @@ public class MemberService {
         refreshTokenRepository.deleteByMember(member);
     }
 
+    // 회원 이름 변경
     public MemberInformationDTO updateMember(String memberId, MemberUpdateDTO dto) {
 
         Member member = memberRepository.findById(Long.parseLong(memberId))
@@ -167,12 +202,17 @@ public class MemberService {
         return new MemberInformationDTO(member);
     }
 
+    // 이름 중복 여부 확인
     public boolean duplicateName(NameDTO dto) {
 
         return memberRepository.existsByName(dto.name());
     }
 
+    /*
+        닉네임을 이용한 가입 이메일 조회
 
+        회원 이메일 전체를 노출하지 않도록 maskEmail()을 사용해 일부 문자를 마스킹한다.
+    */
     public String foundEmail(NameDTO dto) {
         // 닉네임으로 회원을 조회
         Member member = memberRepository.findByName(dto.name())

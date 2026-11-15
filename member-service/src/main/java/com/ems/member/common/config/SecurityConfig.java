@@ -12,7 +12,17 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationFilter;
 
+/*
+    Member Service의 Spring Security 설정
+
+    API별 인증 필요 여부와 JWT 기반 인증 방식을 정의한다.
+    Google/Naver OAuth2 로그인 처리 및 인증·인가 실패 응답도 설정한다.
+
+    Gateway에서 전달된 요청이라도 Member Service의
+    Spring Security 규칙에 따라 추가 검증을 수행한다.
+*/
 @Configuration
 public class SecurityConfig {
 
@@ -31,12 +41,22 @@ public class SecurityConfig {
         this.accessDeniedHandler = accessDeniedHandler;
     }
 
+    /*
+        회원 비밀번호 암호화를 위한 PasswordEncoder Bean 등록
+
+        BCrypt를 이용해 비밀번호를 단방향 해시 처리하며, 회원가입, 로그인, 비밀번호 변경 및 재설정에 사용한다.
+    */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // jwt의 role claim -> Spring Security의 권한(GrantedAuthority)으로 변환하는 설정
+    /*
+        JWT의 role claim을 Spring Security 권한으로 변환하는 설정이다.
+        변환된 권한은 hasRole("ADMIN") 등의 권한 검사에 사용된다.
+
+        예: role = ADMIN → ROLE_ADMIN
+    */
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
 
@@ -56,9 +76,22 @@ public class SecurityConfig {
         return jwtAuthenticationConverter;
     }
 
-    // Spring Security에서 어떤 요청에 어떤 보안 규칙을 적용할지 정의하는 필터 체인 객체
+    /*
+        Member Service에 적용할 Spring Security Filter Chain 설정
+        Spring Security에서 어떤 요청에 어떤 보안 규칙을 적용할지 정의하는 필터 체인 객체
+
+        공개 API는 인증 없이 접근하도록 허용하고, 나머지 요청은 유효한 JWT 인증을 요구한다.
+
+        Access Token 검증에는 accessTokenDecoder를 사용하며,
+        OAuth2 로그인 및 내부 서비스 인증 필터도 함께 구성한다.
+
+        인증 실패는 AuthenticationEntryPointImpl,
+        권한 부족은 AccessDeniedHandlerImpl에서 처리
+    */
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, @Qualifier("accessTokenDecoder") JwtDecoder accessDecoder) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http,
+                                           @Qualifier("accessTokenDecoder") JwtDecoder accessDecoder,
+                                           InternalMemberServiceAuthFilter internalMemberServiceAuthFilter) throws Exception {
 
         // Spring Security의 CSRF(Cross-Site Request Forgery) 보호 기능을 끄는 설정
         // 사용자가 원하지 않는 요청을 다른 사이트가 대신 보내는 공격을 막는 기능
@@ -69,6 +102,7 @@ public class SecurityConfig {
                 // 어떤 HTTP 요청을 누구에게 허용할지 정하는 설정
                 .authorizeHttpRequests(author ->
                         author.requestMatchers(
+                                    "/members/internal/**",
                                     "/members/ping",
                                     "/members/register",
                                     "/members/login",
@@ -113,6 +147,8 @@ public class SecurityConfig {
                         oauth2.successHandler(oAuth2LoginSuccessHandler)
                                 .failureHandler(oAuth2LoginFailureHandler)
                 )
+                // 내부 서비스 간 요청을 검증하는 필터를 Bearer Token 인증 필터보다 먼저 실행
+                .addFilterBefore(internalMemberServiceAuthFilter, BearerTokenAuthenticationFilter.class)
                 // Spring Security에서 인증/인가 실패가 발생했을 때 어떻게 응답할지 정하는 설정
                 // controller에 도달하기 전에 발생하는 Security 예외이기 때문에 별도 Handler가 필요
                 .exceptionHandling(exception -> exception

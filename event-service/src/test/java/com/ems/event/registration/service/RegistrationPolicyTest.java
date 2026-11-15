@@ -63,8 +63,8 @@ class RegistrationPolicyTest {
     @Test
     void duplicateApplicationReturnsContractCode() {
         when(events.findById(10L)).thenReturn(Optional.of(event(EventStatus.OPEN)));
-        when(registrations.findByUserIdAndEventId(99L, 10L))
-            .thenReturn(Optional.of(new Registration(99L, 10L)));
+        when(registrations.existsByUserIdAndEventIdAndStatusNot(
+                99L, 10L, RegistrationStatus.CANCELLED)).thenReturn(true);
         BusinessException exception = assertThrows(BusinessException.class,
             () -> service.apply(99L, 10L));
         assertError(exception, HttpStatus.CONFLICT, "ALREADY_REGISTERED");

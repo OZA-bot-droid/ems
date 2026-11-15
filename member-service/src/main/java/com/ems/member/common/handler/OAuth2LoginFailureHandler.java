@@ -11,6 +11,13 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+/*
+    OAuth2 인증 실패 시 실행
+
+    로그인 과정에서 세션에 저장한 임시 정보를 제거하고, 프론트엔드 로그인 페이지로 리다이렉트한다.
+
+    내부 예외 메시지를 URL에 직접 노출하지 않고 공통 오류 코드(oauth_failed)를 전달
+*/
 @Component
 public class OAuth2LoginFailureHandler implements AuthenticationFailureHandler {
 

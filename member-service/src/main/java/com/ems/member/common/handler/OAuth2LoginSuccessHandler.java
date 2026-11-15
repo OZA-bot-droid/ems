@@ -29,6 +29,17 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.UUID;
 
+/*
+    Google 또는 Naver OAuth2 인증 성공 후 실행되는 메서드
+
+    1. 인증 제공자(Google/Naver) 확인
+    2. 제공자별 사용자 정보 추출
+    3. 세션에 저장된 role을 기준으로 회원가입 또는 로그인 처리
+    4. Access Token과 Refresh Token 발급
+    5. 일회용 로그인 코드 생성 후 프론트엔드로 리다이렉트
+
+    로그인 처리 후에는 세션에 저장된 임시 role과 clientId를 제거
+*/
 @Component
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     // AuthenticationSuccessHandler : 인증 성공 직후 실행되는 후처리 담당 인터페이스
@@ -104,8 +115,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
                 socialUser = new SocialLoginDTO(
                         provider,
-                        naverResponse.get("id").toString(),     // google 사용자 고유 id
-                        naverResponse.get("email").toString(),  // gmail
+                        naverResponse.get("id").toString(),     // naver 사용자 고유 id
+                        naverResponse.get("email").toString(),  // naver 계정 이메일
                         naverResponse.get("name").toString()    // 이름
                 );
 
@@ -149,6 +160,17 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         }
     }
 
+    /*
+        소셜 로그인 완료 후 JWT 발급 및 프론트엔드 이동 처리
+
+        세션에 저장된 clientId를 확인하고, Access Token과 Refresh Token을 발급
+
+        Refresh Token은 AuthService를 통해 DB에 저장
+
+        JWT를 URL에 직접 노출하지 않기 위해 일회용 로그인 코드를 발급한 뒤 프론트엔드로 전달
+
+        프론트엔드는 해당 코드를 Token Exchange API에 전달하여 실제 로그인 토큰을 수신
+    */
     private void completeLogin(HttpSession session, Member member, HttpServletResponse response) throws IOException {
 
 

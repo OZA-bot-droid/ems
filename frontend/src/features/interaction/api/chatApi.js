@@ -7,4 +7,7 @@ export const chatApi = {
    */
   getMessages: (sessionId) =>
     api.get(`/interactions/sessions/${sessionId}/chat/messages`).then(unwrap),
+
+  // 신규: 현재 채팅 접속 현황 조회
+  getPresence: (sessionId) => api.get(`/interactions/sessions/${sessionId}/presence`).then(unwrap),
 };

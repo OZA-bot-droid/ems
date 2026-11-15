@@ -31,11 +31,23 @@ public class EmailVerificationService {
         this.rateLimiter = rateLimiter;
     }
 
+    /*
+        이메일 비교 및 저장에 사용할 형식으로 정규화한다.
+        앞뒤 공백을 제거하고 소문자로 통일
+    */
     private String normalize(String email) {
         return email.trim().toLowerCase(Locale.ROOT);
     }
 
-    // 인증번호 발송
+    /*
+        회원가입을 위한 이메일 인증번호 발송
+
+        동일 이메일의 인증 정보를 잠금 조회하여 중복 요청을 제어
+
+        6자리 인증번호를 SecureRandom으로 생성하고, DB에는 원본이 아닌 해시값을 저장한다.
+
+        재발송 대기 시간 및 Rate Limiter를 통해 반복 요청을 제한
+    */
     public void sendCode(String email) {
         email = normalize(email);
         Instant now = Instant.now();
@@ -54,6 +66,7 @@ public class EmailVerificationService {
         }
         rateLimiter.checkEmailSend(email);
 
+        // 인증번호 원본은 이메일로 발송하고, DB에는 해시값만 저장
         String code = String.format("%06d", secureRandom.nextInt(1_000_000));
         String codeHash = passwordEncoder.encode(code);
 
@@ -67,6 +80,16 @@ public class EmailVerificationService {
         mailService.sendVerificationEmail(email, code);
     }
 
+    /*
+        이메일 인증번호 검증
+
+        인증 정보의 만료 여부, 인증 완료 여부, 실패 횟수를 확인
+        입력한 인증번호는 DB에 저장된 해시값과 비교
+
+        인증에 실패하면 실패 횟수를 증가시키고, 성공하면 인증 완료 시각을 기록
+
+        실패 시 예외가 발생해도 실패 횟수 변경이 유지되도록 noRollbackFor를 적용한다.
+    */
     @Transactional(noRollbackFor = InvalidEmailVerificationException.class)
     public void verifyCode(EmailVerificationConfirmDTO dto) {
         String email = normalize(dto.email());
@@ -91,7 +114,12 @@ public class EmailVerificationService {
         verification.verify(now);
     }
 
-    // 회원가입 시 인증 완료 여부 확인 및 사용 처리
+    /*
+        회원가입 시 인증 완료 여부 확인 및 사용 처리
+
+        인증이 완료되지 않았거나 만료된 경우 회원가입을 거부
+        정상적으로 인증된 정보는 회원가입 과정에서 삭제하여 동일한 인증 기록을 다시 사용하지 못하도록 한다.
+    */
     public void consumeVerifiedEmail(String email) {
         email = normalize(email);
 

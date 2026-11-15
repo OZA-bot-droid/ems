@@ -48,6 +48,8 @@ public class AuthService {
     }
 
     // refresh token entity 생성 및 DB 저장
+    // 동일 회원과 clientId로 로그인한 기록이 있다면 기존 토큰을 사용 이력에 저장하고 새로운 토큰으로 교체
+    // 다른 clientId의 로그인 정보는 유지하므로 다중 기기 로그인이 가능
     public void replaceRefreshToken(Member member, String refreshToken, UUID clientId) {
 
         // 동일 회원의 로그인 요청을 직렬화하기 위한 행 잠금
@@ -93,8 +95,19 @@ public class AuthService {
         }
     }
 
-    // 새로운 accessToken과 refreshToken 발급
-    // noRollbackFor : 해당 예외가 발생해도 이 트랜잭션은 rollback하지 않음
+    /*
+        새로운 accessToken과 refreshToken 발급
+        noRollbackFor : 해당 예외가 발생해도 이 트랜잭션은 rollback하지 않음
+
+        1. 요청값 및 JWT 유효성 검증
+        2. 회원 행 잠금으로 재발급 요청 직렬화
+        3. Refresh Token 해시를 이용해 DB 조회
+        4. 기존 사용 이력 조회 및 재사용 공격 탐지
+        5. 토큰 소유자, clientId, 만료 시간 검증
+        6. 기존 토큰 이력 저장 및 신규 토큰으로 교체 (Rotation)
+
+        재사용이 탐지되면 해당 sessionId의 활성 Refresh Token을 폐기한다.
+    */
     @Transactional(noRollbackFor = RefreshTokenReusedException.class)
     public LoginResponseDTO reissue(ClientDTO dto, String refreshToken) {
 
@@ -176,6 +189,10 @@ public class AuthService {
         return new LoginResponseDTO(newAccessToken, newRefreshToken);
     }
 
+    /*
+        요청한 클라이언트의 Refresh Token을 삭제하여 로그아웃 처리
+        clientId와 Refresh Token 해시가 일치하는 토큰만 삭제하므로 다른 기기의 로그인 세션에는 영향을 주지 않는다.
+    */
     public void logout(ClientDTO dto, String refreshToken) {
 
         RefreshToken refreshTokenEntity = refreshTokenRepository.findByClientIdAndTokenHash(dto.clientId(), hashRefreshToken(refreshToken))
@@ -184,6 +201,11 @@ public class AuthService {
         refreshTokenRepository.delete(refreshTokenEntity);
     }
 
+    /*
+        사용이 종료된 Refresh Token의 해시와 sessionId를 이력 테이블에 저장
+
+        재발급 과정에서 이전 Refresh Token이 다시 제출되면 이 이력을 이용해 토큰 재사용 여부를 판단한다.
+    */
     private void saveRefreshTokenHistory(RefreshToken refreshToken) {
         refreshTokenHistoryRepository.save(
                 RefreshTokenHistory.builder()
@@ -195,6 +217,11 @@ public class AuthService {
         );
     }
 
+    /*
+        매일 한국 시간 오전 3시에 오래된 Refresh Token 사용 이력을 삭제
+
+        Refresh Token 유효기간이 지나고 추가 1일이 경과한 이력만 삭제하여 재사용 탐지에 필요한 기록을 일정 기간 유지
+    */
     @Scheduled(cron = "0 0 3 * * *", zone = "Asia/Seoul")
     public void cleanupRefreshTokenHistory() {
 

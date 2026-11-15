@@ -17,6 +17,13 @@ public class MailService {
         this.frontendUrl = frontendUrl;
     }
 
+    /*
+        이메일 발송 공통 처리
+
+        수신자, 제목, 본문을 설정한 뒤 JavaMailSender를 이용해 이메일을 발송한다.
+
+        인증번호 발송과 비밀번호 재설정 메일에서 공통으로 사용한다.
+    */
     private void sendEmail(String email, String subject, String text) {
         SimpleMailMessage message = new SimpleMailMessage();
 
@@ -26,6 +33,14 @@ public class MailService {
         mailSender.send(message);
     }
 
+    /*
+        비밀번호 재설정 안내 이메일 발송
+
+        프론트엔드 비밀번호 재설정 주소에 일회용 토큰을 포함하여
+        사용자가 이메일 링크를 통해 비밀번호를 변경할 수 있도록 한다.
+
+        토큰의 유효성 및 사용 여부는 PasswordResetService에서 검증한다.
+    */
     public void sendPasswordResetEmail(String email, String resetToken) {
         sendEmail(
                 email,
@@ -46,6 +61,13 @@ public class MailService {
         );
     }
 
+    /*
+        회원가입 이메일 인증번호 발송
+
+        EmailVerificationService에서 생성한 6자리 인증번호를 사용자 이메일로 전달한다.
+
+        인증번호의 만료 시간과 검증은 EmailVerificationService에서 관리한다.
+    */
     public void sendVerificationEmail(String email, String code) {
         sendEmail(
                 email,
