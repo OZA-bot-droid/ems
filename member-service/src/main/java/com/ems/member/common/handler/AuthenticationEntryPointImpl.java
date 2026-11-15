@@ -15,6 +15,18 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
+/*
+    Spring Security의 인증 실패를 처리하는 Handler
+
+    인증이 필요한 API에 유효한 인증 정보 없이 접근하면 실행된다.
+    인증 실패와 관련된 예외를 받아 HTTP 401 Unauthorized 응답을 반환한다.
+
+    JWT 검증 과정에서 invalid_token 오류가 발생하면
+    INVALID_TOKEN을 반환하고, 그 외 인증 실패는 UNAUTHORIZED로 처리한다.
+
+    Spring Security 필터 단계에서 발생하는 인증 예외를 처리하므로
+    Controller의 일반적인 예외 처리와 별도로 동작한다.
+*/
 @Component
 public class AuthenticationEntryPointImpl implements AuthenticationEntryPoint {
 

@@ -27,6 +27,13 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
+/*
+    JWT 발급과 검증에 필요한 보안 설정
+
+    RSA 개인키를 이용해 JWT에 서명하고, 공개키를 이용해 JWT의 서명을 검증
+
+    Access Token과 Refresh Token을 구분하기 위해 각각 별도의 JwtDecoder Bean을 등록
+*/
 @Configuration
 public class JwtTokenConfig {
 
@@ -112,16 +119,34 @@ public class JwtTokenConfig {
         return new NimbusJwtEncoder(jwkSource);
     }
 
+    /*
+        Access Token 검증 전용 JwtDecoder 등록
+
+        서명, 만료 시간, 발급자 및 token_type을 검증
+        token_type이 access가 아닌 토큰은 거부
+    */
     @Bean("accessTokenDecoder")
     public JwtDecoder accessTokenDecoder(@Value("${jwt.issuer}") String issuer) throws Exception {
         return createDecoder(issuer, "access");
     }
 
+    /*
+        Refresh Token 검증 전용 JwtDecoder 등록
+
+        Access Token과 동일한 검증 방식이지만, token_type이 refresh인 토큰만 허용
+    */
     @Bean("refreshTokenDecoder")
     public JwtDecoder refreshTokenDecoder(@Value("${jwt.issuer}") String issuer) throws Exception {
         return createDecoder(issuer, "refresh");
     }
 
+    /*
+        JWT Decoder의 공통 검증 규칙을 생성한다.
+
+        RSA 공개키로 RS256 서명을 검증
+        기본 JWT Validator로 발급자와 시간 관련 조건을 확인하고, 별도의 Validator로 token_type을 검사
+        expectedType에 따라 Access Token과 Refresh Token을 구분
+    */
     private JwtDecoder createDecoder(String issuer, String expectedType) throws Exception {
 
         NimbusJwtDecoder decoder =

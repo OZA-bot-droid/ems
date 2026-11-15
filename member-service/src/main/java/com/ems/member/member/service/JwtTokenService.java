@@ -39,10 +39,15 @@ public class JwtTokenService {
         this.refreshDecoder = refreshDecoder;
     }
 
-    // accessToken 생성
+    /*
+        accessToken 생성
+        회원 ID와 권한을 JWT에 포함
+        설정된 Access Token 유효기간을 적용
+    */
     public String createAccessToken(long id, Role role) {
         return createToken(id, accessTokenExpiration, "access", role);
     }
+    // 소셜 로그인용
     public String createAccessToken(long id) {
         return createAccessToken(
                 id,
@@ -52,10 +57,17 @@ public class JwtTokenService {
         );
     }
 
-    // refreshToken 생성
+    /*
+        refreshToken 생성
+        Access Token과 동일한 JWT 서명 방식을 사용
+        단, token_type을 refresh로 지정하고 별도의 만료 시간을 적용
+
+        발급된 토큰의 해시 저장과 Rotation 처리는 AuthService에서 담당
+    */
     public String createRefreshToken(long id, Role role) {
         return createToken(id, refreshTokenExpiration, "refresh", role);
     }
+    // 소셜 로그인용
     public String createRefreshToken(long id) {
         return createRefreshToken(
                 id,
@@ -65,7 +77,13 @@ public class JwtTokenService {
         );
     }
 
-    // token 생성
+    /*
+        token 생성
+        JWT Payload에 회원 ID, 권한, 토큰 종류, 발급 및 만료 시간을 설정
+        jti에는 매번 새로운 UUID를 부여해 토큰을 구별
+
+        RS256 알고리즘을 사용해 개인키로 서명
+    */
     private String createToken(long id, long expiration, String type, Role role) {
 
         // Instant : 특정 시점을 나타내는 클래스
@@ -93,7 +111,14 @@ public class JwtTokenService {
         ).getTokenValue();  // 완성된 JWT Token을 문자열로 변환
     }
 
-    // refresh token 확인 및 sub return
+    /*
+        Refresh Token의 JWT 유효성을 검증하고 회원 member id를 반환
+
+        JwtDecoder를 이용해 서명과 설정된 검증 조건을 확인
+        token_type이 refresh가 아니면 요청을 거부
+
+        DB에 저장된 활성 토큰 여부, clientId, 재사용 여부는 AuthService.reissue()에서 추가로 검증
+    */
     public Long validateRefreshToken(String refreshToken) {
 
         try {

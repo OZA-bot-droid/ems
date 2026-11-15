@@ -14,6 +14,18 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
+/*
+    Spring Security의 인가 실패를 처리하는 Handler
+
+    사용자가 정상적으로 인증되었더라도
+    요청한 API에 접근할 권한이 없으면 실행된다.
+
+    HTTP 403 Forbidden 응답을 반환하며,
+    서비스의 공통 APIErrorResponse 형식으로 오류 정보를 전달한다.
+
+    AuthenticationEntryPoint는 인증 실패(401)를 담당하고,
+    AccessDeniedHandler는 인가 실패(403)를 담당한다.
+*/
 @Component
 public class AccessDeniedHandlerImpl implements AccessDeniedHandler {
 

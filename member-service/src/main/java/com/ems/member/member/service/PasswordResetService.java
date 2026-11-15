@@ -43,6 +43,15 @@ public class PasswordResetService {
         this.refreshTokenRepository = refreshTokenRepository;
     }
 
+    /*
+        비밀번호 재설정 요청 처리
+
+        입력한 이메일로 회원을 조회하고 LOCAL 계정인지 확인
+        계정이 없거나 소셜 로그인 회원이면 별도의 오류를 반환하지 않는다.
+
+        기존 재설정 토큰을 폐기하고 새로운 토큰을 발급
+        DB에는 토큰의 SHA-256 해시값만 저장하며, 원본 토큰은 회원의 이메일로 발송
+    */
     public void requestResetToken(String email) {
 
         Optional<Member> optionalMember = memberRepository.findByEmail(
@@ -79,6 +88,11 @@ public class PasswordResetService {
         mailService.sendPasswordResetEmail(member.getEmail(), resetToken);
     }
 
+    /*
+        비밀번호 재설정에 사용할 일회용 랜덤 토큰 생성
+
+        SecureRandom으로 32바이트의 난수를 생성하고 URL에서 안전하게 사용할 수 있는 Base64 문자열로 변환한다.
+    */
     private String generateResetToken() {
 
         // 비밀번호 재설정 토큰은 보안용 비밀값
@@ -92,6 +106,11 @@ public class PasswordResetService {
                 .encodeToString(bytes);
     }
 
+    /*
+        비밀번호 재설정 토큰을 SHA-256으로 해시 처리
+
+        원본 토큰을 DB에 저장하지 않기 위해 사용하며, 이후 재설정 요청 시 전달된 토큰과 DB 기록을 비교하는 데 활용한다.
+    */
     private String hashToken(String token) {
         try {
             MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
@@ -103,6 +122,17 @@ public class PasswordResetService {
         }
     }
 
+    /*
+        비밀번호 재설정 토큰을 검증하고 새 비밀번호를 저장
+
+        처리 순서:
+        1. 전달받은 토큰을 해시 처리하여 DB에서 조회
+        2. 토큰의 사용 여부 및 만료 시간 검증
+        3. LOCAL 계정 여부 확인
+        4. 새로운 비밀번호를 해시 처리하여 저장
+        5. 재설정 토큰을 사용 완료 상태로 변경
+        6. 해당 회원의 모든 Refresh Token 폐기
+    */
     public void resetPassword(String token, String newPassword) {
         String tokenHash = hashToken(token);
         PasswordResetToken resetToken = passwordResetTokenRepository.findByTokenHash(tokenHash)
