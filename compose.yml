@@ -15,7 +15,7 @@ services:
   member:
     build: ./member-service
     environment:
-      DB_URL: jdbc:postgresql://postgres:5432/member_db
+      DB_URL: jdbc:postgresql://${DB_HOST}:${DB_PORT}/member_db
       DB_USER: member_app
       DB_PASSWORD: localdev
       JWT_PRIVATE_KEY_PATH: /app/keys/private_key.pem
@@ -34,22 +34,18 @@ services:
     volumes:
       - ./local-secrets/jwt/private_key.pem:/app/keys/private_key.pem:ro
       - ./local-secrets/jwt/public_key.pem:/app/keys/public_key.pem:ro
-    depends_on:
-      postgres: {condition: service_healthy}
   event:
     build: ./event-service
     environment:
-      DB_URL: jdbc:postgresql://postgres:5432/event_db
+      DB_URL: jdbc:postgresql://${DB_HOST}:${DB_PORT}/event_db
       DB_USER: event_app
       DB_PASSWORD: localdev
       EMS_INTERNAL_TOKEN: ${EMS_INTERNAL_TOKEN:?Set_EMS_INTERNAL_TOKEN_in_.env}
       MEMBER_SERVICE_URL: http://member:8081
-    depends_on:
-      postgres: {condition: service_healthy}
   interaction:
     build: ./interaction-service
     environment:
-      DB_URL: jdbc:postgresql://postgres:5432/interaction_db
+      DB_URL: jdbc:postgresql://${DB_HOST}:${DB_PORT}/interaction_db
       DB_USER: interaction_app
       DB_PASSWORD: localdev
       JWT_PUBLIC_KEY_PATH: /app/keys/public_key.pem
@@ -57,8 +53,6 @@ services:
       EMS_INTERNAL_TOKEN: ${EMS_INTERNAL_TOKEN:?Set_EMS_INTERNAL_TOKEN_in_.env}
     volumes:
       - ./local-secrets/jwt/public_key.pem:/app/keys/public_key.pem:ro
-    depends_on:
-      postgres: {condition: service_healthy}
   gateway:
     build: ./gateway
     environment:
