@@ -31,3 +31,5 @@ event:
   service-url: ${EVENT_SERVICE_URL:http://localhost:8082}
 ems:
   internal-token: ${EMS_INTERNAL_TOKEN}
+  websocket:
+    allowed-origins: ${WS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:8088}
